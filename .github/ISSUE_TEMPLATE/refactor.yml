@@ -1,0 +1,25 @@
+name: "🧹 Refactor"
+description: "코드 구조 개선 및 최적화"
+labels: ["refactor"]
+body:
+  - type: textarea
+    attributes:
+      label: "📌 대상 코드 위치"
+      description: "리팩토링이 필요한 컴포넌트, 파일 경로 또는 함수명을 적어주세요."
+      placeholder: "예: src/components/LoginForm.tsx"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "❓ 리팩토링 필요성"
+      description: "현재 코드의 문제점과 왜 리팩토링을 해야 하는지 적어주세요."
+      placeholder: "예: 중복 로직이 많아 가독성이 떨어지고 유지보수가 어렵습니다."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "🛠️ 개선 방향성 및 작업 내용"
+      description: "어떻게 코드를 개선할 것인지 구체적인 계획을 체크박스로 적어주세요."
+      placeholder: "- [ ] 공통 훅으로 로직 분리\n- [ ] 불필요한 state 제거"
+    validations:
+      required: true

@@ -1,0 +1,31 @@
+name: "🐛 Bug"
+description: "발생한 버그 리포트"
+labels: ["bug"]
+body:
+  - type: textarea
+    attributes:
+      label: "🚨 버그 설명"
+      description: "어떤 버그가 발생했는지 명확하게 설명해 주세요."
+      placeholder: "예: 로그인 버튼을 누르면 화면이 멈춥니다."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "🔄 재현 순서"
+      description: "버그를 재현하기 위한 단계를 순서대로 적어주세요."
+      placeholder: "1. 메인 페이지 접속\n2. 로그인 버튼 클릭\n3. 화면 정지 확인"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "💻 실행 환경"
+      description: "문제가 발생한 환경을 적어주세요. (OS, 브라우저 등)"
+      placeholder: "예: MacOS / Chrome 버전 120 / 모바일 Safari 등"
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: "📸 스크린샷 및 로그"
+      description: "오류 화면 캡처나 에러 로그가 있다면 첨부해 주세요."
+    validations:
+      required: false
