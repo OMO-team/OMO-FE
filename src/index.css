@@ -1,111 +1,58 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@theme {
+  /* ---------- Primary ---------- */
+  --color-primary-900: #001b33;
+  --color-primary-800: #003566;
+  --color-primary-700: #005099;
+  --color-primary-600: #006acc;
+  --color-primary-500: #0085ff; /* 확정값 */
+  --color-primary-400: #1a91ff;
+  --color-primary-300: #47a7ff;
+  --color-primary-200: #7ac0ff;
+  --color-primary-100: #c2e2ff; /* 확정값 */
+  --color-primary-50: #e5f3ff;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* ---------- Secondary ---------- */
+  --color-secondary-900: #092a26;
+  --color-secondary-800: #16645b;
+  --color-secondary-700: #219789;
+  --color-secondary-600: #2ac0ae;
+  --color-secondary-500: #2ed1be; /* 확정값 */
+  --color-secondary-400: #58dacb;
+  --color-secondary-300: #79e2d5;
+  --color-secondary-200: #9be9e0;
+  --color-secondary-100: #c4f2ed;
+  --color-secondary-50: #e6faf7;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
+  /* ---------- Warning ---------- */
+  --color-warning-400: #ff4633; /* 확정값 */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+  /* ---------- Red (Warning 서브 스케일) ---------- */
+  --color-red-900: #4d0700;
+  --color-red-800: #990e00;
+  --color-red-700: #cc1300;
+  --color-red-600: #eb1600;
+  --color-red-500: #ff5241; /* 확정값 */
+  --color-red-400: #ff4633;
+  --color-red-300: #ff7466; /* 확정값 */
+  --color-red-200: #ff998f;
+  --color-red-100: #ffbeb8;
+  --color-red-50: #ffe3e0;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+  /* ---------- Gray Scale ---------- */
+  --color-black: #16181c; /* 확정값 */
+  --color-white: #ffffff; /* 확정값 */
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  --color-gray-900: #15181d;
+  --color-gray-800: #2b313b;
+  --color-gray-700: #404959;
+  --color-gray-600: #566276;
+  --color-gray-500: #6b7a94;
+  --color-gray-400: #94a0b4;
+  --color-gray-300: #b8bfcb;
+  --color-gray-200: #cfd3da;
+  --color-gray-100: #e7eaef;
+  --color-gray-50: #f3f4f6;
+  --color-gray-20: #f8f9fa;
 }
