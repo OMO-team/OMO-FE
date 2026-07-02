@@ -1,5 +1,6 @@
-name: "🚀 Deploy"
+name: "Deploy"
 description: "운영 및 테스트 서버 배포"
+title: "[Deploy] "
 labels: ["deploy"]
 body:
   - type: input

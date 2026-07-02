@@ -1,5 +1,6 @@
-name: "🐛 Bug"
+name: "Bug"
 description: "발생한 버그 리포트"
+title: "[Bug] "
 labels: ["bug"]
 body:
   - type: textarea
