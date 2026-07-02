@@ -6,11 +6,11 @@
   --color-primary-800: #003566;
   --color-primary-700: #005099;
   --color-primary-600: #006acc;
-  --color-primary-500: #0085ff; /* 확정값 */
+  --color-primary-500: #0085ff;
   --color-primary-400: #1a91ff;
   --color-primary-300: #47a7ff;
   --color-primary-200: #7ac0ff;
-  --color-primary-100: #c2e2ff; /* 확정값 */
+  --color-primary-100: #c2e2ff;
   --color-primary-50: #e5f3ff;
 
   /* ---------- Secondary ---------- */
@@ -18,7 +18,7 @@
   --color-secondary-800: #16645b;
   --color-secondary-700: #219789;
   --color-secondary-600: #2ac0ae;
-  --color-secondary-500: #2ed1be; /* 확정값 */
+  --color-secondary-500: #2ed1be;
   --color-secondary-400: #58dacb;
   --color-secondary-300: #79e2d5;
   --color-secondary-200: #9be9e0;
@@ -26,23 +26,23 @@
   --color-secondary-50: #e6faf7;
 
   /* ---------- Warning ---------- */
-  --color-warning-400: #ff4633; /* 확정값 */
+  --color-warning-400: #ff4633;
 
   /* ---------- Red (Warning 서브 스케일) ---------- */
   --color-red-900: #4d0700;
   --color-red-800: #990e00;
   --color-red-700: #cc1300;
   --color-red-600: #eb1600;
-  --color-red-500: #ff5241; /* 확정값 */
+  --color-red-500: #ff5241;
   --color-red-400: #ff4633;
-  --color-red-300: #ff7466; /* 확정값 */
+  --color-red-300: #ff7466;
   --color-red-200: #ff998f;
   --color-red-100: #ffbeb8;
   --color-red-50: #ffe3e0;
 
   /* ---------- Gray Scale ---------- */
-  --color-black: #16181c; /* 확정값 */
-  --color-white: #ffffff; /* 확정값 */
+  --color-black: #16181c;
+  --color-white: #ffffff;
 
   --color-gray-900: #15181d;
   --color-gray-800: #2b313b;
@@ -55,4 +55,162 @@
   --color-gray-100: #e7eaef;
   --color-gray-50: #f3f4f6;
   --color-gray-20: #f8f9fa;
+
+  /* =========================================
+     Typography
+     ========================================= */
+  --font-pretendard:
+    "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+/* =========================================
+   Typography Styles
+   사용법: className="heading-01" 처럼 그대로 클래스명 사용
+   ========================================= */
+@layer components {
+  /* ---------- Heading ---------- */
+  .heading-01 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-bold);
+    font-size: 40px;
+    line-height: 130%;
+    letter-spacing: -0.03em;
+  }
+  .heading-02 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-bold);
+    font-size: 36px;
+    line-height: 130%;
+    letter-spacing: -0.03em;
+  }
+  .heading-03 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-bold);
+    font-size: 32px;
+    line-height: 130%;
+    letter-spacing: -0.03em;
+  }
+  .heading-04 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-semibold);
+    font-size: 28px;
+    line-height: 130%;
+    letter-spacing: -0.03em;
+  }
+  .heading-05 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-semibold);
+    font-size: 22px;
+    line-height: 140%;
+    letter-spacing: -0.03em;
+  }
+  .heading-06 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-semibold);
+    font-size: 18px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+
+  /* ---------- Title ---------- */
+  .title-01 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-medium);
+    font-size: 18px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .title-02 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-medium);
+    font-size: 16px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .title-03 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-medium);
+    font-size: 14px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .title-04 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-regular);
+    font-size: 18px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .title-05 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-semibold);
+    font-size: 16px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+
+  /* ---------- Body ---------- */
+  .body-01 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-medium);
+    font-size: 16px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .body-02 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-medium);
+    font-size: 14px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .body-03 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-regular);
+    font-size: 14px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .body-04 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-regular);
+    font-size: 13px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .body-05 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-medium);
+    font-size: 12px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+
+  /* ---------- Label ---------- */
+  .label-01 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-regular);
+    font-size: 12px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .label-02 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-medium);
+    font-size: 11px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
+  .label-03 {
+    font-family: var(--font-pretendard);
+    font-weight: var(--font-weight-regular);
+    font-size: 10px;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+  }
 }
