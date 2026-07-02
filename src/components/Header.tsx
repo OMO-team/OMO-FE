@@ -1,0 +1,52 @@
+const Header = () => {
+  return (
+    <header className="flex justify-center items-center w-full px-[188px] pt-6 gap-[216px] bg-white">
+      {/* 왼쪽: 로고 + 검색창 */}
+      <div className="flex items-center gap-4">
+        {/* 로고 */}
+        <img src="/src/assets/icons/omo-logo.svg" alt="OMO 로고" />
+
+        {/* 검색창 */}
+        <div className="flex items-center w-[418px] h-[40px] pl-5 pr-4 py-2 gap-8 rounded-2 bg-gray-50 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] cursor-pointer">
+          <span className="body-03 text-gray-400 flex-1">도시나 키워드로 검색하기</span>
+          <img src="/src/assets/icons/icon-search.svg" alt="검색" />
+        </div>
+      </div>
+
+      {/* 오른쪽: 탐색/내홈/로그인/회원가입 */}
+      <div className="flex items-center gap-2">
+
+        {/* 탐색 + 내홈 묶음 */}
+        <div className="flex items-center gap-2">
+          {/* 탐색 - 선택된 상태 */}
+          <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[10px] rounded-2 border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] body-03 text-gray-700">
+            <img src="/src/assets/icons/icon-explore.svg" alt="탐색" />
+            탐색
+          </button>
+
+          {/* 내홈 */}
+          <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[10px] rounded-2 body-03 text-gray-700">
+            <img src="/src/assets/icons/icon-home.svg" alt="내홈" />
+            내 홈
+          </button>
+        </div>
+
+        {/* 로그인 + 회원가입 묶음 */}
+        <div className="flex items-center gap-1">
+          {/* 로그인 */}
+          <button className="flex items-center px-[18px] py-[10px] rounded-2 body-03 text-gray-700">
+            로그인
+          </button>
+
+          {/* 회원가입 */}
+          <button className="flex items-center px-[18px] py-[10px] rounded-2 bg-primary-500 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
+            회원가입
+          </button>
+        </div>
+
+      </div>
+    </header>
+  );
+};
+
+export default Header;
