@@ -1,0 +1,29 @@
+name: "🚀 Deploy"
+description: "운영 및 테스트 서버 배포"
+labels: ["deploy"]
+body:
+  - type: input
+    attributes:
+      label: "📦 배포 버전 / 브랜치"
+      description: "배포할 버전 또는 브랜치명을 입력해 주세요."
+      placeholder: "예: v1.0.0 또는 main"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "📝 주요 변경 사항 (Changelog)"
+      description: "이번 배포에 포함된 핵심 기능이나 수정 사항을 요약해 주세요."
+      placeholder: "- #12 로그인 기능 구현\n- #15 회원가입 버그 수정"
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: "🚨 배포 전/후 확인 사항"
+      description: "배포를 진행하기 전과 후에 반드시 확인해야 할 체크리스트입니다."
+      options:
+        - label: "환경 변수(.env) 설정에 변경 및 추가 사항이 있는지 확인했습니다."
+          required: true
+        - label: "데이터베이스 마이그레이션(DDL 등)이 정상적으로 반영되었는지 확인했습니다."
+          required: true
+        - label: "배포 후 주요 기능(로그인, 코어 API 등)이 정상 작동하는지 직접 테스트했습니다."
+          required: true
