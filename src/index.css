@@ -2,7 +2,11 @@
 
 @theme {
   /* =========================================
-     Color
+     [사용법] Color
+     --color-{name}-{step} → bg-{name}-{step}, text-{name}-{step}, border-{name}-{step}
+     예) <div className="bg-primary-500 text-white">      배경색
+         <p className="text-gray-700">                    텍스트색
+         <div className="border border-secondary-300">    테두리색
      ========================================= */
   /* ---------- Primary ---------- */
   --color-primary-900: #001b33;
@@ -60,7 +64,8 @@
   --color-gray-20: #f8f9fa;
 
   /* =========================================
-     Typography
+     [사용법] Typography - Font Family / Weight
+     각 항목 낱개로 조합하기보다 @layer components의 heading-01 / body-02 같은 클래스를 쓰는 걸 추천
      ========================================= */
   --font-pretendard:
     "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
@@ -71,7 +76,11 @@
   --font-weight-bold: 700;
 
   /* =========================================
-     Border Radius
+     [사용법] Border Radius
+     --radius-{n} → rounded-{n}
+     예) <div className="rounded-1">   4px
+         <div className="rounded-3">   12px
+         <div className="rounded-full"> 완전한 원/알약 모양
      ========================================= */
   --radius-1: 4px;
   --radius-2: 8px;
@@ -81,7 +90,10 @@
   --radius-full: 9999px;
 
   /* =========================================
-     Shadow
+     [사용법] Shadow
+     --shadow-{n} → shadow-{n}
+     예) <div className="shadow-01">   가장 강한 그림자 (Blur 36)
+         <div className="shadow-02">   중간 그림자 (Blur 24)
      ========================================= */
   --shadow-01: 0px 16px 36px rgba(6, 49, 88, 0.2);
   --shadow-02: 0px 16px 24px rgba(6, 49, 88, 0.2);
@@ -93,8 +105,12 @@
   /* --shadow-06: ; */
 
   /* =========================================
-     Icon Size
-     사용법: size-icon-xs, size-icon-sm ...
+     [사용법] Icon Size
+     --spacing-icon-{size} → size-icon-{size} (width+height 동시 적용)
+     예) <Icon className="size-icon-xs" />   16px
+         <Icon className="size-icon-md" />   24px
+         <Icon className="size-icon-xl" />   32px
+     ※ w-icon-{size}, h-icon-{size}로 각각 따로도 사용 가능
      ========================================= */
   --spacing-icon-xs: 16px;
   --spacing-icon-sm: 20px;
@@ -103,7 +119,8 @@
   --spacing-icon-xl: 32px;
 
   /* =========================================
-     Grid (데스크탑 1440px 뷰포트)
+     [사용법] Grid / Layout
+     아래 값들은 @layer components의 .grid-container 클래스에서 사용됨
      ========================================= */
   --container-content: 1064px; /* Container 너비 */
   --spacing-gutter: 16px; /* Column 사이 간격 */
