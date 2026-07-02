@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme {
+  /* =========================================
+     Color
+     ========================================= */
   /* ---------- Primary ---------- */
   --color-primary-900: #001b33;
   --color-primary-800: #003566;
@@ -88,6 +91,28 @@
   /* --shadow-04: ; */
   /* --shadow-05: ; */
   /* --shadow-06: ; */
+
+  /* =========================================
+     Icon Size
+     사용법: size-icon-xs, size-icon-sm ...
+     ========================================= */
+  --spacing-icon-xs: 16px;
+  --spacing-icon-sm: 20px;
+  --spacing-icon-md: 24px;
+  --spacing-icon-lg: 28px;
+  --spacing-icon-xl: 32px;
+
+  /* =========================================
+     Grid (데스크탑 1440px 뷰포트)
+     ========================================= */
+  --container-content: 1064px; /* Container 너비 */
+  --spacing-gutter: 16px; /* Column 사이 간격 */
+  --grid-columns: 12; /* 컬럼 수 */
+
+  /* Spacing Scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64px
+     → Tailwind 기본 spacing(4px 단위)과 정확히 일치해서 별도 정의 불필요.
+     p-1=4px, p-2=8px, p-3=12px, p-4=16px, p-6=24px, p-8=32px, p-12=48px, p-16=64px
+     그대로 쓰면 됨. */
 }
 
 /* =========================================
@@ -234,5 +259,19 @@
     font-size: 10px;
     line-height: 140%;
     letter-spacing: -0.02em;
+  }
+
+  /* ---------- Grid Layout ----------
+     Container 1064px / 12 Columns / Gutter 16px / Offset Center
+     사용법: <div className="grid-container">...</div>
+  */
+  .grid-container {
+    width: 100%;
+    max-width: var(--container-content);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: var(--spacing-gutter);
+    padding-inline: 16px;
   }
 }
