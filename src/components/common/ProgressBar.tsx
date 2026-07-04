@@ -3,7 +3,7 @@ interface ProgressBarProps {
   label?: string;
   leftLabel?: string;
   rightLabel?: string;
-  color?: "primary" | "gray" | "gradient";
+  color?: "gray" | "gradient";
 }
 
 export default function ProgressBar({
@@ -16,12 +16,10 @@ export default function ProgressBar({
   const fillClass =
     color === "gray"
       ? "bg-gray-400"
-      : color === "primary"
-        ? "bg-primary-500"
-        : "bg-linear-to-l from-primary-500 to-primary-200";
+      : "bg-linear-to-l from-primary-500 to-primary-200";
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col self-stretch gap-1">
       {(leftLabel || rightLabel) && (
         <div className="flex justify-between">
           {label && <p className="Body-04">{label}</p>}

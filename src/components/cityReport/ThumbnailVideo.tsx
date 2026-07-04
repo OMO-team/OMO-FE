@@ -11,9 +11,14 @@ export default function ThumbnailVideo({
 }: ThumbnailVideoProps) {
   return (
     <div
-      className="w-[218px] h-[137px] relative overflow-hidden rounded-4 bg-gray-100 bg-cover bg-center"
+      className="w-[218px] h-[137px] relative overflow-hidden rounded-4 bg-cover bg-center"
       style={
-        thumbnailUrl ? { backgroundImage: `url(${thumbnailUrl})` } : undefined
+        thumbnailUrl
+          ? { backgroundImage: `url(${thumbnailUrl})` }
+          : {
+              background:
+                "linear-gradient(180deg, color-mix(in srgb, var(--color-primary-900) 0%, transparent) 0%, color-mix(in srgb, var(--color-gray-900) 40%, transparent) 100%), var(--color-gray-50)",
+            }
       }
     >
       <div className="flex flex-col justify-start items-start w-[184px] absolute left-[17px] top-[78px] gap-1">

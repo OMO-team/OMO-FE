@@ -8,7 +8,7 @@ export interface KeyMetricItem {
   id: string;
   label: string;
   percentage: number;
-  barColor: "primary" | "gray" | "gradient";
+  barColor: "gray" | "gradient";
 }
 
 export interface VlogItem {

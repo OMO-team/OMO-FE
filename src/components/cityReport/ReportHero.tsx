@@ -15,7 +15,7 @@ export default function ReportHero({
 }: ReportHeroProps) {
   return (
     <div
-      className="self-stretch h-[433px] relative overflow-hidden bg-white bg-cover bg-center"
+      className="self-stretch shrink-0 h-[433px] relative overflow-hidden bg-white bg-cover bg-center"
       style={{ backgroundImage: `url(${heroImageUrl})` }}
     >
       <div className="flex flex-col justify-start items-start w-[896px] absolute left-[72px] top-11 gap-[266px]">

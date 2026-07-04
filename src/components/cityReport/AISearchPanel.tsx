@@ -55,9 +55,9 @@ export default function AISearchPanel({
             <button
               type="button"
               onClick={() => runSearch(inputValue)}
-              className="flex justify-center items-center h-[46px] overflow-hidden gap-1 px-[26px] py-2.5 rounded-3 bg-primary-500"
+              className="flex shrink-0 justify-center items-center h-[46px] overflow-hidden gap-1 px-[26px] py-2.5 rounded-3 bg-primary-500"
             >
-              <p className="body-01 text-white">검색</p>
+              <p className="body-01 text-white ">검색</p>
             </button>
           </div>
           <div className="flex justify-start items-center gap-1.5">
