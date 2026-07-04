@@ -1,4 +1,7 @@
-import type { CityReportData, AISearchResultData } from "../types/cityReport";
+import type {
+  CityReportData,
+  AISearchResultData,
+} from "../../types/cityReport";
 
 export const berlinReportData: CityReportData = {
   cityName: "베를린",

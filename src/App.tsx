@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CityReportModal } from "./components/cityReport";
+import { CityReportModal } from "./components/aireport";
 import {
   berlinReportData,
   mockSearchResult,
-} from "./components/cityReport/mockData";
+} from "./components/aireport/mockData";
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);

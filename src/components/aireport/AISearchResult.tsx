@@ -1,5 +1,5 @@
 import DocumentCard from "./DocumentCard";
-import type { AISearchResultData } from "../types/cityReport";
+import type { AISearchResultData } from "../../types/cityReport";
 
 interface AISearchResultProps {
   result: AISearchResultData;
