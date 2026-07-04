@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Chip from "../common/Chip";
 import AISearchResult from "./AISearchResult";
-import type { AISearchResultData } from "./types/cityReport";
+import type { AISearchResultData } from "../types/cityReport";
 
 interface AISearchPanelProps {
   keywords: string[];
