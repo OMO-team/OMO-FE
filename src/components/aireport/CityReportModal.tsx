@@ -6,7 +6,7 @@ import KeyMetrics from "./KeyMetrics";
 import ProsCons from "./ProsCons";
 import VlogReviews from "./VlogReviews";
 import RealReviews from "./RealReviews";
-import type { AISearchResultData, CityReportData } from "./types/cityReport";
+import type { AISearchResultData, CityReportData } from "../types/cityReport";
 
 interface CityReportModalProps {
   isOpen: boolean;

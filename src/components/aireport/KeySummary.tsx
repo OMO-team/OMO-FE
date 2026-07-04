@@ -1,5 +1,5 @@
 import InfoCard from "./InfoCard";
-import type { KeySummaryItem } from "./types/cityReport";
+import type { KeySummaryItem } from "../types/cityReport";
 
 interface KeySummaryProps {
   items: KeySummaryItem[];
