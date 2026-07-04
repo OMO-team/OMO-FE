@@ -94,7 +94,7 @@ export default function SearchModal({
               {/* 휴지통 아이콘 (24×24 컨테이너) */}
               <div className="flex justify-center items-center w-6 h-6">
                 <img
-                  src="/src/assets/icons/Group.svg"
+                  src="/src/assets/icons/icon-trash.svg"
                   alt="삭제"
                   style={{ width: '17.412px', height: '18.5px', flexShrink: 0 }}
                 />
