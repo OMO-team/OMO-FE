@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import CategoryTab from './CategoryTab';
+import CategoryTab from '../common/CategoryTab';
 import CityCard, { CITY_IMAGES } from './CityCard';
 
 const CATEGORIES = ['워킹홀리데이', '교환학생', '인턴십'];
