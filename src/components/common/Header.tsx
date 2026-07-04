@@ -4,7 +4,11 @@ import searchIcon from '../../assets/icons/icon-search[24].svg';
 import exploreIcon from '../../assets/icons/icon-explore.svg';
 import homeIcon from '../../assets/icons/icon-home.svg';
 
-const Header = () => {
+type HeaderProps = {
+  showProfile?: boolean;
+};
+
+const Header = ({ showProfile = false }: HeaderProps) => {
   return (
     <header className="flex justify-center items-center w-full px-[188px] pt-6 gap-[216px] bg-white">
       {/* 왼쪽: 로고 + 검색창 */}
@@ -23,20 +27,17 @@ const Header = () => {
         </div>
       </div>
 
-      {/* 오른쪽: 탐색/내홈/로그인/회원가입 */}
+      {/* 오른쪽 */}
       <div className="flex items-center gap-2">
 
         {/* 탐색 + 내홈 묶음 */}
         <div className="flex items-center gap-2">
-          {/* 탐색 - 선택된 상태 */}
           <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[4px] rounded-2 border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] body-02 text-primary-500">
             <Icon size="sm">
               <img src={exploreIcon} alt="탐색" />
             </Icon>
             탐색
           </button>
-
-          {/* 내홈 */}
           <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[4px] rounded-2 body-02 text-gray-700">
             <Icon size="sm">
               <img src={homeIcon} alt="내홈" />
@@ -45,18 +46,22 @@ const Header = () => {
           </button>
         </div>
 
-        {/* 로그인 + 회원가입 묶음 */}
-        <div className="flex items-center gap-1">
-          {/* 로그인 */}
-          <button className="flex items-center px-[18px] py-[10px] rounded-2 body-03 text-gray-700">
-            로그인
+        {showProfile ? (
+          /* 프로필 아이콘 */
+          <button className="flex justify-center items-center" style={{ width: '30px', height: '38px' }}>
+            <img src="/src/assets/icons/S_profil.svg" alt="프로필" style={{ width: '30px', height: '30px' }} />
           </button>
-
-          {/* 회원가입 */}
-          <button className="flex items-center px-[18px] py-[10px] rounded-2 bg-primary-500 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
-            회원가입
-          </button>
-        </div>
+        ) : (
+          /* 로그인 + 회원가입 묶음 */
+          <div className="flex items-center gap-1">
+            <button className="flex items-center px-[18px] py-[10px] rounded-2 body-03 text-gray-700">
+              로그인
+            </button>
+            <button className="flex items-center px-[18px] py-[10px] rounded-2 bg-primary-500 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
+              회원가입
+            </button>
+          </div>
+        )}
 
       </div>
     </header>
