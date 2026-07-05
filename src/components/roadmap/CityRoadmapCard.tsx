@@ -1,3 +1,5 @@
+import LargeFillButton from '../common/LargeFillButton';
+
 type CityRoadmapCardProps = {
   cityName: string;
   countryName: string;
@@ -77,13 +79,7 @@ export default function CityRoadmapCard({
           <span className="title-03 text-primary-600">다음 일정 : {nextSchedule}</span>
         </div>
 
-        <button
-          type="button"
-          className="title-02 rounded-2 bg-primary-500 py-[13px] text-white"
-          onClick={onViewRoadmap}
-        >
-          로드맵 보기
-        </button>
+        <LargeFillButton label="로드맵 보기" onClick={onViewRoadmap} />
       </div>
     </div>
   );
