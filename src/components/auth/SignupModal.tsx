@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import closeIcon from '../../assets/icons/icon-close[14].svg';
+import errorIcon from '../../assets/icons/error.svg';
+import kakaoIcon from '../../assets/icons/icon-kakao.svg';
+import googleIcon from '../../assets/icons/icon-google.svg';
 
 type SignupModalProps = {
   onClose: () => void;
@@ -125,7 +129,7 @@ export default function SignupModal({
             className="flex justify-center items-center flex-shrink-0"
             style={{ width: '24px', height: '24px' }}
           >
-            <img src="/src/assets/icons/Vector_X.svg" alt="닫기" style={{ width: '14px', height: '14px' }} />
+            <img src={closeIcon} alt="닫기" style={{ width: '14px', height: '14px' }} />
           </button>
         </div>
 
@@ -163,7 +167,7 @@ export default function SignupModal({
                   />
                   {nameError && (
                     <div className="flex justify-center items-center" style={{ width: '20px', height: '20px', flexShrink: 0 }}>
-                      <img src="/src/assets/icons/error.svg" alt="오류" style={{ width: '17px', height: '17px' }} />
+                      <img src={errorIcon} alt="오류" style={{ width: '17px', height: '17px' }} />
                     </div>
                   )}
                 </div>
@@ -199,7 +203,7 @@ export default function SignupModal({
                   />
                   {emailError && (
                     <div className="flex justify-center items-center" style={{ width: '20px', height: '20px', flexShrink: 0 }}>
-                      <img src="/src/assets/icons/error.svg" alt="오류" style={{ width: '17px', height: '17px' }} />
+                      <img src={errorIcon} alt="오류" style={{ width: '17px', height: '17px' }} />
                     </div>
                   )}
                 </div>
@@ -392,7 +396,7 @@ export default function SignupModal({
                 >
                   <div className="flex justify-center items-center" style={{ width: '350px', gap: '104px' }}>
                     <div className="flex justify-center items-center flex-shrink-0" style={{ width: '24px', height: '24px', padding: '3px 2px' }}>
-                      <img src="/src/assets/icons/icon-kakao.svg" alt="카카오" style={{ width: '20px', height: '18px', flexShrink: 0 }} />
+                      <img src={kakaoIcon} alt="카카오" style={{ width: '20px', height: '18px', flexShrink: 0 }} />
                     </div>
                     <span style={{ width: '96px', height: '24px', flexShrink: 0, color: '#15181D', textAlign: 'center', fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}>
                       카카오 로그인
@@ -418,7 +422,7 @@ export default function SignupModal({
                   }}
                 >
                   <div className="flex justify-center items-center self-stretch" style={{ gap: '82px' }}>
-                    <img src="/src/assets/icons/icon-google.svg" alt="구글" style={{ width: '24px', height: '24px' }} />
+                    <img src={googleIcon} alt="구글" style={{ width: '24px', height: '24px' }} />
                     <span style={{ color: '#15181D', textAlign: 'center', fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}>
                       Goole 계정으로 로그인
                     </span>

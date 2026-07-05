@@ -17,7 +17,7 @@ export default function AIPromptSection() {
         <div className="flex flex-col items-start gap-2">
           {/* 여행가방 아이콘 */}
           <div className="w-8 h-8">
-            <img src="/src/assets/icons/Vector.svg" alt="여행" />
+            <img src={arrowUpIcon} alt="여행" />
           </div>
           {/* 타이틀 */}
           <h2 className="heading-01 text-[#181A1F]">

@@ -43,7 +43,7 @@ export default function PromptInput({ onSubmit }: PromptInputProps) {
             className="flex justify-center items-center p-[10px] rounded-full bg-primary-500 hover:bg-primary-600 transition-colors"
           >
             <span className="flex justify-center items-center w-7 h-7">
-              <img src="/src/assets/icons/Vector.svg" alt="전송" width={17} height={17} />
+              <img src={arrowUpIcon} alt="전송" width={17} height={17} />
             </span>
           </button>
         </div>

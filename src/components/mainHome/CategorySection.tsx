@@ -59,7 +59,7 @@ export default function CategorySection() {
           >
             <span className="body-02 text-primary-500">더보기</span>
             <div className="flex justify-center items-center w-4 h-4">
-              <img src="/src/assets/icons/16_16_icon_down_arrow.svg" alt="더보기" />
+              <img src={arrowDownIcon} alt="더보기" />
             </div>
           </button>
         </div>

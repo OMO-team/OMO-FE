@@ -3,6 +3,7 @@ import omoLogo from '../../assets/icons/omo-logo.svg';
 import searchIcon from '../../assets/icons/icon-search[24].svg';
 import exploreIcon from '../../assets/icons/icon-explore.svg';
 import homeIcon from '../../assets/icons/icon-home.svg';
+import profileIcon from '../../assets/icons/icon-profile.svg';
 
 type HeaderProps = {
   showProfile?: boolean;
@@ -49,7 +50,7 @@ const Header = ({ showProfile = false }: HeaderProps) => {
         {showProfile ? (
           /* 프로필 아이콘 */
           <button className="flex justify-center items-center" style={{ width: '30px', height: '38px' }}>
-            <img src="/src/assets/icons/S_profil.svg" alt="프로필" style={{ width: '30px', height: '30px' }} />
+            <img src={profileIcon} alt="프로필" style={{ width: '30px', height: '30px' }} />
           </button>
         ) : (
           /* 로그인 + 회원가입 묶음 */

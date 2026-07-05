@@ -1,5 +1,6 @@
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
+import mailIcon from '../assets/icons/icon-mail.svg';
 
 type EmailVerificationPageProps = {
   email?: string;
@@ -60,7 +61,7 @@ export default function EmailVerificationPage({
                   }}
                 >
                   <img
-                    src="/src/assets/icons/icon-mail.svg"
+                    src={mailIcon}
                     alt="이메일"
                     style={{ width: '42px', height: '42px', flexShrink: 0 }}
                   />

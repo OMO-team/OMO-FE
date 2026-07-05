@@ -29,7 +29,7 @@ export default function CityCard({ name, cityCount, imagePath }: CityCardProps) 
           <span className="title-01 text-[#C2E2FF]">추천도시 {cityCount}개 보기</span>
           <div className="flex justify-center items-center w-6 h-6">
             <img
-              src="/src/assets/icons/Vector_diagonal.svg"
+              src={arrowDiagonalIcon}
               alt="이동"
               className="w-[14px] h-[14px]"
             />
