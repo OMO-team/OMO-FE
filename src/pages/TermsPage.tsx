@@ -275,10 +275,142 @@ function TermsContent() {
   );
 }
 
+const PRIVACY_TITLE_STYLE: React.CSSProperties = {
+  color: '#15181D',
+  fontFamily: 'Pretendard Variable',
+  fontSize: '16px',
+  fontWeight: 600,
+  lineHeight: '140%',
+  letterSpacing: '-0.32px',
+  alignSelf: 'stretch',
+};
+
+const DATE_STYLE: React.CSSProperties = {
+  color: '#566276',
+  fontFamily: 'Pretendard Variable',
+  fontSize: '18px',
+  fontWeight: 400,
+  lineHeight: '140%',
+  letterSpacing: '-0.36px',
+};
+
+const PRIVACY_ARTICLES: { title: string; content: string }[] = [
+  {
+    title: '제1조 (개인정보의 처리 목적)',
+    content: `회사는 다음의 목적을 위하여 개인정보를 처리합니다.
+처리하는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행합니다.
+
+회원 가입 및 관리: 본인 식별·인증, 회원자격 유지·관리, 서비스 부정이용 방지
+서비스 제공: 해외 체류 준비 정보 브리핑, 맞춤형 추천, 체류 준비 로드맵 및 예산 시뮬레이션 등 제공
+고충처리 및 문의 대응: 문의·민원 확인, 사실조사를 위한 연락·통지, 처리결과 통보
+서비스 개선 및 개발: 신규 서비스 개발, 이용 통계 분석(통계 목적은 가명·익명 처리 후 활용)
+마케팅 및 광고 활용(동의한 경우에 한함): 이벤트·광고성 정보 제공, 맞춤형 정보 제공`,
+  },
+  {
+    title: '제2조 (처리하는 개인정보의 항목)',
+    content: `1. 회원가입 시 (필수): 이메일 주소, 비밀번호(암호화 저장), 닉네임
+2. 소셜 로그인 이용 시 (해당 시): 소셜 서비스 제공자가 제공하는 식별자, 이메일, 프로필 정보 등 동의 항목
+3. 마케팅 정보 수신 동의 시 (선택): 광고성 정보 수신 동의 여부
+4. 서비스 이용 과정에서 자동 수집되는 정보: 접속 IP, 쿠키, 서비스 이용 기록, 방문 기록, 검색어 및 질의 내용, 기기정보(OS·브라우저), 접속 로그
+민감정보·고유식별정보 미수집 원칙 — 회사는 본 데모/MVP 단계에서 여권번호, 비자정보, 외국인등록번호 등 고유식별정보 및 민감정보를 수집·저장하지 않습니다. 향후 공문서(여권·비자) 검증 기능을 도입할 경우, 해당 정보는 별도 트랙으로 분리하여 클라이언트 단에서 형식 검증만 수행하거나 최소수집·암호화 원칙에 따라 처리하며, 「개인정보 보호법」 제23조·제24조에 따른 별도 동의를 받습니다.`,
+  },
+  {
+    title: '제3조 (개인정보의 처리 및 보유 기간)',
+    content: `회사는 법령에 따른 보유·이용기간 또는 동의받은 보유·이용기간 내에서 개인정보를 처리·보유합니다.
+항목별 기간:
+회원 가입 및 관리: 회원 탈퇴 시까지. 다만 수사·조사 진행 중이거나 채권·채무관계 잔존 시 그 종료/정산 시까지
+마케팅 활용: 동의 철회 또는 회원 탈퇴 시까지
+관련 법령에 따른 보존:
+서비스 방문 기록: 3개월(「통신비밀보호법」)
+표시·광고에 관한 기록: 6개월(「전자상거래법」)
+계약 또는 청약철회 등에 관한 기록: 5년(상용화·유료화 시, 「전자상거래법」)
+소비자 불만 또는 분쟁처리에 관한 기록: 3년(「전자상거래법」)`,
+  },
+  {
+    title: '제4조 (개인정보의 제3자 제공)',
+    content: `회사는 정보주체의 개인정보를 제1조에서 명시한 범위 내에서만 처리하며, 정보주체의 동의·법률의 특별한 규정 등 「개인정보 보호법」 제17조 및 제18조에 해당하는 경우에만 제3자에게 제공합니다.
+회사는 현재 이용자의 개인정보를 제3자에게 제공하고 있지 않습니다. 향후 제공이 필요한 경우 제공받는 자, 제공 목적, 제공 항목, 보유·이용기간을 사전에 고지하고 동의를 받습니다.`,
+  },
+  {
+    title: '제5조 (개인정보 처리의 위탁)',
+    content: `회사는 원활한 서비스 제공을 위하여 개인정보 처리업무를 위탁할 수 있으며, 수탁자·위탁업무 현황은 본 페이지 하단의 [처리 위탁 현황] 데이터베이스에 정리합니다.
+회사는 위탁계약 체결 시 「개인정보 보호법」 제26조에 따라 목적 외 처리 금지, 기술적·관리적 보호조치, 재위탁 제한, 관리·감독, 손해배상 등 책임에 관한 사항을 문서에 명시하고 수탁자를 감독합니다.
+위탁업무 내용이나 수탁자가 변경될 경우 본 방침을 통하여 공개합니다.`,
+  },
+  {
+    title: '제6조 (개인정보의 국외 이전)',
+    content: `회사가 클라우드 인프라 등을 통해 개인정보를 국외로 이전하는 경우, 「개인정보 보호법」 제28조의8에 따라 이전받는 자, 이전 국가, 이전 일시 및 방법, 이전 항목, 이용 목적 및 보유기간 등을 사전에 고지하고 동의를 받거나 법령상 허용되는 요건을 갖추어 처리합니다.`,
+  },
+  {
+    title: '제7조 (정보주체와 법정대리인의 권리·의무 및 행사방법)',
+    content: `정보주체는 언제든지 개인정보 열람·정정·삭제·처리정지를 요구할 수 있습니다.
+권리 행사는 서면, 전자우편 등을 통하여 할 수 있으며 회사는 지체 없이 조치합니다.
+정정·삭제 요구 시 완료 전까지 해당 개인정보를 이용·제공하지 않습니다.
+권리 행사는 법정대리인이나 위임받은 자를 통해 가능하며, 「개인정보 보호법 시행규칙」 별지 제11호 서식 위임장을 제출해야 합니다.
+열람·처리정지 요구는 「개인정보 보호법」 제35조 제4항, 제37조 제2항에 따라 제한될 수 있습니다.`,
+  },
+  {
+    title: '제8조 (자동화된 결정에 관한 정보주체의 권리)',
+    content: `회사가 「개인정보 보호법」 제37조의2에 따라 완전히 자동화된 시스템(AI 포함)으로 정보주체의 권리·의무에 중대한 영향을 미치는 결정을 하는 경우, 정보주체는 이를 거부하거나 설명을 요구할 수 있습니다. AI 브리핑은 정보 큐레이션 제공에 해당하며 현재 정보주체의 권리·의무에 중대한 영향을 미치는 자동화된 결정은 수행하지 않습니다.`,
+  },
+  {
+    title: '제9조 (개인정보의 파기 절차 및 방법)',
+    content: `회사는 보유기간 경과·처리목적 달성 등으로 개인정보가 불필요하게 되면 지체 없이(5일 이내) 파기합니다.
+파기 방법 — 전자적 파일: 복구 불가능한 기술적 방법으로 삭제 / 종이 문서: 분쇄 또는 소각.
+법령에 따라 보존하는 경우 별도 DB로 옮기거나 보관장소를 달리하여 보존합니다.`,
+  },
+  {
+    title: '제10조 (개인정보의 안전성 확보조치)',
+    content: `회사는 「개인정보 보호법」 제29조 및 동법 시행령 제30조에 따라 다음 조치를 취합니다.
+관리적 조치: 내부관리계획 수립·시행, 취급자 최소화 및 교육
+기술적 조치: 접근권한 관리, 접근통제시스템 설치, 비밀번호·고유식별정보 암호화, 보안프로그램 설치·갱신
+물리적 조치: 전산실·자료보관실 접근통제
+공개 데이터와 개인정보의 분리: 외부 수집 공개 경험 데이터와 이용자 개인 식별정보의 저장소·처리 파이프라인을 논리적·물리적으로 분리`,
+  },
+  {
+    title: '제11조 (개인정보 자동 수집 장치의 설치·운영 및 거부)',
+    content: `회사는 맞춤 서비스 제공을 위해 쿠키(cookie)를 사용합니다.
+쿠키는 서버가 이용자 브라우저에 보내는 소량의 정보로 이용자 기기에 저장됩니다.
+이용자는 브라우저 설정으로 쿠키 저장을 거부할 수 있으나, 이 경우 맞춤형 서비스 이용에 어려움이 발생할 수 있습니다. (예: Chrome → 설정 → 개인정보 및 보안 → 쿠키 및 기타 사이트 데이터)`,
+  },
+  {
+    title: '제12조 (권익침해 구제방법)',
+    content: `정보주체는 아래 기관에 분쟁해결·상담을 신청할 수 있습니다. 상세 연락처는 본 페이지 하단의 [권익침해 구제기관] 데이터베이스를 참고하세요.`,
+  },
+  {
+    title: '제13조 (개인정보처리방침의 변경)',
+    content: `본 방침은 시행일로부터 적용됩니다.
+변경 시 시행 7일 전부터 공지하며, 이용자 권리의 중요한 변경 시 최소 30일 전에 고지합니다.`,
+  },
+];
+
 function PrivacyContent() {
   return (
-    <div className="flex flex-col items-start w-[1064px]" style={{ gap: '56px' }}>
-      <p style={{ ...ARTICLE_BODY_STYLE, color: '#94A0B4' }}>개인정보 처리방침 내용이 여기에 표시됩니다.</p>
+    <div className="flex flex-col items-start" style={{ gap: '30px' }}>
+      {/* Frame 10963: 인트로 + 시행일자 */}
+      <div className="flex flex-col items-start" style={{ width: '1034px', gap: '10px' }}>
+        <span style={{ color: '#15181D', fontFamily: 'Pretendard Variable', fontSize: '18px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.36px' }}>
+          {`OMO는 「개인정보 보호법」 제30조에 따라\n정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보처리방침을 수립·공개합니다.`}
+        </span>
+        <div className="flex items-center" style={{ gap: '4px' }}>
+          <span style={DATE_STYLE}>시행일자 : </span>
+          <div className="flex items-center" style={{ gap: '2px' }}>
+            <span style={DATE_STYLE}>0000년</span>
+            <span style={DATE_STYLE}>00월</span>
+            <span style={DATE_STYLE}>00일</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 조항 목록 */}
+      <div className="inline-flex flex-col items-start" style={{ gap: '24px', width: '1064px' }}>
+        {PRIVACY_ARTICLES.map((article) => (
+          <div key={article.title} className="flex flex-col items-start self-stretch" style={{ gap: '6px' }}>
+            <span style={PRIVACY_TITLE_STYLE}>{article.title}</span>
+            <span style={{ ...ARTICLE_BODY_STYLE, whiteSpace: 'pre-line' }}>{article.content}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -320,11 +452,10 @@ export default function TermsPage() {
               width: '531px',
               padding: '15px 149px',
               borderRadius: '16px 0 0 16px',
-              border: isTerms
-                ? '1px solid #0085FF'
-                : '1px solid #CFD3DA',
-              background: isTerms ? '#E5F3FF' : '#FFF',
-              transition: 'background 0.15s, border 0.15s',
+              ...(isTerms
+                ? { border: '1px solid #0085FF', background: '#E5F3FF' }
+                : { borderTop: '1px solid #CFD3DA', borderLeft: '1px solid #CFD3DA', borderBottom: '1px solid #CFD3DA', background: '#FFF' }),
+              transition: 'background 0.15s',
             }}
           >
             <span style={{
@@ -348,11 +479,10 @@ export default function TermsPage() {
               width: '531px',
               padding: '15px 120px',
               borderRadius: '0 16px 16px 0',
-              borderTop: !isTerms ? '1px solid #0085FF' : '1px solid #CFD3DA',
-              borderRight: !isTerms ? '1px solid #0085FF' : '1px solid #CFD3DA',
-              borderBottom: !isTerms ? '1px solid #0085FF' : '1px solid #CFD3DA',
-              background: !isTerms ? '#E5F3FF' : '#FFF',
-              transition: 'background 0.15s, border 0.15s',
+              ...(!isTerms
+                ? { border: '1px solid #0085FF', background: '#E5F3FF' }
+                : { borderTop: '1px solid #CFD3DA', borderRight: '1px solid #CFD3DA', borderBottom: '1px solid #CFD3DA', background: '#FFF' }),
+              transition: 'background 0.15s',
             }}
           >
             <span style={{
