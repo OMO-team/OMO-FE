@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import clipIcon from '../../assets/icons/icon-clip.svg';
+import newChatIcon from '../../assets/icons/icon-new-chat.svg';
+import collapseIcon from '../../assets/icons/icon-double-right-arrow.svg';
+import arrowDownIcon from '../../assets/icons/icon-arrow-down[16].svg';
+import arrowUpIcon from '../../assets/icons/icon-arrow-up.svg';
 
 type ChatMessage = {
   id: string;
@@ -12,6 +17,12 @@ type ChatMessage = {
 type AIChatPanelProps = {
   onClose?: () => void;
 };
+
+const SUGGESTION_CHIPS = [
+  '치안이 좋고 영어로 생활 가능한 200만원 이하 도시',
+  '유럽에서 생활비가 저렴하고 대중교통 좋은 곳',
+  '아시아 워킹홀리데이 추천, 한 달 150만원 예산',
+];
 
 export default function AIChatPanel({ onClose }: AIChatPanelProps) {
   const [input, setInput] = useState('');
@@ -28,111 +39,193 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
   };
 
   return (
-    <div
-      className="flex flex-col bg-white"
-      style={{ width: '551px', height: '100vh', borderLeft: '1px solid #E7EAEF' }}
-    >
-      {/* 헤더 */}
+    <div className="relative flex" style={{ width: '670px', height: '1080px', borderLeft: '1px solid #B8BFCB', background: '#FFF' }}>
+      {/* Sidebar_Collapse_Handle */}
       <div
-        className="flex items-center justify-between flex-shrink-0"
-        style={{ padding: '16px 20px', borderBottom: '1px solid #E7EAEF' }}
+        className="absolute left-0 top-0 flex h-full cursor-pointer items-center pl-2"
+        style={{ zIndex: 10 }}
+        onClick={onClose}
       >
-        <button type="button" className="flex items-center gap-1">
-          <span style={{ color: '#15181D', fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 600, lineHeight: '140%', letterSpacing: '-0.32px' }}>
-            OMO 스마트 브리핑
-          </span>
-          {/* 드롭다운 화살표 */}
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 6L8 10L12 6" stroke="#15181D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <div
+          className="rounded-[10px] transition-colors hover:bg-[#E7EAEF]"
+          style={{ width: '6px', height: '120px', background: '#CFD3DA' }}
+        />
+      </div>
 
-        <div className="flex items-center gap-2">
-          {/* 새 채팅 */}
-          <button type="button" className="flex justify-center items-center" style={{ width: '24px', height: '24px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10.5" stroke="#94A0B4" strokeWidth="1" />
-              <path d="M12 7.5V16.5M7.5 12H16.5" stroke="#94A0B4" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+      {/* 메인 컨텐츠 */}
+      <div className="flex flex-1 flex-col" style={{ marginLeft: '14px' }}>
+        {/* R_Header_AI_chat */}
+        <div
+          className="flex flex-shrink-0 items-center justify-between"
+          style={{ padding: '40px 34px 10px 30px', borderBottom: '1px solid #E7EAEF' }}
+        >
+          {/* OMO 스마트 브리핑 버튼 */}
+          <button
+            type="button"
+            className="flex items-center gap-1"
+            style={{
+              width: '206px',
+              height: '40px',
+              padding: '8px 18px',
+              borderRadius: '12px',
+              background: 'transparent',
+            }}
+          >
+            <span
+              style={{
+                color: '#404959',
+                fontFamily: 'Pretendard Variable',
+                fontSize: '18px',
+                fontWeight: 500,
+                lineHeight: '140%',
+                letterSpacing: '-0.36px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              OMO 스마트 브리핑
+            </span>
+            <img
+              src={arrowDownIcon}
+              alt="드롭다운"
+              style={{ width: '20px', height: '20px', transform: 'rotate(-90deg)', flexShrink: 0 }}
+            />
           </button>
-          {/* 더보기 (기본 상태엔 숨김, 채팅 시작 후 표시) */}
-          {!isEmpty && (
-            <button type="button" className="flex justify-center items-center" style={{ width: '24px', height: '24px' }}>
-              <svg width="16" height="4" viewBox="0 0 16 4" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="2" cy="2" r="1.5" fill="#94A0B4" />
-                <circle cx="8" cy="2" r="1.5" fill="#94A0B4" />
-                <circle cx="14" cy="2" r="1.5" fill="#94A0B4" />
-              </svg>
+
+          {/* 우측 버튼들 */}
+          <div className="flex items-center gap-2">
+            {/* 새 채팅 */}
+            <button
+              type="button"
+              className="flex items-center justify-center"
+              style={{ width: '24px', height: '24px' }}
+              aria-label="새 채팅"
+            >
+              <img src={newChatIcon} alt="새 채팅" style={{ width: '22px', height: '22px' }} />
             </button>
-          )}
-          {/* 접기 */}
-          <button type="button" onClick={onClose} className="flex justify-center items-center" style={{ width: '24px', height: '24px' }}>
-            <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1H15M1 6H15M1 11H15" stroke="#94A0B4" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
+            {/* 패널 접기 */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex items-center justify-center"
+              style={{ width: '24px', height: '24px' }}
+              aria-label="패널 접기"
+            >
+              <img src={collapseIcon} alt="패널 접기" style={{ width: '14px', height: '16px' }} />
+            </button>
+          </div>
+        </div>
+
+        {/* 콘텐츠 영역 */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex flex-1 flex-col items-center overflow-y-auto">
+            {isEmpty ? (
+              /* Empty State — Frame 11240 */
+              <div
+                className="flex flex-col items-center"
+                style={{ width: '570px', gap: '60px', paddingTop: '60px' }}
+              >
+                {/* Frame 11205 */}
+                <div className="flex flex-col items-center" style={{ width: '500px', gap: '26px' }}>
+                  {/* Frame 48 — 여행 아이콘 + 타이틀 */}
+                  <div className="flex flex-col items-center gap-4">
+                    {/* 여행가방 아이콘 */}
+                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="7" y="19" width="42" height="30" rx="4" stroke="#0085FF" strokeWidth="2.5" />
+                      <path d="M19 19V13.5C19 11.567 20.567 10 22.5 10H33.5C35.433 10 37 11.567 37 13.5V19" stroke="#0085FF" strokeWidth="2.5" strokeLinecap="round" />
+                      <path d="M7 31H49" stroke="#0085FF" strokeWidth="2.5" />
+                      <circle cx="21" cy="49" r="2" fill="#0085FF" />
+                      <circle cx="35" cy="49" r="2" fill="#0085FF" />
+                    </svg>
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <p
+                        style={{
+                          color: '#15181D',
+                          fontFamily: 'Pretendard Variable',
+                          fontSize: '22px',
+                          fontWeight: 700,
+                          lineHeight: '140%',
+                          letterSpacing: '-0.66px',
+                        }}
+                      >
+                        어느 나라로 떠나고 싶으신가요?
+                      </p>
+                      <p
+                        style={{
+                          color: '#566276',
+                          fontFamily: 'Pretendard Variable',
+                          fontSize: '14px',
+                          fontWeight: 400,
+                          lineHeight: '150%',
+                          letterSpacing: '-0.28px',
+                        }}
+                      >
+                        원하는 조건이나 예산을 자유롭게 적으면,
+                        <br />
+                        OMO AI가 딱 맞는 도시를 찾아드릴게요.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Frame 11204 — 추천 칩 */}
+                  <div className="flex flex-col items-start" style={{ width: '289px', gap: '8px' }}>
+                    {SUGGESTION_CHIPS.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setInput(chip)}
+                        className="flex items-center text-left"
+                        style={{
+                          width: '100%',
+                          height: '42px',
+                          padding: '10px 20px',
+                          borderRadius: '12px',
+                          background: '#F8F9FA',
+                          border: 'none',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: '#404959',
+                            fontFamily: 'Pretendard Variable',
+                            fontSize: '13px',
+                            fontWeight: 400,
+                            lineHeight: '140%',
+                            letterSpacing: '-0.26px',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            display: 'block',
+                            width: '100%',
+                          }}
+                        >
+                          {chip}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* 채팅 메시지 목록 */
+              <div className="flex w-full flex-col gap-6 p-6">
+                {messages.map((msg) => (
+                  <div key={msg.id}>
+                    {msg.role === 'user' ? (
+                      <UserMessage content={msg.content} />
+                    ) : (
+                      <AIMessage message={msg} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* R_Prompt Input Container */}
+          <ChatInput value={input} onChange={setInput} onSend={handleSend} />
         </div>
       </div>
-
-      {/* 콘텐츠 영역 */}
-      <div className="flex-1 overflow-y-auto" style={{ padding: '24px 20px' }}>
-        {isEmpty ? (
-          /* Empty State */
-          <div className="flex flex-col items-start gap-6">
-            {/* 여행 가방 아이콘 + 타이틀 */}
-            <div className="flex flex-col items-start gap-2">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="4" y="10" width="24" height="18" rx="3" stroke="#0085FF" strokeWidth="2" />
-                <path d="M11 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="#0085FF" strokeWidth="2" strokeLinecap="round" />
-                <path d="M4 18h24" stroke="#0085FF" strokeWidth="2" />
-              </svg>
-              <p style={{ color: '#15181D', fontFamily: 'Pretendard Variable', fontSize: '22px', fontWeight: 700, lineHeight: '140%', letterSpacing: '-0.66px' }}>
-                어느 나라로 떠나고 싶으신가요?
-              </p>
-              <p style={{ color: '#566276', fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 400, lineHeight: '150%', letterSpacing: '-0.28px' }}>
-                원하는 조건이나 예산을 자유롭게 적으면, OMO AI가 딱 맞는 도시를 찾아드릴게요.
-              </p>
-            </div>
-
-            {/* 추천 프롬프트 */}
-            <div className="flex flex-col items-start gap-2 self-stretch">
-              {['치안이 좋고 영어로 생활 가능한 200만원 이하 도시', '유럽에서 생활비가 저렴하고 대중교통 좋은 곳', '아시아 워킹홀리데이 추천, 한 달 150만원 예산'].map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => setInput(prompt)}
-                  className="flex items-center self-stretch text-left"
-                  style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #E7EAEF', background: '#FFF' }}
-                >
-                  <span style={{ color: '#404959', fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 400, lineHeight: '150%', letterSpacing: '-0.28px' }}>
-                    {prompt}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          /* 채팅 메시지 목록 */
-          <div className="flex flex-col gap-6">
-            {messages.map((msg) => (
-              <div key={msg.id}>
-                {msg.role === 'user' ? (
-                  <UserMessage content={msg.content} />
-                ) : (
-                  <AIMessage message={msg} />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* 입력창 */}
-      <ChatInput
-        value={input}
-        onChange={setInput}
-        onSend={handleSend}
-      />
     </div>
   );
 }
@@ -163,32 +256,100 @@ function UserMessage({ content }: { content: string }) {
 function AIMessage({ message }: { message: ChatMessage }) {
   return (
     <div className="flex flex-col gap-3">
-      {message.isLoading ? (
-        <p style={{ color: '#94A0B4', fontFamily: 'Pretendard Variable', fontSize: '13px', fontWeight: 400 }}>
+      {message.isLoading && (
+        <p
+          style={{
+            color: '#94A0B4',
+            fontFamily: 'Pretendard Variable',
+            fontSize: '13px',
+            fontWeight: 400,
+          }}
+        >
           21S 동안 생각함
         </p>
-      ) : null}
-      <p style={{ color: '#15181D', fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 400, lineHeight: '160%', letterSpacing: '-0.28px', whiteSpace: 'pre-line' }}>
+      )}
+      <p
+        style={{
+          color: '#15181D',
+          fontFamily: 'Pretendard Variable',
+          fontSize: '14px',
+          fontWeight: 400,
+          lineHeight: '160%',
+          letterSpacing: '-0.28px',
+          whiteSpace: 'pre-line',
+        }}
+      >
         {message.content}
       </p>
       {message.tags && message.tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {message.tags.map((tag) => (
-            <div key={tag} className="flex items-center gap-1" style={{ padding: '4px 10px', borderRadius: '100px', background: '#E5F3FF' }}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="#0085FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span style={{ color: '#0085FF', fontFamily: 'Pretendard Variable', fontSize: '13px', fontWeight: 500, lineHeight: '140%' }}>{tag}</span>
+            <div
+              key={tag}
+              className="flex items-center gap-1"
+              style={{ padding: '4px 10px', borderRadius: '100px', background: '#E5F3FF' }}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6L5 9L10 3" stroke="#0085FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span
+                style={{
+                  color: '#0085FF',
+                  fontFamily: 'Pretendard Variable',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  lineHeight: '140%',
+                }}
+              >
+                {tag}
+              </span>
             </div>
           ))}
         </div>
       )}
       {message.referenceLinks && message.referenceLinks.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span style={{ color: '#94A0B4', fontFamily: 'Pretendard Variable', fontSize: '13px', fontWeight: 400 }}>참고자료</span>
+          <span
+            style={{
+              color: '#94A0B4',
+              fontFamily: 'Pretendard Variable',
+              fontSize: '13px',
+              fontWeight: 400,
+            }}
+          >
+            참고자료
+          </span>
           {message.referenceLinks.map((link, i) => (
-            <div key={i} className="flex items-center gap-2" style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #E7EAEF' }}>
-              <span style={{ padding: '2px 6px', borderRadius: '4px', background: '#E5F3FF', color: '#0085FF', fontSize: '12px', fontWeight: 500 }}>{link.type}</span>
-              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#404959', fontSize: '13px', fontWeight: 400 }}>{link.title}</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2M9 3h4m0 0v4m0-4L8 10" stroke="#94A0B4" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <div
+              key={i}
+              className="flex items-center gap-2"
+              style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #E7EAEF' }}
+            >
+              <span
+                style={{
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#E5F3FF',
+                  color: '#0085FF',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                }}
+              >
+                {link.type}
+              </span>
+              <span
+                style={{
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  color: '#404959',
+                  fontSize: '13px',
+                  fontWeight: 400,
+                }}
+              >
+                {link.title}
+              </span>
             </div>
           ))}
         </div>
@@ -207,50 +368,85 @@ function ChatInput({ value, onChange, onSend }: ChatInputProps) {
   const isActive = value.trim().length > 0;
 
   return (
-    <div
-      className="flex-shrink-0"
-      style={{
-        margin: '0 20px 20px',
-        padding: '12px 14px',
-        borderRadius: '12px',
-        border: isActive ? '1px solid #0085FF' : '1px solid #E7EAEF',
-        background: '#FFF',
-        transition: 'border 0.15s',
-      }}
-    >
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-            e.preventDefault();
-            onSend();
-          }
+    <div style={{ padding: '20px 24px', flexShrink: 0 }}>
+      <div
+        className="flex flex-col"
+        style={{
+          padding: '20px 24px',
+          borderRadius: '16px',
+          border: isActive ? '1px solid #1A91FF' : '1px solid #E7EAEF',
+          background: '#F8F9FA',
+          boxShadow: isActive
+            ? '0 4px 12px 0 rgba(23, 146, 255, 0.16)'
+            : '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
+          transition: 'border 0.15s, box-shadow 0.15s',
         }}
-        placeholder="원하는 나라 조건을 자유롭게 입력해보세요. 예: 유럽에서 생활비가 저렴한 도시 추천해줘"
-        rows={1}
-        className="w-full outline-none resize-none bg-transparent"
-        style={{ color: '#15181D', fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 400, lineHeight: '150%', letterSpacing: '-0.28px' }}
-      />
-      <div className="flex justify-between items-center mt-2">
-        {/* 파일 첨부 */}
-        <button type="button" className="flex justify-center items-center" style={{ width: '24px', height: '24px' }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17 9.5l-7.5 7.5A5 5 0 0 1 2.5 10l7-7a3.333 3.333 0 0 1 4.714 4.714L7 15a1.667 1.667 0 0 1-2.357-2.357L11 6.5" stroke="#B8BFCB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        {/* 전송 */}
-        <button
-          type="button"
-          onClick={onSend}
-          disabled={!isActive}
-          className="flex justify-center items-center"
-          style={{ width: '32px', height: '32px', borderRadius: '50%', background: isActive ? '#0085FF' : '#E7EAEF', transition: 'background 0.15s' }}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 13V3M3 8l5-5 5 5" stroke={isActive ? '#FFF' : '#B8BFCB'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+      >
+        {/* Frame 11211 — placeholder 영역 */}
+        <div style={{ height: '48px', display: 'flex', alignItems: 'flex-start' }}>
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                onSend();
+              }
+            }}
+            placeholder="원하는 나라 조건을 자유롭게 입력해보세요. 예: 유럽에서 생활비가 저렴한 도시 추천해줘"
+            rows={2}
+            className="w-full resize-none bg-transparent outline-none"
+            style={{
+              color: '#15181D',
+              fontFamily: 'Pretendard Variable',
+              fontSize: '14px',
+              fontWeight: 400,
+              lineHeight: '150%',
+              letterSpacing: '-0.28px',
+            }}
+          />
+        </div>
+
+        {/* Frame 11209 — 하단 버튼 행 */}
+        <div className="flex items-center justify-between">
+          {/* 파일 첨부 */}
+          <button
+            type="button"
+            className="flex items-center justify-center"
+            style={{ width: '24px', height: '24px' }}
+            aria-label="파일 첨부"
+          >
+            <img src={clipIcon} alt="파일 첨부" style={{ width: '18px', height: '20px' }} />
+          </button>
+
+          {/* 전송 버튼 */}
+          <button
+            type="button"
+            onClick={onSend}
+            disabled={!isActive}
+            className="flex items-center justify-center"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: isActive ? '#0085FF' : '#CFD3DA',
+              border: 'none',
+              transition: 'background 0.15s',
+              cursor: isActive ? 'pointer' : 'default',
+            }}
+            aria-label="전송"
+          >
+            <img
+              src={arrowUpIcon}
+              alt="전송"
+              style={{
+                width: '16px',
+                height: '16px',
+                filter: isActive ? 'none' : 'brightness(0) saturate(100%) invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%) contrast(90%)',
+              }}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );
