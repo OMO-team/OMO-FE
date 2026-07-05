@@ -1,8 +1,8 @@
-import WarningIcon from './WarningIcon';
-import TimelineSuccessIcon from './TimelineSuccessIcon';
-import TimelineOngoingIcon from './TimelineOngoingIcon';
-import TimelineUpcomingIcon from './TimelineUpcomingIcon';
-import TimelineLockIcon from './TimelineLockIcon';
+import WarningIcon from './icons/WarningIcon';
+import TimelineSuccessIcon from './icons/TimelineSuccessIcon';
+import TimelineOngoingIcon from './icons/TimelineOngoingIcon';
+import TimelineUpcomingIcon from './icons/TimelineUpcomingIcon';
+import TimelineLockIcon from './icons/TimelineLockIcon';
 
 export type TimeLineTaskCardStatus = 'success' | 'ongoing' | 'upcoming' | 'lock';
 

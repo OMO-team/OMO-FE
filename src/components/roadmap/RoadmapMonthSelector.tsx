@@ -1,4 +1,4 @@
-import ChevronLeftIcon from './ChevronLeftIcon';
+import ChevronLeftIcon from './icons/ChevronLeftIcon';
 
 type RoadmapMonthSelectorProps = {
   title?: string;

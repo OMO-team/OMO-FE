@@ -1,6 +1,6 @@
-import CalendarIcon from './CalendarIcon';
-import EditIcon from './EditIcon';
-import PlusScheduleIcon from './PlusScheduleIcon';
+import CalendarIcon from './icons/CalendarIcon';
+import EditIcon from './icons/EditIcon';
+import PlusScheduleIcon from './icons/PlusScheduleIcon';
 import RequiredDocumentCard from './RequiredDocumentCard';
 import type { RequiredDocumentData } from '../types/roadmap';
 

@@ -1,4 +1,4 @@
-import MoneyIcon from './MoneyIcon';
+import MoneyIcon from './icons/MoneyIcon';
 import SFillButtonGrayPlan from './SFillButtonGrayPlan';
 import RFillButtonGrayPlan from './RFillButtonGrayPlan';
 

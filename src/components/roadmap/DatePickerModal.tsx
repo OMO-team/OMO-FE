@@ -1,5 +1,5 @@
-import ChevronLeftIcon from './ChevronLeftIcon';
-import ChevronDownIcon from './ChevronDownIcon';
+import ChevronLeftIcon from './icons/ChevronLeftIcon';
+import ChevronDownIcon from './icons/ChevronDownIcon';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);

@@ -1,4 +1,4 @@
-import CalendarIcon from './CalendarIcon';
+import CalendarIcon from './icons/CalendarIcon';
 import RoadmapMonthSelector from './RoadmapMonthSelector';
 
 type RoadmapHeaderProps = {

@@ -1,5 +1,5 @@
-import MinusIcon from './MinusIcon';
-import PlusIcon from './PlusIcon';
+import MinusIcon from './icons/MinusIcon';
+import PlusIcon from './icons/PlusIcon';
 
 type RFillButtonGrayPlanProps = {
   months: number;
