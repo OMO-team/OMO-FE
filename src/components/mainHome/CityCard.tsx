@@ -1,3 +1,4 @@
+import arrowDiagonalIcon from '../../assets/icons/icon-arrow-diagonal.svg';
 import countryCard1 from '../../assets/images/country_card_1.png';
 import countryCard2 from '../../assets/images/country_card_2.png';
 import countryCard3 from '../../assets/images/country_card_3.png';

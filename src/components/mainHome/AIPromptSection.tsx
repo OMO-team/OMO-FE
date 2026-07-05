@@ -1,3 +1,4 @@
+import arrowUpIcon from '../../assets/icons/icon-arrow-up.svg';
 import PromptInput from './PromptInput';
 
 const SUGGESTION_CHIPS = [

@@ -1,3 +1,4 @@
+import arrowUpIcon from '../../assets/icons/icon-arrow-up.svg';
 import { useState } from 'react';
 
 type PromptInputProps = {

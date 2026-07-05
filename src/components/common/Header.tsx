@@ -1,4 +1,8 @@
 import Icon from './Icon';
+import omoLogo from '../../assets/icons/omo-logo.svg';
+import searchIcon from '../../assets/icons/icon-search[24].svg';
+import exploreIcon from '../../assets/icons/icon-explore.svg';
+import homeIcon from '../../assets/icons/icon-home.svg';
 
 const Header = () => {
   return (
@@ -7,14 +11,14 @@ const Header = () => {
       <div className="flex items-center gap-4">
         {/* 로고 */}
         <Icon size="xl">
-          <img src="/src/assets/icons/omo-logo.svg" alt="OMO 로고" />
+          <img src={omoLogo} alt="OMO 로고" />
         </Icon>
 
         {/* 검색창 */}
         <div className="flex items-center w-[418px] h-[40px] pl-5 pr-4 py-2 gap-8 rounded-2 bg-gray-50 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] cursor-pointer">
           <span className="body-03 text-gray-400 flex-1">도시나 키워드로 검색하기</span>
           <Icon size="md">
-            <img src="/src/assets/icons/icon-search.svg" alt="검색" />
+            <img src={searchIcon} alt="검색" />
           </Icon>
         </div>
       </div>
@@ -27,7 +31,7 @@ const Header = () => {
           {/* 탐색 - 선택된 상태 */}
           <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[4px] rounded-2 border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] body-02 text-primary-500">
             <Icon size="sm">
-              <img src="/src/assets/icons/icon-explore.svg" alt="탐색" />
+              <img src={exploreIcon} alt="탐색" />
             </Icon>
             탐색
           </button>
@@ -35,7 +39,7 @@ const Header = () => {
           {/* 내홈 */}
           <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[4px] rounded-2 body-02 text-gray-700">
             <Icon size="sm">
-              <img src="/src/assets/icons/icon-home.svg" alt="내홈" />
+              <img src={homeIcon} alt="내홈" />
             </Icon>
             내 홈
           </button>
