@@ -23,7 +23,7 @@ export default function CloseButton({
 }: CloseButtonProps) {
   const wrapperClass = hasBackground
     ? "w-9 h-9 rounded-full bg-white text-gray-700"
-    : "text-gray-400 hover:text-white";
+    : "text-gray-700"; // 중립 기본값. 어두운 배경 위에서 쓸 땐 호출부 className으로 색 오버라이드
 
   return (
     <button

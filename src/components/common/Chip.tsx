@@ -26,11 +26,14 @@ export default function Chip({
         className={`flex justify-center items-center gap-1.5 px-3 py-1.5 body-03 ${variantClass} ${className}`}
       >
         {label}
-        <CloseButton onClick={onRemove} hasBackground={false} />
+        <CloseButton
+          onClick={onRemove}
+          hasBackground={false}
+          className="text-gray-400 hover:text-white"
+        />
       </span>
     );
   }
-
   if (onClick) {
     return (
       <button
