@@ -117,12 +117,12 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
 
         {/* 콘텐츠 영역 */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex flex-1 flex-col items-center overflow-y-auto">
+          <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto">
             {isEmpty ? (
               /* Empty State — Frame 11240 */
               <div
                 className="flex flex-col items-center"
-                style={{ width: '570px', gap: '60px', paddingTop: '60px' }}
+                style={{ width: '570px', gap: '60px' }}
               >
                 {/* Frame 11205 */}
                 <div className="flex flex-col items-center" style={{ width: '500px', gap: '26px' }}>
