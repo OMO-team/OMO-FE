@@ -1,39 +1,63 @@
-import Icon from './Icon';
+import Icon from "./Icon";
+import profileImage from "../../assets/icons/profile-image.svg";
 
-const Header = () => {
+type ActiveNav = "explore" | "myhome" | null;
+
+interface HeaderProps {
+  isLoggedIn: boolean;
+  userAvatarUrl?: string;
+}
+
+export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
+  // 임시 라우팅 주소
+  const activeNav: ActiveNav =
+    location.pathname === "/explore"
+      ? "explore"
+      : location.pathname === "/myhome"
+        ? "myhome"
+        : null;
+
   return (
-    <header className="flex justify-center items-center w-full px-[188px] pt-6 gap-[216px] bg-white">
+    <header className="flex w-full items-center justify-center gap-[216px] bg-white px-[188px] pt-6">
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
-        {/* 로고 */}
         <Icon size="xl">
           <img src="/src/assets/icons/omo-logo.svg" alt="OMO 로고" />
         </Icon>
 
-        {/* 검색창 */}
-        <div className="flex items-center w-[418px] h-[40px] pl-5 pr-4 py-2 gap-8 rounded-2 bg-gray-50 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] cursor-pointer">
-          <span className="body-03 text-gray-400 flex-1">도시나 키워드로 검색하기</span>
+        <div className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]">
+          <span className="body-03 flex-1 text-gray-400">
+            도시나 키워드로 검색하기
+          </span>
           <Icon size="md">
             <img src="/src/assets/icons/icon-search.svg" alt="검색" />
           </Icon>
         </div>
       </div>
 
-      {/* 오른쪽: 탐색/내홈/로그인/회원가입 */}
+      {/* 오른쪽: 탐색/내홈 + (로그인 상태에 따라 분기) */}
       <div className="flex items-center gap-2">
-
-        {/* 탐색 + 내홈 묶음 */}
         <div className="flex items-center gap-2">
-          {/* 탐색 - 선택된 상태 */}
-          <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[4px] rounded-2 border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] body-02 text-primary-500">
+          <button
+            className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
+              activeNav === "explore"
+                ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
+                : "text-gray-700"
+            }`}
+          >
             <Icon size="sm">
               <img src="/src/assets/icons/icon-explore.svg" alt="탐색" />
             </Icon>
             탐색
           </button>
 
-          {/* 내홈 */}
-          <button className="flex items-center w-[80px] pl-[10px] pr-[12px] py-[10px] gap-[4px] rounded-2 body-02 text-gray-700">
+          <button
+            className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
+              activeNav === "myhome"
+                ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
+                : "text-gray-700"
+            }`}
+          >
             <Icon size="sm">
               <img src="/src/assets/icons/icon-home.svg" alt="내홈" />
             </Icon>
@@ -41,22 +65,25 @@ const Header = () => {
           </button>
         </div>
 
-        {/* 로그인 + 회원가입 묶음 */}
-        <div className="flex items-center gap-1">
-          {/* 로그인 */}
-          <button className="flex items-center px-[18px] py-[10px] rounded-2 body-03 text-gray-700">
-            로그인
+        {isLoggedIn ? (
+          <button type="button" aria-label="내 계정" className="shrink-0">
+            <img
+              src={userAvatarUrl || profileImage}
+              alt=""
+              className="size-10 rounded-full object-cover"
+            />
           </button>
-
-          {/* 회원가입 */}
-          <button className="flex items-center px-[18px] py-[10px] rounded-2 bg-primary-500 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
-            회원가입
-          </button>
-        </div>
-
+        ) : (
+          <div className="flex items-center gap-1">
+            <button className="flex items-center rounded-2 px-[18px] py-2.5 body-03 text-gray-700">
+              로그인
+            </button>
+            <button className="flex items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
+              회원가입
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
-};
-
-export default Header;
+}
