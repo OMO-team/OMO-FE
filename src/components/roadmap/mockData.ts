@@ -75,13 +75,13 @@ export const countryRoadmapGroups: CountryGroupData[] = [
   {
     countryName: '독일',
     cityCount: 4,
-    cities: [berlinCard, { ...berlinCard, cityName: '뮌헨' }],
+    cities: [{ ...berlinCard, isWished: true }, { ...berlinCard, cityName: '뮌헨' }],
   },
   {
     countryName: '프랑스',
     cityCount: 2,
     cities: [
-      { ...berlinCard, cityName: '파리', countryName: '프랑스' },
+      { ...berlinCard, cityName: '파리', countryName: '프랑스', isWished: true },
       { ...berlinCard, cityName: '리옹', countryName: '프랑스' },
     ],
   },

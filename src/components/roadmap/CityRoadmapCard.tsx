@@ -13,6 +13,7 @@ type CityRoadmapCardProps = {
   nextSchedule: string;
   imageUrl: string;
   onViewRoadmap?: () => void;
+  onToggleWish?: () => void;
 };
 
 export default function CityRoadmapCard({
@@ -28,6 +29,7 @@ export default function CityRoadmapCard({
   nextSchedule,
   imageUrl,
   onViewRoadmap,
+  onToggleWish,
 }: CityRoadmapCardProps) {
   return (
     <div className="flex w-[522px] flex-col overflow-hidden rounded-4 bg-white shadow-02">
@@ -42,8 +44,9 @@ export default function CityRoadmapCard({
           </span>
           <button
             type="button"
+            onClick={onToggleWish}
             className={`size-6 rounded-full ${isWished ? 'text-primary-500' : 'text-white'}`}
-            aria-label="위시리스트에 추가"
+            aria-label={isWished ? '위시리스트에서 제거' : '위시리스트에 추가'}
           >
             ♥
           </button>
