@@ -10,7 +10,7 @@ export default function ProgressBar({ label, leftLabel, rightLabel, percent }: P
     <div className="flex flex-col gap-1">      
       {(leftLabel || rightLabel) && (
         <div className="flex justify-between">
-          {label && <p className="Body-04">{label}</p>}
+          {label && <p className="body-04">{label}</p>}
           <span className="label-01 text-gray-500">{leftLabel}</span>
           <span className="label-01 text-gray-500">{rightLabel}</span>
         </div>

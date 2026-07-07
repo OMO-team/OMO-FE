@@ -71,8 +71,8 @@ export default function CityInsightCard({
         {/* 월 평균 생활비 */}
         <div className='mt-[20px]'>
           <div className='flex items-center justify-between mb-[7px]'>
-            <p className='Body-02'>월 평균 생활비</p>
-            <p className='Body-02'>{monthlyCost}</p>
+            <p className='body-02'>월 평균 생활비</p>
+            <p className='body-02'>{monthlyCost}</p>
           </div>
           <ProgressBar percent={costPercent} leftLabel='낮음' rightLabel='높음' />
         </div>
@@ -92,7 +92,7 @@ export default function CityInsightCard({
           {cityInfo.map((info, index) => (
             <div key={index} className='flex flex-col items-center gap-1.5 flex-1'>
               <p className='label-01'>{info.label}</p>
-              <p className='Title-02'>{info.value}</p>
+              <p className='title-02'>{info.value}</p>
             </div>
           ))}
         </div>
