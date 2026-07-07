@@ -97,7 +97,7 @@ export default function CityInsightCard({
           ))}
         </div>
 
-        <CardButtonGroup onCompare={() => {}} onReport={() => {}} />
+        <CardButtonGroup onCompare={onCompare} onReport={onReport} />
       </div>
     </div>
   )
