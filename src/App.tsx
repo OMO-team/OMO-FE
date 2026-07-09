@@ -1,23 +1,14 @@
-import { useState } from "react";
-import { CityReportModal } from "./components/cityReport";
-import {
-  berlinReportData,
-  mockSearchResult,
-} from "./components/cityReport/mockData";
+import Header from './components/common/Header';
+import AIPromptSection from './components/mainHome/AIPromptSection';
 
 function App() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
-    <>
-      <button onClick={() => setIsModalOpen(true)}>리포트 열기</button>
-      <CityReportModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        data={berlinReportData}
-        onSearch={mockSearchResult}
-      />
-    </>
+    <div>
+      <Header />
+      <div className="flex justify-center pt-10">
+        <AIPromptSection />
+      </div>
+    </div>
   );
 }
 
