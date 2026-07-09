@@ -1,2 +1,2 @@
 export { default as CityReportModal } from "./CityReportModal";
-export * from "../types/cityReport";
+export * from "../../types/cityReport";

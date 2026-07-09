@@ -1,5 +1,5 @@
 import ProgressBar from "../common/ProgressBar";
-import type { KeyMetricItem } from "../types/cityReport";
+import type { KeyMetricItem } from "../../types/cityReport";
 
 interface KeyMetricsProps {
   metrics: KeyMetricItem[];
