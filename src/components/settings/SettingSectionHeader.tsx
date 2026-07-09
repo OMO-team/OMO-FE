@@ -1,19 +1,15 @@
-import type { ReactNode } from "react";
-
 interface SettingsSectionHeaderProps {
-  icon: ReactNode;
+  iconSrc: string;
   title: string;
 }
 
 export default function SettingsSectionHeader({
-  icon,
+  iconSrc,
   title,
 }: SettingsSectionHeaderProps) {
   return (
     <div className="flex items-center gap-2 border-b border-gray-300 p-[30px]">
-      <span className="flex size-icon-md items-center justify-center">
-        {icon}
-      </span>
+      <img src={iconSrc} alt="" className="size-icon-md" />
       <p className="title-01 text-gray-900">{title}</p>
     </div>
   );
