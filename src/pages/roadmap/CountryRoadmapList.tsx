@@ -5,6 +5,7 @@ import CountryGroupHeader from '../../components/roadmap/CountryGroupHeader';
 import CityRoadmapCard from '../../components/roadmap/CityRoadmapCard';
 import EmptyStateIcon from '../../components/roadmap/EmptyStateIcon';
 import PageNavigation from '../../components/common/PageNavigation';
+import LargeFillButton from '../../components/common/LargeFillButton';
 import Footer from '../../components/common/Footer';
 import type { CityRoadmapData, CountryGroupData } from '../../components/types/roadmap';
 
@@ -14,6 +15,8 @@ type CountryRoadmapListProps = {
   totalPages: number;
   onPageChange?: (page: number) => void;
   onViewRoadmap?: (city: CityRoadmapData) => void;
+  /** 지정하면 도시가 하나도 선택 안 된 상태(F-501)의 "도시 탐색하러 가기" 버튼 클릭 시 호출 */
+  onExploreCity?: () => void;
 };
 
 export default function CountryRoadmapList({
@@ -22,6 +25,7 @@ export default function CountryRoadmapList({
   totalPages,
   onPageChange,
   onViewRoadmap,
+  onExploreCity,
 }: CountryRoadmapListProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [wishedCityNames, setWishedCityNames] = useState<Set<string>>(
@@ -49,7 +53,18 @@ export default function CountryRoadmapList({
       <div className="mx-auto flex w-full max-w-content flex-col items-start gap-8 px-4 py-10">
         <CategoryTab categories={['나라별 로드맵', '위시 리스트']} activeIndex={activeTab} onChange={setActiveTab} />
 
-        {activeTab === 0 ? (
+        {countryGroups.length === 0 ? (
+          <div className="flex w-full flex-col items-center gap-4 py-20">
+            <EmptyStateIcon />
+            <div className="flex flex-col items-center gap-1">
+              <p className="title-02 text-gray-700">선택된 도시가 없습니다</p>
+              <p className="body-02 text-gray-500">준비를 시작할 도시를 선택해주세요</p>
+            </div>
+            <div className="w-89.5">
+              <LargeFillButton label="도시 탐색하러 가기" onClick={onExploreCity} />
+            </div>
+          </div>
+        ) : activeTab === 0 ? (
           <div className="flex w-full flex-col gap-[50px]">
             {countryGroups.map((group) => (
               <div key={group.countryName} className="flex w-full flex-col gap-3">

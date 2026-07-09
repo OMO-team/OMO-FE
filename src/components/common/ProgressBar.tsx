@@ -27,6 +27,9 @@ export default function ProgressBar({
           <span className="label-01 text-gray-500">{rightLabel}</span>
         </div>
       )}
+      <div className="h-2 overflow-hidden rounded-2 bg-gray-100">
+        <div className={`h-full rounded-2 ${fillClass}`} style={{ width: `${percent}%` }} />
+      </div>
     </div>
   );
 }

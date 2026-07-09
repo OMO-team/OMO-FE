@@ -34,13 +34,7 @@ export default function ComponentPreview() {
 
       <RoadmapTimeline tasks={berlinRoadmapTasks} />
 
-      <BudgetPlanCard
-        {...berlinBudgetPlan}
-        months={months}
-        onIncrementMonths={() => setMonths((m) => m + 1)}
-        onDecrementMonths={() => setMonths((m) => Math.max(0, m - 1))}
-        onSelectMonths={setMonths}
-      />
+      <BudgetPlanCard {...berlinBudgetPlan} months={months} onMonthsChange={setMonths} />
 
       <DocumentTaskDetailModal
         category="비자"

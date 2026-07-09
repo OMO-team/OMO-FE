@@ -56,7 +56,7 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
   const openTask = openTaskIndex !== null ? berlinRoadmapTasks[openTaskIndex] : null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-20">
+    <div className="flex max-h-[90vh] w-[90vw] max-w-content flex-col overflow-y-auto rounded-5 bg-gray-20">
       <Header />
 
       <div className="relative">
@@ -88,9 +88,7 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
         <div className="flex flex-col gap-[30px]">
           <BudgetPlanCard
             months={months}
-            onSelectMonths={setMonths}
-            onIncrementMonths={() => setMonths((m) => m + 1)}
-            onDecrementMonths={() => setMonths((m) => Math.max(0, m - 1))}
+            onMonthsChange={setMonths}
             initialSettlementCost={berlinBudgetPlan.initialSettlementCost}
             monthlyLivingCost={berlinBudgetPlan.monthlyLivingCost}
             stayMonths={berlinBudgetPlan.stayMonths}
@@ -120,6 +118,7 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
             onDateClick={() => setDatePickerTarget('task')}
             onClose={() => setOpenTaskIndex(null)}
             documents={apostilleRequiredDocuments}
+            locked={openTask.status === 'lock'}
           />
         </ModalOverlay>
       )}

@@ -6,25 +6,26 @@ import type {
   CountryGroupData,
 } from '../types/roadmap';
 
+/** 타임라인 순서(F-502 스펙): 여권 → 어학 → 숙소 → 재정 → 비자 → 항공권 */
 export const berlinRoadmapTasks: RoadmapTaskData[] = [
-  { status: 'success', dDay: '000', date: '2026.04.15', category: '비자', title: '비자 신청 서류 준비' },
-  { status: 'success', dDay: '000', date: '2026.04.15', category: '보험', title: '여행자 보험 가입' },
+  { status: 'success', dDay: '000', date: '2026.04.15', category: '여권', title: '여권 발급 신청' },
+  { status: 'success', dDay: '000', date: '2026.04.15', category: '어학', title: '어학 성적 제출' },
   {
     status: 'ongoing',
     dDay: '15',
     date: '2026.04.15',
-    category: '서류',
-    title: '아포스티유 공증',
+    category: '숙소',
+    title: '임시숙소 예약',
     stepsCompleted: 3,
     stepsTotal: 4,
   },
-  { status: 'upcoming', dDay: '30', date: '2026.04.15', category: '항공', title: '항공권 예약' },
-  { status: 'upcoming', dDay: '45', date: '2026.06.21', category: '숙소', title: '임시숙소 예약' },
+  { status: 'upcoming', dDay: '30', date: '2026.04.15', category: '재정', title: '재정증명서 준비' },
+  { status: 'upcoming', dDay: '45', date: '2026.06.21', category: '비자', title: '비자 신청 서류 준비' },
   {
     status: 'lock',
     date: '2026.04.15',
-    category: '은행',
-    title: '현지 계좌 개설',
+    category: '항공권',
+    title: '항공권 예약',
     prerequisiteWarning: '선행 작업 완료 필요',
   },
 ];
