@@ -1,14 +1,14 @@
-import omoLogo from '../../assets/icons/omo-logo.png';
 import snsInstagram from '../../assets/icons/sns-instagram.png';
 import snsYoutube from '../../assets/icons/sns-youtube.png';
-import snsNaverBlog from '../../assets/icons/sns-naver-blog.png';
+import OmoLogoIcon from './OmoLogoIcon';
+import NaverBlogIcon from './NaverBlogIcon';
 
 const SERVICE_LINKS = ['AI스마트 브리핑', '도시별 인사이트 리포트', '내 출국 준비 로드맵'];
 const POLICY_LINKS = ['개인정보처리방침', '이용약관', '공지사항', '문의하기', '제휴문의'];
-const SNS_LINKS = [
+const SNS_LINKS: { label: string; icon?: string }[] = [
   { label: 'Instagram', icon: snsInstagram },
   { label: 'YouTube', icon: snsYoutube },
-  { label: 'Blog', icon: snsNaverBlog },
+  { label: 'Blog' },
 ];
 
 export default function Footer() {
@@ -16,7 +16,7 @@ export default function Footer() {
     <footer className="flex w-full flex-col items-center gap-4 bg-gray-50">
       <div className="mx-auto flex w-full max-w-content flex-col items-center gap-10 px-4">
         <div className="flex w-full flex-col gap-1 pt-[30px]">
-          <img src={omoLogo} alt="OMO" className="h-5 w-auto shrink-0 self-start object-contain" />
+          <OmoLogoIcon className="h-5 w-auto shrink-0 self-start text-primary-600" />
           <p className="body-04 text-primary-600">
             Overseas, Make Obvious! 나에게 맞는 해외 도시 찾기부터 출국 준비까지
           </p>
@@ -57,7 +57,7 @@ export default function Footer() {
                   key={label}
                   className="flex size-[34px] items-center justify-center rounded-full bg-white"
                 >
-                  <img src={icon} alt={label} className="size-6" />
+                  {icon ? <img src={icon} alt={label} className="size-6" /> : <NaverBlogIcon className="size-6" />}
                 </span>
               ))}
             </div>
