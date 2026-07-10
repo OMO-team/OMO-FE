@@ -57,6 +57,7 @@ export const apostilleRequiredDocuments: RequiredDocumentData[] = [
     scanProgressPercent: 80,
     scanDetail: '이미지 분석중 · AI 텍스트 추출 중',
   },
+  { name: '통장 잔고 증명서', subtitle: '파일을 업로드해주세요', status: 'pending', tag: 'OCR 지원' },
 ];
 
 const berlinCard = {

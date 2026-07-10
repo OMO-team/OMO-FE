@@ -25,6 +25,8 @@ type DocumentTaskDetailModalProps = {
   onAddSchedule?: () => void;
   /** true면 선행 작업 미완료 상태 — 서류 목록 대신 안내 문구만 표시하고 체크 불가 */
   locked?: boolean;
+  /** 서류 카드의 "파일 업로드" 버튼 클릭 시 호출 (document.name) — Document Upload Modal을 여는 용도 */
+  onOpenUpload?: (documentName: string) => void;
 };
 
 export default function DocumentTaskDetailModal({
@@ -42,6 +44,7 @@ export default function DocumentTaskDetailModal({
   onTitleChange,
   onAddSchedule,
   locked = false,
+  onOpenUpload,
 }: DocumentTaskDetailModalProps) {
   const progressPercent = totalCount === 0 ? 0 : (completedCount / totalCount) * 100;
 
@@ -121,7 +124,11 @@ export default function DocumentTaskDetailModal({
 
             <div className="flex flex-col gap-3">
               {documents.map((document) => (
-                <RequiredDocumentCard key={document.name} document={document} />
+                <RequiredDocumentCard
+                  key={document.name}
+                  document={document}
+                  onOpenUpload={() => onOpenUpload?.(document.name)}
+                />
               ))}
             </div>
           </div>

@@ -41,7 +41,7 @@ export default function ComponentPreview() {
         title="아포스티유 공증"
         infoBanner="해외에서 한국 학력을 인정받기 위해 필요한 공증 절차입니다. 외교부 영사민원24를 통해 온라인으로 신청할 수 있습니다."
         completedCount={2}
-        totalCount={3}
+        totalCount={4}
         documents={apostilleRequiredDocuments}
         dDayLabel="D-000"
         scheduledDate="2026.04.15"

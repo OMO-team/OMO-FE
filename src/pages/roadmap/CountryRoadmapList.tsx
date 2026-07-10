@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '../../components/common/Header';
 import CategoryTab from '../../components/common/CategoryTab';
 import CountryGroupHeader from '../../components/roadmap/CountryGroupHeader';
@@ -7,7 +7,16 @@ import EmptyStateIcon from '../../components/roadmap/EmptyStateIcon';
 import PageNavigation from '../../components/common/PageNavigation';
 import LargeFillButton from '../../components/common/LargeFillButton';
 import Footer from '../../components/common/Footer';
+import ModalOverlay from '../../components/common/ModalOverlay';
+import DeleteRoadmapModal from '../../components/roadmap/DeleteRoadmapModal';
+import RoadmapRemovedToast from '../../components/roadmap/RoadmapRemovedToast';
 import type { CityRoadmapData, CountryGroupData } from '../../components/types/roadmap';
+
+type RemovedRecord = {
+  city: CityRoadmapData;
+  countryName: string;
+  index: number;
+};
 
 type CountryRoadmapListProps = {
   countryGroups: CountryGroupData[];
@@ -27,6 +36,7 @@ export default function CountryRoadmapList({
   onViewRoadmap,
   onExploreCity,
 }: CountryRoadmapListProps) {
+  const [groups, setGroups] = useState<CountryGroupData[]>(countryGroups);
   const [activeTab, setActiveTab] = useState(0);
   const [wishedCityNames, setWishedCityNames] = useState<Set<string>>(
     () =>
@@ -34,6 +44,14 @@ export default function CountryRoadmapList({
         countryGroups.flatMap((group) => group.cities).filter((city) => city.isWished).map((city) => city.cityName),
       ),
   );
+  const [deleteTarget, setDeleteTarget] = useState<CityRoadmapData | null>(null);
+  const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
+
+  useEffect(() => {
+    if (!removedRecord) return;
+    const timer = setTimeout(() => setRemovedRecord(null), 5000);
+    return () => clearTimeout(timer);
+  }, [removedRecord]);
 
   const toggleWish = (cityName: string) => {
     setWishedCityNames((prev) => {
@@ -44,16 +62,59 @@ export default function CountryRoadmapList({
     });
   };
 
-  const wishedCities = countryGroups.flatMap((group) => group.cities).filter((city) => wishedCityNames.has(city.cityName));
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    const group = groups.find((g) => g.countryName === deleteTarget.countryName);
+    const cityIndex = group?.cities.findIndex((c) => c.cityName === deleteTarget.cityName) ?? -1;
+    if (!group || cityIndex === -1) {
+      setDeleteTarget(null);
+      return;
+    }
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.countryName === deleteTarget.countryName
+          ? { ...g, cities: g.cities.filter((c) => c.cityName !== deleteTarget.cityName), cityCount: g.cityCount - 1 }
+          : g,
+      ),
+    );
+    setRemovedRecord({ city: deleteTarget, countryName: deleteTarget.countryName, index: cityIndex });
+    setDeleteTarget(null);
+  };
+
+  const handleUndo = () => {
+    if (!removedRecord) return;
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.countryName === removedRecord.countryName
+          ? {
+              ...g,
+              cities: [
+                ...g.cities.slice(0, removedRecord.index),
+                removedRecord.city,
+                ...g.cities.slice(removedRecord.index),
+              ],
+              cityCount: g.cityCount + 1,
+            }
+          : g,
+      ),
+    );
+    setRemovedRecord(null);
+  };
+
+  const wishedCities = groups.flatMap((group) => group.cities).filter((city) => wishedCityNames.has(city.cityName));
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Header />
 
-      <div className="mx-auto flex w-full max-w-content flex-col items-start gap-8 px-4 py-10">
+      {removedRecord && (
+        <RoadmapRemovedToast cityName={removedRecord.city.cityName} onUndo={handleUndo} onClose={() => setRemovedRecord(null)} />
+      )}
+
+      <div className="mx-auto flex w-full max-w-content flex-col items-start gap-8 py-10">
         <CategoryTab categories={['나라별 로드맵', '위시 리스트']} activeIndex={activeTab} onChange={setActiveTab} />
 
-        {countryGroups.length === 0 ? (
+        {groups.length === 0 ? (
           <div className="flex w-full flex-col items-center gap-4 py-20">
             <EmptyStateIcon />
             <div className="flex flex-col items-center gap-1">
@@ -66,10 +127,10 @@ export default function CountryRoadmapList({
           </div>
         ) : activeTab === 0 ? (
           <div className="flex w-full flex-col gap-[50px]">
-            {countryGroups.map((group) => (
+            {groups.map((group) => (
               <div key={group.countryName} className="flex w-full flex-col gap-3">
                 <CountryGroupHeader countryName={group.countryName} cityCount={group.cityCount} />
-                <div className="flex w-full items-center gap-5">
+                <div className="flex w-full flex-wrap items-center gap-5">
                   {group.cities.map((city) => (
                     <CityRoadmapCard
                       key={city.cityName}
@@ -77,6 +138,7 @@ export default function CountryRoadmapList({
                       isWished={wishedCityNames.has(city.cityName)}
                       onToggleWish={() => toggleWish(city.cityName)}
                       onViewRoadmap={() => onViewRoadmap?.(city)}
+                      onDelete={() => setDeleteTarget(city)}
                     />
                   ))}
                 </div>
@@ -92,6 +154,7 @@ export default function CountryRoadmapList({
                 isWished
                 onToggleWish={() => toggleWish(city.cityName)}
                 onViewRoadmap={() => onViewRoadmap?.(city)}
+                onDelete={() => setDeleteTarget(city)}
               />
             ))}
           </div>
@@ -108,6 +171,16 @@ export default function CountryRoadmapList({
       </div>
 
       <Footer />
+
+      {deleteTarget && (
+        <ModalOverlay onClose={() => setDeleteTarget(null)}>
+          <DeleteRoadmapModal
+            cityName={deleteTarget.cityName}
+            onCancel={() => setDeleteTarget(null)}
+            onConfirm={handleConfirmDelete}
+          />
+        </ModalOverlay>
+      )}
     </div>
   );
 }

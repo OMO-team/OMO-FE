@@ -7,6 +7,7 @@ import BudgetPlanCard from '../../components/roadmap/BudgetPlanCard';
 import AiReportCard from '../../components/roadmap/AiReportCard';
 import DocumentTaskDetailModal from '../../components/roadmap/DocumentTaskDetailModal';
 import DatePickerModal from '../../components/roadmap/DatePickerModal';
+import DocumentUploadModal from '../../components/roadmap/DocumentUploadModal';
 import ModalOverlay from '../../components/common/ModalOverlay';
 import Footer from '../../components/common/Footer';
 import {
@@ -16,7 +17,7 @@ import {
   apostilleRequiredDocuments,
   countryRoadmapGroups,
 } from '../../components/roadmap/mockData';
-import type { CityRoadmapData } from '../../components/types/roadmap';
+import type { CityRoadmapData, UploadedFileItem } from '../../components/types/roadmap';
 
 const APOSTILLE_INFO_BANNER =
   '해외에서 한국 학력을 인정받기 위해 필요한 공증 절차입니다. 외교부 영사민원24를 통해 온라인으로 신청할 수 있습니다.';
@@ -35,6 +36,25 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
   const [openTaskIndex, setOpenTaskIndex] = useState<number | null>(null);
   const [departureDate, setDepartureDate] = useState<string | null>(null);
   const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'task' | null>(null);
+  const [uploadTargetDocument, setUploadTargetDocument] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+
+  const handleSelectFiles = (fileList: FileList) => {
+    const newItems: UploadedFileItem[] = Array.from(fileList).map((file) => ({
+      name: file.name,
+      uploadedSizeKB: 0,
+      totalSizeKB: Math.max(1, Math.round(file.size / 1024)),
+      status: 'uploading',
+    }));
+    setUploadedFiles((prev) => [...prev, ...newItems]);
+    newItems.forEach((item) => {
+      setTimeout(() => {
+        setUploadedFiles((prev) =>
+          prev.map((f) => (f.name === item.name ? { ...f, uploadedSizeKB: f.totalSizeKB, status: 'completed' } : f)),
+        );
+      }, 1500);
+    });
+  };
 
   const handlePrevMonth = () => {
     if (month === 1) {
@@ -56,7 +76,7 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
   const openTask = openTaskIndex !== null ? berlinRoadmapTasks[openTaskIndex] : null;
 
   return (
-    <div className="flex max-h-[90vh] w-[90vw] max-w-content flex-col overflow-y-auto rounded-5 bg-gray-20">
+    <div className="flex min-h-screen flex-col bg-gray-20">
       <Header />
 
       <div className="relative">
@@ -112,13 +132,29 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
             title={openTask.title}
             infoBanner={APOSTILLE_INFO_BANNER}
             completedCount={2}
-            totalCount={3}
+            totalCount={4}
             dDayLabel={openTask.dDay ? `D-${openTask.dDay}` : undefined}
             scheduledDate={openTask.date}
             onDateClick={() => setDatePickerTarget('task')}
             onClose={() => setOpenTaskIndex(null)}
             documents={apostilleRequiredDocuments}
             locked={openTask.status === 'lock'}
+            onOpenUpload={(name) => {
+              setUploadedFiles([]);
+              setUploadTargetDocument(name);
+            }}
+          />
+        </ModalOverlay>
+      )}
+
+      {uploadTargetDocument && (
+        <ModalOverlay zIndex={60} onClose={() => setUploadTargetDocument(null)}>
+          <DocumentUploadModal
+            files={uploadedFiles}
+            onSelectFiles={handleSelectFiles}
+            onRemoveFile={(name) => setUploadedFiles((prev) => prev.filter((f) => f.name !== name))}
+            onComplete={() => setUploadTargetDocument(null)}
+            onClose={() => setUploadTargetDocument(null)}
           />
         </ModalOverlay>
       )}

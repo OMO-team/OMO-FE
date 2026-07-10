@@ -2,6 +2,7 @@ import LargeFillButton from '../common/LargeFillButton';
 import StarIcon from '../common/StarIcon';
 import HeartIcon from '../common/HeartIcon';
 import ProgressBar from '../common/ProgressBar';
+import TrashIcon from './icons/TrashIcon';
 
 type CityRoadmapCardProps = {
   cityName: string;
@@ -17,6 +18,7 @@ type CityRoadmapCardProps = {
   imageUrl: string;
   onViewRoadmap?: () => void;
   onToggleWish?: () => void;
+  onDelete?: () => void;
 };
 
 export default function CityRoadmapCard({
@@ -33,6 +35,7 @@ export default function CityRoadmapCard({
   imageUrl,
   onViewRoadmap,
   onToggleWish,
+  onDelete,
 }: CityRoadmapCardProps) {
   return (
     <div className="flex w-[522px] flex-col overflow-hidden rounded-4 bg-white shadow-02">
@@ -45,14 +48,24 @@ export default function CityRoadmapCard({
           <span className="body-02 flex items-center gap-0.5 rounded-2 bg-black/30 px-3 py-1 text-white">
             <StarIcon size={16} className="text-white" /> {rating}
           </span>
-          <button
-            type="button"
-            onClick={onToggleWish}
-            className="size-6"
-            aria-label={isWished ? '위시리스트에서 제거' : '위시리스트에 추가'}
-          >
-            <HeartIcon isWished={isWished} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onToggleWish}
+              className="size-6"
+              aria-label={isWished ? '위시리스트에서 제거' : '위시리스트에 추가'}
+            >
+              <HeartIcon isWished={isWished} />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              className="size-6 text-white"
+              aria-label="로드맵 삭제"
+            >
+              <TrashIcon className="size-6" />
+            </button>
+          </div>
         </div>
       </div>
 
