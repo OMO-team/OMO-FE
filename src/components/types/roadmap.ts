@@ -29,11 +29,18 @@ export interface AiReportData {
 export interface RequiredDocumentData {
   name: string;
   subtitle: string;
-  status: 'done' | 'processing';
+  status: 'done' | 'processing' | 'pending';
   tag?: string;
   scanStatus?: string;
   scanProgressPercent?: number;
   scanDetail?: string;
+}
+
+export interface UploadedFileItem {
+  name: string;
+  uploadedSizeKB: number;
+  totalSizeKB: number;
+  status: 'uploading' | 'completed';
 }
 
 export interface CityRoadmapData {
@@ -42,6 +49,7 @@ export interface CityRoadmapData {
   progressPercent: number;
   description: string;
   rating: number;
+  isWished?: boolean;
   costProgressPercent: number;
   completedSteps: number;
   totalSteps: number;

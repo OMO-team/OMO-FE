@@ -5,7 +5,6 @@ type NaverBlogIconProps = {
 export default function NaverBlogIcon({ className }: NaverBlogIconProps) {
   return (
     <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <rect width="34" height="34" rx="17" fill="white" />
       <path d="M10.8003 15.3798C10.3817 15.3798 10.0423 15.7125 10.0423 16.1227C10.0423 16.5329 10.3817 16.8656 10.8003 16.8656C11.2188 16.8656 11.5583 16.5329 11.5583 16.1227C11.5583 15.7125 11.2188 15.3798 10.8003 15.3798Z" fill="#62BC48" />
       <path d="M18.2836 15.3022C17.8337 15.3022 17.4683 15.6603 17.4683 16.1013C17.4683 16.5422 17.8337 16.9017 18.2836 16.9017C18.7335 16.9017 19.0988 16.5436 19.0988 16.1013C19.0988 15.659 18.7335 15.3022 18.2836 15.3022Z" fill="#62BC48" />
       <path
