@@ -1,4 +1,4 @@
-import ProgressBar from "../common/ProgressBar";
+import ProgressBar from "../../../shared/components/ProgressBar";
 
 interface CompareMetricValueProps {
   value: string; // "180만원" 또는 "85%"

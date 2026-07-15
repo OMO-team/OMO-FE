@@ -1,5 +1,5 @@
-import CloseButton from "../common/CloseButton";
-import StarIcon from "../common/StarIcon";
+import CloseButton from "../../../shared/components/CloseButton";
+import StarIcon from "../../../shared/components/StarIcon";
 
 interface CityReportHeaderProps {
   ratingBadge: number;

@@ -1,4 +1,4 @@
-import StarIcon from "../common/StarIcon";
+import StarIcon from "../../../shared/components/StarIcon";
 
 interface ReviewCardProps {
   authorInitial: string;

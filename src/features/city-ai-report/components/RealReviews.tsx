@@ -1,5 +1,5 @@
 import ReviewCard from "./ReviewCard";
-import type { ReviewItem } from "../../types/cityReport";
+import type { ReviewItem } from "../../../shared/types/cityReport";
 
 interface RealReviewsProps {
   reviews: ReviewItem[];

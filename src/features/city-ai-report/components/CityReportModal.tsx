@@ -9,7 +9,7 @@ import RealReviews from "./RealReviews";
 import type {
   AISearchResultData,
   CityReportData,
-} from "../../types/cityReport";
+} from "../../../shared/types/cityReport";
 
 interface CityReportModalProps {
   isOpen: boolean;

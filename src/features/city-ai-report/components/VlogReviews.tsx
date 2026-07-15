@@ -1,5 +1,5 @@
 import ThumbnailVideo from "./ThumbnailVideo";
-import type { VlogItem } from "../../types/cityReport";
+import type { VlogItem } from "../../../shared/types/cityReport";
 
 interface VlogReviewsProps {
   vlogs: VlogItem[];
