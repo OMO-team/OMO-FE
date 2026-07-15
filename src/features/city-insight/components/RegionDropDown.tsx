@@ -8,9 +8,10 @@ import { REGION_DATA } from '../mocks/regionData'
 
 interface RegionDropDownProps {
   onSelect: (country: string) => void
+  onReset: () => void
 }
 
-export default function RegionDropDown({ onSelect }:RegionDropDownProps) {
+export default function RegionDropDown({ onSelect, onReset }:RegionDropDownProps) {
     const[isOpen, setIsOpen] = useState(false)
     const [openRegionIds, setOpenRegionIds] = useState<number[]>([])
     const [checkedCountries, setCheckedCountries] = useState<string[]>([])
@@ -73,7 +74,7 @@ export default function RegionDropDown({ onSelect }:RegionDropDownProps) {
                   })}
                 </div>
                 <div className="absolute w-full h-10 bg-white justify-center  pb-4 bottom-4 flex gap-1">
-                  <button className="w-[110px] h-10 bg-gray-50 text-gray-400 rounded-[8px]">초기화</button>
+                  <button onClick={() => { setCheckedCountries([]); onReset() }} className="w-[110px] h-10 bg-gray-50 text-gray-400 rounded-[8px]">초기화</button>
                   <button onClick={() => { checkedCountries.forEach(country => onSelect(country)); setIsOpen(false) }} className="w-[170px] h-10 bg-blue-500 text-white rounded-[8px]">적용하기</button>
                 </div>
             </div>
