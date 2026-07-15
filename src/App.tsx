@@ -4,7 +4,7 @@ import AIPromptSection from "./features/home/components/AIPromptSection";
 function App() {
   return (
     <div>
-      <Header />
+      <Header isLoggedIn={false} />
       <div className="flex justify-center pt-10">
         <AIPromptSection />
       </div>

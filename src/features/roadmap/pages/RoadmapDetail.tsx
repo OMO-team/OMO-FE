@@ -77,7 +77,7 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
-      <Header />
+      <Header isLoggedIn={false} />
 
       <div className="relative">
         {onBack && (
