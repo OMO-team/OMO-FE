@@ -18,7 +18,7 @@ export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
         : null;
 
   return (
-    <header className="flex w-full items-center justify-center gap-[216px] bg-white px-[188px] pt-6">
+    <header className="flex w-full items-center justify-center gap-[216px] px-[188px] pt-6">
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <Icon size="xl">
