@@ -1,3 +1,4 @@
+import { twMerge } from "tailwind-merge";
 import CloseButton from "./CloseButton";
 
 interface ChipProps {
@@ -23,7 +24,7 @@ export default function Chip({
   if (onRemove) {
     return (
       <span
-        className={`flex justify-center items-center gap-1.5 px-3 py-1.5 body-03 ${variantClass} ${className}`}
+        className={twMerge(`flex justify-center items-center gap-1.5 px-3 py-1.5 body-03 ${variantClass}`, className)}
       >
         {label}
         <CloseButton
@@ -39,7 +40,7 @@ export default function Chip({
       <button
         type="button"
         onClick={onClick}
-        className={`flex justify-center items-center gap-1 px-3 py-1.5 ${variantClass} body-03 ${className}`}
+        className={twMerge(`flex justify-center items-center gap-1 px-3 py-1.5 ${variantClass} body-03`, className)}
       >
         {label}
       </button>
@@ -48,7 +49,7 @@ export default function Chip({
 
   return (
     <div
-      className={`flex justify-center items-center gap-1 px-3 py-1.5 ${variantClass} body-03 ${className}`}
+      className={twMerge(`flex justify-center items-center gap-1 px-3 py-1.5 ${variantClass} body-03`, className)}
     >
       {label}
     </div>
