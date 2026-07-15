@@ -1,3 +1,9 @@
+import LargeFillButton from '../common/LargeFillButton';
+import StarIcon from '../common/StarIcon';
+import HeartIcon from '../common/HeartIcon';
+import ProgressBar from '../common/ProgressBar';
+import TrashIcon from './icons/TrashIcon';
+
 type CityRoadmapCardProps = {
   cityName: string;
   countryName: string;
@@ -11,6 +17,8 @@ type CityRoadmapCardProps = {
   nextSchedule: string;
   imageUrl: string;
   onViewRoadmap?: () => void;
+  onToggleWish?: () => void;
+  onDelete?: () => void;
 };
 
 export default function CityRoadmapCard({
@@ -26,6 +34,8 @@ export default function CityRoadmapCard({
   nextSchedule,
   imageUrl,
   onViewRoadmap,
+  onToggleWish,
+  onDelete,
 }: CityRoadmapCardProps) {
   return (
     <div className="flex w-[522px] flex-col overflow-hidden rounded-4 bg-white shadow-02">
@@ -36,15 +46,26 @@ export default function CityRoadmapCard({
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
         <div className="relative flex items-center justify-between p-6">
           <span className="body-02 flex items-center gap-0.5 rounded-2 bg-black/30 px-3 py-1 text-white">
-            ★ {rating}
+            <StarIcon size={16} className="text-white" /> {rating}
           </span>
-          <button
-            type="button"
-            className={`size-6 rounded-full ${isWished ? 'text-primary-500' : 'text-white'}`}
-            aria-label="위시리스트에 추가"
-          >
-            ♥
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onToggleWish}
+              className="size-6"
+              aria-label={isWished ? '위시리스트에서 제거' : '위시리스트에 추가'}
+            >
+              <HeartIcon isWished={isWished} />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              className="size-6 text-white"
+              aria-label="로드맵 삭제"
+            >
+              <TrashIcon className="size-6" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -60,15 +81,7 @@ export default function CityRoadmapCard({
           <p className="label-01 text-gray-500">{description}</p>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="title-05 flex justify-between text-gray-800">
-            <span>준비 진행률</span>
-            <span className="title-01 text-primary-500">{costProgressPercent}%</span>
-          </div>
-          <div className="h-1 overflow-hidden rounded-2 bg-gray-100">
-            <div className="h-full rounded-2 bg-primary-500" style={{ width: `${costProgressPercent}%` }} />
-          </div>
-        </div>
+        <ProgressBar percent={costProgressPercent} leftLabel="준비 진행률" rightLabel={`${costProgressPercent}%`} />
 
         <div className="body-04 flex items-center justify-between text-gray-600">
           <span>
@@ -77,13 +90,7 @@ export default function CityRoadmapCard({
           <span className="title-03 text-primary-600">다음 일정 : {nextSchedule}</span>
         </div>
 
-        <button
-          type="button"
-          className="title-02 rounded-2 bg-primary-500 py-[13px] text-white"
-          onClick={onViewRoadmap}
-        >
-          로드맵 보기
-        </button>
+        <LargeFillButton label="로드맵 보기" onClick={onViewRoadmap} />
       </div>
     </div>
   );

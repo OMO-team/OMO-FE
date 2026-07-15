@@ -20,18 +20,15 @@ export default function ProgressBar({
 
   return (
     <div className="flex flex-col self-stretch gap-1">
+      {label && <p className="body-04">{label}</p>}
       {(leftLabel || rightLabel) && (
         <div className="flex justify-between">
-          {label && <p className="Body-04">{label}</p>}
           <span className="label-01 text-gray-500">{leftLabel}</span>
           <span className="label-01 text-gray-500">{rightLabel}</span>
         </div>
       )}
       <div className="h-2 overflow-hidden rounded-2 bg-gray-100">
-        <div
-          className={`h-full rounded-2 ${fillClass}`}
-          style={{ width: `${percent}%` }}
-        />
+        <div className={`h-full rounded-2 ${fillClass}`} style={{ width: `${percent}%` }} />
       </div>
     </div>
   );

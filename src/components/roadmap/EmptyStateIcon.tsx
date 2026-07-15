@@ -1,14 +1,13 @@
-import bagIcon from '../../assets/icons/empty-state-bag.png';
+import BagIcon from './icons/BagIcon';
 
 type EmptyStateIconProps = {
-  iconSrc?: string;
-  alt?: string;
+  className?: string;
 };
 
-export default function EmptyStateIcon({ iconSrc = bagIcon, alt = '' }: EmptyStateIconProps) {
+export default function EmptyStateIcon({ className }: EmptyStateIconProps) {
   return (
     <div className="flex size-[70px] items-center justify-center overflow-hidden rounded-full bg-gray-50 p-3.5">
-      <img src={iconSrc} alt={alt} className="size-icon-xl" />
+      <BagIcon className={`size-icon-xl text-gray-400 ${className ?? ''}`} />
     </div>
   );
 }
