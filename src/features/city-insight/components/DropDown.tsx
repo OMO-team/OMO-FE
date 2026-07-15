@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import dropDownIcon from '../../../assets/icons/dropdown-icon.svg'
+import ChevronDownIcon from '../../../shared/components/ChevronDownIcon';
 
 interface DropDownProps {
     title: string;
@@ -21,10 +21,11 @@ export default function DropDown({ title, options, onClick }: DropDownProps) {
         onClick(next)
     }
   return (
+    <>
     <div className='relative'>
         <div className='bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2' onClick={handleOpen}>
-            <p className='text-gray-600 body-03'>{title}</p>
-            <img src={dropDownIcon} alt="dropdown icon" className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <p className='text-gray-600 body-03 cursor-pointer'>{title}</p>
+            <ChevronDownIcon className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
         {isOpen && (
             <div className='absolute top-10 z-1 bg-white w-32.5 flex flex-col justify-center items-center border border-gray-100 rounded-2 px-2 py-3 shadow-01'>
@@ -39,5 +40,6 @@ export default function DropDown({ title, options, onClick }: DropDownProps) {
             </div>
         )}
     </div>
+    </>
   )
 }
