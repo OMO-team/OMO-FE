@@ -1,5 +1,5 @@
-import Header from './components/common/Header';
-import AIPromptSection from './components/mainHome/AIPromptSection';
+import Header from "./components/common/Header";
+import AIPromptSection from "./components/mainHome/AIPromptSection";
 
 function App() {
   return (
