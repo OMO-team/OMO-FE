@@ -42,7 +42,7 @@
 | Language | TypeScript |
 | Build Tool | Vite |
 | Styling | Tailwind CSS v4 |
-| 상태 관리 | Zustand |
+| 상태 관리 | Zustand, TanStack Query |
 | Linter | ESLint |
 | Formatter | Prettier |
 
