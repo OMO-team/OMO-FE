@@ -3,6 +3,7 @@ import thinkingIcon from '../../../assets/icons/icon-thinking.svg';
 import checkConditionIcon from '../../../assets/icons/icon-check-condition.svg';
 import chevronRightBlueIcon from '../../../assets/icons/icon-chevron-right-blue.svg';
 import externalLinkIcon from '../../../assets/icons/icon-external-link.svg';
+import UserChatBubble from './UserChatBubble';
 
 const MOCK_THINKING_SECONDS = 21;
 const MOCK_USER_MESSAGE = '영어만으로 생활이 가능하면서 치안이 우수한 도시를 추천해줘';
@@ -80,31 +81,7 @@ export default function AIChatThread() {
           }}
         >
           {/* User chat 버블 */}
-          <div
-            style={{
-              display: 'flex',
-              padding: '10px 20px',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '4px',
-              borderRadius: '200px',
-              background: '#E7EAEF',
-            }}
-          >
-            <span
-              style={{
-                color: '#15181D',
-                textAlign: 'center',
-                fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                fontSize: '14px',
-                fontWeight: 400,
-                lineHeight: '150%',
-                letterSpacing: '-0.28px',
-              }}
-            >
-              {MOCK_USER_MESSAGE}
-            </span>
-          </div>
+          <UserChatBubble text={MOCK_USER_MESSAGE} />
         </div>
 
         {/* Frame 11235 — AI 응답 영역 */}
