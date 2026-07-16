@@ -19,43 +19,42 @@ export default function SearchModal({
 
   return (
     <div
-      className="flex flex-col items-center w-[1440px] bg-white"
-      style={{ height: '496px' }}
+      className="flex h-[496px] w-[1440px] flex-col items-center bg-white"
       role="dialog"
       aria-modal="true"
     >
       {/* L_Search Header */}
-      <div className="flex flex-col items-center w-[1440px]">
-        <div className="flex w-[1064px] px-5 pt-9 pb-6 justify-between items-center">
-          <div className="flex items-center gap-[57px] flex-1">
-            <div className="flex justify-center items-center w-6 h-6 flex-shrink-0">
-              <img src={searchIcon} alt="검색" className="w-[18px] h-[18px]" />
+      <div className="flex w-[1440px] flex-col items-center">
+        <div className="flex w-[1064px] items-center justify-between px-5 pb-6 pt-9">
+          <div className="flex flex-1 items-center gap-[57px]">
+            <div className="flex size-6 shrink-0 items-center justify-center">
+              <img src={searchIcon} alt="검색" className="size-[18px]" />
             </div>
             <input
               type="text"
-              className="flex-1 outline-none text-gray-900 placeholder:text-gray-500 bg-transparent body-02"
+              className="body-02 flex-1 bg-transparent outline-none placeholder:text-gray-500"
               placeholder="도시나 키워드로 검색하기"
             />
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex justify-center items-center w-6 h-6 flex-shrink-0"
+            className="flex size-6 shrink-0 items-center justify-center"
           >
-            <img src={closeIcon} alt="닫기" className="w-[14px] h-[14px]" />
+            <img src={closeIcon} alt="닫기" className="size-[14px]" />
           </button>
         </div>
-        <div className="w-[1440px] h-px bg-gray-100" />
+        <div className="h-px w-[1440px] bg-gray-100" />
       </div>
 
       {/* L_Search Content */}
-      <div className="flex flex-col items-center w-[1064px]">
-        <div className="flex pt-10 px-5 pb-0 justify-between items-center self-stretch">
+      <div className="flex w-[1064px] flex-col items-center">
+        <div className="flex items-center justify-between self-stretch px-5 pb-0 pt-10">
           <span className="heading-06 text-gray-900">최근 검색어</span>
           {hasSearches && (
             <button type="button" onClick={onClearAll} className="flex items-center gap-1">
-              <div className="flex justify-center items-center w-6 h-6">
-                <img src={trashIcon} alt="삭제" className="flex-shrink-0" style={{ width: '17.412px', height: '18.5px' }} />
+              <div className="flex size-6 items-center justify-center">
+                <img src={trashIcon} alt="삭제" className="h-[18px] w-[17px] shrink-0" />
               </div>
               <span className="body-03 text-gray-500">전체 삭제</span>
             </button>
@@ -63,20 +62,18 @@ export default function SearchModal({
         </div>
 
         {hasSearches ? (
-          <div className="flex flex-col items-start w-full mt-4">
+          <div className="mt-4 flex w-full flex-col items-start">
             {recentSearches.map((query, i) => (
-              <div key={i} className="flex w-[1064px] px-5 py-5 items-center gap-1">
+              <div key={i} className="flex w-[1064px] items-center gap-1 px-5 py-5">
                 <span
-                  className={`flex-1 overflow-hidden body-02 ${i === 0 ? 'text-gray-600' : 'text-gray-700'}`}
-                  style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 1, textOverflow: 'ellipsis' }}
+                  className={`body-02 line-clamp-1 flex-1 overflow-hidden text-ellipsis ${i === 0 ? 'text-gray-600' : 'text-gray-700'}`}
                 >
                   {query}
                 </span>
                 <button
                   type="button"
                   onClick={() => onRemove?.(i)}
-                  className="flex-shrink-0"
-                  style={{ width: '16px', height: '16px' }}
+                  className="size-4 shrink-0"
                 >
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 1l8 8M9 1L1 9" stroke="#6B7A94" strokeWidth="1" strokeLinecap="round" />
@@ -86,7 +83,7 @@ export default function SearchModal({
             ))}
           </div>
         ) : (
-          <p className="self-stretch text-center mt-[60px] body-01 text-gray-500">
+          <p className="body-01 mt-[60px] self-stretch text-center text-gray-500">
             최근 검색어가 없습니다
           </p>
         )}
