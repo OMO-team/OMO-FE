@@ -1,4 +1,4 @@
-import ChevronLeftIcon from './icons/ChevronLeftIcon';
+import ChevronLeftIcon from '../../../shared/components/ChevronLeftIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -59,7 +59,7 @@ export default function DatePickerModal({
         </button>
         <button
           type="button"
-          className="flex size-icon-lg items-center justify-center rounded-full text-gray-700"
+          className="flex size-icon-lg items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-50"
           onClick={onClose}
           aria-label="닫기"
         >
@@ -86,8 +86,10 @@ export default function DatePickerModal({
                   type="button"
                   disabled={day === null}
                   onClick={() => day && onSelectDay?.(day)}
-                  className={`body-04 flex size-[30px] items-center justify-center rounded-full ${
-                    day === selectedDay ? 'bg-primary-100 text-primary-600' : 'text-gray-700'
+                  className={`body-04 flex size-[30px] items-center justify-center rounded-full transition-colors ${
+                    day === selectedDay
+                      ? 'bg-primary-100 text-primary-600'
+                      : 'text-gray-700 not-disabled:hover:bg-gray-50'
                   }`}
                 >
                   {day}
@@ -99,11 +101,21 @@ export default function DatePickerModal({
       ) : (
         <div className="flex flex-col items-center gap-10">
           <div className="flex items-center gap-2">
-            <button type="button" onClick={onYearPrev} aria-label="이전 해">
+            <button
+              type="button"
+              onClick={onYearPrev}
+              aria-label="이전 해"
+              className="rounded-full p-1 text-gray-700 transition-colors hover:bg-gray-50"
+            >
               <ChevronLeftIcon className="size-icon-sm" />
             </button>
             <span className="heading-05 text-primary-500">{year}년</span>
-            <button type="button" onClick={onYearNext} aria-label="다음 해">
+            <button
+              type="button"
+              onClick={onYearNext}
+              aria-label="다음 해"
+              className="rounded-full p-1 text-gray-700 transition-colors hover:bg-gray-50"
+            >
               <ChevronLeftIcon className="size-icon-sm rotate-180" />
             </button>
           </div>
@@ -113,8 +125,8 @@ export default function DatePickerModal({
                 key={m}
                 type="button"
                 onClick={() => onSelectMonth?.(m)}
-                className={`body-04 flex h-[34px] w-[66px] items-center justify-center rounded-full shadow-02 ${
-                  m === selectedMonth ? 'bg-primary-500 text-white' : 'bg-gray-50 text-gray-600'
+                className={`body-04 flex h-[34px] w-[66px] items-center justify-center rounded-full shadow-02 transition-colors ${
+                  m === selectedMonth ? 'bg-primary-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 {String(m).padStart(2, '0')}월

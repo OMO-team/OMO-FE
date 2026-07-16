@@ -8,7 +8,7 @@ import SettingsSectionHeader from "../components/SettingSectionHeader";
 import SettingActionItem from "../components/SettingActionItem";
 import ToggleSwitch from "../components/ToggleSwitch";
 import LogoutButton from "../components/LogoutButton";
-import ConfirmActionModal from "../components/ConfirmActionModal";
+import ConfirmActionModal from "../../../shared/components/ConfirmActionModal";
 
 import bellIcon from "../../../assets/icons/bell.svg";
 import settingIcon from "../../../assets/icons/setting.svg";

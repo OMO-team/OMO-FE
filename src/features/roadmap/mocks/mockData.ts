@@ -13,17 +13,17 @@ export const berlinRoadmapTasks: RoadmapTaskData[] = [
   {
     status: 'ongoing',
     dDay: '15',
-    date: '2026.04.15',
+    date: '2026.08.05',
     category: '숙소',
     title: '임시숙소 예약',
     stepsCompleted: 3,
     stepsTotal: 4,
   },
   { status: 'upcoming', dDay: '30', date: '2026.04.15', category: '재정', title: '재정증명서 준비' },
-  { status: 'upcoming', dDay: '45', date: '2026.06.21', category: '비자', title: '비자 신청 서류 준비' },
+  { status: 'upcoming', dDay: '45', date: '2026.08.21', category: '비자', title: '비자 신청 서류 준비' },
   {
     status: 'lock',
-    date: '2026.04.15',
+    date: '2026.09.01',
     category: '항공권',
     title: '항공권 예약',
     prerequisiteWarning: '선행 작업 완료 필요',
@@ -46,8 +46,14 @@ export const berlinAiReport: AiReportData = {
 };
 
 export const apostilleRequiredDocuments: RequiredDocumentData[] = [
-  { name: '졸업 증명서', subtitle: '파싱 완료', status: 'done' },
-  { name: '성적 증명서', subtitle: '파싱 완료', status: 'done' },
+  {
+    name: '졸업 증명서',
+    subtitle: '파싱 완료',
+    status: 'done',
+    tag: 'OCR 지원',
+    uploadedFiles: ['졸업증명서_스캔본.pdf', '졸업증명서_원본.jpg'],
+  },
+  { name: '성적 증명서', subtitle: '파싱 완료', status: 'done', uploadedFiles: ['성적증명서.pdf'] },
   {
     name: '재학 증명서',
     subtitle: '파싱 완료',
@@ -85,6 +91,27 @@ export const countryRoadmapGroups: CountryGroupData[] = [
     cities: [
       { ...berlinCard, cityName: '파리', countryName: '프랑스', isWished: true },
       { ...berlinCard, cityName: '리옹', countryName: '프랑스' },
+    ],
+  },
+  {
+    countryName: '스페인',
+    cityCount: 2,
+    cities: [
+      { ...berlinCard, cityName: '마드리드', countryName: '스페인' },
+      { ...berlinCard, cityName: '바르셀로나', countryName: '스페인' },
+    ],
+  },
+  {
+    countryName: '이탈리아',
+    cityCount: 1,
+    cities: [{ ...berlinCard, cityName: '로마', countryName: '이탈리아' }],
+  },
+  {
+    countryName: '영국',
+    cityCount: 2,
+    cities: [
+      { ...berlinCard, cityName: '런던', countryName: '영국' },
+      { ...berlinCard, cityName: '맨체스터', countryName: '영국' },
     ],
   },
 ];

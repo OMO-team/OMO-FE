@@ -34,13 +34,15 @@ export interface RequiredDocumentData {
   scanStatus?: string;
   scanProgressPercent?: number;
   scanDetail?: string;
+  /** done 상태일 때 업로드 완료된 파일명 목록 */
+  uploadedFiles?: string[];
 }
 
 export interface UploadedFileItem {
   name: string;
-  uploadedSizeKB: number;
-  totalSizeKB: number;
-  status: 'uploading' | 'completed';
+  uploadedSizeMB: number;
+  totalSizeMB: number;
+  status: 'uploading' | 'completed' | 'error';
 }
 
 export interface CityRoadmapData {

@@ -6,9 +6,14 @@ type ActiveNav = "explore" | "myhome" | null;
 interface HeaderProps {
   isLoggedIn: boolean;
   userAvatarUrl?: string;
+  /** 이미지/사진 위에 겹쳐지는 히어로 배너 등에서 사용, 로고·아이콘·텍스트를 흰색으로 전환 */
+  variant?: "default" | "overlay";
 }
 
-export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
+export default function Header({ isLoggedIn, userAvatarUrl, variant = "default" }: HeaderProps) {
+  const isOverlay = variant === "overlay";
+  const iconFilter = isOverlay ? "brightness-0 invert" : "";
+
   // 임시 라우팅 주소
   const activeNav: ActiveNav =
     location.pathname === "/explore"
@@ -22,7 +27,7 @@ export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <Icon size="xl">
-          <img src="/src/assets/icons/omo-logo.svg" alt="OMO 로고" />
+          <img src="/src/assets/icons/omo-logo.svg" alt="OMO 로고" className={iconFilter} />
         </Icon>
 
         <div className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]">
@@ -42,11 +47,17 @@ export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
             className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
               activeNav === "explore"
                 ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
-                : "text-gray-700"
+                : isOverlay
+                  ? "text-white"
+                  : "text-gray-700"
             }`}
           >
             <Icon size="sm">
-              <img src="/src/assets/icons/icon-explore.svg" alt="탐색" />
+              <img
+                src="/src/assets/icons/icon-explore.svg"
+                alt="탐색"
+                className={activeNav === "explore" ? "" : iconFilter}
+              />
             </Icon>
             탐색
           </button>
@@ -55,11 +66,17 @@ export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
             className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
               activeNav === "myhome"
                 ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
-                : "text-gray-700"
+                : isOverlay
+                  ? "text-white"
+                  : "text-gray-700"
             }`}
           >
             <Icon size="sm">
-              <img src="/src/assets/icons/icon-home.svg" alt="내홈" />
+              <img
+                src="/src/assets/icons/icon-home.svg"
+                alt="내홈"
+                className={activeNav === "myhome" ? "" : iconFilter}
+              />
             </Icon>
             내 홈
           </button>
@@ -70,15 +87,15 @@ export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
             <img
               src={userAvatarUrl || profileImage}
               alt=""
-              className="size-10 rounded-full object-cover"
+              className={`size-10 rounded-full object-cover ${isOverlay ? "ring-2 ring-white" : ""}`}
             />
           </button>
         ) : (
           <div className="flex items-center gap-1">
-            <button className="flex items-center rounded-2 px-[18px] py-2.5 body-03 text-gray-700">
+            <button className={`flex items-center rounded-2 px-4.5 py-2.5 body-03 ${isOverlay ? "text-white" : "text-gray-700"}`}>
               로그인
             </button>
-            <button className="flex items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
+            <button className="flex items-center rounded-2 bg-primary-500 px-4.5 py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
               회원가입
             </button>
           </div>

@@ -48,6 +48,14 @@ export default function CountryRoadmapList({
   const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
 
   useEffect(() => {
+    setGroups(countryGroups);
+  }, [countryGroups]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+
+  useEffect(() => {
     if (!removedRecord) return;
     const timer = setTimeout(() => setRemovedRecord(null), 5000);
     return () => clearTimeout(timer);
@@ -102,6 +110,7 @@ export default function CountryRoadmapList({
   };
 
   const wishedCities = groups.flatMap((group) => group.cities).filter((city) => wishedCityNames.has(city.cityName));
+  const isEmpty = groups.length === 0 || (activeTab === 1 && wishedCities.length === 0);
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -165,9 +174,11 @@ export default function CountryRoadmapList({
           </div>
         )}
 
-        <div className="flex w-full justify-center pt-[100px]">
-          <PageNavigation currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
-        </div>
+        {!isEmpty && (
+          <div className="flex w-full justify-center pt-25">
+            <PageNavigation currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+          </div>
+        )}
       </div>
 
       <Footer />

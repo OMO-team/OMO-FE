@@ -24,6 +24,12 @@ const APOSTILLE_INFO_BANNER =
 
 const DEFAULT_CITY = countryRoadmapGroups[0].cities[0];
 
+function parseDepartureDate(value: string | null) {
+  const match = value?.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
+  if (!match) return null;
+  return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
+}
+
 type RoadmapDetailProps = {
   city?: CityRoadmapData;
   onBack?: () => void;
@@ -36,21 +42,24 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
   const [openTaskIndex, setOpenTaskIndex] = useState<number | null>(null);
   const [departureDate, setDepartureDate] = useState<string | null>(null);
   const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'task' | null>(null);
+  const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
+  const [datePickerViewYear, setDatePickerViewYear] = useState(2026);
+  const [datePickerViewMonth, setDatePickerViewMonth] = useState(4);
   const [uploadTargetDocument, setUploadTargetDocument] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
 
   const handleSelectFiles = (fileList: FileList) => {
     const newItems: UploadedFileItem[] = Array.from(fileList).map((file) => ({
       name: file.name,
-      uploadedSizeKB: 0,
-      totalSizeKB: Math.max(1, Math.round(file.size / 1024)),
+      uploadedSizeMB: 0,
+      totalSizeMB: Math.max(1, Math.round(file.size / 1024 / 1024)),
       status: 'uploading',
     }));
     setUploadedFiles((prev) => [...prev, ...newItems]);
     newItems.forEach((item) => {
       setTimeout(() => {
         setUploadedFiles((prev) =>
-          prev.map((f) => (f.name === item.name ? { ...f, uploadedSizeKB: f.totalSizeKB, status: 'completed' } : f)),
+          prev.map((f) => (f.name === item.name ? { ...f, uploadedSizeMB: f.totalSizeMB, status: 'completed' } : f)),
         );
       }, 1500);
     });
@@ -74,17 +83,19 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
   };
 
   const openTask = openTaskIndex !== null ? berlinRoadmapTasks[openTaskIndex] : null;
+  const parsedDeparture = parseDepartureDate(departureDate);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
-      <Header isLoggedIn={false} />
-
       <div className="relative">
+        <div className="absolute inset-x-0 top-0 z-10">
+          <Header isLoggedIn={false} variant="overlay" />
+        </div>
         {onBack && (
           <button
             type="button"
             onClick={onBack}
-            className="body-02 absolute left-6 top-6 z-10 rounded-2 bg-black/30 px-4 py-2 text-white"
+            className="body-02 absolute left-6 top-24 z-10 rounded-2 bg-black/30 px-4 py-2 text-white"
           >
             〈 목록으로
           </button>
@@ -93,16 +104,54 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
       </div>
 
       <div className="mx-auto flex w-full max-w-content gap-[30px] px-4 py-10">
-        <div className="flex flex-col gap-5">
+        <div className="relative flex flex-col gap-5">
           <RoadmapHeader
             year={year}
             month={month}
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
             departureDate={departureDate ?? undefined}
-            onDepartureDateClick={() => setDatePickerTarget('departure')}
+            onDepartureDateClick={() => {
+              setDatePickerViewYear(parsedDeparture?.year ?? year);
+              setDatePickerViewMonth(parsedDeparture?.month ?? month);
+              setDatePickerMode('day');
+              setDatePickerTarget('departure');
+            }}
           />
           <RoadmapTimeline tasks={berlinRoadmapTasks} onTaskClick={setOpenTaskIndex} />
+
+          {datePickerTarget === 'departure' && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setDatePickerTarget(null)} />
+              <div className="absolute right-0 top-30 z-50">
+                <DatePickerModal
+                  mode={datePickerMode}
+                  year={datePickerViewYear}
+                  month={datePickerViewMonth}
+                  selectedDay={
+                    parsedDeparture?.year === datePickerViewYear && parsedDeparture?.month === datePickerViewMonth
+                      ? parsedDeparture.day
+                      : undefined
+                  }
+                  selectedMonth={datePickerViewMonth}
+                  onClose={() => setDatePickerTarget(null)}
+                  onModeToggle={() => setDatePickerMode((m) => (m === 'day' ? 'month' : 'day'))}
+                  onSelectMonth={(m) => {
+                    setDatePickerViewMonth(m);
+                    setDatePickerMode('day');
+                  }}
+                  onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
+                  onYearNext={() => setDatePickerViewYear((y) => y + 1)}
+                  onSelectDay={(day) => {
+                    setDepartureDate(
+                      `${datePickerViewYear}년 ${String(datePickerViewMonth).padStart(2, '0')}월 ${String(day).padStart(2, '0')}일`,
+                    );
+                    setDatePickerTarget(null);
+                  }}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex flex-col gap-[30px]">
@@ -135,7 +184,10 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
             totalCount={4}
             dDayLabel={openTask.dDay ? `D-${openTask.dDay}` : undefined}
             scheduledDate={openTask.date}
-            onDateClick={() => setDatePickerTarget('task')}
+            onDateClick={() => {
+              setDatePickerMode('day');
+              setDatePickerTarget('task');
+            }}
             onClose={() => setOpenTaskIndex(null)}
             documents={apostilleRequiredDocuments}
             locked={openTask.status === 'lock'}
@@ -159,20 +211,23 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
         </ModalOverlay>
       )}
 
-      {datePickerTarget && (
+      {datePickerTarget === 'task' && (
         <ModalOverlay zIndex={60} onClose={() => setDatePickerTarget(null)}>
           <DatePickerModal
-            mode="day"
+            mode={datePickerMode}
             year={year}
             month={month}
             selectedDay={15}
+            selectedMonth={month}
             onClose={() => setDatePickerTarget(null)}
-            onSelectDay={(day) => {
-              if (datePickerTarget === 'departure') {
-                setDepartureDate(`${year}년 ${String(month).padStart(2, '0')}월 ${String(day).padStart(2, '0')}일`);
-              }
-              setDatePickerTarget(null);
+            onModeToggle={() => setDatePickerMode((m) => (m === 'day' ? 'month' : 'day'))}
+            onSelectMonth={(m) => {
+              setMonth(m);
+              setDatePickerMode('day');
             }}
+            onYearPrev={() => setYear((y) => y - 1)}
+            onYearNext={() => setYear((y) => y + 1)}
+            onSelectDay={() => setDatePickerTarget(null)}
           />
         </ModalOverlay>
       )}

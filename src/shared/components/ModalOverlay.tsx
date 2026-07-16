@@ -12,7 +12,7 @@ export default function ModalOverlay({ children, onClose, zIndex = 50 }: ModalOv
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 flex items-center justify-center bg-gray-800/50 p-4"
       style={{ zIndex }}
       onClick={onClose}
     >

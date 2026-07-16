@@ -1,5 +1,5 @@
 import MoneyIcon from './icons/MoneyIcon';
-import StayDurationSlider from './StayDurationSlider';
+import StayDurationPicker from './StayDurationPicker';
 
 type BudgetPlanCardProps = {
   months: number;
@@ -23,12 +23,12 @@ export default function BudgetPlanCard({
   return (
     <div className="flex w-[434px] flex-col items-center rounded-4 border border-gray-100 bg-white px-7 pb-[30px] pt-6">
       <div className="flex w-[358px] flex-col gap-10">
-        <div className="flex items-center gap-1">
-          <MoneyIcon className="size-icon-lg text-gray-900" />
-          <p className="heading-05 text-black">예산 계획</p>
+        <div className="flex items-center gap-2">
+          <MoneyIcon className="size-icon-md text-primary-900" />
+          <p className="heading-06 text-primary-900">예산 계획</p>
         </div>
 
-        <StayDurationSlider months={months} onChange={onMonthsChange} />
+        <StayDurationPicker months={months} onChange={onMonthsChange} />
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col items-start gap-5 rounded-2 bg-gray-20 px-5 pb-6 pt-5">

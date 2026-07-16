@@ -1,4 +1,4 @@
-import AlertCircleIcon from '../../../shared/components/AlertCircleIcon';
+import AlertCircleIcon from './AlertCircleIcon';
 
 type ConfirmActionModalProps = {
   title: string;
