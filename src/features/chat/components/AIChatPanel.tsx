@@ -3,12 +3,13 @@ import clipIcon from '../../../assets/icons/icon-clip.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
 
 type AIChatPanelProps = {
+  hasChat?: boolean;
   onClose?: () => void;
   onNewChat?: () => void;
   onMoreMenu?: () => void;
 };
 
-export default function AIChatPanel({ onClose, onNewChat, onMoreMenu }: AIChatPanelProps) {
+export default function AIChatPanel({ hasChat = false, onClose, onNewChat, onMoreMenu }: AIChatPanelProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -164,24 +165,26 @@ export default function AIChatPanel({ onClose, onNewChat, onMoreMenu }: AIChatPa
               </svg>
             </button>
 
-            {/* More Menu(...) 버튼 */}
-            <button
-              type="button"
-              onClick={onMoreMenu}
-              style={{
-                display: 'flex',
-                width: '24px',
-                height: '24px',
-                justifyContent: 'center',
-                alignItems: 'center',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-              }}
-            >
-              <img src={moreMenuIcon} alt="더보기" width={18} height={4} />
-            </button>
+            {/* More Menu(...) 버튼 — 채팅 시작 후에만 노출 */}
+            {hasChat && (
+              <button
+                type="button"
+                onClick={onMoreMenu}
+                style={{
+                  display: 'flex',
+                  width: '24px',
+                  height: '24px',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              >
+                <img src={moreMenuIcon} alt="더보기" width={18} height={4} />
+              </button>
+            )}
 
             {/* Collapse(>>) 버튼 */}
             <button
