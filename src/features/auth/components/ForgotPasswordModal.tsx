@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
-import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
+import errorReverseIcon from '../../../assets/icons/icon-error[16].svg';
 import eyeIcon from '../../../assets/icons/icon-eye.svg';
 
 type ForgotPasswordModalProps = {
