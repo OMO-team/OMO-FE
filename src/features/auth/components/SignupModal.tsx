@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
-import errorIcon from '../../../assets/icons/icon-error[19].svg';
+import errorIcon from '../../../assets/icons/error.svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 
