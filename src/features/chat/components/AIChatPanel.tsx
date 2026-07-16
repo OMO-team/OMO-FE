@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
+import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
 import clipDarkIcon from '../../../assets/icons/icon-clip-dark.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
 import editIcon from '../../../assets/icons/icon-edit.svg';
@@ -42,6 +43,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
   const [isNewChatHovered, setIsNewChatHovered] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [noticeType, setNoticeType] = useState<NoticeType>(defaultNotice);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const hasText = value.trim().length > 0;
   const hasImages = noticeType === 'attachment';
@@ -183,11 +185,75 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
         if (isDropdownOpen) setIsDropdownOpen(false);
         if (isMoreMenuOpen) setIsMoreMenuOpen(false);
       }}
+      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragOver(false); }}
+      onDrop={(e) => { e.preventDefault(); setIsDragOver(false); }}
     >
       {/* Sidebar_Collapse_Handle */}
       <div className="absolute left-0 top-0 bottom-0 flex items-center" style={{ paddingLeft: '10px', pointerEvents: 'none' }}>
         <div style={{ width: '6px', height: '120px', borderRadius: '10px', background: '#CFD3DA', flexShrink: 0 }} />
       </div>
+
+      {/* Image Upload Dropzone 오버레이 */}
+      {isDragOver && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(255, 255, 255, 0.50)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+          }}
+        >
+          <div
+            style={{
+              display: 'inline-flex',
+              padding: '30px 40px',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '12px',
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.40)',
+            }}
+          >
+            {/* 32×32 아이콘 */}
+            <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={imageUploadIcon} alt="업로드" width={24} height={24} />
+              </div>
+            </div>
+            <span
+              style={{
+                alignSelf: 'stretch',
+                color: '#404959',
+                textAlign: 'center',
+                fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
+                fontSize: '16px',
+                fontWeight: 600,
+                lineHeight: '140%',
+                letterSpacing: '-0.32px',
+              }}
+            >
+              이미지 또는 파일을 여기에 놓아주세요.
+            </span>
+            <span
+              style={{
+                color: '#566276',
+                fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
+                fontSize: '12px',
+                fontWeight: 400,
+                lineHeight: '140%',
+                letterSpacing: '-0.24px',
+              }}
+            >
+              JPG, PNG 파일을 첨부할 수 있어요. 파일당 최대 10MB
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* R_Header_AI chat */}
       <div
