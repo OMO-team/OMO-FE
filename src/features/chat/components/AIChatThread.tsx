@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import thinkingIcon from '../../../assets/icons/icon-thinking.svg';
 import checkConditionIcon from '../../../assets/icons/icon-check-condition.svg';
 import chevronRightBlueIcon from '../../../assets/icons/icon-chevron-right-blue.svg';
@@ -52,6 +53,7 @@ const divider = (
 );
 
 export default function AIChatThread() {
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   return (
     <div
       style={{
@@ -256,6 +258,8 @@ export default function AIChatThread() {
                 return (
                   <div
                     key={ref.title}
+                    onMouseEnter={() => setHoveredCard(ref.title)}
+                    onMouseLeave={() => setHoveredCard(null)}
                     style={{
                       display: 'flex',
                       padding: '8px 16px',
@@ -265,7 +269,9 @@ export default function AIChatThread() {
                       alignSelf: 'stretch',
                       borderRadius: '8px',
                       border: '1px solid #E7EAEF',
-                      background: '#FFF',
+                      background: hoveredCard === ref.title ? '#F3F4F6' : '#FFF',
+                      cursor: 'pointer',
+                      transition: 'background 0.15s',
                     }}
                   >
                     <div style={{ display: 'flex', height: '26px', justifyContent: 'center', alignItems: 'center', gap: '8px', alignSelf: 'stretch' }}>
