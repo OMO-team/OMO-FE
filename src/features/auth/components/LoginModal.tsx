@@ -8,6 +8,7 @@ import googleIcon from '../../../assets/icons/icon-google.svg';
 type LoginModalProps = {
   onClose: () => void;
   onSignupClick?: () => void;
+  onForgotPasswordClick?: () => void;
   emailError?: string;
   passwordError?: string;
   formError?: string;
@@ -51,6 +52,7 @@ function EyeIcon({ color }: { color: string }) {
 export default function LoginModal({
   onClose,
   onSignupClick,
+  onForgotPasswordClick,
   emailError,
   passwordError,
   formError,
@@ -197,7 +199,7 @@ export default function LoginModal({
                     </button>
                     <span style={{ color: '#566276', ...BODY04_STYLE }}>로그인 상태 유지</span>
                   </div>
-                  <button type="button" style={{ color: '#0085FF', ...BODY04_STYLE }}>
+                  <button type="button" onClick={onForgotPasswordClick} style={{ color: '#0085FF', ...BODY04_STYLE }}>
                     비밀번호 찾기
                   </button>
                 </div>

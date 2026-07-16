@@ -6,9 +6,11 @@ type ActiveNav = "explore" | "myhome" | null;
 interface HeaderProps {
   isLoggedIn: boolean;
   userAvatarUrl?: string;
+  onLoginClick?: () => void;
+  onSignupClick?: () => void;
 }
 
-export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
+export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSignupClick }: HeaderProps) {
   // 임시 라우팅 주소
   const activeNav: ActiveNav =
     location.pathname === "/explore"
@@ -75,10 +77,10 @@ export default function Header({ isLoggedIn, userAvatarUrl }: HeaderProps) {
           </button>
         ) : (
           <div className="flex items-center gap-1">
-            <button className="flex items-center rounded-2 px-[18px] py-2.5 body-03 text-gray-700">
+            <button onClick={onLoginClick} className="flex items-center rounded-2 px-[18px] py-2.5 body-03 text-gray-700">
               로그인
             </button>
-            <button className="flex items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
+            <button onClick={onSignupClick} className="flex items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">
               회원가입
             </button>
           </div>
