@@ -90,7 +90,7 @@ export default function CityInsight() {
                         <h1 className='heading-05 text-gray-600'>조건에 맞는 도시가 없습니다.</h1>
                         <p className='title-03 text-gray-300'>필터를 완화하면 더 많은 도시를 볼 수 있어요.</p> 
                     </div>
-                    <button className='bg-blue-100 text-blue-400 px-[26px] py-3 title-02 rounded-[12px]' onClick={handleReset}>필터 초기화 하기</button>
+                    <button className='bg-blue-100 text-blue-400 px-[26px] py-3 title-02 rounded-[12px] hover:bg-[#9FD2FF]' onClick={handleReset}>필터 초기화 하기</button>
                 </div>
             )}
         </div>
