@@ -14,6 +14,7 @@ import { useState } from 'react'
 
 export default function CityInsight() {
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
+    const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
     const [resetKey, setResetKey] = useState(0)
 
     const handleSelect = (country: string) => {
@@ -22,8 +23,19 @@ export default function CityInsight() {
         )
     }
 
+    const handleSelectOption = (title: string, option: string) => {
+        setSelectedOptions(prev => {
+            if (prev[title] === option) {
+                const { [title]: _, ...rest } = prev
+                return rest
+            }
+            return { ...prev, [title]: option }
+        })
+    }
+
     const handleReset = () => {
         setSelectedFilters([])
+        setSelectedOptions({})
         setResetKey(prev => prev + 1)
     }
 
@@ -39,11 +51,11 @@ export default function CityInsight() {
                 <SearchInputBar placeholder='원하는 도시 조건을 입력해 보세요' width='w-[974px]'/>
                 <div className='flex justify-between'>
                     <div className='flex gap-2'>
-                        <DetailDropDown key={resetKey}/>
+                        <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption}/>
                         <RegionDropDown key={`region-${resetKey}`} onSelect={handleSelect} onReset={() => setSelectedFilters([])}/>
                         <div className='w-px h-7 bg-gray-300'></div>
                         {DETAIL_OPTIONS.map(({ title, options }) => (
-                            <DropDown key={`${title}-${resetKey}`} title={title} options={options} onClick={() => {}} />
+                            <DropDown key={title} title={title} options={options} selectedOption={selectedOptions[title] ?? null} onSelect={(option) => handleSelectOption(title, option)} />
                         ))}
                     </div>
                     <button className='flex items-center gap-1' onClick={handleReset}>

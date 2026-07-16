@@ -4,22 +4,18 @@ import ChevronDownIcon from '../../../shared/components/ChevronDownIcon';
 interface DropDownProps {
     title: string;
     options: string[];
-    onClick: (option: string | null) => void;
+    selectedOption: string | null;
+    onSelect: (option: string) => void;
 }
 
-export default function DropDown({ title, options, onClick }: DropDownProps) {
+
+export default function DropDown({ title, options, selectedOption, onSelect }: DropDownProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedOption, setSelectedOption] = useState<string | null>(null)
 
     const handleOpen = () => {
         setIsOpen(!isOpen)
     }
 
-    const handleSelectOption = (option: string) => {
-        const next = selectedOption === option ? null : option
-        setSelectedOption(next)
-        onClick(next)
-    }
   return (
     <>
     <div className='relative'>
@@ -32,7 +28,7 @@ export default function DropDown({ title, options, onClick }: DropDownProps) {
                 {options.map((option, index) => {
                     const isSelected = selectedOption === option
                     return (
-                        <div key={index} className={`w-full flex justify-left items-center h-7.5 px-4 py-1.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => handleSelectOption(option)}>
+                        <div key={index} className={`w-full flex justify-left items-center h-7.5 px-4 py-1.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => {onSelect(option); handleOpen()}}>
                             <p className={`body-04 ${isSelected ? 'text-primary-800' : 'text-gray-700'}`}>{option}</p>
                         </div>
                     )

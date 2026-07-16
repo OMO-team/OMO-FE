@@ -1,24 +1,24 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import FilterIcon from "../../../shared/components/FilterIcon"
 import { DETAIL_OPTIONS } from "../constants/filterOptions"
 
-export default function DetailDropDown() {
+interface DetailDropDownProps {
+    selectedOptions: Record<string, string>;
+    onSelect: (title: string, option: string) => void;
+}
+
+export default function DetailDropDown({ selectedOptions, onSelect }: DetailDropDownProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
 
     const handleOpen = () => {
         setIsOpen(!isOpen)
     }
 
-    const handleSelectOptions = (title: string, option: string) => {
-        setSelectedOptions(prev => {
-            if (prev[title] === option) {
-                const { [title]: _, ...rest } = prev
-                return rest
-            }
-            return { ...prev, [title]: option }
-        })
-    }
+    useEffect(() => {
+        const allSelected = DETAIL_OPTIONS.every(item => selectedOptions[item.title])
+        if (allSelected) 
+            setIsOpen(false)
+    }, [selectedOptions])
 
   return (
     <div className="relative cursor-pointer">
@@ -33,12 +33,12 @@ export default function DetailDropDown() {
                     <div className="flex items-center w-25 shrink-0">
                         <p className="flex-1 text-gray-700 body-02">{item.title}</p>
                         <div className="w-px h-4 bg-gray-200" />
-                    </div> 
+                    </div>
                     <div className="flex ml-5">
                         {item.options.map((option) => {
                             const isSelected = selectedOptions[item.title] === option
                             return (
-                                <div key={option} className={`flex items-center pl-4 w-28.5 h-7.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => handleSelectOptions(item.title, option)}>
+                                <div key={option} className={`flex items-center pl-4 w-28.5 h-7.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => {onSelect(item.title, option)}}>
                                     <p className={`body-04 ${isSelected ? 'text-primary-800' : 'text-gray-700'}`}>{option}</p>
                                 </div>
                             )
