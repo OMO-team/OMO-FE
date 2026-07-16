@@ -2,6 +2,7 @@ import starIcon from '../../../assets/icons/star-icon.svg'
 import HeartIcon from '../../../shared/components/HeartIcon';
 import CardButtonGroup from '../../../shared/components/CardButtonGroup';
 import ProgressBar from '../../../shared/components/ProgressBar';
+import Chip from '../../../shared/components/Chip';
 
 interface CityInsightCardProps {
   imageUrl: string;
@@ -63,7 +64,7 @@ export default function CityInsightCard({
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
             <span className="title-01 text-black">{cityName}</span>
-            <span className="body-05 rounded-2 bg-gray-100 px-2.5 py-1 text-gray-500">{countryName}</span>
+            <Chip label={countryName} className="body-05 bg-gray-100 px-2.5 py-1 text-gray-500" />
           </div>
           <p className="label-01 text-gray-500">{description}</p>
         </div>

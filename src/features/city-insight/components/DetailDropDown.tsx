@@ -1,42 +1,35 @@
-import { useState } from "react"
-import FilterIcon from "./FilterIcon"
+import { useState, useEffect } from "react"
+import FilterIcon from "../../../shared/components/FilterIcon"
+import { DETAIL_OPTIONS } from "../constants/filterOptions"
 
-const DETAIL_OPTIONS = [
-    { title: '월 생활비', options: ['150 만원', '200 만원', '300 만원', '상관없음'] },
-    { title: '치안', options: ['5점', '4점', '3점', '상관없음'] },
-    { title: '숙소 난이도',  options: ['쉬움', '보통', '어려움'] },    
-    { title: '비자 난이도',  options: ['쉬움', '보통', '어려움'] },   
-    { title: '체류 기간',  options: ['3개월 이하', '3 - 6개월', '6개월 - 1년', '1년 이상'] }    
-]
+interface DetailDropDownProps {
+    selectedOptions: Record<string, string>;
+    onSelect: (title: string, option: string) => void;
+}
 
-export default function DetailDropDown() {
+export default function DetailDropDown({ selectedOptions, onSelect }: DetailDropDownProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
 
     const handleOpen = () => {
         setIsOpen(!isOpen)
     }
 
-    const handleSelectOptions = (title: string, option: string) => {
-        setSelectedOptions(prev => {
-            if (prev[title] === option) {
-                const { [title]: _, ...rest } = prev
-                return rest
-            }
-            return { ...prev, [title]: option }
-        })
-    }
+    useEffect(() => {
+        const allSelected = DETAIL_OPTIONS.every(item => selectedOptions[item.title])
+        if (allSelected) 
+            setIsOpen(false)
+    }, [selectedOptions])
 
   return (
-    <div className="relative">
+    <div className="relative cursor-pointer">
         <div className={`inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer ${isOpen ? 'bg-primary-500' : 'bg-gray-50 hover:bg-gray-100'}`} onClick={handleOpen}>
             <FilterIcon color={isOpen ? '#ffffff' : undefined}/>
             <p className={`body-03 ${isOpen ? 'text-white' : 'text-gray-600'}`}>상세필터</p>
         </div>
         {isOpen && (
         <div className='absolute top-10 z-1 bg-white w-[624px] h-[242px] flex flex-col justify-center items-center border border-gray-100 rounded-2 px-6 py-5 shadow-01'>
-            {DETAIL_OPTIONS.map((item) => (
-                <div key={item.title} className="w-full flex items-center mb-3">
+            {DETAIL_OPTIONS.map((item, index) => (
+                <div key={item.title} className={`w-full flex items-center ${index !== DETAIL_OPTIONS.length - 1 ? 'mb-3' : ''}`}>
                     <div className="flex items-center w-25 shrink-0">
                         <p className="flex-1 text-gray-700 body-02">{item.title}</p>
                         <div className="w-px h-4 bg-gray-200" />
@@ -45,7 +38,7 @@ export default function DetailDropDown() {
                         {item.options.map((option) => {
                             const isSelected = selectedOptions[item.title] === option
                             return (
-                                <div key={option} className={`flex items-center pl-4 w-28.5 h-7.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => handleSelectOptions(item.title, option)}>
+                                <div key={option} className={`flex items-center pl-4 w-28.5 h-7.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => {onSelect(item.title, option)}}>
                                     <p className={`body-04 ${isSelected ? 'text-primary-800' : 'text-gray-700'}`}>{option}</p>
                                 </div>
                             )
@@ -58,5 +51,3 @@ export default function DetailDropDown() {
     </div>
   )
 }
-
-
