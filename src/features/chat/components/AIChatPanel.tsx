@@ -8,6 +8,7 @@ type AIChatPanelProps = {
 
 export default function AIChatPanel({ onClose, onNewChat }: AIChatPanelProps) {
   const [value, setValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
 
   const hasText = value.trim().length > 0;
 
@@ -109,13 +110,12 @@ export default function AIChatPanel({ onClose, onNewChat }: AIChatPanelProps) {
               >
                 OMO 스마트 브리핑
               </span>
-              {/* 20×20 chevron (rotate -90deg → pointing right) */}
+              {/* 20×20 chevron (아래 방향) */}
               <div
                 style={{
                   display: 'flex',
                   width: '20px',
                   height: '20px',
-                  transform: 'rotate(-90deg)',
                   justifyContent: 'center',
                   alignItems: 'center',
                   flexShrink: 0,
@@ -223,10 +223,13 @@ export default function AIChatPanel({ onClose, onNewChat }: AIChatPanelProps) {
             alignItems: 'center',
             alignSelf: 'stretch',
             borderRadius: '16px',
-            border: '1px solid #E7EAEF',
-            background: '#F8F9FA',
-            boxShadow: '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
+            border: isFocused ? '1px solid #1A91FF' : '1px solid #E7EAEF',
+            background: isFocused ? '#FFF' : '#F8F9FA',
+            boxShadow: isFocused
+              ? '0 4px 12px 0 rgba(23, 146, 255, 0.16)'
+              : '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
             gap: '8px',
+            transition: 'border 0.15s, box-shadow 0.15s, background 0.15s',
           }}
         >
           {/* Frame 11211: 텍스트 입력 */}
@@ -257,6 +260,8 @@ export default function AIChatPanel({ onClose, onNewChat }: AIChatPanelProps) {
                 border: 'none',
                 background: 'transparent',
               }}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
             />
           </div>
 
