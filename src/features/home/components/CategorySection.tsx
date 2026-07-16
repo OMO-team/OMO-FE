@@ -1,4 +1,3 @@
-import arrowDownIcon from '../../assets/icons/icon-arrow-down[16].svg';
 import { useState } from 'react';
 import CategoryTab from '../../../shared/components/CategoryTab';
 import CityCard, { CITY_IMAGES } from './CityCard';
@@ -59,7 +58,7 @@ export default function CategorySection() {
           >
             <span className="body-02 text-primary-500">더보기</span>
             <div className="flex justify-center items-center w-4 h-4">
-              <img src={arrowDownIcon} alt="더보기" />
+              <img src="/src/assets/icons/16_16_icon.svg" alt="더보기" />
             </div>
           </button>
         </div>

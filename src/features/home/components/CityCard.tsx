@@ -1,4 +1,3 @@
-import arrowDiagonalIcon from '../../../assets/icons/icon-arrow-diagonal.svg';
 import countryCard1 from '../../../assets/images/country_card_1.png';
 import countryCard2 from '../../../assets/images/country_card_2.png';
 import countryCard3 from '../../../assets/images/country_card_3.png';
@@ -29,7 +28,7 @@ export default function CityCard({ name, cityCount, imagePath }: CityCardProps) 
           <span className="title-01 text-[#C2E2FF]">추천도시 {cityCount}개 보기</span>
           <div className="flex justify-center items-center w-6 h-6">
             <img
-              src={arrowDiagonalIcon}
+              src="/src/assets/icons/Vector_diagonal.svg"
               alt="이동"
               className="w-[14px] h-[14px]"
             />
