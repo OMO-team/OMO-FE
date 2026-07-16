@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
+import clipDarkIcon from '../../../assets/icons/icon-clip-dark.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
 import editIcon from '../../../assets/icons/icon-edit.svg';
 import trashIcon from '../../../assets/icons/icon-trash.svg';
@@ -30,16 +31,17 @@ type AIChatPanelProps = {
   hasChat?: boolean;
   onClose?: () => void;
   onNewChat?: () => void;
+  defaultNotice?: NoticeType;
 };
 
-export default function AIChatPanel({ hasChat = false, onClose, onNewChat }: AIChatPanelProps) {
+export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defaultNotice = null }: AIChatPanelProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isTitleHovered, setIsTitleHovered] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNewChatHovered, setIsNewChatHovered] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [noticeType, setNoticeType] = useState<NoticeType>(null);
+  const [noticeType, setNoticeType] = useState<NoticeType>(defaultNotice);
 
   const hasText = value.trim().length > 0;
   const hasImages = noticeType === 'attachment';
@@ -60,7 +62,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat }: AIC
       border: string;
       background: string;
       icon: string;
-      iconSize: number;
+      iconW: number;
+      iconH: number;
       mainText: string;
       mainColor: string;
       subText?: string;
@@ -71,8 +74,9 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat }: AIC
       attachment: {
         border: '1px solid #E7EAEF',
         background: '#FFF',
-        icon: clipIcon,
-        iconSize: 24,
+        icon: clipDarkIcon,
+        iconW: 18,
+        iconH: 20,
         mainText: '사진 및 파일 첨부',
         mainColor: '#15181D',
         subText: '컴퓨터에서 업로드하세요   JPG, PNG, PDF · 파일당 최대 10MB',
@@ -82,7 +86,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat }: AIC
         border: '1px solid #FFBEB8',
         background: '#FFE3E0',
         icon: alertRedIcon,
-        iconSize: 20,
+        iconW: 20,
+        iconH: 20,
         mainText: '브리핑 답변을 생성하지 못했어요.',
         mainColor: '#EB1600',
         subText: '잠시 후 다시 시도해 주세요.',
@@ -92,7 +97,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat }: AIC
         border: '1px solid #FFBEB8',
         background: '#FFE3E0',
         icon: fileErrorIcon,
-        iconSize: 24,
+        iconW: 24,
+        iconH: 24,
         mainText: '파일을 업로드 하지 못했어요.',
         mainColor: '#EB1600',
         subText: '파일 형식이나 용량을 확인한 뒤 다시 시도해 주세요.',
@@ -102,7 +108,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat }: AIC
         border: '1px solid #C4F2ED',
         background: '#E6FAF7',
         icon: clockTealIcon,
-        iconSize: 24,
+        iconW: 24,
+        iconH: 24,
         mainText: '응답이 지연되고 있어요. 다시 시도 해주세요.',
         mainColor: '#219789',
       },
@@ -131,7 +138,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat }: AIC
       >
         {/* 아이콘 */}
         <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <img src={cfg.icon} alt="" width={cfg.iconSize} height={cfg.iconSize} />
+          <img src={cfg.icon} alt="" width={cfg.iconW} height={cfg.iconH} />
         </div>
         {/* 텍스트 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
