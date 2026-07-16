@@ -14,11 +14,17 @@ import { useState } from 'react'
 
 export default function CityInsight() {
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
-    
+    const [resetKey, setResetKey] = useState(0)
+
     const handleSelect = (country: string) => {
         setSelectedFilters(prev =>
             prev.includes(country) ? prev : [...prev, country]
         )
+    }
+
+    const handleReset = () => {
+        setSelectedFilters([])
+        setResetKey(prev => prev + 1)
     }
 
   return (
@@ -33,14 +39,14 @@ export default function CityInsight() {
                 <SearchInputBar placeholder='원하는 도시 조건을 입력해 보세요' width='w-[974px]'/>
                 <div className='flex justify-between'>
                     <div className='flex gap-2'>
-                        <DetailDropDown/>
-                        <RegionDropDown onSelect={handleSelect} />
+                        <DetailDropDown key={resetKey}/>
+                        <RegionDropDown key={`region-${resetKey}`} onSelect={handleSelect} onReset={() => setSelectedFilters([])}/>
                         <div className='w-px h-7 bg-gray-300'></div>
                         {DETAIL_OPTIONS.map(({ title, options }) => (
-                            <DropDown key={title} title={title} options={options} onClick={() => {}} />
+                            <DropDown key={`${title}-${resetKey}`} title={title} options={options} onClick={() => {}} />
                         ))}
                     </div>
-                    <button className='flex items-center gap-1'>
+                    <button className='flex items-center gap-1' onClick={handleReset}>
                         <p className='body-03 text-gray-400'>필터 초기화</p>
                         <img src={filterResetIcon} alt="" />
                     </button>
