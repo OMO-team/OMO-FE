@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
+import AIChatThread from './AIChatThread';
 
 type AIChatPanelProps = {
   hasChat?: boolean;
@@ -223,8 +224,10 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, onMor
         </div>
       </div>
 
-      {/* 빈 콘텐츠 영역 (Empty State) */}
-      <div className="flex-1" />
+      {/* 콘텐츠 영역 */}
+      <div className="flex-1 overflow-y-auto">
+        {hasChat && <AIChatThread />}
+      </div>
 
       {/* Frame 11265: 하단 입력 영역 */}
       <div
