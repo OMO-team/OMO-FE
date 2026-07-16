@@ -1,23 +1,27 @@
 import Icon from "./Icon";
+import ExploreIcon from "./ExploreIcon";
+import HomeIcon from "./HomeIcon";
 import omoLogo from "../../assets/icons/omo-logo.svg";
 import iconSearch from "../../assets/icons/icon-search[24].svg";
-import iconExplore from "../../assets/icons/icon-explore.svg";
-import iconHome from "../../assets/icons/icon-home.svg";
 import profileImage from "../../assets/icons/profile-image.svg";
-
-type ActiveNav = "explore" | "myhome" | null;
 
 interface LoggedInHeaderProps {
   userAvatarUrl?: string;
 }
 
-const NAV_BTN_BASE =
-  'flex w-20 flex-col items-start gap-1 rounded-[8px] py-[10px] pl-[10px] pr-3 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]';
-
-const NAV_BTN_ACTIVE =
-  'border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500';
-
-const NAV_BTN_DEFAULT = 'text-[#404959]';
+const NAV_BTN_STYLE: React.CSSProperties = {
+  display: 'flex',
+  width: '80px',
+  padding: '10px 12px 10px 10px',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '4px',
+  borderRadius: '8px',
+  background: '#fff',
+  color: '#404959',
+  border: 'none',
+  cursor: 'pointer',
+};
 
 const NAV_TEXT_STYLE: React.CSSProperties = {
   fontFamily: 'Pretendard Variable',
@@ -29,15 +33,8 @@ const NAV_TEXT_STYLE: React.CSSProperties = {
 };
 
 export default function LoggedInHeader({ userAvatarUrl }: LoggedInHeaderProps) {
-  const activeNav: ActiveNav =
-    location.pathname === '/explore'
-      ? 'explore'
-      : location.pathname === '/myhome'
-        ? 'myhome'
-        : null;
-
   return (
-    <header className="flex w-full items-center justify-center gap-[216px] px-[188px] pt-6">
+    <header className="flex w-full items-center justify-center gap-[216px] bg-white px-[188px] pt-6 pb-6">
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <Icon size="xl">
@@ -56,15 +53,15 @@ export default function LoggedInHeader({ userAvatarUrl }: LoggedInHeaderProps) {
       </div>
 
       {/* 오른쪽: 탐색/내홈 + 프로필 */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-[20px]">
         <div className="flex items-center gap-2">
           {/* 탐색 버튼 */}
           <button
-            className={`${NAV_BTN_BASE} ${activeNav === 'explore' ? NAV_BTN_ACTIVE : NAV_BTN_DEFAULT}`}
+            style={NAV_BTN_STYLE}
           >
             <div className="flex items-center gap-[10px] self-stretch">
               <div className="flex h-5 w-5 items-center justify-center">
-                <img src={iconExplore} alt="" width={17} height={17} />
+                <ExploreIcon color="#404959" />
               </div>
               <span style={NAV_TEXT_STYLE}>탐색</span>
             </div>
@@ -72,11 +69,11 @@ export default function LoggedInHeader({ userAvatarUrl }: LoggedInHeaderProps) {
 
           {/* 내 홈 버튼 */}
           <button
-            className={`${NAV_BTN_BASE} ${activeNav === 'myhome' ? NAV_BTN_ACTIVE : NAV_BTN_DEFAULT}`}
+            style={NAV_BTN_STYLE}
           >
             <div className="flex items-center gap-[10px] self-stretch">
               <div className="flex h-5 w-5 items-center justify-center">
-                <img src={iconHome} alt="" width={17} height={17} />
+                <HomeIcon color="#404959" />
               </div>
               <span style={NAV_TEXT_STYLE}>내 홈</span>
             </div>
