@@ -1,4 +1,4 @@
-import Header from '../../../shared/components/Header';
+import LoggedInHeader from '../../../shared/components/LoggedInHeader';
 import Footer from '../../../shared/components/Footer';
 import LockIcon from '../../../shared/components/LockIcon';
 
@@ -55,7 +55,7 @@ const BTN_STYLE: React.CSSProperties = {
 export default function PasswordChangeSuccessPage({ onLoginClick }: PasswordChangeSuccessPageProps) {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header isLoggedIn={false} />
+      <LoggedInHeader />
       <main className="flex flex-1 items-start justify-center bg-[#F3F4F6]" style={{ paddingTop: '72px', paddingBottom: '300px' }}>
         <div
           style={{

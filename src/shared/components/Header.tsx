@@ -1,9 +1,9 @@
 import Icon from "./Icon";
+import ExploreIcon from "./ExploreIcon";
+import HomeIcon from "./HomeIcon";
 import profileImage from "../../assets/icons/profile-image.svg";
 import omoLogo from "../../assets/icons/omo-logo.svg";
 import iconSearch from "../../assets/icons/icon-search[24].svg";
-import iconExplore from "../../assets/icons/icon-explore.svg";
-import iconHome from "../../assets/icons/icon-home.svg";
 
 type ActiveNav = "explore" | "myhome" | null;
 
@@ -52,7 +52,7 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
             }`}
           >
             <Icon size="sm">
-              <img src={iconExplore} alt="탐색" />
+              <ExploreIcon />
             </Icon>
             탐색
           </button>
@@ -65,7 +65,7 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
             }`}
           >
             <Icon size="sm">
-              <img src={iconHome} alt="내홈" />
+              <HomeIcon />
             </Icon>
             내 홈
           </button>
