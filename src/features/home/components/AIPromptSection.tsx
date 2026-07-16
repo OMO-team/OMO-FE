@@ -1,4 +1,5 @@
 import PromptInput from './PromptInput';
+import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 
 const SUGGESTION_CHIPS = [
   '치안이 좋고 영어로 생활 가능한 200만원 이하 도시',
@@ -16,7 +17,7 @@ export default function AIPromptSection() {
         <div className="flex flex-col items-start gap-2">
           {/* 여행가방 아이콘 */}
           <div className="w-8 h-8">
-            <img src="/src/assets/icons/Vector.svg" alt="여행" />
+            <img src={suitcaseIcon} alt="여행" />
           </div>
           {/* 타이틀 */}
           <h2 className="heading-01 text-[#181A1F]">
