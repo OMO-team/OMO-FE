@@ -49,7 +49,7 @@ export default function CityInsight() {
             </div>
             <div className='flex flex-col gap-4'>
                 <CategoryTab categories={['워킹홀리데이','교환학생','인턴십']} activeIndex={0} onChange={()=>{}}/>
-                <SearchInputBar placeholder='원하는 도시 조건을 입력해 보세요' width='w-[974px]'/>
+                <SearchInputBar placeholder='원하는 도시 조건을 입력해 보세요' width='w-[974px]' value='' onChange={()=>{}} onSearch={()=>{}}/>
                 <div className='flex justify-between'>
                     <div className='flex gap-2'>
                         <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption}/>
