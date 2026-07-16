@@ -1,8 +1,10 @@
 type TopAlertBannerVariant = 'blue' | 'teal' | 'red';
+type TopAlertBannerIcon = 'shield' | 'clock' | 'warning';
 
 type TopAlertBannerProps = {
   message: string;
   variant?: TopAlertBannerVariant;
+  icon?: TopAlertBannerIcon;
   showRetry?: boolean;
   onRetry?: () => void;
   onClose?: () => void;
@@ -71,9 +73,18 @@ function CloseIcon({ stroke }: { stroke: string }) {
   );
 }
 
-function BannerIcon({ variant }: { variant: TopAlertBannerVariant }) {
-  if (variant === 'red') return <WarningIcon />;
-  if (variant === 'teal') return <ClockIcon stroke="#2ED1BE" />;
+const DEFAULT_ICON: Record<TopAlertBannerVariant, TopAlertBannerIcon> = {
+  blue: 'shield',
+  teal: 'clock',
+  red: 'warning',
+};
+
+function BannerIcon({ variant, icon }: { variant: TopAlertBannerVariant; icon: TopAlertBannerIcon }) {
+  if (icon === 'warning') return <WarningIcon />;
+  if (icon === 'clock') {
+    const stroke = variant === 'teal' ? '#2ED1BE' : '#0085FF';
+    return <ClockIcon stroke={stroke} />;
+  }
   return <ShieldUserIcon />;
 }
 
@@ -88,11 +99,13 @@ const TEXT_STYLE: React.CSSProperties = {
 export default function TopAlertBanner({
   message,
   variant = 'blue',
+  icon,
   showRetry = false,
   onRetry,
   onClose,
 }: TopAlertBannerProps) {
   const v = VARIANT[variant];
+  const resolvedIcon = icon ?? DEFAULT_ICON[variant];
 
   return (
     <div
@@ -111,7 +124,7 @@ export default function TopAlertBanner({
         <div className="flex items-center gap-4">
           <div className={`flex items-center justify-center p-[6px] rounded-full flex-shrink-0 ${v.iconBg}`}>
             <div className="w-6 h-6 flex items-center justify-center">
-              <BannerIcon variant={variant} />
+              <BannerIcon variant={variant} icon={resolvedIcon} />
             </div>
           </div>
           <span style={{ ...TEXT_STYLE, color: v.textColor, width: '428px' }}>
