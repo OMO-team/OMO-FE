@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import ChevronDownIcon from '../../../shared/components/ChevronDownIcon';
+import { twMerge } from 'tailwind-merge';
 
-interface DropDownProps {
+interface DropDownProps<T extends string = string> {
     title: string;
-    options: string[];
-    selectedOption: string | null;
-    onSelect: (option: string) => void;
+    options: T[];
+    selectedOption?: T | null;
+    onSelect?: (option: T) => void;
+    className?: string
+    triggerClassName?: string
 }
 
 
-export default function DropDown({ title, options, selectedOption, onSelect }: DropDownProps) {
+export default function DropDown<T extends string>({ title, options, selectedOption, onSelect, className, triggerClassName }: DropDownProps<T>) {
     const [isOpen, setIsOpen] = useState(false)
 
     const handleOpen = () => {
@@ -19,12 +22,12 @@ export default function DropDown({ title, options, selectedOption, onSelect }: D
   return (
     <>
     <div className='relative'>
-        <div className='bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2' onClick={handleOpen}>
+        <div className={twMerge('bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2', triggerClassName)} onClick={handleOpen}>
             <p className='text-gray-600 body-03 cursor-pointer'>{title}</p>
             <ChevronDownIcon className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
         {isOpen && (
-            <div className='absolute top-10 z-1 bg-white w-32.5 flex flex-col justify-center items-center border border-gray-100 rounded-2 px-2 py-3 shadow-01'>
+            <div className={twMerge('absolute top-10 z-1 bg-white w-32.5 flex flex-col justify-center items-center border border-gray-100 rounded-2 px-2 py-3 shadow-01', className)}>
                 {options.map((option, index) => {
                     const isSelected = selectedOption === option
                     return (
