@@ -1,5 +1,9 @@
 import Icon from "./Icon";
 import profileImage from "../../assets/icons/profile-image.svg";
+import omoLogo from "../../assets/icons/omo-logo.svg";
+import iconSearch from "../../assets/icons/icon-search[24].svg";
+import iconExplore from "../../assets/icons/icon-explore.svg";
+import iconHome from "../../assets/icons/icon-home.svg";
 
 type ActiveNav = "explore" | "myhome" | null;
 
@@ -24,7 +28,7 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <Icon size="xl">
-          <img src="/src/assets/icons/omo-logo.svg" alt="OMO 로고" />
+          <img src={omoLogo} alt="OMO 로고" />
         </Icon>
 
         <div className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]">
@@ -32,7 +36,7 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
             도시나 키워드로 검색하기
           </span>
           <Icon size="md">
-            <img src="/src/assets/icons/icon-search.svg" alt="검색" />
+            <img src={iconSearch} alt="검색" />
           </Icon>
         </div>
       </div>
@@ -48,7 +52,7 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
             }`}
           >
             <Icon size="sm">
-              <img src="/src/assets/icons/icon-explore.svg" alt="탐색" />
+              <img src={iconExplore} alt="탐색" />
             </Icon>
             탐색
           </button>
@@ -61,7 +65,7 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
             }`}
           >
             <Icon size="sm">
-              <img src="/src/assets/icons/icon-home.svg" alt="내홈" />
+              <img src={iconHome} alt="내홈" />
             </Icon>
             내 홈
           </button>
