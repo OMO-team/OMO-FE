@@ -1,4 +1,4 @@
-import AlertCircleIcon from './icons/AlertCircleIcon';
+import AlertCircleIcon from '../../../shared/components/AlertCircleIcon';
 
 type DeleteRoadmapModalProps = {
   cityName: string;

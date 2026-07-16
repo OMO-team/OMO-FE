@@ -2,11 +2,13 @@ import { useState } from "react";
 import Header from "../../../shared/components/Header";
 import Footer from "../../../shared/components/Footer";
 import BackHeader from "../../../shared/components/BackHeader";
+import ModalOverlay from "../../../shared/components/ModalOverlay";
 import ProfileCard from "../components/ProfileCard";
 import SettingsSectionHeader from "../components/SettingSectionHeader";
 import SettingActionItem from "../components/SettingActionItem";
 import ToggleSwitch from "../components/ToggleSwitch";
 import LogoutButton from "../components/LogoutButton";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 
 import bellIcon from "../../../assets/icons/bell.svg";
 import settingIcon from "../../../assets/icons/setting.svg";
@@ -20,11 +22,20 @@ import exitIcon from "../../../assets/icons/exit.svg";
 
 interface SettingsPageProps {
   isLoggedIn?: boolean;
+  onNavigateToTerms?: () => void;
+  onLogout?: () => void;
+  onDeleteAccount?: () => void;
 }
 
-export default function SettingsPage({ isLoggedIn = true }: SettingsPageProps) {
+export default function SettingsPage({
+  isLoggedIn = true,
+  onNavigateToTerms,
+  onLogout,
+  onDeleteAccount,
+}: SettingsPageProps) {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
+  const [activeModal, setActiveModal] = useState<"logout" | "delete" | null>(null);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
@@ -97,7 +108,7 @@ export default function SettingsPage({ isLoggedIn = true }: SettingsPageProps) {
               <SettingActionItem
                 title="이용약관 및 정책"
                 right={<img src={chevronRightIcon} alt="" className="h-3.5" />}
-                onClick={() => {}}
+                onClick={onNavigateToTerms}
               />
               <SettingActionItem
                 title="앱 버전"
@@ -117,11 +128,11 @@ export default function SettingsPage({ isLoggedIn = true }: SettingsPageProps) {
         </div>
 
         <div className="mb-[300px] flex flex-col gap-[30px]">
-          <LogoutButton iconSrc={exitIcon} onClick={() => {}} />
+          <LogoutButton iconSrc={exitIcon} onClick={() => setActiveModal("logout")} />
           <button
             type="button"
             className="w-full text-center text-[16px] text-gray-600 underline"
-            onClick={() => {}}
+            onClick={() => setActiveModal("delete")}
           >
             계정 탈퇴
           </button>
@@ -129,6 +140,49 @@ export default function SettingsPage({ isLoggedIn = true }: SettingsPageProps) {
       </main>
 
       <Footer />
+
+      {activeModal === "logout" && (
+        <ModalOverlay onClose={() => setActiveModal(null)}>
+          <ConfirmActionModal
+            title="로그아웃하시겠어요?"
+            description={["현재 계정에서 로그아웃됩니다.", "다시 이용하려면 로그인해 주세요."]}
+            infoTitle="로그아웃 전 확인해 주세요."
+            infoDetail={[
+              "로그아웃해도 저장된 국가, 로드맵, 계정 정보는 삭제되지 않습니다.",
+              "다시 로그인하면 기존 정보를 그대로 확인할 수 있어요.",
+            ]}
+            cancelLabel="취소"
+            confirmLabel="로그아웃 하기"
+            onCancel={() => setActiveModal(null)}
+            onConfirm={() => {
+              setActiveModal(null);
+              onLogout?.();
+            }}
+          />
+        </ModalOverlay>
+      )}
+
+      {activeModal === "delete" && (
+        <ModalOverlay onClose={() => setActiveModal(null)}>
+          {/* Figma 원본 그대로: 회색(왼쪽) 버튼이 "탈퇴하기", 빨간(오른쪽) 버튼이 "취소" */}
+          <ConfirmActionModal
+            title="정말 탈퇴하시겠어요?"
+            description={["탈퇴하면 계정 정보와 저장된 데이터가 삭제됩니다.", "삭제된 정보는 복구할 수 없어요."]}
+            infoTitle="탈퇴 전 확인해 주세요."
+            infoDetail={[
+              "저장한 국가, 로드맵, 일정, 문의 내역 등 OMO에서 이용한 정보가 모두 삭제됩니다.",
+              "계속 진행하려면 탈퇴하기 버튼을 눌러 주세요.",
+            ]}
+            cancelLabel="탈퇴하기"
+            confirmLabel="취소"
+            onCancel={() => {
+              setActiveModal(null);
+              onDeleteAccount?.();
+            }}
+            onConfirm={() => setActiveModal(null)}
+          />
+        </ModalOverlay>
+      )}
     </div>
   );
 }
