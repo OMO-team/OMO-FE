@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import PromptInput from './PromptInput';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 
@@ -8,6 +9,8 @@ const SUGGESTION_CHIPS = [
 ];
 
 export default function AIPromptSection() {
+  const [inputValue, setInputValue] = useState('');
+
   return (
     <div className="flex flex-col items-start w-[1064px] gap-[48px]">
 
@@ -34,7 +37,7 @@ export default function AIPromptSection() {
       <div className="flex flex-col items-start gap-[36px]">
 
         {/* 입력창 */}
-        <PromptInput />
+        <PromptInput value={inputValue} onChange={setInputValue} />
 
         {/* Frame 108: 추천 프롬프트 */}
         <div className="flex flex-col items-start gap-4 self-stretch">
@@ -53,7 +56,8 @@ export default function AIPromptSection() {
                 <button
                   key={text}
                   type="button"
-                  className="flex justify-center items-center w-[346px] h-[42px] px-5 py-[10px] gap-1 rounded-[12px] border border-[#E7EAEF] bg-gray-50 shadow-[0_2px_2.4px_0_rgba(44,54,78,0.20),0_4px_4px_0_rgba(58,70,94,0.12)]"
+                  onClick={() => setInputValue(text)}
+                  className="flex justify-center items-center w-[346px] h-[42px] px-5 py-[10px] gap-1 rounded-[12px] border border-[#E7EAEF] bg-gray-50 shadow-[0_2px_2.4px_0_rgba(44,54,78,0.20),0_4px_4px_0_rgba(58,70,94,0.12)] hover:bg-[#EEF6FF] hover:border-primary-200 transition-colors"
                 >
                   <span className="title-03 text-gray-700 w-[300px] text-center truncate">
                     {text}

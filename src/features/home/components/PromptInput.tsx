@@ -2,12 +2,20 @@ import { useState } from 'react';
 import arrowUpIcon from '../../../assets/icons/icon-arrow-up.svg';
 
 type PromptInputProps = {
+  value?: string;
+  onChange?: (value: string) => void;
   onSubmit?: (value: string) => void;
 };
 
-export default function PromptInput({ onSubmit }: PromptInputProps) {
-  const [value, setValue] = useState('');
+export default function PromptInput({ value: externalValue, onChange, onSubmit }: PromptInputProps) {
+  const [internalValue, setInternalValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+
+  const value = externalValue !== undefined ? externalValue : internalValue;
+  const setValue = (v: string) => {
+    setInternalValue(v);
+    onChange?.(v);
+  };
 
   const handleSubmit = () => {
     if (!value.trim()) return;
