@@ -10,6 +10,7 @@ import PageNavigation from '../../../shared/components/PageNavigation'
 import RegionDropDown from '../components/RegionDropDown'
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg'
 import FilterChip from '../components/FilterChip'
+import FilterIcon from '../../../shared/components/FilterIcon'
 import { useState } from 'react'
 
 export default function CityInsight() {
@@ -69,14 +70,29 @@ export default function CityInsight() {
                     <FilterChip key={filter} label={filter} onRemove={() => setSelectedFilters(prev => prev.filter(v => v !== filter))} />
                 ))}
             </div>
-            <div className='mt-11 grid grid-cols-2 gap-5'>
-                {CITY_INSIGHT_CARDS.map((card) => (
-                    <CityInsightCard key={card.cityName} {...card} onCompare={() => {}} onReport={() => {}} />
-                ))}
-            </div>
-            <div className='mt-25 mb-[304px]'>
-                <PageNavigation currentPage={1} totalPages={3}/>
-            </div>
+            {CITY_INSIGHT_CARDS.length !== 0 ? (
+               <>
+                <div className='mt-11 grid grid-cols-2 gap-5'>
+                    {CITY_INSIGHT_CARDS.map((card) => (
+                        <CityInsightCard key={card.cityName} {...card} onCompare={() => {}} onReport={() => {}} />
+                    ))}
+                </div>
+                <div className='mt-25 mb-[304px]'>
+                    <PageNavigation currentPage={1} totalPages={3}/>
+                </div>
+               </>
+            ) : (
+                <div className='flex flex-col gap-[30px] items-center mt-[298px] mb-[295px]'>
+                    <div className='w-[70px] h-[70px] bg-[#F1F8FF] flex justify-center items-center rounded-full'>
+                        <FilterIcon width={42} height={42}/>
+                    </div>
+                    <div className='flex flex-col gap-2 items-center'>
+                        <h1 className='heading-05 text-gray-600'>조건에 맞는 도시가 없습니다.</h1>
+                        <p className='title-03 text-gray-300'>필터를 완화하면 더 많은 도시를 볼 수 있어요.</p> 
+                    </div>
+                    <button className='bg-blue-100 text-blue-400 px-[26px] py-3 title-02 rounded-[12px]' onClick={handleReset}>필터 초기화 하기</button>
+                </div>
+            )}
         </div>
     </div>
   )
