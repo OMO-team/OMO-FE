@@ -74,46 +74,46 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
 
     const configs: Record<NonNullable<NoticeType>, BarConfig> = {
       attachment: {
-        border: '1px solid #E7EAEF',
-        background: '#FFF',
+        border: '1px solid var(--color-gray-100)',
+        background: 'var(--color-white)',
         icon: clipDarkIcon,
         iconW: 18,
         iconH: 20,
         mainText: '사진 및 파일 첨부',
-        mainColor: '#15181D',
+        mainColor: 'var(--color-gray-900)',
         subText: '컴퓨터에서 업로드하세요   JPG, PNG, PDF · 파일당 최대 10MB',
-        subColor: '#94A0B4',
+        subColor: 'var(--color-gray-400)',
       },
       'briefing-error': {
-        border: '1px solid #FFBEB8',
-        background: '#FFE3E0',
+        border: '1px solid var(--color-red-100)',
+        background: 'var(--color-red-50)',
         icon: alertRedIcon,
         iconW: 20,
         iconH: 20,
         mainText: '브리핑 답변을 생성하지 못했어요.',
-        mainColor: '#EB1600',
+        mainColor: 'var(--color-red-600)',
         subText: '잠시 후 다시 시도해 주세요.',
-        subColor: '#FF7466',
+        subColor: 'var(--color-red-300)',
       },
       'file-error': {
-        border: '1px solid #FFBEB8',
-        background: '#FFE3E0',
+        border: '1px solid var(--color-red-100)',
+        background: 'var(--color-red-50)',
         icon: fileErrorIcon,
         iconW: 24,
         iconH: 24,
         mainText: '파일을 업로드 하지 못했어요.',
-        mainColor: '#EB1600',
+        mainColor: 'var(--color-red-600)',
         subText: '파일 형식이나 용량을 확인한 뒤 다시 시도해 주세요.',
-        subColor: '#FF7466',
+        subColor: 'var(--color-red-300)',
       },
       timeout: {
-        border: '1px solid #C4F2ED',
-        background: '#E6FAF7',
+        border: '1px solid var(--color-secondary-100)',
+        background: 'var(--color-secondary-50)',
         icon: clockTealIcon,
         iconW: 24,
         iconH: 24,
         mainText: '응답이 지연되고 있어요. 다시 시도 해주세요.',
-        mainColor: '#219789',
+        mainColor: 'var(--color-secondary-700)',
       },
     };
 
@@ -146,27 +146,15 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span
-              style={{
-                color: cfg.mainColor,
-                fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                fontSize: '13px',
-                fontWeight: 400,
-                lineHeight: '140%',
-                letterSpacing: '-0.39px',
-              }}
+              className="body-04"
+              style={{ color: cfg.mainColor }}
             >
               {cfg.mainText}
             </span>
             {cfg.subText && (
               <span
-                style={{
-                  color: cfg.subColor,
-                  fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                  fontSize: '12px',
-                  fontWeight: 400,
-                  lineHeight: '140%',
-                  letterSpacing: '-0.24px',
-                }}
+                className="label-01"
+                style={{ color: cfg.subColor }}
               >
                 {cfg.subText}
               </span>
@@ -180,7 +168,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
   return (
     <div
       className="relative flex flex-col"
-      style={{ width: '670px', height: '1080px', borderLeft: '1px solid #B8BFCB', background: '#FFF', flexShrink: 0 }}
+      style={{ width: '670px', height: '1080px', borderLeft: '1px solid var(--color-gray-300)', background: 'var(--color-white)', flexShrink: 0 }}
       onClick={() => {
         if (isDropdownOpen) setIsDropdownOpen(false);
         if (isMoreMenuOpen) setIsMoreMenuOpen(false);
@@ -191,7 +179,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
     >
       {/* Sidebar_Collapse_Handle */}
       <div className="absolute left-0 top-0 bottom-0 flex items-center" style={{ paddingLeft: '10px', pointerEvents: 'none' }}>
-        <div style={{ width: '6px', height: '120px', borderRadius: '10px', background: '#CFD3DA', flexShrink: 0 }} />
+        <div style={{ width: '6px', height: '120px', borderRadius: '10px', background: 'var(--color-gray-200)', flexShrink: 0 }} />
       </div>
 
       {/* Image Upload Dropzone 오버레이 */}
@@ -228,9 +216,9 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             <span
               style={{
                 alignSelf: 'stretch',
-                color: '#404959',
+                color: 'var(--color-gray-700)',
                 textAlign: 'center',
-                fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
+                fontFamily: 'var(--font-pretendard)',
                 fontSize: '16px',
                 fontWeight: 600,
                 lineHeight: '140%',
@@ -240,14 +228,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
               이미지 또는 파일을 여기에 놓아주세요.
             </span>
             <span
-              style={{
-                color: '#566276',
-                fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                fontSize: '12px',
-                fontWeight: 400,
-                lineHeight: '140%',
-                letterSpacing: '-0.24px',
-              }}
+              className="label-01"
+              style={{ color: 'var(--color-gray-600)' }}
             >
               JPG, PNG 파일을 첨부할 수 있어요. 파일당 최대 10MB
             </span>
@@ -263,8 +245,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
           padding: '14px 34px 6px 30px',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderBottom: '1px solid #E7EAEF',
-          background: '#FFF',
+          borderBottom: '1px solid var(--color-gray-100)',
+          background: 'var(--color-white)',
           boxSizing: 'border-box',
         }}
       >
@@ -288,14 +270,14 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                 gap: '8px',
                 flexShrink: 0,
                 borderRadius: '12px',
-                background: isTitleHovered || isDropdownOpen ? '#F8F9FA' : 'transparent',
+                background: isTitleHovered || isDropdownOpen ? 'var(--color-gray-20)' : 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'background 0.15s',
               }}
             >
               <div style={{ display: 'flex', width: '141px', justifyContent: 'center', alignItems: 'center', flexShrink: 0, gap: '8px' }}>
-                <span style={{ color: '#404959', fontFamily: '"Pretendard Variable", Pretendard, sans-serif', fontSize: '18px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.36px', whiteSpace: 'nowrap' }}>
+                <span className="title-01" style={{ color: 'var(--color-gray-700)', whiteSpace: 'nowrap' }}>
                   OMO 스마트 브리핑
                 </span>
                 <div style={{ display: 'flex', width: '20px', height: '20px', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
@@ -303,7 +285,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                     ? <img src={chevronUpIcon} alt="닫기" width={14} height={8} />
                     : (
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8" fill="none">
-                        <path d="M12.7 0.699219L6.69995 6.69922L0.699951 0.69922" stroke="#6B7A94" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M12.7 0.699219L6.69995 6.69922L0.699951 0.69922" stroke="var(--color-gray-500)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     )
                   }
@@ -325,14 +307,14 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                   alignItems: 'flex-start',
                   display: 'flex',
                   borderRadius: '16px',
-                  border: '1px solid #CFD3DA',
-                  background: '#FFF',
+                  border: '1px solid var(--color-gray-200)',
+                  background: 'var(--color-white)',
                   boxShadow: '4px 8px 16px 0 rgba(6, 49, 88, 0.20)',
                   zIndex: 50,
                 }}
               >
                 <div style={{ display: 'flex', padding: '8px 20px', alignItems: 'center', gap: '4px', alignSelf: 'stretch' }}>
-                  <span style={{ color: '#566276', fontFamily: '"Pretendard Variable", Pretendard, sans-serif', fontSize: '12px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.24px' }}>
+                  <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
                     지난 30일
                   </span>
                 </div>
@@ -354,21 +336,16 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                         cursor: 'pointer',
                         textAlign: 'left',
                       }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#F8F9FA'; }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-gray-20)'; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                     >
-                      <span style={{
+                      <span className="body-02" style={{
                         display: '-webkit-box',
                         width: '210px',
                         WebkitBoxOrient: 'vertical',
                         WebkitLineClamp: 1,
                         overflow: 'hidden',
-                        color: '#2B313B',
-                        fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        lineHeight: '140%',
-                        letterSpacing: '-0.28px',
+                        color: 'var(--color-gray-800)',
                         textOverflow: 'ellipsis',
                       }}>
                         {item.title}
@@ -393,7 +370,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                 style={{ display: 'flex', width: '24px', height: '24px', justifyContent: 'center', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
-                  <path d="M13.75 10.75H10.75M10.75 10.75H7.75M10.75 10.75V7.75001M10.75 10.75V13.75M5.75 2.08801C7.26945 1.20874 8.99448 0.747119 10.75 0.750014C16.273 0.750014 20.75 5.22701 20.75 10.75C20.75 16.273 16.273 20.75 10.75 20.75C5.227 20.75 0.75 16.273 0.75 10.75C0.75 8.92901 1.237 7.22001 2.088 5.75001" stroke="#404959" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M13.75 10.75H10.75M10.75 10.75H7.75M10.75 10.75V7.75001M10.75 10.75V13.75M5.75 2.08801C7.26945 1.20874 8.99448 0.747119 10.75 0.750014C16.273 0.750014 20.75 5.22701 20.75 10.75C20.75 16.273 16.273 20.75 10.75 20.75C5.227 20.75 0.75 16.273 0.75 10.75C0.75 8.92901 1.237 7.22001 2.088 5.75001" stroke="var(--color-gray-700)" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </button>
               {isNewChatHovered && (
@@ -408,11 +385,11 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                   alignItems: 'center',
                   gap: '4px',
                   borderRadius: '6px',
-                  background: '#F3F4F6',
+                  background: 'var(--color-gray-50)',
                   whiteSpace: 'nowrap',
                   zIndex: 50,
                 }}>
-                  <span style={{ color: '#566276', fontFamily: '"Pretendard Variable", Pretendard, sans-serif', fontSize: '12px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.24px' }}>
+                  <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
                     새 채팅 시작
                   </span>
                 </div>
@@ -443,7 +420,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                       alignItems: 'flex-start',
                       gap: '4px',
                       borderRadius: '12px',
-                      background: '#F3F4F6',
+                      background: 'var(--color-gray-50)',
                       boxShadow: '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
                       zIndex: 50,
                     }}
@@ -452,22 +429,22 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                       <button
                         type="button"
                         style={{ display: 'flex', height: '26px', padding: '4px 12px', alignItems: 'center', gap: '4px', alignSelf: 'stretch', borderRadius: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#E7EAEF'; }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-gray-100)'; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                       >
                         <img src={editIcon} alt="수정" width={16} height={16} />
-                        <span style={{ color: '#566276', fontFamily: '"Pretendard Variable", Pretendard, sans-serif', fontSize: '12px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.24px' }}>
+                        <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
                           이름 수정하기
                         </span>
                       </button>
                       <button
                         type="button"
                         style={{ display: 'flex', height: '26px', padding: '4px 12px', alignItems: 'center', gap: '4px', alignSelf: 'stretch', borderRadius: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#E7EAEF'; }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-gray-100)'; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                       >
                         <img src={trashIcon} alt="삭제" width={16} height={16} />
-                        <span style={{ color: '#566276', fontFamily: '"Pretendard Variable", Pretendard, sans-serif', fontSize: '12px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.24px' }}>
+                        <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
                           삭제하기
                         </span>
                       </button>
@@ -484,8 +461,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
               style={{ display: 'flex', width: '24px', height: '24px', justifyContent: 'center', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16" fill="none">
-                <path d="M6.75 14.75L12.75 7.75L6.75 0.75" stroke="#404959" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M0.75 14.75L6.75 7.75L0.75 0.75" stroke="#404959" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M6.75 14.75L12.75 7.75L6.75 0.75" stroke="var(--color-gray-700)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M0.75 14.75L6.75 7.75L0.75 0.75" stroke="var(--color-gray-700)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -507,7 +484,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
           alignItems: 'flex-start',
           gap: '4px',
           boxSizing: 'border-box',
-          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, #FFF 19.71%)',
+          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, var(--color-white) 19.71%)',
         }}
       >
         {/* R_Prompt Input Container 래퍼 (notice bar position 기준) */}
@@ -523,8 +500,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
               alignItems: 'center',
               alignSelf: 'stretch',
               borderRadius: '16px',
-              border: isFocused ? '1px solid #1A91FF' : '1px solid #E7EAEF',
-              background: isFocused ? '#FFF' : '#F8F9FA',
+              border: isFocused ? '1px solid var(--color-primary-400)' : '1px solid var(--color-gray-100)',
+              background: isFocused ? 'var(--color-white)' : 'var(--color-gray-20)',
               boxShadow: isFocused ? '0 4px 12px 0 rgba(23, 146, 255, 0.16)' : '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
               gap: '8px',
               transition: 'border 0.15s, box-shadow 0.15s, background 0.15s',
@@ -544,8 +521,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                         width: '100px',
                         height: '124px',
                         borderRadius: '12px',
-                        border: `1px solid ${img.isDark ? '#6B7A94' : '#CFD3DA'}`,
-                        background: img.isDark ? '#94A0B4' : '#E7EAEF',
+                        border: `1px solid ${img.isDark ? 'var(--color-gray-500)' : 'var(--color-gray-200)'}`,
+                        background: img.isDark ? 'var(--color-gray-400)' : 'var(--color-gray-100)',
                         flexShrink: 0,
                       }}
                     >
@@ -588,8 +565,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                 style={{
                   height: '48px',
                   alignSelf: 'stretch',
-                  color: '#94A0B4',
-                  fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
+                  color: 'var(--color-gray-400)',
+                  fontFamily: 'var(--font-pretendard)',
                   fontSize: '14px',
                   fontWeight: 400,
                   lineHeight: '150%',
@@ -617,7 +594,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                   alignItems: 'center',
                   gap: '4px',
                   borderRadius: '100px',
-                  background: noticeType === 'attachment' ? '#E7EAEF' : 'transparent',
+                  background: noticeType === 'attachment' ? 'var(--color-gray-100)' : 'transparent',
                   border: 'none',
                   cursor: 'pointer',
                   transition: 'background 0.15s',
@@ -641,7 +618,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderRadius: '62.5px',
-                  background: hasText ? '#0085FF' : '#CFD3DA',
+                  background: hasText ? 'var(--color-primary-500)' : 'var(--color-gray-200)',
                   border: 'none',
                   cursor: hasText ? 'pointer' : 'default',
                   transition: 'background 0.2s',

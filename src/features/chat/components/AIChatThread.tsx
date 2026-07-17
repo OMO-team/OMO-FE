@@ -18,28 +18,9 @@ const MOCK_REFERENCES: { type: '블로그' | '보고서'; title: string }[] = [
 ];
 
 const CATEGORY_TAG_STYLES = {
-  블로그: { bg: '#E6FAF7', color: '#219789' },
-  보고서: { bg: '#E5F3FF', color: '#005099' },
+  블로그: { bg: 'var(--color-secondary-50)', color: 'var(--color-secondary-700)' },
+  보고서: { bg: 'var(--color-primary-50)', color: 'var(--color-primary-700)' },
 } as const;
-
-const textStyle: React.CSSProperties = {
-  fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-  fontSize: '14px',
-  fontWeight: 400,
-  lineHeight: '150%',
-  letterSpacing: '-0.28px',
-  color: '#000',
-  alignSelf: 'stretch',
-};
-
-const smallTextStyle: React.CSSProperties = {
-  fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-  fontSize: '13px',
-  fontWeight: 400,
-  lineHeight: '140%',
-  letterSpacing: '-0.39px',
-  color: '#B8BFCB',
-};
 
 const divider = (
   <div
@@ -47,7 +28,7 @@ const divider = (
       width: '360px',
       height: '2px',
       borderRadius: '10px',
-      background: '#E7EAEF',
+      background: 'var(--color-gray-100)',
       flexShrink: 0,
     }}
   />
@@ -99,7 +80,7 @@ export default function AIChatThread() {
             <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <img src={thinkingIcon} alt="생각 중" width={18} height={20} />
             </div>
-            <span style={smallTextStyle}>
+            <span className="body-04" style={{ color: 'var(--color-gray-300)' }}>
               {MOCK_THINKING_SECONDS}s 동안 생각함
             </span>
           </div>
@@ -125,9 +106,25 @@ export default function AIChatThread() {
 
                   {/* Frame 11223 — 텍스트 단락 */}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px', alignSelf: 'stretch' }}>
-                    <p style={textStyle}>{MOCK_AI_PARAGRAPHS[0]}</p>
-                    {divider}
-                    <p style={textStyle}>{MOCK_AI_PARAGRAPHS[1]}</p>
+                    {MOCK_AI_PARAGRAPHS.map((text, i) => (
+                      <>
+                        <p
+                          key={text}
+                          style={{
+                            color: 'var(--color-black)',
+                            fontFamily: 'var(--font-pretendard)',
+                            fontSize: '14px',
+                            fontWeight: 400,
+                            lineHeight: '150%',
+                            letterSpacing: '-0.28px',
+                            alignSelf: 'stretch',
+                          }}
+                        >
+                          {text}
+                        </p>
+                        {i < MOCK_AI_PARAGRAPHS.length - 1 && divider}
+                      </>
+                    ))}
                   </div>
 
                   {/* Frame 11220 — 조건 칩 */}
@@ -143,21 +140,15 @@ export default function AIChatThread() {
                             alignItems: 'center',
                             gap: '4px',
                             borderRadius: '8px',
-                            background: '#E5F3FF',
+                            background: 'var(--color-primary-50)',
                           }}
                         >
                           <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <img src={checkConditionIcon} alt="체크" width={14} height={10} />
                           </div>
                           <span
-                            style={{
-                              color: '#005099',
-                              fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                              fontSize: '13px',
-                              fontWeight: 400,
-                              lineHeight: '140%',
-                              letterSpacing: '-0.39px',
-                            }}
+                            className="body-04"
+                            style={{ color: 'var(--color-primary-700)' }}
                           >
                             {condition}
                           </span>
@@ -171,13 +162,9 @@ export default function AIChatThread() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', alignSelf: 'stretch' }}>
                   <a
                     href="#"
+                    className="body-02"
                     style={{
-                      color: '#0085FF',
-                      fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      lineHeight: '140%',
-                      letterSpacing: '-0.28px',
+                      color: 'var(--color-primary-500)',
                       textDecorationLine: 'underline',
                       textDecorationStyle: 'solid',
                     }}
@@ -206,16 +193,7 @@ export default function AIChatThread() {
                 alignSelf: 'stretch',
               }}
             >
-              <span
-                style={{
-                  color: '#6B7A94',
-                  fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                  fontSize: '13px',
-                  fontWeight: 400,
-                  lineHeight: '140%',
-                  letterSpacing: '-0.39px',
-                }}
-              >
+              <span className="body-04" style={{ color: 'var(--color-gray-500)' }}>
                 참고자료
               </span>
             </div>
@@ -245,8 +223,8 @@ export default function AIChatThread() {
                       gap: '4px',
                       alignSelf: 'stretch',
                       borderRadius: '8px',
-                      border: '1px solid #E7EAEF',
-                      background: hoveredCard === ref.title ? '#F3F4F6' : '#FFF',
+                      border: '1px solid var(--color-gray-100)',
+                      background: hoveredCard === ref.title ? 'var(--color-gray-50)' : 'var(--color-white)',
                       cursor: 'pointer',
                       transition: 'background 0.15s',
                     }}
@@ -267,29 +245,16 @@ export default function AIChatThread() {
                             flexShrink: 0,
                           }}
                         >
-                          <span
-                            style={{
-                              color: tagStyle.color,
-                              fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                              fontSize: '12px',
-                              fontWeight: 500,
-                              lineHeight: '140%',
-                              letterSpacing: '-0.24px',
-                            }}
-                          >
+                          <span className="body-05" style={{ color: tagStyle.color }}>
                             {ref.type}
                           </span>
                         </div>
                         {/* 제목 */}
                         <span
+                          className="body-04"
                           style={{
                             width: '194px',
-                            color: '#181A1F',
-                            fontFamily: '"Pretendard Variable", Pretendard, sans-serif',
-                            fontSize: '13px',
-                            fontWeight: 400,
-                            lineHeight: '140%',
-                            letterSpacing: '-0.39px',
+                            color: 'var(--color-gray-900)',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
