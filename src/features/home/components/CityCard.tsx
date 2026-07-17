@@ -13,7 +13,7 @@ type CityCardProps = {
 
 export default function CityCard({ name, cityCount, imagePath }: CityCardProps) {
   return (
-    <div className="relative w-[344px] h-[280px] rounded-[16px] overflow-hidden flex-shrink-0">
+    <div className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0">
       <img
         src={imagePath}
         alt={name}
@@ -26,7 +26,7 @@ export default function CityCard({ name, cityCount, imagePath }: CityCardProps) 
       <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start px-[22px] py-[20px] gap-2">
         <p className="heading-05 text-white">{name}</p>
         <div className="flex items-center gap-1 self-stretch">
-          <span className="title-01 text-[#C2E2FF]">추천도시 {cityCount}개 보기</span>
+          <span className="title-01 text-primary-100">추천도시 {cityCount}개 보기</span>
           <div className="flex justify-center items-center w-6 h-6">
             <img
               src={arrowDiagonalIcon}

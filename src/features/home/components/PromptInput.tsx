@@ -25,7 +25,7 @@ export default function PromptInput({ value: externalValue, onChange, onSubmit }
   return (
     <div
       className={`flex flex-col justify-end items-end w-[1064px] pt-6 px-9 pb-5 gap-1 rounded-[12px] border bg-white shadow-[0_8px_14px_0_rgba(6,49,88,0.20)] transition-colors ${
-        isFocused ? 'border-primary-500' : 'border-[#E7EAEF]'
+        isFocused ? 'border-primary-500' : 'border-gray-100'
       }`}
     >
       {/* Frame 113 */}

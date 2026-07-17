@@ -55,7 +55,7 @@ export default function CategorySection() {
           {/* 더보기 버튼 */}
           <button
             type="button"
-            className="flex justify-center items-center pl-[18px] pr-[12px] py-2 gap-1 rounded-[8px] bg-[#E5F3FF]"
+            className="flex justify-center items-center pl-[18px] pr-[12px] py-2 gap-1 rounded-2 bg-primary-50"
           >
             <span className="body-02 text-primary-500">더보기</span>
             <div className="flex justify-center items-center w-4 h-4">
