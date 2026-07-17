@@ -14,32 +14,6 @@ type LoginModalProps = {
   formError?: string;
 };
 
-const LABEL_STYLE: React.CSSProperties = {
-  color: '#000',
-  fontFamily: 'Pretendard Variable',
-  fontSize: '14px',
-  fontWeight: 500,
-  lineHeight: '140%',
-  letterSpacing: '-0.28px',
-};
-
-const INPUT_TEXT_STYLE: React.CSSProperties = {
-  color: '#15181D',
-  fontFamily: 'Pretendard Variable',
-  fontSize: '14px',
-  fontWeight: 400,
-  lineHeight: '150%',
-  letterSpacing: '-0.28px',
-};
-
-const BODY04_STYLE: React.CSSProperties = {
-  fontFamily: 'Pretendard Variable',
-  fontSize: '13px',
-  fontWeight: 400,
-  lineHeight: '140%',
-  letterSpacing: '-0.39px',
-};
-
 function EyeIcon({ color }: { color: string }) {
   return (
     <svg width="19" height="15" viewBox="0 0 19 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -59,26 +33,26 @@ export default function LoginModal({
 }: LoginModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isRemembered, setIsRemembered] = useState(false);
-  const [isEmailHovered, setIsEmailHovered] = useState(false);
-  const [isPasswordHovered, setIsPasswordHovered] = useState(false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
 
-  const eyeColor = passwordError ? '#FF2A14' : showPassword ? '#0085FF' : '#B8BFCB';
+  const eyeColor = passwordError ? '#FF2A14' : showPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)';
 
   return (
     <div
-      className="inline-flex justify-center items-start"
-      style={{ padding: '30px 40px 40px 40px', borderRadius: '16px', background: '#FFF', gap: '4px' }}
+      className="inline-flex justify-center items-start rounded-4 bg-white"
+      style={{ padding: '30px 40px 40px 40px', gap: '4px' }}
       role="dialog"
       aria-modal="true"
     >
-      {/* Frame 10660 */}
       <div className="flex flex-col items-center" style={{ gap: '36px' }}>
 
-        {/* S_header_modal */}
+        {/* 헤더: 타이틀 + 닫기 */}
         <div className="flex items-center" style={{ width: '400px', gap: '118px' }}>
-          <span style={{ width: '257px', height: '24px', flexShrink: 0, color: '#15181D', fontFamily: 'Pretendard Variable', fontSize: '18px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.36px' }}>
+          <span
+            className="text-gray-900"
+            style={{ width: '257px', height: '24px', flexShrink: 0, fontFamily: 'Pretendard Variable', fontSize: '18px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.36px' }}
+          >
             로그인
           </span>
           <button
@@ -91,75 +65,52 @@ export default function LoginModal({
           </button>
         </div>
 
-        {/* Frame 10659 */}
         <div className="flex flex-col items-center" style={{ gap: '24px' }}>
-
-          {/* Frame 10658 */}
           <div className="flex flex-col justify-center items-center">
 
-            {/* login_form */}
+            {/* 로그인 폼 */}
             <div className="flex flex-col items-start" style={{ gap: '16px' }}>
 
-              {/* email_text_field */}
+              {/* 이메일 필드 */}
               <div className="flex flex-col items-start self-stretch" style={{ gap: '6px' }}>
-                <span className="self-stretch" style={LABEL_STYLE}>이메일</span>
+                <span className="body-02 text-black self-stretch">이메일</span>
                 <div
-                  className="flex items-center"
-                  onMouseEnter={() => setIsEmailHovered(true)}
-                  onMouseLeave={() => setIsEmailHovered(false)}
-                  style={{
-                    width: '400px',
-                    padding: '12px 16px',
-                    gap: '4px',
-                    borderRadius: '8px',
-                    border: emailError ? '1px solid #FF4633' : '1px solid #E7EAEF',
-                    background: isEmailHovered ? '#F3F4F6' : '#FFF',
-                    transition: 'background 0.15s',
-                  }}
+                  className={`flex items-center rounded-2 bg-white hover:bg-gray-50 transition-colors border ${emailError ? 'border-warning-400' : 'border-gray-100'}`}
+                  style={{ width: '400px', padding: '12px 16px', gap: '4px' }}
                 >
                   <input
                     type="email"
-                    className="outline-none bg-transparent flex-1"
-                    style={{ ...INPUT_TEXT_STYLE, width: '344px', flexShrink: 0 }}
+                    className="outline-none bg-transparent flex-1 body-03 text-gray-900 placeholder:text-gray-400"
+                    style={{ width: '344px', flexShrink: 0 }}
                     placeholder="이메일을 입력해주세요"
                   />
                   {emailError && (
-                    <div className="flex justify-center items-center" style={{ width: '20px', height: '20px', paddingRight: '0px', flexShrink: 0 }}>
+                    <div className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
                       <img src={errorIcon} alt="오류" style={{ width: '17px', height: '17px' }} />
                     </div>
                   )}
                 </div>
                 {emailError && (
                   <div className="flex items-center self-stretch" style={{ padding: '0 8px', gap: '4px' }}>
-                    <span style={{ flex: '1 0 0', color: '#FF2A14', ...BODY04_STYLE }}>{emailError}</span>
+                    <span className="body-04 text-[#FF2A14]" style={{ flex: '1 0 0' }}>{emailError}</span>
                   </div>
                 )}
               </div>
 
-              {/* Frame 10656: password + login_option */}
+              {/* 비밀번호 + 로그인 옵션 */}
               <div className="flex flex-col items-start self-stretch" style={{ gap: '8px' }}>
 
-                {/* password_text_field */}
+                {/* 비밀번호 필드 */}
                 <div className="flex flex-col items-start self-stretch" style={{ gap: '6px' }}>
-                  <span className="self-stretch" style={LABEL_STYLE}>비밀번호</span>
+                  <span className="body-02 text-black self-stretch">비밀번호</span>
                   <div
-                    className="flex items-center"
-                    onMouseEnter={() => setIsPasswordHovered(true)}
-                    onMouseLeave={() => setIsPasswordHovered(false)}
-                    style={{
-                      width: '400px',
-                      padding: '12px 16px',
-                      gap: '4px',
-                      borderRadius: '8px',
-                      border: passwordError ? '1px solid #FF4633' : '1px solid #E7EAEF',
-                      background: isPasswordHovered ? '#F3F4F6' : '#FFF',
-                      transition: 'background 0.15s',
-                    }}
+                    className={`flex items-center rounded-2 bg-white hover:bg-gray-50 transition-colors border ${passwordError ? 'border-warning-400' : 'border-gray-100'}`}
+                    style={{ width: '400px', padding: '12px 16px', gap: '4px' }}
                   >
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      className="flex-1 outline-none bg-transparent"
-                      style={{ ...INPUT_TEXT_STYLE, width: '344px', flexShrink: 0 }}
+                      className="flex-1 outline-none bg-transparent body-03 text-gray-900 placeholder:text-gray-400"
+                      style={{ width: '344px', flexShrink: 0 }}
                       placeholder="비밀번호를 입력해주세요"
                     />
                     <button
@@ -173,12 +124,12 @@ export default function LoginModal({
                   </div>
                   {passwordError && (
                     <div className="flex items-center self-stretch" style={{ padding: '0 8px', gap: '4px' }}>
-                      <span style={{ flex: '1 0 0', color: '#FF2A14', ...BODY04_STYLE }}>{passwordError}</span>
+                      <span className="body-04 text-[#FF2A14]" style={{ flex: '1 0 0' }}>{passwordError}</span>
                     </div>
                   )}
                 </div>
 
-                {/* login_option */}
+                {/* 로그인 옵션: 로그인 유지 + 비밀번호 찾기 */}
                 <div className="flex items-center self-stretch" style={{ gap: '200px' }}>
                   <div className="flex items-center" style={{ gap: '4px' }}>
                     <button
@@ -188,37 +139,25 @@ export default function LoginModal({
                       style={{ width: '24px', height: '24px' }}
                     >
                       {isRemembered ? (
-                        <img
-                          src={checkboxCheckedIcon}
-                          alt="체크됨"
-                          style={{ width: '20px', height: '20px', flexShrink: 0 }}
-                        />
+                        <img src={checkboxCheckedIcon} alt="체크됨" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
                       ) : (
-                        <div style={{ width: '20px', height: '20px', flexShrink: 0, borderRadius: '4px', border: '1px solid #B8BFCB', background: '#FFF' }} />
+                        <div className="border border-gray-300 bg-white rounded-1" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
                       )}
                     </button>
-                    <span style={{ color: '#566276', ...BODY04_STYLE }}>로그인 상태 유지</span>
+                    <span className="body-04 text-gray-600">로그인 상태 유지</span>
                   </div>
-                  <button type="button" onClick={onForgotPasswordClick} style={{ color: '#0085FF', ...BODY04_STYLE }}>
+                  <button type="button" onClick={onForgotPasswordClick} className="body-04 text-primary-500">
                     비밀번호 찾기
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 폼 에러 (미가입/불일치) */}
+            {/* 폼 에러 */}
             {formError && (
               <span
-                style={{
-                  marginTop: '16px',
-                  alignSelf: 'flex-start',
-                  color: '#FF2A14',
-                  fontFamily: 'Pretendard Variable',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  lineHeight: '140%',
-                  letterSpacing: '-0.28px',
-                }}
+                className="body-02 text-[#FF2A14]"
+                style={{ marginTop: '16px', alignSelf: 'flex-start' }}
               >
                 {formError}
               </span>
@@ -227,51 +166,53 @@ export default function LoginModal({
             {/* 로그인 버튼 */}
             <button
               type="button"
-              className="flex justify-center items-center"
+              className="flex justify-center items-center rounded-2 bg-primary-500"
               style={{
                 marginTop: formError ? '16px' : '26px',
                 width: '400px',
                 padding: '13px 169px',
-                borderRadius: '8px',
-                background: '#0085FF',
                 gap: '4px',
               }}
             >
-              <span style={{ color: '#FFF', fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}>
+              <span
+                className="text-white"
+                style={{ fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
+              >
                 로그인
               </span>
             </button>
           </div>
 
-          {/* Frame 98: 또는 + 소셜 로그인 + 회원가입 */}
+          {/* 소셜 로그인 + 회원가입 */}
           <div className="flex flex-col items-center self-stretch" style={{ gap: '24px' }}>
 
-            {/* Frame 90: 또는 구분선 */}
+            {/* 또는 구분선 */}
             <div className="flex items-center" style={{ gap: '12px' }}>
-              <div style={{ width: '166px', height: '0.6px', background: '#94A0B4' }} />
-              <span style={{ color: '#94A0B4', fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 400, lineHeight: '150%', letterSpacing: '-0.28px' }}>
+              <div className="bg-gray-400" style={{ width: '166px', height: '0.6px' }} />
+              <span
+                className="text-gray-400"
+                style={{ fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 400, lineHeight: '150%', letterSpacing: '-0.28px' }}
+              >
                 또는
               </span>
-              <div style={{ width: '166px', height: '0.6px', background: '#94A0B4' }} />
+              <div className="bg-gray-400" style={{ width: '166px', height: '0.6px' }} />
             </div>
 
-            {/* Frame 97 */}
             <div className="flex flex-col items-center" style={{ gap: '24px' }}>
 
-              {/* Frame 96: 소셜 로그인 버튼들 */}
+              {/* 소셜 로그인 버튼들 */}
               <div className="flex flex-col items-start" style={{ gap: '12px' }}>
 
-                {/* 카카오 로그인 버튼 */}
+                {/* 카카오 로그인 */}
                 <button
                   type="button"
-                  className="flex flex-col justify-center items-center"
+                  className="flex flex-col justify-center items-center rounded-2"
                   onMouseEnter={() => setIsKakaoHovered(true)}
                   onMouseLeave={() => setIsKakaoHovered(false)}
                   style={{
                     width: '400px',
                     height: '48px',
                     padding: '8px 12px 8px 10px',
-                    borderRadius: '8px',
                     background: isKakaoHovered ? '#F5D401' : '#FAE100',
                     gap: '4px',
                     transition: 'background 0.15s',
@@ -281,24 +222,26 @@ export default function LoginModal({
                     <div className="flex justify-center items-center flex-shrink-0" style={{ width: '24px', height: '24px', padding: '3px 2px' }}>
                       <img src={kakaoIcon} alt="카카오" style={{ width: '20px', height: '18px', flexShrink: 0 }} />
                     </div>
-                    <span style={{ width: '96px', height: '24px', flexShrink: 0, color: '#15181D', textAlign: 'center', fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}>
+                    <span
+                      className="text-gray-900 text-center"
+                      style={{ width: '96px', height: '24px', flexShrink: 0, fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
+                    >
                       카카오 로그인
                     </span>
                     <div style={{ width: '24px', height: '24px', flexShrink: 0 }} />
                   </div>
                 </button>
 
-                {/* 구글 로그인 버튼 */}
+                {/* 구글 로그인 */}
                 <button
                   type="button"
-                  className="flex flex-col justify-center items-center"
+                  className="flex flex-col justify-center items-center rounded-2"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
                   style={{
                     width: '400px',
                     height: '48px',
                     padding: '8px 12px 8px 10px',
-                    borderRadius: '8px',
                     background: isGoogleHovered ? '#E7E6E6' : '#F2F2F2',
                     gap: '4px',
                     transition: 'background 0.15s',
@@ -306,7 +249,10 @@ export default function LoginModal({
                 >
                   <div className="flex justify-center items-center self-stretch" style={{ gap: '82px' }}>
                     <img src={googleIcon} alt="구글" style={{ width: '24px', height: '24px' }} />
-                    <span style={{ color: '#15181D', textAlign: 'center', fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}>
+                    <span
+                      className="text-gray-900 text-center"
+                      style={{ fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
+                    >
                       Goole 계정으로 로그인
                     </span>
                     <div style={{ width: '24px', height: '24px', flexShrink: 0 }} />
@@ -314,13 +260,11 @@ export default function LoginModal({
                 </button>
               </div>
 
-              {/* Frame 87: 회원가입 유도 */}
+              {/* 회원가입 유도 */}
               <div className="flex items-center" style={{ gap: '8px' }}>
-                <span style={{ color: '#B8BFCB', ...BODY04_STYLE }}>계정이 없으신가요?</span>
+                <span className="body-04 text-gray-300">계정이 없으신가요?</span>
                 <button type="button" onClick={onSignupClick} className="flex items-center">
-                  <span style={{ color: '#0085FF', fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.28px' }}>
-                    회원가입하기
-                  </span>
+                  <span className="body-02 text-primary-500">회원가입하기</span>
                 </button>
               </div>
             </div>
