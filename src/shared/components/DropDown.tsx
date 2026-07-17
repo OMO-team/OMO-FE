@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ChevronDownIcon from '../../../shared/components/ChevronDownIcon';
+import ChevronDownIcon from './ChevronDownIcon';
 import { twMerge } from 'tailwind-merge';
 
 interface DropDownProps<T extends string = string> {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import backArrow from '../../../assets/icons/back-arrow.svg'
 import cameraIcon from '../../../assets/icons/icon-camera.svg'
-import DropDown from '../../city-insight/components/DropDown'
+import DropDown from '../../../shared/components/DropDown'
 import ContactSuccessModal from '../components/ContactSuccessModal'
 import { CONTACT_TYPE_OPTIONS, type ContactType } from '../constants/contactOptions'
 
@@ -41,7 +41,7 @@ export default function Contact() {
         setIsModalOpen(true) 
     }
 
-    const handleModalClosse = () => {
+    const handleModalClose = () => {
         setIsModalOpen(false) 
         setContactType(null)
         setName('')
@@ -170,7 +170,7 @@ export default function Contact() {
 
         {isModalOpen && (
             <div className='bg-[#2B313B]/50 fixed inset-0 flex justify-center items-start pt-[142px]'>
-                <ContactSuccessModal onClick={handleModalClosse}/>
+                <ContactSuccessModal onClick={handleModalClose}/>
             </div>
         )}
     </div>
