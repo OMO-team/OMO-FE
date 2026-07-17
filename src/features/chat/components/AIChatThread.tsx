@@ -18,100 +18,60 @@ const MOCK_REFERENCES: { type: '블로그' | '보고서'; title: string }[] = [
 ];
 
 const CATEGORY_TAG_STYLES = {
-  블로그: { bg: 'var(--color-secondary-50)', color: 'var(--color-secondary-700)' },
-  보고서: { bg: 'var(--color-primary-50)', color: 'var(--color-primary-700)' },
+  블로그: { bgClass: 'bg-secondary-50', textClass: 'text-secondary-700' },
+  보고서: { bgClass: 'bg-primary-50', textClass: 'text-primary-700' },
 } as const;
 
 const divider = (
   <div
-    style={{
-      width: '360px',
-      height: '2px',
-      borderRadius: '10px',
-      background: 'var(--color-gray-100)',
-      flexShrink: 0,
-    }}
+    className="bg-gray-100 flex-shrink-0"
+    style={{ width: '360px', height: '2px', borderRadius: '10px' }}
   />
 );
 
 export default function AIChatThread() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+
   return (
     <div
-      style={{
-        display: 'flex',
-        padding: '0 50px',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '4px',
-        alignSelf: 'stretch',
-      }}
+      className="flex flex-col items-center"
+      style={{ padding: '0 50px', gap: '4px', alignSelf: 'stretch' }}
     >
-      {/* Frame 11238 outer */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', alignSelf: 'stretch' }}>
+      <div className="flex flex-col items-start" style={{ alignSelf: 'stretch' }}>
 
-        {/* Frame 11238 inner — 유저 메시지 (우측 정렬) */}
+        {/* 유저 메시지 (우측 정렬) */}
         <div
-          style={{
-            display: 'flex',
-            padding: '40px 0 40px 160px',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: '4px',
-            alignSelf: 'stretch',
-          }}
+          className="flex flex-col items-end"
+          style={{ padding: '40px 0 40px 160px', gap: '4px', alignSelf: 'stretch' }}
         >
-          {/* User chat 버블 */}
           <UserChatBubble text={MOCK_USER_MESSAGE} />
         </div>
 
-        {/* Frame 11235 — AI 응답 영역 */}
-        <div
-          style={{
-            display: 'flex',
-            width: '360px',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: '8px',
-          }}
-        >
-          {/* Frame 11259 — 생각 중 표시 */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* AI 응답 영역 */}
+        <div className="flex flex-col items-start gap-2" style={{ width: '360px' }}>
+
+          {/* 생각 중 표시 */}
+          <div className="flex items-center gap-2">
+            <div className="size-icon-md flex items-center justify-center">
               <img src={thinkingIcon} alt="생각 중" width={18} height={20} />
             </div>
-            <span className="body-04" style={{ color: 'var(--color-gray-300)' }}>
-              {MOCK_THINKING_SECONDS}s 동안 생각함
-            </span>
+            <span className="body-04 text-gray-300">{MOCK_THINKING_SECONDS}s 동안 생각함</span>
           </div>
 
-          {/* Frame 11232 — AI 응답 본문 */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: '24px',
-              alignSelf: 'stretch',
-            }}
-          >
-            {/* Frame 11258 */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '30px', alignSelf: 'stretch' }}>
+          {/* AI 응답 본문 */}
+          <div className="flex flex-col items-start gap-6" style={{ alignSelf: 'stretch' }}>
+            <div className="flex flex-col items-start gap-[30px]" style={{ alignSelf: 'stretch' }}>
+              <div className="flex flex-col items-start gap-4" style={{ alignSelf: 'stretch' }}>
+                <div className="flex flex-col items-start gap-6" style={{ alignSelf: 'stretch' }}>
 
-              {/* Frame 11256 */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '16px', alignSelf: 'stretch' }}>
-
-                {/* Frame 11231 */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '24px', alignSelf: 'stretch' }}>
-
-                  {/* Frame 11223 — 텍스트 단락 */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px', alignSelf: 'stretch' }}>
+                  {/* 텍스트 단락 */}
+                  <div className="flex flex-col items-start gap-3" style={{ alignSelf: 'stretch' }}>
                     {MOCK_AI_PARAGRAPHS.map((text, i) => (
                       <>
                         <p
                           key={text}
+                          className="text-black"
                           style={{
-                            color: 'var(--color-black)',
                             fontFamily: 'var(--font-pretendard)',
                             fontSize: '14px',
                             fontWeight: 400,
@@ -127,87 +87,56 @@ export default function AIChatThread() {
                     ))}
                   </div>
 
-                  {/* Frame 11220 — 조건 칩 */}
-                  <div style={{ display: 'flex', width: '265px', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', alignSelf: 'stretch', flexWrap: 'wrap' }}>
+                  {/* 조건 칩 */}
+                  <div className="flex flex-col items-start gap-2" style={{ width: '265px' }}>
+                    <div className="flex items-center gap-2 flex-wrap" style={{ alignSelf: 'stretch' }}>
                       {MOCK_CONDITIONS.map((condition) => (
                         <div
                           key={condition}
-                          style={{
-                            display: 'flex',
-                            padding: '4px 10px 4px 8px',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            gap: '4px',
-                            borderRadius: '8px',
-                            background: 'var(--color-primary-50)',
-                          }}
+                          className="flex items-center justify-center gap-1 rounded-2 bg-primary-50"
+                          style={{ padding: '4px 10px 4px 8px' }}
                         >
-                          <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <div className="size-icon-sm flex items-center justify-center flex-shrink-0">
                             <img src={checkConditionIcon} alt="체크" width={14} height={10} />
                           </div>
-                          <span
-                            className="body-04"
-                            style={{ color: 'var(--color-primary-700)' }}
-                          >
-                            {condition}
-                          </span>
+                          <span className="body-04 text-primary-700">{condition}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Frame 11257 — 추천 도시 보러가기 */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', alignSelf: 'stretch' }}>
+                {/* 추천 도시 보러가기 */}
+                <div className="flex items-start gap-1" style={{ alignSelf: 'stretch' }}>
                   <a
                     href="#"
-                    className="body-02"
-                    style={{
-                      color: 'var(--color-primary-500)',
-                      textDecorationLine: 'underline',
-                      textDecorationStyle: 'solid',
-                    }}
+                    className="body-02 text-primary-500 underline"
+                    style={{ textDecorationStyle: 'solid' }}
                   >
                     추천 도시 보러가기
                   </a>
-                  <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="size-icon-sm flex items-center justify-center">
                     <img src={chevronRightBlueIcon} alt="이동" width={6} height={12} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Frame 11230 — 구분선 */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', alignSelf: 'stretch' }}>
+            {/* 구분선 */}
+            <div className="flex flex-col items-start" style={{ alignSelf: 'stretch' }}>
               {divider}
             </div>
 
-            {/* Frame 11255 — 참고자료 레이블 */}
+            {/* 참고자료 레이블 */}
             <div
-              style={{
-                display: 'flex',
-                padding: '12px 16px 8px 16px',
-                alignItems: 'center',
-                gap: '4px',
-                alignSelf: 'stretch',
-              }}
+              className="flex items-center gap-1"
+              style={{ padding: '12px 16px 8px 16px', alignSelf: 'stretch' }}
             >
-              <span className="body-04" style={{ color: 'var(--color-gray-500)' }}>
-                참고자료
-              </span>
+              <span className="body-04 text-gray-500">참고자료</span>
             </div>
 
-            {/* Frame 11229 — 참고자료 카드 목록 */}
-            <div
-              style={{
-                display: 'flex',
-                width: '317px',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '8px',
-              }}
-            >
+            {/* 참고자료 카드 목록 */}
+            <div className="flex flex-col items-start gap-2" style={{ width: '317px' }}>
               {MOCK_REFERENCES.map((ref) => {
                 const tagStyle = CATEGORY_TAG_STYLES[ref.type];
                 return (
@@ -215,56 +144,27 @@ export default function AIChatThread() {
                     key={ref.title}
                     onMouseEnter={() => setHoveredCard(ref.title)}
                     onMouseLeave={() => setHoveredCard(null)}
-                    style={{
-                      display: 'flex',
-                      padding: '8px 16px',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: '4px',
-                      alignSelf: 'stretch',
-                      borderRadius: '8px',
-                      border: '1px solid var(--color-gray-100)',
-                      background: hoveredCard === ref.title ? 'var(--color-gray-50)' : 'var(--color-white)',
-                      cursor: 'pointer',
-                      transition: 'background 0.15s',
-                    }}
+                    className={`flex flex-col items-start gap-1 rounded-2 border border-gray-100 cursor-pointer transition-colors ${hoveredCard === ref.title ? 'bg-gray-50' : 'bg-white'}`}
+                    style={{ padding: '8px 16px', alignSelf: 'stretch' }}
                   >
-                    <div style={{ display: 'flex', height: '26px', justifyContent: 'center', alignItems: 'center', gap: '8px', alignSelf: 'stretch' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="flex items-center justify-center gap-2" style={{ height: '26px', alignSelf: 'stretch' }}>
+                      <div className="flex items-center gap-2">
                         {/* S_Category_Tag */}
                         <div
-                          style={{
-                            display: 'flex',
-                            height: '24px',
-                            padding: '4px 12px',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            gap: '4px',
-                            borderRadius: '6px',
-                            background: tagStyle.bg,
-                            flexShrink: 0,
-                          }}
+                          className={`flex items-center justify-center gap-1 rounded-2 flex-shrink-0 ${tagStyle.bgClass}`}
+                          style={{ height: '24px', padding: '4px 12px' }}
                         >
-                          <span className="body-05" style={{ color: tagStyle.color }}>
-                            {ref.type}
-                          </span>
+                          <span className={`body-05 ${tagStyle.textClass}`}>{ref.type}</span>
                         </div>
                         {/* 제목 */}
                         <span
-                          className="body-04"
-                          style={{
-                            width: '194px',
-                            color: 'var(--color-gray-900)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
+                          className="body-04 text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap"
+                          style={{ width: '194px' }}
                         >
                           {ref.title}
                         </span>
                       </div>
-                      {/* 외부 링크 아이콘 */}
-                      <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div className="size-icon-sm flex items-center justify-center flex-shrink-0">
                         <img src={externalLinkIcon} alt="외부 링크" width={16} height={16} />
                       </div>
                     </div>

@@ -35,6 +35,63 @@ type AIChatPanelProps = {
   defaultNotice?: NoticeType;
 };
 
+type BarConfig = {
+  borderClass: string;
+  bgClass: string;
+  icon: string;
+  iconW: number;
+  iconH: number;
+  mainText: string;
+  mainColorClass: string;
+  subText?: string;
+  subColorClass?: string;
+};
+
+const NOTICE_CONFIGS: Record<NonNullable<NoticeType>, BarConfig> = {
+  attachment: {
+    borderClass: 'border border-gray-100',
+    bgClass: 'bg-white',
+    icon: clipDarkIcon,
+    iconW: 18,
+    iconH: 20,
+    mainText: '사진 및 파일 첨부',
+    mainColorClass: 'text-gray-900',
+    subText: '컴퓨터에서 업로드하세요   JPG, PNG, PDF · 파일당 최대 10MB',
+    subColorClass: 'text-gray-400',
+  },
+  'briefing-error': {
+    borderClass: 'border border-red-100',
+    bgClass: 'bg-red-50',
+    icon: alertRedIcon,
+    iconW: 20,
+    iconH: 20,
+    mainText: '브리핑 답변을 생성하지 못했어요.',
+    mainColorClass: 'text-red-600',
+    subText: '잠시 후 다시 시도해 주세요.',
+    subColorClass: 'text-red-300',
+  },
+  'file-error': {
+    borderClass: 'border border-red-100',
+    bgClass: 'bg-red-50',
+    icon: fileErrorIcon,
+    iconW: 24,
+    iconH: 24,
+    mainText: '파일을 업로드 하지 못했어요.',
+    mainColorClass: 'text-red-600',
+    subText: '파일 형식이나 용량을 확인한 뒤 다시 시도해 주세요.',
+    subColorClass: 'text-red-300',
+  },
+  timeout: {
+    borderClass: 'border border-secondary-100',
+    bgClass: 'bg-secondary-50',
+    icon: clockTealIcon,
+    iconW: 24,
+    iconH: 24,
+    mainText: '응답이 지연되고 있어요. 다시 시도 해주세요.',
+    mainColorClass: 'text-secondary-700',
+  },
+};
+
 export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defaultNotice = null }: AIChatPanelProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -59,105 +116,30 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
 
   const renderNoticeBar = () => {
     if (!noticeType) return null;
-
-    type BarConfig = {
-      border: string;
-      background: string;
-      icon: string;
-      iconW: number;
-      iconH: number;
-      mainText: string;
-      mainColor: string;
-      subText?: string;
-      subColor?: string;
-    };
-
-    const configs: Record<NonNullable<NoticeType>, BarConfig> = {
-      attachment: {
-        border: '1px solid var(--color-gray-100)',
-        background: 'var(--color-white)',
-        icon: clipDarkIcon,
-        iconW: 18,
-        iconH: 20,
-        mainText: '사진 및 파일 첨부',
-        mainColor: 'var(--color-gray-900)',
-        subText: '컴퓨터에서 업로드하세요   JPG, PNG, PDF · 파일당 최대 10MB',
-        subColor: 'var(--color-gray-400)',
-      },
-      'briefing-error': {
-        border: '1px solid var(--color-red-100)',
-        background: 'var(--color-red-50)',
-        icon: alertRedIcon,
-        iconW: 20,
-        iconH: 20,
-        mainText: '브리핑 답변을 생성하지 못했어요.',
-        mainColor: 'var(--color-red-600)',
-        subText: '잠시 후 다시 시도해 주세요.',
-        subColor: 'var(--color-red-300)',
-      },
-      'file-error': {
-        border: '1px solid var(--color-red-100)',
-        background: 'var(--color-red-50)',
-        icon: fileErrorIcon,
-        iconW: 24,
-        iconH: 24,
-        mainText: '파일을 업로드 하지 못했어요.',
-        mainColor: 'var(--color-red-600)',
-        subText: '파일 형식이나 용량을 확인한 뒤 다시 시도해 주세요.',
-        subColor: 'var(--color-red-300)',
-      },
-      timeout: {
-        border: '1px solid var(--color-secondary-100)',
-        background: 'var(--color-secondary-50)',
-        icon: clockTealIcon,
-        iconW: 24,
-        iconH: 24,
-        mainText: '응답이 지연되고 있어요. 다시 시도 해주세요.',
-        mainColor: 'var(--color-secondary-700)',
-      },
-    };
-
-    const cfg = configs[noticeType];
+    const cfg = NOTICE_CONFIGS[noticeType];
 
     return (
       <div
+        className={`${cfg.bgClass} ${cfg.borderClass} absolute flex items-center gap-2`}
         style={{
-          position: 'absolute',
           top: '-48px',
           left: '0',
           right: '0',
-          display: 'flex',
           width: '570px',
           padding: '6px 20px',
-          alignItems: 'center',
-          gap: '8px',
           borderRadius: '12px',
-          border: cfg.border,
-          background: cfg.background,
           boxShadow: '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
           boxSizing: 'border-box',
         }}
       >
-        {/* 아이콘 */}
-        <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className="size-icon-md flex items-center justify-center flex-shrink-0">
           <img src={cfg.icon} alt="" width={cfg.iconW} height={cfg.iconH} />
         </div>
-        {/* 텍스트 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span
-              className="body-04"
-              style={{ color: cfg.mainColor }}
-            >
-              {cfg.mainText}
-            </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className={`body-04 ${cfg.mainColorClass}`}>{cfg.mainText}</span>
             {cfg.subText && (
-              <span
-                className="label-01"
-                style={{ color: cfg.subColor }}
-              >
-                {cfg.subText}
-              </span>
+              <span className={`label-01 ${cfg.subColorClass}`}>{cfg.subText}</span>
             )}
           </div>
         </div>
@@ -167,8 +149,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
 
   return (
     <div
-      className="relative flex flex-col"
-      style={{ width: '670px', height: '1080px', borderLeft: '1px solid var(--color-gray-300)', background: 'var(--color-white)', flexShrink: 0 }}
+      className="relative flex flex-col border-l border-gray-300 bg-white"
+      style={{ width: '670px', height: '1080px', flexShrink: 0 }}
       onClick={() => {
         if (isDropdownOpen) setIsDropdownOpen(false);
         if (isMoreMenuOpen) setIsMoreMenuOpen(false);
@@ -179,45 +161,26 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
     >
       {/* Sidebar_Collapse_Handle */}
       <div className="absolute left-0 top-0 bottom-0 flex items-center" style={{ paddingLeft: '10px', pointerEvents: 'none' }}>
-        <div style={{ width: '6px', height: '120px', borderRadius: '10px', background: 'var(--color-gray-200)', flexShrink: 0 }} />
+        <div className="bg-gray-200 flex-shrink-0" style={{ width: '6px', height: '120px', borderRadius: '10px' }} />
       </div>
 
       {/* Image Upload Dropzone 오버레이 */}
       {isDragOver && (
         <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'rgba(255, 255, 255, 0.50)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-          }}
+          className="absolute inset-0 flex items-center justify-center bg-white/50"
+          style={{ zIndex: 100 }}
         >
           <div
-            style={{
-              display: 'inline-flex',
-              padding: '30px 40px',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '12px',
-              borderRadius: '20px',
-              background: 'rgba(255, 255, 255, 0.40)',
-            }}
+            className="inline-flex flex-col items-center justify-center gap-3 rounded-5"
+            style={{ padding: '30px 40px', background: 'rgba(255, 255, 255, 0.40)' }}
           >
-            {/* 32×32 아이콘 */}
-            <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={imageUploadIcon} alt="업로드" width={24} height={24} />
-              </div>
+            <div className="size-icon-xl flex items-center justify-center">
+              <img src={imageUploadIcon} alt="업로드" width={24} height={24} />
             </div>
             <span
+              className="text-gray-700 text-center"
               style={{
                 alignSelf: 'stretch',
-                color: 'var(--color-gray-700)',
-                textAlign: 'center',
                 fontFamily: 'var(--font-pretendard)',
                 fontSize: '16px',
                 fontWeight: 600,
@@ -227,10 +190,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             >
               이미지 또는 파일을 여기에 놓아주세요.
             </span>
-            <span
-              className="label-01"
-              style={{ color: 'var(--color-gray-600)' }}
-            >
+            <span className="label-01 text-gray-600">
               JPG, PNG 파일을 첨부할 수 있어요. 파일당 최대 10MB
             </span>
           </div>
@@ -239,48 +199,30 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
 
       {/* R_Header_AI chat */}
       <div
+        className="flex items-center justify-between border-b border-gray-100 bg-white"
         style={{
-          display: 'flex',
           width: '670px',
           padding: '14px 34px 6px 30px',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid var(--color-gray-100)',
-          background: 'var(--color-white)',
           boxSizing: 'border-box',
         }}
       >
-        {/* Frame 11243 */}
-        <div style={{ display: 'flex', width: '606px', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <div className="flex items-center justify-between flex-shrink-0" style={{ width: '606px' }}>
 
           {/* AI Chat Title 드롭다운 버튼 */}
-          <div style={{ position: 'relative' }}>
+          <div className="relative">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setIsDropdownOpen((v) => !v); }}
               onMouseEnter={() => setIsTitleHovered(true)}
               onMouseLeave={() => setIsTitleHovered(false)}
-              style={{
-                display: 'flex',
-                width: '206px',
-                height: '40px',
-                padding: '8px 18px',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '8px',
-                flexShrink: 0,
-                borderRadius: '12px',
-                background: isTitleHovered || isDropdownOpen ? 'var(--color-gray-20)' : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
+              className={`flex items-center justify-center gap-2 rounded-3 flex-shrink-0 border-none cursor-pointer transition-colors ${isTitleHovered || isDropdownOpen ? 'bg-gray-20' : 'bg-transparent'}`}
+              style={{ width: '206px', height: '40px', padding: '8px 18px' }}
             >
-              <div style={{ display: 'flex', width: '141px', justifyContent: 'center', alignItems: 'center', flexShrink: 0, gap: '8px' }}>
-                <span className="title-01" style={{ color: 'var(--color-gray-700)', whiteSpace: 'nowrap' }}>
+              <div className="flex items-center justify-center flex-shrink-0 gap-2" style={{ width: '141px' }}>
+                <span className="title-01 text-gray-700 whitespace-nowrap">
                   OMO 스마트 브리핑
                 </span>
-                <div style={{ display: 'flex', width: '20px', height: '20px', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
+                <div className="size-icon-sm flex items-center justify-center flex-shrink-0">
                   {isDropdownOpen
                     ? <img src={chevronUpIcon} alt="닫기" width={14} height={8} />
                     : (
@@ -296,56 +238,34 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             {/* Chat History Dropdown */}
             {isDropdownOpen && (
               <div
+                className="absolute flex flex-col items-start border border-gray-200 bg-white rounded-4"
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  position: 'absolute',
                   right: '-68px',
                   bottom: '-164px',
                   width: '274px',
                   padding: '10px 12px',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  display: 'flex',
-                  borderRadius: '16px',
-                  border: '1px solid var(--color-gray-200)',
-                  background: 'var(--color-white)',
                   boxShadow: '4px 8px 16px 0 rgba(6, 49, 88, 0.20)',
                   zIndex: 50,
                 }}
               >
-                <div style={{ display: 'flex', padding: '8px 20px', alignItems: 'center', gap: '4px', alignSelf: 'stretch' }}>
-                  <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
-                    지난 30일
-                  </span>
+                <div className="flex items-center gap-1" style={{ padding: '8px 20px', alignSelf: 'stretch' }}>
+                  <span className="body-05 text-gray-600">지난 30일</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', alignSelf: 'stretch' }}>
+                <div className="flex flex-col items-start" style={{ alignSelf: 'stretch' }}>
                   {MOCK_HISTORY.map((item) => (
                     <button
                       key={item.id}
                       type="button"
-                      style={{
-                        display: 'flex',
-                        padding: '8px 20px',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '4px',
-                        alignSelf: 'stretch',
-                        borderRadius: '8px',
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-gray-20)'; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                      className="flex items-center justify-center gap-1 rounded-2 border-none cursor-pointer text-left hover:bg-gray-20 bg-transparent transition-colors"
+                      style={{ padding: '8px 20px', alignSelf: 'stretch' }}
                     >
-                      <span className="body-02" style={{
+                      <span className="body-02 text-gray-800" style={{
                         display: '-webkit-box',
                         width: '210px',
                         WebkitBoxOrient: 'vertical',
                         WebkitLineClamp: 1,
                         overflow: 'hidden',
-                        color: 'var(--color-gray-800)',
                         textOverflow: 'ellipsis',
                       }}>
                         {item.title}
@@ -358,95 +278,70 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
           </div>
 
           {/* Frame 11200: New Chat + More Menu + Collapse */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
+          <div className="flex items-center justify-end gap-3">
 
             {/* New Chat 버튼 */}
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <button
                 type="button"
                 onClick={onNewChat}
                 onMouseEnter={() => setIsNewChatHovered(true)}
                 onMouseLeave={() => setIsNewChatHovered(false)}
-                style={{ display: 'flex', width: '24px', height: '24px', justifyContent: 'center', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+                className="size-icon-md flex items-center justify-center bg-transparent border-none cursor-pointer p-0"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
                   <path d="M13.75 10.75H10.75M10.75 10.75H7.75M10.75 10.75V7.75001M10.75 10.75V13.75M5.75 2.08801C7.26945 1.20874 8.99448 0.747119 10.75 0.750014C16.273 0.750014 20.75 5.22701 20.75 10.75C20.75 16.273 16.273 20.75 10.75 20.75C5.227 20.75 0.75 16.273 0.75 10.75C0.75 8.92901 1.237 7.22001 2.088 5.75001" stroke="var(--color-gray-700)" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </button>
               {isNewChatHovered && (
-                <div style={{
-                  position: 'absolute',
-                  right: '-29px',
-                  bottom: '-29px',
-                  display: 'flex',
-                  height: '25px',
-                  padding: '4px 12px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '4px',
-                  borderRadius: '6px',
-                  background: 'var(--color-gray-50)',
-                  whiteSpace: 'nowrap',
-                  zIndex: 50,
-                }}>
-                  <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
-                    새 채팅 시작
-                  </span>
+                <div
+                  className="absolute flex items-center justify-center gap-1 rounded-2 bg-gray-50 whitespace-nowrap"
+                  style={{ right: '-29px', bottom: '-29px', height: '25px', padding: '4px 12px', zIndex: 50 }}
+                >
+                  <span className="body-05 text-gray-600">새 채팅 시작</span>
                 </div>
               )}
             </div>
 
             {/* More Menu(...) 버튼 — 채팅 시작 후에만 노출 */}
             {hasChat && (
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setIsMoreMenuOpen((v) => !v); }}
-                  style={{ display: 'flex', width: '24px', height: '24px', justifyContent: 'center', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+                  className="size-icon-md flex items-center justify-center bg-transparent border-none cursor-pointer p-0"
                 >
                   <img src={moreMenuIcon} alt="더보기" width={18} height={4} />
                 </button>
                 {isMoreMenuOpen && (
                   <div
+                    className="absolute flex flex-col items-start gap-1 rounded-3 bg-gray-50"
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                      position: 'absolute',
                       right: '-52px',
                       bottom: '-76px',
                       width: '124px',
                       padding: '8px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: '4px',
-                      borderRadius: '12px',
-                      background: 'var(--color-gray-50)',
                       boxShadow: '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
                       zIndex: 50,
                     }}
                   >
-                    <div style={{ display: 'flex', width: '108px', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                    <div className="flex flex-col items-start gap-1" style={{ width: '108px' }}>
                       <button
                         type="button"
-                        style={{ display: 'flex', height: '26px', padding: '4px 12px', alignItems: 'center', gap: '4px', alignSelf: 'stretch', borderRadius: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-gray-100)'; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                        className="flex items-center gap-1 rounded-2 border-none cursor-pointer bg-transparent hover:bg-gray-100 transition-colors"
+                        style={{ height: '26px', padding: '4px 12px', alignSelf: 'stretch' }}
                       >
                         <img src={editIcon} alt="수정" width={16} height={16} />
-                        <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
-                          이름 수정하기
-                        </span>
+                        <span className="body-05 text-gray-600">이름 수정하기</span>
                       </button>
                       <button
                         type="button"
-                        style={{ display: 'flex', height: '26px', padding: '4px 12px', alignItems: 'center', gap: '4px', alignSelf: 'stretch', borderRadius: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-gray-100)'; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                        className="flex items-center gap-1 rounded-2 border-none cursor-pointer bg-transparent hover:bg-gray-100 transition-colors"
+                        style={{ height: '26px', padding: '4px 12px', alignSelf: 'stretch' }}
                       >
                         <img src={trashIcon} alt="삭제" width={16} height={16} />
-                        <span className="body-05" style={{ color: 'var(--color-gray-600)' }}>
-                          삭제하기
-                        </span>
+                        <span className="body-05 text-gray-600">삭제하기</span>
                       </button>
                     </div>
                   </div>
@@ -458,7 +353,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             <button
               type="button"
               onClick={onClose}
-              style={{ display: 'flex', width: '24px', height: '24px', justifyContent: 'center', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+              className="size-icon-md flex items-center justify-center bg-transparent border-none cursor-pointer p-0"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16" fill="none">
                 <path d="M6.75 14.75L12.75 7.75L6.75 0.75" stroke="var(--color-gray-700)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -484,65 +379,44 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
           alignItems: 'flex-start',
           gap: '4px',
           boxSizing: 'border-box',
-          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, var(--color-white) 19.71%)',
+          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, #FFF 19.71%)',
         }}
       >
         {/* R_Prompt Input Container 래퍼 (notice bar position 기준) */}
-        <div style={{ position: 'relative', alignSelf: 'stretch' }}>
+        <div className="relative" style={{ alignSelf: 'stretch' }}>
           {renderNoticeBar()}
 
           {/* R_Prompt Input Container */}
           <div
+            className={`flex flex-col items-center rounded-4 ${isFocused ? 'border border-primary-400 bg-white' : 'border border-gray-100 bg-gray-20'}`}
             style={{
-              display: 'flex',
               padding: hasImages ? '16px 24px 20px 24px' : '20px 24px',
-              flexDirection: 'column',
-              alignItems: 'center',
               alignSelf: 'stretch',
-              borderRadius: '16px',
-              border: isFocused ? '1px solid var(--color-primary-400)' : '1px solid var(--color-gray-100)',
-              background: isFocused ? 'var(--color-white)' : 'var(--color-gray-20)',
               boxShadow: isFocused ? '0 4px 12px 0 rgba(23, 146, 255, 0.16)' : '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
               gap: '8px',
               transition: 'border 0.15s, box-shadow 0.15s, background 0.15s',
             }}
           >
             {/* Frame 11211: 이미지(있을 경우) + 텍스트 입력 */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: hasImages ? '16px' : '8px', alignSelf: 'stretch' }}>
+            <div className="flex flex-col items-start" style={{ gap: hasImages ? '16px' : '8px', alignSelf: 'stretch' }}>
 
               {/* Frame 11457: 이미지 썸네일 행 (이미지 있을때만) */}
               {hasImages && (
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                <div className="flex items-start gap-2">
                   {MOCK_IMAGES.map((img) => (
                     <div
                       key={img.id}
-                      style={{
-                        position: 'relative',
-                        width: '100px',
-                        height: '124px',
-                        borderRadius: '12px',
-                        border: `1px solid ${img.isDark ? 'var(--color-gray-500)' : 'var(--color-gray-200)'}`,
-                        background: img.isDark ? 'var(--color-gray-400)' : 'var(--color-gray-100)',
-                        flexShrink: 0,
-                      }}
+                      className={`relative rounded-3 flex-shrink-0 ${img.isDark ? 'border border-gray-500 bg-gray-400' : 'border border-gray-200 bg-gray-100'}`}
+                      style={{ width: '100px', height: '124px' }}
                     >
                       {/* Frame 11452: 닫기 버튼 오버레이 */}
                       <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          right: 0,
-                          width: '100px',
-                          padding: '8px 8px 0 0',
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          alignItems: 'flex-start',
-                          boxSizing: 'border-box',
-                        }}
+                        className="absolute top-0 right-0 flex justify-end items-start"
+                        style={{ width: '100px', padding: '8px 8px 0 0', boxSizing: 'border-box' }}
                       >
                         <button
                           type="button"
-                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, width: '20px', height: '20px' }}
+                          className="bg-transparent border-none cursor-pointer p-0 size-icon-sm"
                         >
                           <img
                             src={img.isDark ? closeCircleWhiteIcon : closeCircleGrayIcon}
@@ -562,19 +436,15 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder="원하는 나라 조건을 자유롭게 입력해보세요. 예: 유럽에서 생활비가 저렴한 도시 추천해줘"
+                className="text-gray-400 bg-transparent border-none outline-none resize-none"
                 style={{
                   height: '48px',
                   alignSelf: 'stretch',
-                  color: 'var(--color-gray-400)',
                   fontFamily: 'var(--font-pretendard)',
                   fontSize: '14px',
                   fontWeight: 400,
                   lineHeight: '150%',
                   letterSpacing: '-0.28px',
-                  resize: 'none',
-                  outline: 'none',
-                  border: 'none',
-                  background: 'transparent',
                 }}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
@@ -582,25 +452,15 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             </div>
 
             {/* Frame 11209: 아이콘 행 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', alignSelf: 'stretch' }}>
+            <div className="flex items-center justify-between" style={{ alignSelf: 'stretch' }}>
               {/* 클립 아이콘 버튼 */}
               <button
                 type="button"
                 onClick={handleClipClick}
-                style={{
-                  display: 'flex',
-                  padding: '4px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '4px',
-                  borderRadius: '100px',
-                  background: noticeType === 'attachment' ? 'var(--color-gray-100)' : 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s',
-                }}
+                className={`flex items-center justify-center gap-1 rounded-full border-none cursor-pointer transition-colors ${noticeType === 'attachment' ? 'bg-gray-100' : 'bg-transparent'}`}
+                style={{ padding: '4px' }}
               >
-                <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="size-icon-md flex items-center justify-center">
                   <img src={clipIcon} alt="첨부" width={18} height={20} />
                 </div>
               </button>
@@ -610,21 +470,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                 type="button"
                 onClick={handleSubmit}
                 disabled={!hasText}
-                style={{
-                  display: 'flex',
-                  width: '32px',
-                  height: '32px',
-                  padding: '6.25px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderRadius: '62.5px',
-                  background: hasText ? 'var(--color-primary-500)' : 'var(--color-gray-200)',
-                  border: 'none',
-                  cursor: hasText ? 'pointer' : 'default',
-                  transition: 'background 0.2s',
-                  flexShrink: 0,
-                  boxSizing: 'border-box',
-                }}
+                className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
+                style={{ width: '32px', height: '32px', padding: '6.25px', boxSizing: 'border-box' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none">
                   <path d="M6.09375 11.4062L6.09375 0.781249M11.4063 6.09375L6.09375 0.781249L0.78125 6.09375" stroke="white" strokeWidth="1.5625" strokeLinecap="round" strokeLinejoin="round" />
