@@ -1,4 +1,3 @@
-import arrowDownIcon from '../../assets/icons/icon-arrow-down[16].svg';
 import { useState } from 'react';
 import CategoryTab from '../../../shared/components/CategoryTab';
 import CityCard, { CITY_IMAGES } from './CityCard';
