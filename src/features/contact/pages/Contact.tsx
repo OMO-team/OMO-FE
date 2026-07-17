@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import backArrow from '../../../assets/icons/back-arrow.svg'
+import cameraIcon from '../../../assets/icons/icon-camera.svg'
 import DropDown from '../../city-insight/components/DropDown'
 import ContactSuccessModal from '../components/ContactSuccessModal'
 import { CONTACT_TYPE_OPTIONS, type ContactType } from '../constants/contactOptions'
@@ -139,7 +140,11 @@ export default function Contact() {
                                 <div className='relative w-35 h-35 bg-gray-20 rounded-[12px]'>
                                     {preview[index] 
                                         ? <img src={preview[index]} alt="" className="w-full h-full object-cover rounded-[12px] overflow-hidden'" />
-                                        : <div className='w-full h-full'></div>
+                                        : <div className='w-full h-full flex justify-center items-center'>
+                                            <div className='bg-gray-100 rounded-full w-12 h-12 flex justify-center items-center'>
+                                                <img src={cameraIcon} alt="" className=''/>
+                                            </div>
+                                        </div>
                                     }
                                     {preview[index] && <div onClick={(e) => handleRemovePreview(e, index)} className='absolute -top-2.5 -right-2.5 w-5 h-5 bg-warning-400 rounded-full flex justify-center items-center text-white'>-</div>}
                                 </div>
