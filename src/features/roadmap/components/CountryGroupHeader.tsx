@@ -1,5 +1,5 @@
 import LocationPinIcon from './icons/LocationPinIcon';
-import ChevronIcon from './icons/ChevronIcon';
+import ChevronIcon from '../../../shared/components/ChevronIcon';
 
 type CountryGroupHeaderProps = {
   countryName: string;
