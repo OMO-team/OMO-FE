@@ -35,10 +35,18 @@ export default function Contact() {
         })
     }
 
+    const isValid = contactType !== null && name.trim() !== '' && email.trim() !== '' && content.trim() !== ''
+
     const handleSubmit = () => {
-        if (!contactType || !name || !email || !content)
-            return
-        setIsModalOpen(!isModalOpen)
+        setIsModalOpen(true) 
+    }
+
+    const handleModalClosse = () => {
+        setIsModalOpen(false) 
+        setContactType(null)
+        setName('')
+        setEmail('')
+        setContent('')
     }
 
   return (
@@ -80,7 +88,7 @@ export default function Contact() {
 
                 {/* 문의 유형 드롭다운 */}
                 <div className='flex flex-col gap-3.25'>
-                    <p className='title-05'>문의 유형</p>
+                    <p className='title-05'>문의 유형<span className='text-red-500'>*</span></p>
                     <DropDown 
                     title={contactType ?? '문의 유형을 선택해 주세요.'}
                     options={[...CONTACT_TYPE_OPTIONS]}
@@ -93,23 +101,23 @@ export default function Contact() {
                 {/* 이름 / 이메일 입력 */}
                 <div className='mt-7.5 w-full flex items-center gap-14.5'>
                     <div className='flex flex-col gap-6.75'>
-                        <p className='title-05'>이름</p>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className='w-100.5 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-300' placeholder='이름을 입력해주세요' />
+                        <p className='title-05'>이름<span className='text-red-500'>*</span></p>
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className='w-100.5 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-900 placeholder:text-gray-300' placeholder='이름을 입력해주세요' />
                     </div>
                     
                     <div className='flex flex-col gap-2'>
                         <div className='flex flex-col gap-0.5'>
-                            <p className='title-05'>이메일</p>
+                            <p className='title-05'>이메일<span className='text-red-500'>*</span></p>
                             <p className='label-01 text-gray-600'>문의 답변은 입력한 이메일로 발송됩니다.</p>
                         </div>
-                        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} className='w-100 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-300'placeholder='답변을 받을 이메일을 입력해주세요' />
+                        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} className='w-100 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-900 placeholder:text-gray-300' placeholder='답변을 받을 이메일을 입력해주세요' />
                     </div>
                 </div>
 
                 {/* 문의 내용 작성*/}
                 <div className='mt-[30px]'>
                     <div className='mb-5 flex flex-col gap-0.5'>
-                        <p className='title-05'>문의 내용</p>
+                        <p className='title-05'>문의 내용<span className='text-red-500'>*</span></p>
                         <p className='label-01 text-gray-600'>
                             상황을 자세히 적어주시면 더 정확한 답변을 받을 수 있어요.
                             <br />문의 내용은 최소 10자 이상, 최대 1,000자 이하로 작성해 주세요.
@@ -119,7 +127,7 @@ export default function Contact() {
                         <textarea   
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            className='w-full h-107 bg-gray-20 rounded-[16px] p-[30px] whitespace-pre-line body-03 text-gray-500 resize-none'
+                            className='w-full h-107 bg-gray-20 rounded-[16px] p-[30px] whitespace-pre-line body-03 text-gray-900 resize-none placeholder:text-gray-300'
                             placeholder={`문의하실 내용을 자세히 입력해 주세요\n예: 저장한 국가가 보이지 않아요 / 로드맵 일정이 수정되지 않아요 / 이메일 인증이 오지 않아요`}/>
                         <p className='absolute bottom-[30px] right-[30px] label-01 text-gray-600'>{content.length} / 1,000</p>
                     </div>
@@ -155,13 +163,14 @@ export default function Contact() {
 
                 {/* 문의하기 버튼 */}
                 <div className='w-full flex justify-end mb-[300px]'>
-                    <button onClick={handleSubmit} className='mt-20 w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02'>문의하기</button>
+                    <button disabled={!isValid} onClick={handleSubmit} className='mt-20 w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02 disabled:bg-gray-400'>문의하기</button>
                 </div>
             </div>
         </div>
+
         {isModalOpen && (
             <div className='bg-[#2B313B]/50 fixed inset-0 flex justify-center items-start pt-[142px]'>
-                <ContactSuccessModal onClick={handleSubmit}/>
+                <ContactSuccessModal onClick={handleModalClosse}/>
             </div>
         )}
     </div>
