@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from '../../../shared/components/Header';
 import Footer from '../../../shared/components/Footer';
+import LargeFillButton from '../../../shared/components/LargeFillButton';
 import mailIcon from '../../../assets/icons/icon-mail.svg';
 
 type Step = 'sent' | 'inputCode' | 'success' | 'expired' | 'limitExceeded' | 'failed';
@@ -16,24 +17,6 @@ const TOTAL_SECONDS = 5 * 60;
 const MAX_RESEND = 5;
 const CODE_LENGTH = 6;
 
-function BlueFilledButton({ onClick, disabled, children }: { onClick?: () => void; disabled?: boolean; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="flex justify-center items-center self-stretch rounded-lg bg-primary-500 disabled:opacity-50"
-      style={{ padding: '13px 0' }}
-    >
-      <span
-        className="text-white"
-        style={{ fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
-      >
-        {children}
-      </span>
-    </button>
-  );
-}
 
 function RedFilledButton({ onClick, children }: { onClick?: () => void; children: React.ReactNode }) {
   return (
@@ -220,7 +203,7 @@ export default function EmailVerificationPage({
           </div>
           <div className="flex items-center self-stretch" style={{ gap: '12px' }}>
             <OutlineButton onClick={handleResend}>메일 다시 받기</OutlineButton>
-            <BlueFilledButton onClick={() => setStep('inputCode')}>확인</BlueFilledButton>
+            <LargeFillButton label="확인" onClick={() => setStep('inputCode')} />
           </div>
         </div>
       )}
@@ -281,9 +264,7 @@ export default function EmailVerificationPage({
           </div>
           <div className="flex items-center self-stretch" style={{ gap: '12px' }}>
             <OutlineButton onClick={handleResend}>인증번호 다시 받기</OutlineButton>
-            <BlueFilledButton onClick={handleVerify} disabled={isVerifying || code.join('').length < CODE_LENGTH}>
-              인증하기
-            </BlueFilledButton>
+            <LargeFillButton label="인증하기" onClick={handleVerify} disabled={isVerifying || code.join('').length < CODE_LENGTH} />
           </div>
         </div>
       )}
@@ -319,7 +300,7 @@ export default function EmailVerificationPage({
               <span className="body-04 text-gray-500 self-stretch">비밀번호 재설정, 보안 알림, 중요 알림이 해당 이메일로 발송됩니다.</span>
             </InfoBox>
           </div>
-          <BlueFilledButton onClick={onServiceStart}>서비스 이용하기</BlueFilledButton>
+          <LargeFillButton label="서비스 이용하기" onClick={onServiceStart} />
         </div>
       )}
 
