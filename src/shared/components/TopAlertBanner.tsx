@@ -18,6 +18,7 @@ const VARIANT = {
     chipBg: 'bg-[#E5F3FF]',
     chipText: '#0085FF',
     xStroke: '#47A7FF',
+    iconStroke: '#0085FF',
   },
   teal: {
     banner: 'border-[#C4F2ED] bg-[#E6FAF7]',
@@ -26,6 +27,7 @@ const VARIANT = {
     chipBg: 'bg-[#E6FAF7]',
     chipText: '#2AC0AE',
     xStroke: '#79E2D5',
+    iconStroke: '#2ED1BE',
   },
   red: {
     banner: 'border-[#FFCDC9] bg-[#FFECEB]',
@@ -34,15 +36,16 @@ const VARIANT = {
     chipBg: 'bg-[#FFECEB]',
     chipText: '#EB1600',
     xStroke: '#FF6B5E',
+    iconStroke: '#EB1600',
   },
 } as const;
 
-function ShieldUserIcon() {
+function ShieldUserIcon({ stroke }: { stroke: string }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 11C13.1046 11 14 10.1046 14 9C14 7.89543 13.1046 7 12 7C10.8954 7 10 7.89543 10 9C10 10.1046 10.8954 11 12 11Z" stroke="#0085FF" strokeWidth="1.5"/>
-      <path d="M16 15C16 16.105 16 17 12 17C8 17 8 16.105 8 15C8 13.895 9.79 13 12 13C14.21 13 16 13.895 16 15Z" stroke="#0085FF" strokeWidth="1.5"/>
-      <path d="M3 10.417C3 7.219 3 5.62 3.378 5.082C3.755 4.545 5.258 4.03 8.265 3.001L8.838 2.805C10.405 2.268 11.188 2 12 2C12.812 2 13.595 2.268 15.162 2.805L15.735 3.001C18.742 4.03 20.245 4.545 20.622 5.082C21 5.62 21 7.22 21 10.417V11.991C21 14.496 20.163 16.428 19 17.904M3.193 14C4.05 18.298 7.576 20.513 9.899 21.527C10.62 21.842 10.981 22 12 22C13.02 22 13.38 21.842 14.101 21.527C14.68 21.275 15.332 20.947 16 20.533" stroke="#0085FF" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M12 11C13.1046 11 14 10.1046 14 9C14 7.89543 13.1046 7 12 7C10.8954 7 10 7.89543 10 9C10 10.1046 10.8954 11 12 11Z" stroke={stroke} strokeWidth="1.5"/>
+      <path d="M16 15C16 16.105 16 17 12 17C8 17 8 16.105 8 15C8 13.895 9.79 13 12 13C14.21 13 16 13.895 16 15Z" stroke={stroke} strokeWidth="1.5"/>
+      <path d="M3 10.417C3 7.219 3 5.62 3.378 5.082C3.755 4.545 5.258 4.03 8.265 3.001L8.838 2.805C10.405 2.268 11.188 2 12 2C12.812 2 13.595 2.268 15.162 2.805L15.735 3.001C18.742 4.03 20.245 4.545 20.622 5.082C21 5.62 21 7.22 21 10.417V11.991C21 14.496 20.163 16.428 19 17.904M3.193 14C4.05 18.298 7.576 20.513 9.899 21.527C10.62 21.842 10.981 22 12 22C13.02 22 13.38 21.842 14.101 21.527C14.68 21.275 15.332 20.947 16 20.533" stroke={stroke} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
 }
@@ -56,11 +59,11 @@ function ClockIcon({ stroke }: { stroke: string }) {
   );
 }
 
-function WarningIcon() {
+function WarningIcon({ stroke }: { stroke: string }) {
   return (
     <svg width="20" height="20" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10.75 0.749999C5.22715 0.749999 0.750001 5.22715 0.750001 10.75C0.75 16.2728 5.22715 20.75 10.75 20.75C16.2728 20.75 20.75 16.2728 20.75 10.75C20.75 5.22715 16.2728 0.75 10.75 0.749999Z" stroke="#EB1600" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10.75 6.75L10.75 10.75M10.75 14.75L10.74 14.75" stroke="#EB1600" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M10.75 0.749999C5.22715 0.749999 0.750001 5.22715 0.750001 10.75C0.75 16.2728 5.22715 20.75 10.75 20.75C16.2728 20.75 20.75 16.2728 20.75 10.75C20.75 5.22715 16.2728 0.75 10.75 0.749999Z" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M10.75 6.75L10.75 10.75M10.75 14.75L10.74 14.75" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -80,12 +83,10 @@ const DEFAULT_ICON: Record<TopAlertBannerVariant, TopAlertBannerIcon> = {
 };
 
 function BannerIcon({ variant, icon }: { variant: TopAlertBannerVariant; icon: TopAlertBannerIcon }) {
-  if (icon === 'warning') return <WarningIcon />;
-  if (icon === 'clock') {
-    const stroke = variant === 'teal' ? '#2ED1BE' : '#0085FF';
-    return <ClockIcon stroke={stroke} />;
-  }
-  return <ShieldUserIcon />;
+  const stroke = VARIANT[variant].iconStroke;
+  if (icon === 'warning') return <WarningIcon stroke={stroke} />;
+  if (icon === 'clock') return <ClockIcon stroke={stroke} />;
+  return <ShieldUserIcon stroke={stroke} />;
 }
 
 const TEXT_STYLE: React.CSSProperties = {
