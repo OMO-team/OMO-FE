@@ -1,8 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
+import EyeIcon from '../../../shared/components/EyeIcon';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
-import eyeIcon from '../../../assets/icons/icon-eye.svg';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
@@ -146,7 +146,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                         onClick={() => setShowNewPassword((p) => !p)}
                         className="shrink-0 w-5 h-5 flex items-center justify-center"
                       >
-                        <img src={eyeIcon} alt="비밀번호 표시" className="w-5 h-5" />
+                        <EyeIcon color={newPasswordError ? '#FF2A14' : showNewPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)'} />
                       </button>
                     </div>
                     {newPasswordError && (
@@ -176,7 +176,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                         onClick={() => setShowConfirmPassword((p) => !p)}
                         className="shrink-0 w-5 h-5 flex items-center justify-center"
                       >
-                        <img src={eyeIcon} alt="비밀번호 표시" className="w-5 h-5" />
+                        <EyeIcon color={confirmPasswordError ? '#FF2A14' : showConfirmPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)'} />
                       </button>
                     </div>
                     {confirmPasswordError && (

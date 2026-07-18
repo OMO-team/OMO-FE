@@ -352,7 +352,7 @@ export default function SignupModal({
                       className="text-gray-900 text-center"
                       style={{ fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
                     >
-                      Goole 계정으로 로그인
+                      Google 계정으로 로그인
                     </span>
                     <div style={{ width: '24px', height: '24px', flexShrink: 0 }} />
                   </div>

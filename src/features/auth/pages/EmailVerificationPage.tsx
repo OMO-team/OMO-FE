@@ -18,41 +18,6 @@ const MAX_RESEND = 5;
 const CODE_LENGTH = 6;
 
 
-function RedFilledButton({ onClick, children }: { onClick?: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex justify-center items-center self-stretch rounded-lg bg-[#FF2A14]"
-      style={{ padding: '13px 0' }}
-    >
-      <span
-        className="text-white"
-        style={{ fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
-      >
-        {children}
-      </span>
-    </button>
-  );
-}
-
-function OutlineButton({ onClick, children }: { onClick?: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex justify-center items-center self-stretch rounded-lg border border-gray-300 bg-white"
-      style={{ padding: '13px 0' }}
-    >
-      <span
-        className="text-gray-600"
-        style={{ fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
-      >
-        {children}
-      </span>
-    </button>
-  );
-}
 
 function MailIcon({ error = false }: { error?: boolean }) {
   return (
@@ -202,7 +167,7 @@ export default function EmailVerificationPage({
             </InfoBox>
           </div>
           <div className="flex items-center self-stretch" style={{ gap: '12px' }}>
-            <OutlineButton onClick={handleResend}>메일 다시 받기</OutlineButton>
+            <LargeFillButton label="메일 다시 받기" variant="outline" onClick={handleResend} />
             <LargeFillButton label="확인" onClick={() => setStep('inputCode')} />
           </div>
         </div>
@@ -263,7 +228,7 @@ export default function EmailVerificationPage({
             </InfoBox>
           </div>
           <div className="flex items-center self-stretch" style={{ gap: '12px' }}>
-            <OutlineButton onClick={handleResend}>인증번호 다시 받기</OutlineButton>
+            <LargeFillButton label="인증번호 다시 받기" variant="outline" onClick={handleResend} />
             <LargeFillButton label="인증하기" onClick={handleVerify} disabled={isVerifying || code.join('').length < CODE_LENGTH} />
           </div>
         </div>
@@ -349,7 +314,7 @@ export default function EmailVerificationPage({
               <span className="body-04 text-gray-500 self-stretch">메일을 받지 못했다면 스팸함을 확인해 주세요.</span>
             </InfoBox>
           </div>
-          <RedFilledButton onClick={handleResend}>인증 메일 다시 받기</RedFilledButton>
+          <LargeFillButton label="인증 메일 다시 받기" variant="red" onClick={handleResend} />
         </div>
       )}
 
@@ -377,8 +342,8 @@ export default function EmailVerificationPage({
             </InfoBox>
           </div>
           <div className="flex items-center self-stretch" style={{ gap: '12px' }}>
-            <OutlineButton onClick={() => setStep('sent')}>닫기</OutlineButton>
-            <RedFilledButton onClick={handleResend}>인증 번호 다시 받기</RedFilledButton>
+            <LargeFillButton label="닫기" variant="outline" onClick={() => setStep('sent')} />
+            <LargeFillButton label="인증 번호 다시 받기" variant="red" onClick={handleResend} />
           </div>
         </div>
       )}
@@ -415,7 +380,7 @@ export default function EmailVerificationPage({
               <span className="body-04 text-gray-500 self-stretch">계속 실패할 경우 인증번호를 다시 받아 진행해 주세요.</span>
             </InfoBox>
           </div>
-          <RedFilledButton onClick={handleResend}>인증 번호 다시 받기</RedFilledButton>
+          <LargeFillButton label="인증 번호 다시 받기" variant="red" onClick={handleResend} />
         </div>
       )}
 
