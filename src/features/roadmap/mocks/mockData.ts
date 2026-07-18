@@ -4,6 +4,7 @@ import type {
   AiReportData,
   RequiredDocumentData,
   CountryGroupData,
+  UploadedFileItem,
 } from '../types/roadmap';
 
 /** 타임라인 순서(F-502 스펙): 여권 → 어학 → 숙소 → 재정 → 비자 → 항공권 */
@@ -114,4 +115,11 @@ export const countryRoadmapGroups: CountryGroupData[] = [
       { ...berlinCard, cityName: '맨체스터', countryName: '영국' },
     ],
   },
+];
+
+export const documentUploadFiles: UploadedFileItem[] = [
+  { name: '졸업증명서.pdf', uploadedSizeMB: 2.4, totalSizeMB: 4, status: 'uploading' },
+  { name: '재학증명서.doc', uploadedSizeMB: 2, totalSizeMB: 2, status: 'processing' },
+  { name: '아포스티유_확인서.csv', uploadedSizeMB: 3, totalSizeMB: 3, status: 'completed' },
+  { name: '통장잔고증명서.jpg', uploadedSizeMB: 1.2, totalSizeMB: 1.2, status: 'error' },
 ];

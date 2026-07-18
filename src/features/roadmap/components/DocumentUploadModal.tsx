@@ -1,6 +1,6 @@
 import { useRef, type ChangeEvent, type DragEvent } from 'react';
 import CloudUploadIcon from './icons/CloudUploadIcon';
-import PdfFileIcon from './icons/PdfFileIcon';
+import FileTypeIcon from './icons/FileTypeIcon';
 import UploadSpinnerIcon from './icons/UploadSpinnerIcon';
 import RemoveIcon from './icons/RemoveIcon';
 import TimelineOngoingIcon from './icons/TimelineOngoingIcon';
@@ -93,7 +93,7 @@ export default function DocumentUploadModal({
                 <div key={file.name} className="flex w-full items-start justify-end rounded-2 border border-gray-100 px-2.5 pb-2.5 pt-2">
                   <div className="flex w-full flex-col gap-1">
                     <div className="flex items-start gap-2">
-                      <PdfFileIcon className="size-[46px] shrink-0" />
+                      <FileTypeIcon fileName={file.name} className="size-11.5 shrink-0" />
                       <div className="flex flex-1 flex-col gap-1">
                         <p className="body-02 truncate text-gray-900">{file.name}</p>
                         <div className="body-04 flex items-center gap-1 text-gray-500">
@@ -106,6 +106,12 @@ export default function DocumentUploadModal({
                               파일을 업로드하고 있어요
                             </span>
                           )}
+                          {file.status === 'processing' && (
+                            <span className="flex items-center gap-1 truncate">
+                              <UploadSpinnerIcon className="size-icon-sm shrink-0" />
+                              <span className="truncate">이미지 분석 중 · AI 텍스트 추출 중</span>
+                            </span>
+                          )}
                           {file.status === 'completed' && (
                             <span className="flex items-center gap-1">
                               <TimelineOngoingIcon className="size-icon-sm" />
@@ -114,7 +120,7 @@ export default function DocumentUploadModal({
                           )}
                           {file.status === 'error' && (
                             <span className="flex items-center gap-1 text-red-300">
-                              <InfoCircleIcon className="size-icon-sm text-[#ff2a14]" />
+                              <InfoCircleIcon className="size-icon-sm rotate-180 text-[#ff2a14]" />
                               파일을 업로드하지 못했어요.
                             </span>
                           )}

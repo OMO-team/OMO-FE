@@ -42,7 +42,7 @@ export interface UploadedFileItem {
   name: string;
   uploadedSizeMB: number;
   totalSizeMB: number;
-  status: 'uploading' | 'completed' | 'error';
+  status: 'uploading' | 'processing' | 'completed' | 'error';
 }
 
 export interface CityRoadmapData {

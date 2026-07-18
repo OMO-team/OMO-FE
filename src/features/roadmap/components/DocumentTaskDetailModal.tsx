@@ -63,7 +63,7 @@ export default function DocumentTaskDetailModal({
             {scheduledDate && (
               <button
                 type="button"
-                className="body-02 flex items-center gap-2 rounded-2 px-2 py-1 text-gray-700"
+                className="body-02 flex items-center gap-2 rounded-2 px-2 py-1 text-gray-700 transition-colors hover:bg-gray-50"
                 onClick={onDateClick}
               >
                 <CalendarIcon className="size-icon-sm" />
