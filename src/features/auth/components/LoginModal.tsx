@@ -28,7 +28,7 @@ export default function LoginModal({
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
 
-  const eyeColor = passwordError ? '#FF2A14' : showPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)';
+  const eyeColor = passwordError ? 'var(--color-warning-400)' : showPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)';
 
   return (
     <div

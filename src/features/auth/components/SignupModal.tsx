@@ -11,6 +11,7 @@ type SignupModalProps = {
   nameError?: string;
   emailError?: string;
   passwordError?: string;
+  confirmPasswordError?: string;
 };
 
 function CheckIcon({ color }: { color: string }) {
@@ -40,15 +41,17 @@ export default function SignupModal({
   nameError,
   emailError,
   passwordError,
+  confirmPasswordError,
 }: SignupModalProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
 
-  const eyeColor = passwordError ? '#FF2A14' : showPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)';
+  const eyeColor = passwordError ? 'var(--color-warning-400)' : showPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)';
 
   const handleAgreeAll = () => {
     const next = !agreeAll;
@@ -182,6 +185,32 @@ export default function SignupModal({
                   {passwordError && (
                     <div className="flex items-center self-stretch" style={{ padding: '0 8px', gap: '4px' }}>
                       <span className="body-04 text-[#FF2A14]" style={{ flex: '1 0 0' }}>{passwordError}</span>
+                    </div>
+                  )}
+
+                  {/* 비밀번호 확인 필드 */}
+                  <div
+                    className={`flex items-center rounded-2 bg-white hover:bg-gray-50 transition-colors border ${confirmPasswordError ? 'border-warning-400' : 'border-gray-100'}`}
+                    style={{ width: '400px', padding: '12px 16px', gap: '4px', marginTop: '6px' }}
+                  >
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      className="flex-1 outline-none bg-transparent body-03 text-gray-900 placeholder:text-gray-400"
+                      style={{ width: '344px', flexShrink: 0 }}
+                      placeholder="비밀번호를 다시 입력해주세요"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="flex justify-center items-center flex-shrink-0"
+                      style={{ width: '20px', height: '20px', aspectRatio: '1/1' }}
+                    >
+                      <EyeIcon color={confirmPasswordError ? 'var(--color-warning-400)' : showConfirmPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)'} />
+                    </button>
+                  </div>
+                  {confirmPasswordError && (
+                    <div className="flex items-center self-stretch" style={{ padding: '0 8px', gap: '4px' }}>
+                      <span className="body-04 text-[#FF2A14]" style={{ flex: '1 0 0' }}>{confirmPasswordError}</span>
                     </div>
                   )}
                 </div>
