@@ -1,4 +1,4 @@
-import ChevronLeftIcon from '../../../shared/components/ChevronLeftIcon';
+import ChevronLeftIcon from './icons/ChevronLeftIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];

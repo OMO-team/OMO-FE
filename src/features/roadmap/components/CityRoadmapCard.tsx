@@ -1,4 +1,4 @@
-import LargeFillButton from '../../../shared/components/LargeFillButton';
+import LargeFillButton from './LargeFillButton';
 import StarIcon from '../../../shared/components/StarIcon';
 import HeartIcon from '../../../shared/components/HeartIcon';
 import ProgressBar from '../../../shared/components/ProgressBar';

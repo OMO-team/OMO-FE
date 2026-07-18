@@ -1,4 +1,4 @@
-import ChevronLeftIcon from '../../../shared/components/ChevronLeftIcon';
+import ChevronLeftIcon from './icons/ChevronLeftIcon';
 import RoadmapTitleIcon from './icons/RoadmapTitleIcon';
 
 type RoadmapMonthSelectorProps = {
