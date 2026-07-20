@@ -105,7 +105,7 @@ export default function CountryRoadmapList({
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <Header />
+      <Header isLoggedIn={false} />
 
       {removedRecord && (
         <RoadmapRemovedToast cityName={removedRecord.city.cityName} onUndo={handleUndo} onClose={() => setRemovedRecord(null)} />

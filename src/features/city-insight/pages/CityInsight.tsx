@@ -3,7 +3,7 @@ import CategoryTab from "../../../shared/components/CategoryTab"
 import CityInsightCard from "../components/CityInsightCard"
 import SearchInputBar from '../../../shared/components/SearchInputBar'
 import DetailDropDown from '../components/DetailDropDown'
-import DropDown from '../components/DropDown'
+import DropDown from '../../../shared/components/DropDown'
 import { DETAIL_OPTIONS } from '../constants/filterOptions'
 import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards'
 import PageNavigation from '../../../shared/components/PageNavigation'
