@@ -1,12 +1,21 @@
 import { useState } from 'react';
+import arrowUpIcon from '../../../assets/icons/icon-arrow-up.svg';
 
 type PromptInputProps = {
+  value?: string;
+  onChange?: (value: string) => void;
   onSubmit?: (value: string) => void;
 };
 
-export default function PromptInput({ onSubmit }: PromptInputProps) {
-  const [value, setValue] = useState('');
+export default function PromptInput({ value: externalValue, onChange, onSubmit }: PromptInputProps) {
+  const [internalValue, setInternalValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+
+  const value = externalValue !== undefined ? externalValue : internalValue;
+  const setValue = (v: string) => {
+    setInternalValue(v);
+    onChange?.(v);
+  };
 
   const handleSubmit = () => {
     if (!value.trim()) return;
@@ -16,7 +25,7 @@ export default function PromptInput({ onSubmit }: PromptInputProps) {
   return (
     <div
       className={`flex flex-col justify-end items-end w-[1064px] pt-6 px-9 pb-5 gap-1 rounded-[12px] border bg-white shadow-[0_8px_14px_0_rgba(6,49,88,0.20)] transition-colors ${
-        isFocused ? 'border-primary-500' : 'border-[#E7EAEF]'
+        isFocused ? 'border-primary-500' : 'border-gray-100'
       }`}
     >
       {/* Frame 113 */}
@@ -42,7 +51,7 @@ export default function PromptInput({ onSubmit }: PromptInputProps) {
             className="flex justify-center items-center p-[10px] rounded-full bg-primary-500 hover:bg-primary-600 transition-colors"
           >
             <span className="flex justify-center items-center w-7 h-7">
-              <img src="/src/assets/icons/Vector.svg" alt="전송" width={17} height={17} />
+              <img src={arrowUpIcon} alt="전송" width={17} height={17} />
             </span>
           </button>
         </div>
