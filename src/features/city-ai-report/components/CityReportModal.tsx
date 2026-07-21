@@ -7,6 +7,7 @@ import KeyMetrics from './KeyMetrics';
 import ProsCons from './ProsCons';
 import VlogReviews from './VlogReviews';
 import RealReviews from './RealReviews';
+import CityReportFooter from './CityReportFooter';
 import CloseButton from '../../../shared/components/CloseButton';
 import type { AISearchResultData, CityReportData } from '../../../shared/types/cityReport';
 
@@ -15,9 +16,16 @@ interface CityReportModalProps {
   onClose: () => void;
   data: CityReportData;
   onSearch: (query: string) => AISearchResultData;
+  onAddToRoadmap?: () => void;
 }
 
-export default function CityReportModal({ isOpen, onClose, data, onSearch }: CityReportModalProps) {
+export default function CityReportModal({
+  isOpen,
+  onClose,
+  data,
+  onSearch,
+  onAddToRoadmap,
+}: CityReportModalProps) {
   useEffect(() => {
     if (!isOpen) return;
     const originalOverflow = document.body.style.overflow;
@@ -69,6 +77,7 @@ export default function CityReportModal({ isOpen, onClose, data, onSearch }: Cit
             </div>
           </div>
         </div>
+        <CityReportFooter cityName={data.cityName} onAddToRoadmap={onAddToRoadmap} />
       </div>
     </div>
   );
