@@ -10,7 +10,8 @@ import Footer from '../../../shared/components/Footer';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import DeleteRoadmapModal from '../components/DeleteRoadmapModal';
 import RoadmapRemovedToast from '../components/RoadmapRemovedToast';
-import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
+import { useRoadmapStore } from '../store/useRoadmapStore';
+import type { CityRoadmapData } from '../types/roadmap';
 
 type RemovedRecord = {
   city: CityRoadmapData;
@@ -19,7 +20,6 @@ type RemovedRecord = {
 };
 
 type CountryRoadmapListProps = {
-  countryGroups: CountryGroupData[];
   currentPage: number;
   totalPages: number;
   onPageChange?: (page: number) => void;
@@ -29,19 +29,20 @@ type CountryRoadmapListProps = {
 };
 
 export default function CountryRoadmapList({
-  countryGroups,
   currentPage,
   totalPages,
   onPageChange,
   onViewRoadmap,
   onExploreCity,
 }: CountryRoadmapListProps) {
-  const [groups, setGroups] = useState<CountryGroupData[]>(countryGroups);
+  const groups = useRoadmapStore((s) => s.countryGroups);
+  const removeCity = useRoadmapStore((s) => s.removeCity);
+  const restoreCity = useRoadmapStore((s) => s.restoreCity);
   const [activeTab, setActiveTab] = useState(0);
   const [wishedCityNames, setWishedCityNames] = useState<Set<string>>(
     () =>
       new Set(
-        countryGroups.flatMap((group) => group.cities).filter((city) => city.isWished).map((city) => city.cityName),
+        groups.flatMap((group) => group.cities).filter((city) => city.isWished).map((city) => city.cityName),
       ),
   );
   const [deleteTarget, setDeleteTarget] = useState<CityRoadmapData | null>(null);
@@ -64,40 +65,14 @@ export default function CountryRoadmapList({
 
   const handleConfirmDelete = () => {
     if (!deleteTarget) return;
-    const group = groups.find((g) => g.countryName === deleteTarget.countryName);
-    const cityIndex = group?.cities.findIndex((c) => c.cityName === deleteTarget.cityName) ?? -1;
-    if (!group || cityIndex === -1) {
-      setDeleteTarget(null);
-      return;
-    }
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.countryName === deleteTarget.countryName
-          ? { ...g, cities: g.cities.filter((c) => c.cityName !== deleteTarget.cityName), cityCount: g.cityCount - 1 }
-          : g,
-      ),
-    );
-    setRemovedRecord({ city: deleteTarget, countryName: deleteTarget.countryName, index: cityIndex });
+    const record = removeCity(deleteTarget.countryName, deleteTarget.cityName);
+    if (record) setRemovedRecord(record);
     setDeleteTarget(null);
   };
 
   const handleUndo = () => {
     if (!removedRecord) return;
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.countryName === removedRecord.countryName
-          ? {
-              ...g,
-              cities: [
-                ...g.cities.slice(0, removedRecord.index),
-                removedRecord.city,
-                ...g.cities.slice(removedRecord.index),
-              ],
-              cityCount: g.cityCount + 1,
-            }
-          : g,
-      ),
-    );
+    restoreCity(removedRecord);
     setRemovedRecord(null);
   };
 
