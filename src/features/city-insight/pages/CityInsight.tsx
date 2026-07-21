@@ -15,6 +15,7 @@ import { useState } from 'react';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import type { CityReportData } from '../../../shared/types/cityReport';
+import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
@@ -25,6 +26,7 @@ export default function CityInsight() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
+  const addCity = useRoadmapStore(s => s.addCity);
 
   const handleSelect = (country: string) => {
     setSelectedFilters(prev => (prev.includes(country) ? prev : [...prev, country]));
@@ -47,6 +49,24 @@ export default function CityInsight() {
   };
 
   const reportData = reportCityName ? CITY_REPORT_DATA[reportCityName] : null;
+
+  const handleAddToRoadmap = () => {
+    const card = CITY_INSIGHT_CARDS.find(c => c.cityName === reportCityName);
+    if (!card) return;
+    addCity({
+      cityName: card.cityName,
+      countryName: card.countryName,
+      description: card.description,
+      rating: card.rating,
+      imageUrl: card.imageUrl,
+      progressPercent: 0,
+      costProgressPercent: 0,
+      completedSteps: 0,
+      totalSteps: 0,
+      nextSchedule: '아직 일정이 없어요',
+    });
+    setReportCityName(null);
+  };
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
@@ -142,6 +162,7 @@ export default function CityInsight() {
           onClose={() => setReportCityName(null)}
           data={reportData}
           onSearch={mockSearchResult}
+          onAddToRoadmap={handleAddToRoadmap}
         />
       )}
     </div>
