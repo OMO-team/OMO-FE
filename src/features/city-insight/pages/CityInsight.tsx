@@ -11,11 +11,12 @@ import RegionDropDown from '../components/RegionDropDown';
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
 import FilterChip from '../components/FilterChip';
 import FilterIcon from '../../../shared/components/FilterIcon';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import type { CityReportData } from '../../../shared/types/cityReport';
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
+import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
@@ -26,7 +27,14 @@ export default function CityInsight() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
+  const [addedCityName, setAddedCityName] = useState<string | null>(null);
   const addCity = useRoadmapStore(s => s.addCity);
+
+  useEffect(() => {
+    if (!addedCityName) return;
+    const timer = setTimeout(() => setAddedCityName(null), 5000);
+    return () => clearTimeout(timer);
+  }, [addedCityName]);
 
   const handleSelect = (country: string) => {
     setSelectedFilters(prev => (prev.includes(country) ? prev : [...prev, country]));
@@ -66,6 +74,7 @@ export default function CityInsight() {
       nextSchedule: '아직 일정이 없어요',
     });
     setReportCityName(null);
+    setAddedCityName(card.cityName);
   };
 
   return (
@@ -164,6 +173,9 @@ export default function CityInsight() {
           onSearch={mockSearchResult}
           onAddToRoadmap={handleAddToRoadmap}
         />
+      )}
+      {addedCityName && (
+        <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
       )}
     </div>
   );
