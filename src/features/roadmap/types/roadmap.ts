@@ -27,14 +27,21 @@ export interface AiReportData {
 }
 
 export interface RequiredDocumentData {
+  /** 서류 완료 체크 API(PATCH /api/v1/task-documents/{taskDocumentId}/check) 식별자 */
+  taskDocumentId: number;
+  documentTemplateId?: number;
   name: string;
-  subtitle: string;
-  status: 'done' | 'processing' | 'pending';
-  tag?: string;
+  subtitle?: string;
+  isChecked: boolean;
+  /** true면 "촬영하여 자동 체크" 버튼(카메라 아이콘) 노출 */
+  ocrSupport: boolean;
+  displayOrder?: number;
+  /** 파일 업로드 후 서버 파싱을 기다리는 중일 때 표시 (isChecked가 false일 때만 의미 있음) */
+  isProcessing?: boolean;
   scanStatus?: string;
   scanProgressPercent?: number;
   scanDetail?: string;
-  /** done 상태일 때 업로드 완료된 파일명 목록 */
+  /** isChecked일 때 업로드 완료된 파일명 목록 */
   uploadedFiles?: string[];
 }
 
@@ -46,6 +53,8 @@ export interface UploadedFileItem {
 }
 
 export interface CityRoadmapData {
+  /** 위시리스트 등 다른 도메인과 도시를 매칭할 때 쓰는 공용 식별자 */
+  cityId: string;
   cityName: string;
   countryName: string;
   progressPercent: number;

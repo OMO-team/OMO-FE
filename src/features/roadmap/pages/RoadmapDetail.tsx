@@ -46,8 +46,13 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
   const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
   const [datePickerViewYear, setDatePickerViewYear] = useState(2026);
   const [datePickerViewMonth, setDatePickerViewMonth] = useState(4);
-  const [uploadTargetDocument, setUploadTargetDocument] = useState<string | null>(null);
+  const [documents, setDocuments] = useState(apostilleRequiredDocuments);
+  const [uploadTargetDocumentId, setUploadTargetDocumentId] = useState<number | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+
+  const handleCheckDocument = (taskDocumentId: number) => {
+    setDocuments((prev) => prev.map((d) => (d.taskDocumentId === taskDocumentId ? { ...d, isChecked: true } : d)));
+  };
 
   const handleSelectFiles = (fileList: FileList) => {
     const newItems: UploadedFileItem[] = Array.from(fileList).map((file) => ({
@@ -225,8 +230,6 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
             category={openTask.category}
             title={openTask.title}
             infoBanner={APOSTILLE_INFO_BANNER}
-            completedCount={2}
-            totalCount={4}
             dDayLabel={openTask.dDay ? `D-${openTask.dDay}` : undefined}
             scheduledDate={openTask.date}
             onDateClick={() => {
@@ -234,24 +237,28 @@ export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDe
               setDatePickerTarget('task');
             }}
             onClose={() => setOpenTaskIndex(null)}
-            documents={apostilleRequiredDocuments}
+            documents={documents}
             locked={openTask.status === 'lock'}
-            onOpenUpload={(name) => {
+            onOpenUpload={(taskDocumentId) => {
               setUploadedFiles([]);
-              setUploadTargetDocument(name);
+              setUploadTargetDocumentId(taskDocumentId);
             }}
+            onCheck={handleCheckDocument}
           />
         </ModalOverlay>
       )}
 
-      {uploadTargetDocument && (
-        <ModalOverlay zIndex={60} onClose={() => setUploadTargetDocument(null)}>
+      {uploadTargetDocumentId !== null && (
+        <ModalOverlay zIndex={60} onClose={() => setUploadTargetDocumentId(null)}>
           <DocumentUploadModal
             files={uploadedFiles}
             onSelectFiles={handleSelectFiles}
             onRemoveFile={(name) => setUploadedFiles((prev) => prev.filter((f) => f.name !== name))}
-            onComplete={() => setUploadTargetDocument(null)}
-            onClose={() => setUploadTargetDocument(null)}
+            onComplete={() => {
+              handleCheckDocument(uploadTargetDocumentId);
+              setUploadTargetDocumentId(null);
+            }}
+            onClose={() => setUploadTargetDocumentId(null)}
           />
         </ModalOverlay>
       )}

@@ -118,17 +118,8 @@ export default function ComponentPreview() {
         <AiReportCard {...berlinAiReport} />
       </Section>
 
-      <Section title="DocumentTaskDetailModal">
-        <DocumentTaskDetailModal
-          category="비자"
-          title="아포스티유 공증"
-          infoBanner="해외에서 한국 학력을 인정받기 위해 필요한 공증 절차입니다. 외교부 영사민원24를 통해 온라인으로 신청할 수 있습니다."
-          completedCount={2}
-          totalCount={4}
-          documents={apostilleRequiredDocuments}
-          dDayLabel="D-000"
-          scheduledDate="2026.04.15"
-        />
+      <Section title="DocumentTaskDetailModal" note="OCR 지원 서류는 '촬영하여 자동 체크' 버튼 클릭해서 시뮬레이션 확인 가능">
+        <DocumentTaskDetailModalDemo />
       </Section>
 
       <Section title="DocumentUploadModal" note="uploading/completed/error 상태 동시 표시">
@@ -244,5 +235,25 @@ export default function ComponentPreview() {
         </div>
       </Section>
     </div>
+  );
+}
+
+function DocumentTaskDetailModalDemo() {
+  const [documents, setDocuments] = useState(apostilleRequiredDocuments);
+
+  const handleCheck = (taskDocumentId: number) => {
+    setDocuments((prev) => prev.map((d) => (d.taskDocumentId === taskDocumentId ? { ...d, isChecked: true } : d)));
+  };
+
+  return (
+    <DocumentTaskDetailModal
+      category="비자"
+      title="아포스티유 공증"
+      infoBanner="해외에서 한국 학력을 인정받기 위해 필요한 공증 절차입니다. 외교부 영사민원24를 통해 온라인으로 신청할 수 있습니다."
+      documents={documents}
+      dDayLabel="D-000"
+      scheduledDate="2026.04.15"
+      onCheck={handleCheck}
+    />
   );
 }

@@ -50,7 +50,7 @@ export default function TimeLineTaskCard({
 
   return (
     <div className="flex w-153.5 items-center pl-2">
-      <StatusIcon className="size-icon-lg shrink-0" />
+      <StatusIcon className="relative size-icon-lg shrink-0" />
       <button
         type="button"
         onClick={onClick}
