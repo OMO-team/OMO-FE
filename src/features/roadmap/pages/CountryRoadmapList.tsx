@@ -19,7 +19,7 @@ import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
-import type { CityInsightData } from '../../../shared/types/cityInsight';
+import type { CityInsightData } from '../types/cityInsight';
 
 type RemovedRecord = {
   city: CityRoadmapData;

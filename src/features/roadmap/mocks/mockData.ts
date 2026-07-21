@@ -6,7 +6,7 @@ import type {
   CountryGroupData,
   UploadedFileItem,
 } from '../types/roadmap';
-import type { CityInsightData } from '../../../shared/types/cityInsight';
+import type { CityInsightData } from '../types/cityInsight';
 import countryCard1 from '../../../assets/images/country_card_1.png';
 import countryCard2 from '../../../assets/images/country_card_2.png';
 import countryCard3 from '../../../assets/images/country_card_3.png';

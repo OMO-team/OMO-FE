@@ -1,4 +1,4 @@
-import type { CityInsightData } from '../../../shared/types/cityInsight';
+import type { CityInsightData } from '../types/cityInsight';
 import type { CompareCity } from '../../../shared/types/compare';
 
 /** 0~5점 스코어를 비교 모달의 0~100% 게이지 값으로 환산 */

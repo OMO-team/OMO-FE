@@ -1,6 +1,6 @@
 import { berlinReportData } from '../../city-ai-report/mocks/mockData';
 import type { CityReportData } from '../../../shared/types/cityReport';
-import type { CityInsightData } from '../../../shared/types/cityInsight';
+import type { CityInsightData } from '../types/cityInsight';
 
 /**
  * 도시별 AI 리포트 상세 콘텐츠(핵심요약/장단점/후기 등)는 아직 도시마다 준비되어 있지 않아
