@@ -34,20 +34,22 @@ export default function CompareSelectionBar({
   return (
     <div className="fixed inset-x-0 bottom-6 z-40 flex flex-col items-center gap-2 px-4">
       {showMaxWarning && <CompareMaxWarning />}
-      <div className="shadow-01 flex items-center gap-3 rounded-full bg-black px-5 py-3">
-        <span className="body-02 whitespace-nowrap text-white">
-          {compareList.length}개 비교중
-        </span>
+      <div className="flex items-center gap-5 overflow-hidden rounded-full bg-primary-900 px-8 py-3 shadow-[4px_8px_16px_0_rgba(6,49,88,0.2)]">
+        <div className="flex items-center gap-4">
+          <span className="body-02 whitespace-nowrap text-white">
+            {compareList.length}개 비교중
+          </span>
 
-        <div className="flex items-center gap-2">
-          {selectedCities.map((city) => (
-            <Chip
-              key={city.id}
-              label={city.name}
-              variant="dark"
-              onRemove={() => removeFromCompare(city.id)}
-            />
-          ))}
+          <div className="flex items-center gap-2">
+            {selectedCities.map((city) => (
+              <Chip
+                key={city.id}
+                label={city.name}
+                variant="dark"
+                onRemove={() => removeFromCompare(city.id)}
+              />
+            ))}
+          </div>
         </div>
 
         <CompareActionButton
