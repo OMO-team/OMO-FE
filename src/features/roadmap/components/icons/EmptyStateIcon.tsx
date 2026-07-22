@@ -1,4 +1,4 @@
-import BagIcon from './icons/BagIcon';
+import BagIcon from './BagIcon';
 
 type EmptyStateIconProps = {
   className?: string;

@@ -4,7 +4,7 @@ import CategoryTab from '../../../shared/components/CategoryTab';
 import CityInsightCard from '../../city-insight/components/CityInsightCard';
 import CountryGroupHeader from '../components/CountryGroupHeader';
 import CityRoadmapCard from '../components/CityRoadmapCard';
-import EmptyStateIcon from '../components/EmptyStateIcon';
+import EmptyStateIcon from '../components/icons/EmptyStateIcon';
 import PageNavigation from '../../../shared/components/PageNavigation';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
 import Footer from '../../../shared/components/Footer';
