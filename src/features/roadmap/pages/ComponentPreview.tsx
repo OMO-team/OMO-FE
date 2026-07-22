@@ -1,5 +1,44 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import CityRoadmapCard from '../components/CityRoadmapCard';
+import CityInsightCard from '../../city-insight/components/CityInsightCard';
+import RequiredDocumentCard from '../components/RequiredDocumentCard';
+import { useCompareStore } from '../../compare/store/useCompareStore';
+import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
+import CompareModal from '../../compare/components/CompareModal';
+import CityReportModal from '../../city-ai-report/components/CityReportModal';
+import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/mockData';
+import { toCompareCity } from '../utils/compareAdapter';
+import BagIcon from '../components/icons/BagIcon';
+import CalendarIcon from '../components/icons/CalendarIcon';
+import CameraIcon from '../components/icons/CameraIcon';
+import CheckCircleIcon from '../components/icons/CheckCircleIcon';
+import ChevronDownIcon from '../components/icons/ChevronDownIcon';
+import CloudUploadIcon from '../components/icons/CloudUploadIcon';
+import CsvFileIcon from '../components/icons/CsvFileIcon';
+import DefaultFileIcon from '../components/icons/DefaultFileIcon';
+import DocFileIcon from '../components/icons/DocFileIcon';
+import DocumentDoneIcon from '../components/icons/DocumentDoneIcon';
+import EditIcon from '../components/icons/EditIcon';
+import FileClipIcon from '../components/icons/FileClipIcon';
+import InfoCircleIcon from '../components/icons/InfoCircleIcon';
+import LocationPinIcon from '../components/icons/LocationPinIcon';
+import MinusStepperIcon from '../components/icons/MinusStepperIcon';
+import MoneyIcon from '../components/icons/MoneyIcon';
+import PdfFileIcon from '../components/icons/PdfFileIcon';
+import PlusScheduleIcon from '../components/icons/PlusScheduleIcon';
+import PlusStepperIcon from '../components/icons/PlusStepperIcon';
+import RemoveIcon from '../components/icons/RemoveIcon';
+import RoadmapTitleIcon from '../components/icons/RoadmapTitleIcon';
+import TimelineLockIcon from '../components/icons/TimelineLockIcon';
+import TimelineMissedIcon from '../components/icons/TimelineMissedIcon';
+import TimelineOngoingIcon from '../components/icons/TimelineOngoingIcon';
+import TimelineSuccessIcon from '../components/icons/TimelineSuccessIcon';
+import TimelineUpcomingIcon from '../components/icons/TimelineUpcomingIcon';
+import ToastCloseIcon from '../components/icons/ToastCloseIcon';
+import TrashIcon from '../components/icons/TrashIcon';
+import UploadIcon from '../components/icons/UploadIcon';
+import UploadSpinnerIcon from '../components/icons/UploadSpinnerIcon';
+import WarningIcon from '../components/icons/WarningIcon';
 import TimeLineTaskCard from '../components/TimeLineTaskCard';
 import BudgetPlanCard from '../components/BudgetPlanCard';
 import CityHeroBanner from '../components/CityHeroBanner';
@@ -41,6 +80,7 @@ import {
   apostilleRequiredDocuments,
   countryRoadmapGroups,
   documentUploadFiles,
+  cityInsightCatalog,
 } from '../mocks/mockData';
 
 function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
@@ -54,6 +94,43 @@ function Section({ title, note, children }: { title: string; note?: string; chil
     </section>
   );
 }
+
+const ROADMAP_ICONS: { name: string; Icon: ComponentType<{ className?: string }> }[] = [
+  { name: 'BagIcon', Icon: BagIcon },
+  { name: 'CalendarErrorIcon', Icon: CalendarErrorIcon },
+  { name: 'CalendarIcon', Icon: CalendarIcon },
+  { name: 'CameraIcon', Icon: CameraIcon },
+  { name: 'CheckCircleIcon', Icon: CheckCircleIcon },
+  { name: 'ChevronDownIcon', Icon: ChevronDownIcon },
+  { name: 'CloudUploadIcon', Icon: CloudUploadIcon },
+  { name: 'CsvFileIcon', Icon: CsvFileIcon },
+  { name: 'DefaultFileIcon', Icon: DefaultFileIcon },
+  { name: 'DocFileIcon', Icon: DocFileIcon },
+  { name: 'DocumentDoneIcon', Icon: DocumentDoneIcon },
+  { name: 'EditIcon', Icon: EditIcon },
+  { name: 'FileClipIcon', Icon: FileClipIcon },
+  { name: 'InfoCircleIcon', Icon: InfoCircleIcon },
+  { name: 'LocationPinIcon', Icon: LocationPinIcon },
+  { name: 'LockOutlineIcon', Icon: LockOutlineIcon },
+  { name: 'MinusStepperIcon', Icon: MinusStepperIcon },
+  { name: 'MoneyIcon', Icon: MoneyIcon },
+  { name: 'PdfFileIcon', Icon: PdfFileIcon },
+  { name: 'PlusScheduleIcon', Icon: PlusScheduleIcon },
+  { name: 'PlusStepperIcon', Icon: PlusStepperIcon },
+  { name: 'RemoveIcon', Icon: RemoveIcon },
+  { name: 'RoadmapTitleIcon', Icon: RoadmapTitleIcon },
+  { name: 'ScanFailIcon', Icon: ScanFailIcon },
+  { name: 'TimelineLockIcon', Icon: TimelineLockIcon },
+  { name: 'TimelineMissedIcon', Icon: TimelineMissedIcon },
+  { name: 'TimelineOngoingIcon', Icon: TimelineOngoingIcon },
+  { name: 'TimelineSuccessIcon', Icon: TimelineSuccessIcon },
+  { name: 'TimelineUpcomingIcon', Icon: TimelineUpcomingIcon },
+  { name: 'ToastCloseIcon', Icon: ToastCloseIcon },
+  { name: 'TrashIcon', Icon: TrashIcon },
+  { name: 'UploadIcon', Icon: UploadIcon },
+  { name: 'UploadSpinnerIcon', Icon: UploadSpinnerIcon },
+  { name: 'WarningIcon', Icon: WarningIcon },
+];
 
 export default function ComponentPreview() {
   const [months, setMonths] = useState(berlinBudgetPlan.months);
@@ -212,6 +289,33 @@ export default function ComponentPreview() {
         </div>
       </Section>
 
+      <Section title="CityInsightCard (위시리스트 탭)">
+        <CityInsightCard {...cityInsightCatalog[0]} isWished onToggleWish={() => {}} onCompare={() => {}} onReport={() => {}} />
+      </Section>
+
+      <Section title="RequiredDocumentCard (단독)" note="OCR 지원 서류는 '촬영하여 자동 체크' 버튼으로 시뮬레이션 확인 가능">
+        <RequiredDocumentCardDemo />
+      </Section>
+
+      <Section title="CompareSelectionBar / CompareModal" note="비교함 2개 자동 담김, 화면 하단 고정 바 확인">
+        <CompareDemo />
+      </Section>
+
+      <Section title="CityReportModal (AI 탐색 리포트)">
+        <CityReportDemo />
+      </Section>
+
+      <Section title="로드맵 아이콘 전체" note={`${ROADMAP_ICONS.length}개`}>
+        <div className="grid w-full grid-cols-8 gap-4">
+          {ROADMAP_ICONS.map(({ name, Icon }) => (
+            <div key={name} className="flex flex-col items-center gap-2 rounded-2 border border-gray-100 p-3">
+              <Icon className="size-icon-lg text-gray-700" />
+              <span className="label-02 text-center text-gray-500">{name}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       <Section title="LargeFillButton">
         <div className="w-90">
           <LargeFillButton label="다음으로" />
@@ -255,5 +359,52 @@ function DocumentTaskDetailModalDemo() {
       scheduledDate="2026.04.15"
       onCheck={handleCheck}
     />
+  );
+}
+
+function RequiredDocumentCardDemo() {
+  const [document, setDocument] = useState(apostilleRequiredDocuments[3]);
+
+  return (
+    <div className="w-100">
+      <RequiredDocumentCard document={document} onOpenUpload={() => {}} onCheck={() => setDocument((d) => ({ ...d, isChecked: true }))} />
+    </div>
+  );
+}
+
+function CompareDemo() {
+  const toggleCompare = useCompareStore((s) => s.toggleCompare);
+  const openModal = useCompareStore((s) => s.openModal);
+  const compareCities = cityInsightCatalog.slice(0, 3).map(toCompareCity);
+
+  useEffect(() => {
+    toggleCompare('berlin');
+    toggleCompare('sydney');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <button type="button" onClick={openModal} className="title-02 w-fit rounded-2 bg-primary-500 px-4 py-2 text-white">
+        비교 모달 열기
+      </button>
+      <CompareSelectionBar cities={compareCities} />
+      <CompareModal cities={compareCities} />
+    </div>
+  );
+}
+
+function CityReportDemo() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <button type="button" onClick={() => setIsOpen(true)} className="title-02 rounded-2 bg-primary-500 px-4 py-2 text-white">
+        AI 리포트 모달 열기
+      </button>
+      {isOpen && (
+        <CityReportModal isOpen onClose={() => setIsOpen(false)} data={berlinReportData} onSearch={mockSearchResult} />
+      )}
+    </div>
   );
 }
