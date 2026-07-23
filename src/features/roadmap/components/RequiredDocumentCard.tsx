@@ -30,9 +30,11 @@ type RequiredDocumentCardProps = {
   onOpenUpload?: () => void;
   /** 촬영 시뮬레이션 성공 또는 실패 후 수동 체크 선택 시 호출 — 서류 완료 체크 API 재사용 */
   onCheck?: () => void;
+  /** 스캔 결과 판정 함수 — 기본값은 클라이언트 시뮬레이션, 실제 OCR 연동 시 이 prop만 교체하면 됨 */
+  scanFn?: () => 'success' | ScanFailure;
 };
 
-export default function RequiredDocumentCard({ document, onOpenUpload, onCheck }: RequiredDocumentCardProps) {
+export default function RequiredDocumentCard({ document, onOpenUpload, onCheck, scanFn = simulateScanOutcome }: RequiredDocumentCardProps) {
   const [scanState, setScanState] = useState<ScanState>('idle');
 
   const isDone = document.isChecked;
@@ -43,7 +45,7 @@ export default function RequiredDocumentCard({ document, onOpenUpload, onCheck }
     if (scanState === 'scanning') return; // 중복 스캔 방지
     setScanState('scanning');
     setTimeout(() => {
-      const outcome = simulateScanOutcome();
+      const outcome = scanFn();
       if (outcome === 'success') {
         setScanState('idle');
         onCheck?.();
