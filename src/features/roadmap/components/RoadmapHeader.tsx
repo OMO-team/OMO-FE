@@ -24,7 +24,7 @@ export default function RoadmapHeader({
   return (
     <div className="flex w-153.5 flex-col gap-4 rounded-4 border border-gray-100 bg-white px-6 pb-4 pt-7.5">
       <RoadmapMonthSelector year={year} month={month} onPrevMonth={onPrevMonth} onNextMonth={onNextMonth} />
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <button
           type="button"
           className="title-03 flex items-center gap-2 rounded-2 px-2.5 py-1.5 text-gray-500 transition-colors hover:bg-gray-50"

@@ -56,7 +56,7 @@ export default function DatePickerModal({
     <div className="flex w-[386px] flex-col items-center rounded-4 border border-gray-100 bg-white px-8 pb-[30px] pt-5 shadow-02">
       {warningMessage && (
         <div className="mb-3 flex h-9.5 w-full items-center gap-2 rounded-full bg-red-50 py-2 pl-5 pr-6 text-red-700">
-          <InfoCircleIcon className="size-icon-sm shrink-0 rotate-180" />
+          <InfoCircleIcon className="size-icon-sm shrink-0" />
           <p className="body-03 whitespace-nowrap">{warningMessage}</p>
         </div>
       )}

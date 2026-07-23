@@ -26,7 +26,7 @@ export default function CountryGroupHeader({
         <span className="body-05 rounded-md bg-primary-50 px-3 py-1 text-primary-700">{cityCount}개 도시</span>
       </div>
       <ChevronIcon
-        className={`size-icon-sm text-gray-600 transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`}
+        className={`size-icon-sm text-gray-600 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-180'}`}
       />
     </button>
   );
