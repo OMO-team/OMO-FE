@@ -1,21 +1,22 @@
-import ReportHero from "./ReportHero";
-import AISearchPanel from "./AISearchPanel";
-import ScoreSummary from "./ScoreSummary";
-import KeySummary from "./KeySummary";
-import KeyMetrics from "./KeyMetrics";
-import ProsCons from "./ProsCons";
-import VlogReviews from "./VlogReviews";
-import RealReviews from "./RealReviews";
-import type {
-  AISearchResultData,
-  CityReportData,
-} from "../../../shared/types/cityReport";
+import { useEffect } from 'react';
+import ReportHero from './ReportHero';
+import AISearchPanel from './AISearchPanel';
+import ScoreSummary from './ScoreSummary';
+import KeySummary from './KeySummary';
+import KeyMetrics from './KeyMetrics';
+import ProsCons from './ProsCons';
+import VlogReviews from './VlogReviews';
+import RealReviews from './RealReviews';
+import CityReportFooter from './CityReportFooter';
+import CloseButton from '../../../shared/components/CloseButton';
+import type { AISearchResultData, CityReportData } from '../../../shared/types/cityReport';
 
 interface CityReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   data: CityReportData;
   onSearch: (query: string) => AISearchResultData;
+  onAddToRoadmap?: () => void;
 }
 
 export default function CityReportModal({
@@ -23,7 +24,17 @@ export default function CityReportModal({
   onClose,
   data,
   onSearch,
+  onAddToRoadmap,
 }: CityReportModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -32,15 +43,15 @@ export default function CityReportModal({
       onClick={onClose}
     >
       <div
-        className="w-[1040px] max-h-[90vh] relative rounded-5 bg-white overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="w-[1040px] h-[900px] relative rounded-5 bg-white overflow-hidden flex flex-col"
+        onClick={e => e.stopPropagation()}
       >
-        <div className="flex flex-col justify-start items-center max-h-[90vh] overflow-y-auto gap-10 pb-10">
+        <CloseButton onClick={onClose} className="absolute top-6 right-6 z-10 shadow-02" />
+        <div className="flex-1 flex flex-col justify-start items-center overflow-y-auto gap-10 pb-10">
           <ReportHero
             cityName={data.cityName}
             heroImageUrl={data.heroImageUrl}
             ratingBadge={data.ratingBadge}
-            onClose={onClose}
           />
           <div className="flex flex-col justify-start items-start w-[896px] gap-9">
             <AISearchPanel keywords={data.searchKeywords} onSearch={onSearch} />
@@ -66,6 +77,7 @@ export default function CityReportModal({
             </div>
           </div>
         </div>
+        <CityReportFooter cityName={data.cityName} onAddToRoadmap={onAddToRoadmap} />
       </div>
     </div>
   );
