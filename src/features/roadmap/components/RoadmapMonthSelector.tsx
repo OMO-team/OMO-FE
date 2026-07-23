@@ -1,4 +1,5 @@
-import ChevronLeftIcon from './icons/ChevronLeftIcon';
+import ChevronLeftIcon from '../../../shared/components/icons/ChevronLeftIcon';
+import RoadmapTitleIcon from './icons/RoadmapTitleIcon';
 
 type RoadmapMonthSelectorProps = {
   title?: string;
@@ -9,7 +10,7 @@ type RoadmapMonthSelectorProps = {
 };
 
 export default function RoadmapMonthSelector({
-  title = '준비 로드맵',
+  title = '로드맵',
   year,
   month,
   onPrevMonth,
@@ -17,7 +18,10 @@ export default function RoadmapMonthSelector({
 }: RoadmapMonthSelectorProps) {
   return (
     <div className="flex w-full items-center justify-between">
-      <p className="heading-06 text-black">{title}</p>
+      <div className="flex items-center gap-2">
+        <RoadmapTitleIcon className="size-icon-md text-black" />
+        <p className="heading-06 text-black">{title}</p>
+      </div>
       <div className="title-01 flex items-center gap-4 text-black">
         <button type="button" onClick={onPrevMonth} aria-label="이전 달">
           <ChevronLeftIcon className="size-icon-md" />

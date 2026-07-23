@@ -31,7 +31,7 @@ export default function DropDown<T extends string>({ title, options, selectedOpt
                 {options.map((option, index) => {
                     const isSelected = selectedOption === option
                     return (
-                        <div key={index} className={`w-full flex justify-left items-center h-7.5 px-4 py-1.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => {onSelect(option); handleOpen()}}>
+                        <div key={index} className={`w-full flex justify-left items-center h-7.5 px-4 py-1.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => {onSelect?.(option); handleOpen()}}>
                             <p className={`body-04 ${isSelected ? 'text-primary-800' : 'text-gray-700'}`}>{option}</p>
                         </div>
                     )

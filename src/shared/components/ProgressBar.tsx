@@ -4,6 +4,7 @@ interface ProgressBarProps {
   leftLabel?: string;
   rightLabel?: string;
   color?: "gray" | "gradient";
+  trackClassName?: string;
 }
 
 export default function ProgressBar({
@@ -12,6 +13,7 @@ export default function ProgressBar({
   rightLabel,
   percent,
   color = "gradient",
+  trackClassName = "h-2",
 }: ProgressBarProps) {
   const fillClass =
     color === "gray"
@@ -27,7 +29,7 @@ export default function ProgressBar({
           <span className="label-01 text-gray-500">{rightLabel}</span>
         </div>
       )}
-      <div className="h-2 overflow-hidden rounded-2 bg-gray-100">
+      <div className={`${trackClassName} overflow-hidden rounded-2 bg-gray-100`}>
         <div className={`h-full rounded-2 ${fillClass}`} style={{ width: `${percent}%` }} />
       </div>
     </div>

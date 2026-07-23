@@ -1,5 +1,5 @@
 import LocationPinIcon from './icons/LocationPinIcon';
-import ChevronDownIcon from './icons/ChevronDownIcon';
+import ChevronIcon from '../../../shared/components/ChevronIcon';
 
 type CountryGroupHeaderProps = {
   countryName: string;
@@ -25,8 +25,8 @@ export default function CountryGroupHeader({
         <span className="title-01 text-primary-800">{countryName}</span>
         <span className="body-05 rounded-md bg-primary-50 px-3 py-1 text-primary-700">{cityCount}개 도시</span>
       </div>
-      <ChevronDownIcon
-        className={`size-icon-sm text-gray-500 transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`}
+      <ChevronIcon
+        className={`size-icon-sm text-gray-600 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-180'}`}
       />
     </button>
   );
