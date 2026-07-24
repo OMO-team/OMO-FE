@@ -6,16 +6,19 @@ const MIN_COMPARE_COUNT = 2;
 interface CompareState {
   compareList: string[];
   isModalOpen: boolean;
+  showMaxWarning: boolean;
   toggleCompare: (cityId: string) => void;
   removeFromCompare: (cityId: string) => void;
   clearCompare: () => void;
   openModal: () => void;
   closeModal: () => void;
+  hideMaxWarning: () => void;
 }
 
 export const useCompareStore = create<CompareState>((set, get) => ({
   compareList: [],
   isModalOpen: false,
+  showMaxWarning: false,
 
   toggleCompare: (cityId) => {
     const { compareList } = get();
@@ -23,9 +26,14 @@ export const useCompareStore = create<CompareState>((set, get) => ({
       set({ compareList: compareList.filter((id) => id !== cityId) });
       return;
     }
-    if (compareList.length >= MAX_COMPARE_COUNT) return; // 최대 3개 초과 시 추가 무시
+    if (compareList.length >= MAX_COMPARE_COUNT) {
+      set({ showMaxWarning: true }); // 최대 3개 초과 시 추가 무시하고 경고만 표시
+      return;
+    }
     set({ compareList: [...compareList, cityId] });
   },
+
+  hideMaxWarning: () => set({ showMaxWarning: false }),
 
   removeFromCompare: (cityId) => {
     const next = get().compareList.filter((id) => id !== cityId);

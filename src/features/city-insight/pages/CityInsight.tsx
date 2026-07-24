@@ -12,11 +12,29 @@ import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg'
 import FilterChip from '../components/FilterChip'
 import FilterIcon from '../../../shared/components/FilterIcon'
 import { useState } from 'react'
+import { useCompareStore } from '../../compare/store/useCompareStore'
+import CompareSelectionBar from '../../compare/components/CompareSelectionBar'
+import CompareModal from '../../compare/components/CompareModal'
+import { mockCities } from '../../../shared/mocks/cities'
+
+// TODO: 도시별 실제 데이터 연동 전까지, 비교 목데이터가 있는 도시만 매핑
+const CITY_COMPARE_ID: Record<string, string> = {
+    베를린: 'berlin',
+    도쿄: 'tokyo',
+    시드니: 'sydney',
+}
 
 export default function CityInsight() {
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
     const [resetKey, setResetKey] = useState(0)
+    const toggleCompare = useCompareStore(s => s.toggleCompare)
+
+    const handleCompare = (cityName: string) => {
+        const id = CITY_COMPARE_ID[cityName]
+        if (!id) return
+        toggleCompare(id)
+    }
 
     const handleSelect = (country: string) => {
         setSelectedFilters(prev =>
@@ -74,7 +92,7 @@ export default function CityInsight() {
                <>
                 <div className='mt-11 grid grid-cols-2 gap-5'>
                     {CITY_INSIGHT_CARDS.map((card) => (
-                        <CityInsightCard key={card.cityName} {...card} onCompare={() => {}} onReport={() => {}} />
+                        <CityInsightCard key={card.cityName} {...card} onCompare={() => handleCompare(card.cityName)} onReport={() => {}} />
                     ))}
                 </div>
                 <div className='mt-25 mb-[304px]'>
@@ -94,6 +112,8 @@ export default function CityInsight() {
                 </div>
             )}
         </div>
+        <CompareSelectionBar cities={mockCities} />
+        <CompareModal cities={mockCities} />
     </div>
   )
 }
