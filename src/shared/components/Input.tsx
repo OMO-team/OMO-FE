@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type ReactNode } from 'react';
+import { useState, useId, type ChangeEvent, type ReactNode } from 'react';
 import errorIcon from '../../assets/icons/error.svg';
 import EyeIcon from './EyeIcon';
 
@@ -25,6 +25,8 @@ export default function Input({
   rightElement,
   id,
 }: InputProps) {
+  const generatedId = useId();
+  const resolvedId = id ?? generatedId;
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
   const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
@@ -32,7 +34,7 @@ export default function Input({
   return (
     <div className="flex w-full flex-col gap-[6px]">
       {label && (
-        <label htmlFor={id} className="body-02 text-gray-900 self-stretch">
+        <label htmlFor={resolvedId} className="body-02 text-gray-900 self-stretch">
           {label}
         </label>
       )}
@@ -47,7 +49,7 @@ export default function Input({
         ].join(' ')}
       >
         <input
-          id={id}
+          id={resolvedId}
           type={inputType}
           value={value}
           onChange={onChange}

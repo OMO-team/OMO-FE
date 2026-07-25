@@ -116,10 +116,10 @@ export default function SignupModal({
 
               {/* 이메일 + 인증 버튼 */}
               <div className="flex flex-col gap-[6px] self-stretch">
-                <span className="body-02 text-gray-900">이메일</span>
                 <div className="flex items-start gap-2">
                   <div className="flex-1">
                     <Input
+                      label="이메일"
                       type="email"
                       value={email}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
