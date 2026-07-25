@@ -72,6 +72,16 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     else if (agreeTerms) setAgreeAll(true);
   };
 
+  const handleSendEmailCode = async () => {
+    if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
+    setEmailError('');
+    try {
+      await authApi.sendEmailCode({ email });
+    } catch {
+      setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -159,7 +169,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                       error={emailError}
                     />
                   </div>
-                  <VerifyButton active={email.length > 0} />
+                  <VerifyButton active={email.length > 0} onClick={handleSendEmailCode} />
                 </div>
               </div>
 
