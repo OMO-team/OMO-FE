@@ -5,7 +5,7 @@ type LoginRequiredModalProps = {
 
 export default function LoginRequiredModal({ onClose, onLoginClick }: LoginRequiredModalProps) {
   return (
-    <div className="flex w-[610px] flex-col items-center gap-[42px] rounded-4 bg-white px-[60px] pb-[48px] pt-[60px]">
+    <div role="dialog" aria-modal="true" aria-labelledby="login-required-title" className="flex w-[610px] flex-col items-center gap-[42px] rounded-4 bg-white px-[60px] pb-[48px] pt-[60px]">
       <div className="flex w-full flex-col gap-[40px]">
         {/* 아이콘 + 제목 + 설명 */}
         <div className="flex w-full flex-col items-center gap-[40px]">
@@ -28,7 +28,7 @@ export default function LoginRequiredModal({ onClose, onLoginClick }: LoginRequi
 
             {/* 제목 + 설명 */}
             <div className="flex w-full flex-col items-center gap-[8px]">
-              <h2 className="heading-05 h-[32px] self-stretch text-center text-black">로그인이 필요한 서비스예요</h2>
+              <h2 id="login-required-title" className="heading-05 min-h-[32px] w-full text-center">로그인이 필요한 서비스예요</h2>
               <div className="flex w-full flex-col items-center gap-[2px]">
                 <p className="body-01 self-stretch text-center text-gray-700">
                   이 기능을 이용하려면 로그인이 필요해요.

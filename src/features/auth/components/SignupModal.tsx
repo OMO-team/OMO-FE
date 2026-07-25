@@ -209,6 +209,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                 <div className="flex items-center" style={{ gap: '4px', alignSelf: 'stretch' }}>
                   <button
                     type="button"
+                    role="checkbox"
+                    aria-checked={agreeAll}
+                    aria-label="전체 동의하기"
                     onClick={handleAgreeAll}
                     className="flex justify-center items-center flex-shrink-0"
                     style={{ width: '24px', height: '24px' }}
