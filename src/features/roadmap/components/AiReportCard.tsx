@@ -13,7 +13,7 @@ export default function AiReportCard({ score, cityName, summary, onViewReport }:
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <span className="heading-06 flex items-center gap-1 text-primary-500">
-            <StarIcon size={28} className="text-primary-500" /> 총점 {score}
+            <StarIcon size={28} className="text-primary-500" /> 총점 {score}/10
           </span>
           <span className="title-02 text-gray-500">{cityName} 한줄 요약</span>
         </div>

@@ -15,7 +15,7 @@ export default function Footer() {
   return (
     <footer className="flex w-full flex-col items-center gap-4 bg-gray-50">
       <div className="mx-auto flex w-full max-w-content flex-col items-center gap-10 px-4">
-        <div className="flex w-full flex-col gap-1 pt-[30px]">
+        <div className="flex w-full flex-col gap-1 pt-7.5">
           <OmoLogoIcon className="h-5 w-auto shrink-0 self-start text-primary-600" />
           <p className="body-04 text-primary-600">
             Overseas, Make Obvious! 나에게 맞는 해외 도시 찾기부터 출국 준비까지
@@ -46,7 +46,7 @@ export default function Footer() {
             <div className="flex flex-col gap-2">
               {SERVICE_LINKS.map((label) => (
                 <div key={label} className="flex items-center gap-1">
-                  <span className="body-05 w-[140px] text-gray-700">{label}</span>
+                  <span className="body-05 w-35 text-gray-700">{label}</span>
                   <span className="size-icon-xs text-gray-700">〉</span>
                 </div>
               ))}
@@ -55,7 +55,7 @@ export default function Footer() {
               {SNS_LINKS.map(({ label, icon }) => (
                 <span
                   key={label}
-                  className="flex size-[34px] items-center justify-center rounded-full bg-white shadow-01"
+                  className="flex size-8.5 items-center justify-center rounded-full bg-white shadow-01"
                 >
                   {icon}
                 </span>
@@ -78,7 +78,7 @@ export default function Footer() {
               </span>
             ))}
           </div>
-          <p className="body-03 text-gray-700">© OMO. All rights reserved.</p>
+          <p className="body-03 text-gray-600">© OMO. All rights reserved.</p>
         </div>
       </div>
     </footer>
