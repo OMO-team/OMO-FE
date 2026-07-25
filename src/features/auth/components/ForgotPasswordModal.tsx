@@ -22,6 +22,16 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleSendPasswordResetEmail = async () => {
+    if (!email) { setEmailError('가입하신 이메일 주소를 입력해주세요.'); return; }
+    setEmailError('');
+    try {
+      await authApi.sendPasswordResetEmail({ email });
+    } catch {
+      setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -110,7 +120,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                         error={emailError}
                       />
                     </div>
-                    <VerifyButton active={email.length > 0} />
+                    <VerifyButton active={email.length > 0} onClick={handleSendPasswordResetEmail} />
                   </div>
                 </div>
 
