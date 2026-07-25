@@ -47,7 +47,7 @@ export default function CityReportModal({
         onClick={e => e.stopPropagation()}
       >
         <CloseButton onClick={onClose} className="absolute top-6 right-6 z-10 shadow-02" />
-        <div className="flex-1 flex flex-col justify-start items-center overflow-y-auto gap-10 pb-10">
+        <div className="flex-1 flex flex-col justify-start items-center overflow-y-auto scrollbar-hide gap-10 pb-10">
           <ReportHero
             cityName={data.cityName}
             heroImageUrl={data.heroImageUrl}
