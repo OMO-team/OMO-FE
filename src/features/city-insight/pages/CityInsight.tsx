@@ -62,6 +62,8 @@ export default function CityInsight() {
     const card = CITY_INSIGHT_CARDS.find(c => c.cityName === reportCityName);
     if (!card) return;
     addCity({
+      // TODO: CITY_INSIGHT_CARDS에 실제 cityId가 생기면 교체 (지금은 cityName을 임시 식별자로 사용)
+      cityId: card.cityName,
       cityName: card.cityName,
       countryName: card.countryName,
       description: card.description,

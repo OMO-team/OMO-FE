@@ -10,22 +10,22 @@ interface RemovedRecord {
 
 interface RoadmapState {
   countryGroups: CountryGroupData[];
-  isCityInRoadmap: (cityName: string) => boolean;
+  isCityInRoadmap: (cityId: string) => boolean;
   addCity: (city: CityRoadmapData) => void;
-  removeCity: (countryName: string, cityName: string) => RemovedRecord | null;
+  removeCity: (countryName: string, cityId: string) => RemovedRecord | null;
   restoreCity: (record: RemovedRecord) => void;
 }
 
 export const useRoadmapStore = create<RoadmapState>((set, get) => ({
   countryGroups: countryRoadmapGroups,
 
-  isCityInRoadmap: (cityName) =>
+  isCityInRoadmap: (cityId) =>
     get().countryGroups.some((group) =>
-      group.cities.some((city) => city.cityName === cityName),
+      group.cities.some((city) => city.cityId === cityId),
     ),
 
   addCity: (city) => {
-    if (get().isCityInRoadmap(city.cityName)) return;
+    if (get().isCityInRoadmap(city.cityId)) return;
     const { countryGroups } = get();
     const groupIndex = countryGroups.findIndex(
       (group) => group.countryName === city.countryName,
@@ -54,11 +54,11 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     });
   },
 
-  removeCity: (countryName, cityName) => {
+  removeCity: (countryName, cityId) => {
     const group = get().countryGroups.find(
       (g) => g.countryName === countryName,
     );
-    const index = group?.cities.findIndex((c) => c.cityName === cityName) ?? -1;
+    const index = group?.cities.findIndex((c) => c.cityId === cityId) ?? -1;
     if (!group || index === -1) return null;
 
     const city = group.cities[index];
@@ -67,7 +67,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
         g.countryName === countryName
           ? {
               ...g,
-              cities: g.cities.filter((c) => c.cityName !== cityName),
+              cities: g.cities.filter((c) => c.cityId !== cityId),
               cityCount: g.cityCount - 1,
             }
           : g,
