@@ -14,6 +14,7 @@ interface HeaderProps {
   onSignupClick?: () => void;
   /** 이미지/사진 위에 겹쳐지는 히어로 배너 등에서 사용, 로고·아이콘·텍스트를 흰색으로 전환 */
   variant?: "default" | "overlay";
+  onSearchClick?: () => void;
 }
 
 export default function Header({
@@ -22,6 +23,7 @@ export default function Header({
   onLoginClick,
   onSignupClick,
   variant = "default",
+  onSearchClick,
 }: HeaderProps) {
   const isOverlay = variant === "overlay";
   const iconFilter = isOverlay ? "brightness-0 invert" : "";
@@ -42,7 +44,7 @@ export default function Header({
           <img src={omoLogo} alt="OMO 로고" style={{ width: '62px', height: '18.888px' }} className={iconFilter} />
         </div>
 
-        <div className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]">
+        <div className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]" onClick={onSearchClick}>
           <span className="body-03 flex-1 text-gray-400">
             도시나 키워드로 검색하기
           </span>
