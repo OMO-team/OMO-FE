@@ -1,17 +1,17 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { type AxiosError } from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
+import { authApi } from '../api/authApi';
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
 
 type SignupModalProps = {
   onClose: () => void;
   onLoginClick?: () => void;
-  nameError?: string;
-  emailError?: string;
-  passwordError?: string;
-  confirmPasswordError?: string;
 };
 
 function CheckIcon({ color }: { color: string }) {
@@ -35,18 +35,16 @@ function ArrowIcon() {
   );
 }
 
-export default function SignupModal({
-  onClose,
-  onLoginClick,
-  nameError,
-  emailError,
-  passwordError,
-  confirmPasswordError,
-}: SignupModalProps) {
+export default function SignupModal({ onClose, onLoginClick }: SignupModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState(false);
@@ -74,8 +72,42 @@ export default function SignupModal({
     else if (agreeTerms) setAgreeAll(true);
   };
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+
+    let hasError = false;
+    if (!name) { setNameError('이름을 입력해주세요.'); hasError = true; }
+    if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
+    if (!PASSWORD_REGEX.test(password)) { setPasswordError('영문 대소문자, 숫자, 특수문자를 포함해 8~20자로 입력해주세요.'); hasError = true; }
+    if (password !== confirmPassword) { setConfirmPasswordError('비밀번호가 일치하지 않습니다.'); hasError = true; }
+    if (!agreeTerms || !agreePrivacy) { hasError = true; }
+    if (hasError) return;
+
+    setIsSubmitting(true);
+    try {
+      await authApi.signup({ name, email, password });
+      onClose();
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      if (axiosError.response?.status === 409) {
+        setEmailError('이미 사용 중인 이메일입니다.');
+      } else {
+        setEmailError('회원가입에 실패했습니다. 다시 시도해주세요.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div
+    <form
+      onSubmit={handleSubmit}
       className="inline-flex justify-center items-start rounded-4 bg-white"
       style={{ padding: '30px 40px 40px 40px', gap: '4px' }}
       role="dialog"
@@ -212,11 +244,12 @@ export default function SignupModal({
 
               {/* 회원가입 버튼 */}
               <button
-                type="button"
-                className="flex justify-center items-center rounded-2 bg-primary-500 title-02 text-white"
+                type="submit"
+                disabled={isSubmitting}
+                className="flex justify-center items-center rounded-2 bg-primary-500 title-02 text-white disabled:opacity-50"
                 style={{ padding: '13px 169px', alignSelf: 'stretch' }}
               >
-                회원가입
+                {isSubmitting ? '처리 중...' : '회원가입'}
               </button>
             </div>
           </div>
@@ -277,6 +310,6 @@ export default function SignupModal({
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

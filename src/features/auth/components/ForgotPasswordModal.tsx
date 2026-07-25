@@ -1,9 +1,11 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { type AxiosError } from 'axios';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
+import { authApi } from '../api/authApi';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
@@ -46,10 +48,15 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
 
     setIsSubmitting(true);
     try {
-      // TODO: API 연결
+      await authApi.resetPassword({ email, newPassword });
       onClose();
-    } catch {
-      setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      if (axiosError.response?.status === 404) {
+        setEmailError('가입되지 않은 이메일입니다.');
+      } else {
+        setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsSubmitting(false);
     }
