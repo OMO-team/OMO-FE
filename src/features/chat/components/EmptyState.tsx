@@ -1,9 +1,6 @@
-type EmptyStateType = 'no-result' | 'error' | 'too-vague' | 'out-of-scope';
-
-type EmptyStateProps = {
-  type: EmptyStateType;
-  onAction?: () => void;
-};
+type EmptyStateProps =
+  | { type: 'no-result' | 'error'; onAction: () => void }
+  | { type: 'too-vague' | 'out-of-scope'; onAction?: never };
 
 const CONFIG = {
   'no-result': {
