@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
-import errorIcon from '../../../assets/icons/error.svg';
 import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
-import EyeIcon from '../../../shared/components/EyeIcon';
+import Input from '../../../shared/components/Input';
 
 type LoginModalProps = {
   onClose: () => void;
@@ -23,12 +22,11 @@ export default function LoginModal({
   passwordError,
   formError,
 }: LoginModalProps) {
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isRemembered, setIsRemembered] = useState(false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
-
-  const eyeColor = passwordError ? 'var(--color-warning-400)' : showPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)';
 
   return (
     <div
@@ -63,63 +61,26 @@ export default function LoginModal({
             {/* 로그인 폼 */}
             <div className="flex flex-col items-start" style={{ gap: '16px' }}>
 
-              {/* 이메일 필드 */}
-              <div className="flex flex-col items-start self-stretch" style={{ gap: '6px' }}>
-                <span className="body-02 text-black self-stretch">이메일</span>
-                <div
-                  className={`flex items-center rounded-2 bg-white hover:bg-gray-50 transition-colors border ${emailError ? 'border-warning-400' : 'border-gray-100'}`}
-                  style={{ width: '400px', padding: '12px 16px', gap: '4px' }}
-                >
-                  <input
-                    type="email"
-                    className="outline-none bg-transparent flex-1 body-03 text-gray-900 placeholder:text-gray-400"
-                    style={{ width: '344px', flexShrink: 0 }}
-                    placeholder="이메일을 입력해주세요"
-                  />
-                  {emailError && (
-                    <div className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
-                      <img src={errorIcon} alt="오류" style={{ width: '17px', height: '17px' }} />
-                    </div>
-                  )}
-                </div>
-                {emailError && (
-                  <div className="flex items-center self-stretch" style={{ padding: '0 8px', gap: '4px' }}>
-                    <span className="body-04 text-[#FF2A14]" style={{ flex: '1 0 0' }}>{emailError}</span>
-                  </div>
-                )}
-              </div>
+              {/* 이메일 */}
+              <Input
+                label="이메일"
+                type="email"
+                value={email}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                placeholder="이메일을 입력해주세요"
+                error={emailError}
+              />
 
               {/* 비밀번호 + 로그인 옵션 */}
               <div className="flex flex-col items-start self-stretch" style={{ gap: '8px' }}>
-
-                {/* 비밀번호 필드 */}
-                <div className="flex flex-col items-start self-stretch" style={{ gap: '6px' }}>
-                  <span className="body-02 text-black self-stretch">비밀번호</span>
-                  <div
-                    className={`flex items-center rounded-2 bg-white hover:bg-gray-50 transition-colors border ${passwordError ? 'border-warning-400' : 'border-gray-100'}`}
-                    style={{ width: '400px', padding: '12px 16px', gap: '4px' }}
-                  >
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      className="flex-1 outline-none bg-transparent body-03 text-gray-900 placeholder:text-gray-400"
-                      style={{ width: '344px', flexShrink: 0 }}
-                      placeholder="비밀번호를 입력해주세요"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="flex justify-center items-center flex-shrink-0"
-                      style={{ width: '20px', height: '20px', aspectRatio: '1/1' }}
-                    >
-                      <EyeIcon color={eyeColor} />
-                    </button>
-                  </div>
-                  {passwordError && (
-                    <div className="flex items-center self-stretch" style={{ padding: '0 8px', gap: '4px' }}>
-                      <span className="body-04 text-[#FF2A14]" style={{ flex: '1 0 0' }}>{passwordError}</span>
-                    </div>
-                  )}
-                </div>
+                <Input
+                  label="비밀번호"
+                  type="password"
+                  value={password}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                  placeholder="비밀번호를 입력해주세요"
+                  error={passwordError}
+                />
 
                 {/* 로그인 옵션: 로그인 유지 + 비밀번호 찾기 */}
                 <div className="flex items-center self-stretch" style={{ gap: '200px' }}>
