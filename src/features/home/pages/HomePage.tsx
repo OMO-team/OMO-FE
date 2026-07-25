@@ -7,10 +7,11 @@ import CategorySection from '../components/CategorySection';
 import LoginModal from '../../auth/components/LoginModal';
 import SignupModal from '../../auth/components/SignupModal';
 import ForgotPasswordModal from '../../auth/components/ForgotPasswordModal';
+import LoginRequiredModal from '../../auth/components/LoginRequiredModal';
 import AIChatPanel from '../../chat/components/AIChatPanel';
 import SearchModal from '../../search/components/SearchModal';
 
-type AuthModal = 'login' | 'signup' | 'forgot' | null;
+type AuthModal = 'login' | 'signup' | 'forgot' | 'loginRequired' | null;
 
 export default function HomePage() {
   const [authModal, setAuthModal] = useState<AuthModal>(null);
@@ -32,6 +33,8 @@ export default function HomePage() {
         onLoginClick={() => setAuthModal('login')}
         onSignupClick={() => setAuthModal('signup')}
         onSearchClick={() => setIsSearchOpen(true)}
+        onExploreClick={() => setAuthModal('loginRequired')}
+        onMyHomeClick={() => setAuthModal('loginRequired')}
       />
 
       <main className="flex flex-1 flex-col items-center gap-[120px] px-[188px] py-[80px]">
@@ -82,6 +85,15 @@ export default function HomePage() {
       {authModal === 'forgot' && (
         <ModalOverlay onClose={closeModal}>
           <ForgotPasswordModal onClose={closeModal} />
+        </ModalOverlay>
+      )}
+
+      {authModal === 'loginRequired' && (
+        <ModalOverlay onClose={closeModal}>
+          <LoginRequiredModal
+            onClose={closeModal}
+            onLoginClick={() => setAuthModal('login')}
+          />
         </ModalOverlay>
       )}
     </div>

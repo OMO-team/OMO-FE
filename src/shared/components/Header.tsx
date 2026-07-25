@@ -15,6 +15,8 @@ interface HeaderProps {
   /** 이미지/사진 위에 겹쳐지는 히어로 배너 등에서 사용, 로고·아이콘·텍스트를 흰색으로 전환 */
   variant?: "default" | "overlay";
   onSearchClick?: () => void;
+  onExploreClick?: () => void;
+  onMyHomeClick?: () => void;
 }
 
 export default function Header({
@@ -24,6 +26,8 @@ export default function Header({
   onSignupClick,
   variant = "default",
   onSearchClick,
+  onExploreClick,
+  onMyHomeClick,
 }: HeaderProps) {
   const isOverlay = variant === "overlay";
   const iconFilter = isOverlay ? "brightness-0 invert" : "";
@@ -58,6 +62,7 @@ export default function Header({
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           <button
+            onClick={onExploreClick}
             className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
               activeNav === "explore"
                 ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
@@ -73,6 +78,7 @@ export default function Header({
           </button>
 
           <button
+            onClick={onMyHomeClick}
             className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
               activeNav === "myhome"
                 ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
