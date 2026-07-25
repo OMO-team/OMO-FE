@@ -11,7 +11,7 @@ type ForgotPasswordModalProps = {
   onClose: () => void;
 };
 
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,20}$|^(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$|^(?=.*\d)(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$/;
 
 export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
@@ -47,7 +47,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
       hasError = true;
     }
     if (!PASSWORD_REGEX.test(newPassword)) {
-      setNewPasswordError('영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.');
+      setNewPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.');
       hasError = true;
     }
     if (newPassword !== confirmPassword) {
@@ -58,7 +58,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
 
     setIsSubmitting(true);
     try {
-      await authApi.resetPassword({ email, newPassword });
+      await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
       onClose();
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
@@ -135,7 +135,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                       placeholder="비밀번호를 입력해주세요"
                       error={newPasswordError}
                     />
-                    <span className="label-01 px-2 text-gray-600">영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.</span>
+                    <span className="label-01 px-2 text-gray-600">영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.</span>
                   </div>
                   <Input
                     label="새 비밀번호 확인"

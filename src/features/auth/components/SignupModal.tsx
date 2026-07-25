@@ -7,7 +7,7 @@ import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import { authApi } from '../api/authApi';
 
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,20}$|^(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$|^(?=.*\d)(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$/;
 
 type SignupModalProps = {
   onClose: () => void;
@@ -94,7 +94,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     let hasError = false;
     if (!name) { setNameError('이름을 입력해주세요.'); hasError = true; }
     if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
-    if (!PASSWORD_REGEX.test(password)) { setPasswordError('영문 대소문자, 숫자, 특수문자를 포함해 8~20자로 입력해주세요.'); hasError = true; }
+    if (!PASSWORD_REGEX.test(password)) { setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.'); hasError = true; }
     if (password !== confirmPassword) { setConfirmPasswordError('비밀번호가 일치하지 않습니다.'); hasError = true; }
     if (!agreeTerms || !agreePrivacy) { hasError = true; }
     if (hasError) return;
