@@ -46,6 +46,7 @@ export type PasswordResetVerifyRequest = {
 export type PasswordResetRequest = {
   email: string;
   newPassword: string;
+  newPasswordConfirm: string;
 };
 
 // 토큰 재발급
