@@ -107,12 +107,13 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                 {/* 이메일 섹션 */}
                 <div className="flex flex-col items-start gap-2">
                   <div className="flex flex-col items-start gap-1">
-                    <span className="body-02 text-gray-900">이메일</span>
+                    <label htmlFor="forgot-email" className="body-02 text-gray-900">이메일</label>
                     <span className="label-01 text-gray-600">가입하신 이메일 주소를 입력해주세요.</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <div className="flex-1">
                       <Input
+                        id="forgot-email"
                         type="email"
                         value={email}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
