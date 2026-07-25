@@ -1,5 +1,7 @@
+import HomePage from './features/home/pages/HomePage';
+
 function App() {
-  return null;
+  return <HomePage />;
 }
 
 export default App;
