@@ -34,8 +34,8 @@ export default function AIChatThread() {
 
   return (
     <div
-      className="flex flex-col items-center"
-      style={{ padding: '0 50px', gap: '4px', alignSelf: 'stretch' }}
+      className="flex flex-col items-start"
+      style={{ padding: '76px 50px 0 50px', gap: '4px', alignSelf: 'stretch' }}
     >
       <div className="flex flex-col items-start" style={{ alignSelf: 'stretch' }}>
 

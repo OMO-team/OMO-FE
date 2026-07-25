@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
+import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
@@ -161,10 +162,10 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
               {/* 이메일 + 인증 버튼 */}
               <div className="flex flex-col gap-[6px] self-stretch">
+                <span className="body-02 text-gray-900 self-stretch">이메일</span>
                 <div className="flex items-start gap-2">
                   <div className="flex-1">
                     <Input
-                      label="이메일"
                       type="email"
                       value={email}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
@@ -210,11 +211,13 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                     type="button"
                     onClick={handleAgreeAll}
                     className="flex justify-center items-center flex-shrink-0"
-                    style={{ width: '20px', height: '20px' }}
+                    style={{ width: '24px', height: '24px' }}
                   >
-                    <div className="flex justify-center items-center border border-gray-300 bg-white rounded-1" style={{ width: '18px', height: '18px' }}>
-                      {agreeAll && <CheckIcon color="var(--color-primary-500)" />}
-                    </div>
+                    {agreeAll ? (
+                      <img src={checkboxCheckedIcon} alt="체크됨" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                    ) : (
+                      <div className="border border-gray-300 bg-white rounded-1" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                    )}
                   </button>
                   <span className="body-02 text-gray-900">전체 동의하기</span>
                 </div>

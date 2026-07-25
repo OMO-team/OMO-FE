@@ -20,7 +20,7 @@ export default function PasswordChangeSuccessPage({ onLoginClick }: PasswordChan
         >
           {/* 자물쇠 아이콘 */}
           <div
-            className="flex flex-col justify-center items-center rounded-full bg-[#F1F8FF]"
+            className="flex flex-col justify-center items-center rounded-full bg-primary-50"
             style={{ width: '70px', height: '70px', padding: '14px', gap: '4px' }}
           >
             <LockIcon />
@@ -28,9 +28,9 @@ export default function PasswordChangeSuccessPage({ onLoginClick }: PasswordChan
 
           {/* 타이틀 + 설명 + 안내박스 */}
           <div className="flex flex-col items-center self-stretch" style={{ gap: '40px' }}>
-            <div className="flex flex-col items-center gap-2">
-              <p className="heading-05 text-gray-900 text-center">비밀번호 변경이 완료되었습니다.</p>
-              <p className="body-03 text-gray-500 text-center">새 비밀번호로 안전하게 변경되었습니다.</p>
+            <div className="flex flex-col items-center gap-[4px]">
+              <p className="heading-05 h-[32px] self-stretch text-center text-black">비밀번호 변경이 완료되었습니다.</p>
+              <p className="body-01 self-stretch text-center text-gray-700">새 비밀번호로 안전하게 변경되었습니다.</p>
             </div>
 
             {/* 안내 박스 */}
@@ -48,8 +48,7 @@ export default function PasswordChangeSuccessPage({ onLoginClick }: PasswordChan
           <button
             type="button"
             onClick={onLoginClick}
-            className="w-full rounded-3 bg-primary-500 text-white border-none cursor-pointer title-05"
-            style={{ padding: '14px 0' }}
+            className="flex w-[490px] items-center justify-center gap-[4px] rounded-2 bg-primary-500 py-[13px] title-05 text-white"
           >
             로그인 하러 가기
           </button>
