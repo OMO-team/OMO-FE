@@ -1,10 +1,29 @@
+import { useNavigate } from 'react-router-dom';
 import OmoLogoIcon from './OmoLogoIcon';
+import ChevronIcon from './ChevronIcon';
 import NaverBlogIcon from './NaverBlogIcon';
 import InstagramIcon from './InstagramIcon';
 import YoutubeIcon from './YoutubeIcon';
 
-const SERVICE_LINKS = ['AI스마트 브리핑', '도시별 인사이트 리포트', '내 출국 준비 로드맵'];
-const POLICY_LINKS = ['개인정보처리방침', '이용약관', '공지사항', '문의하기', '제휴문의'];
+type LinkItem = {
+  label: string;
+  path?: string;
+};
+
+const SERVICE_LINKS: LinkItem[] = [
+  { label: 'AI스마트 브리핑' },
+  { label: '도시별 인사이트 리포트', path: '/city-insight' },
+  { label: '내 출국 준비 로드맵', path: '/myhome/empty' },
+];
+
+const POLICY_LINKS: LinkItem[] = [
+  { label: '개인정보처리방침', path: '/support/terms' },
+  { label: '이용약관', path: '/support/terms' },
+  { label: '공지사항' },
+  { label: '문의하기', path: '/contact' },
+  { label: '제휴문의' },
+];
+
 const SNS_LINKS = [
   { label: 'Instagram', icon: <InstagramIcon className="size-5" /> },
   { label: 'YouTube', icon: <YoutubeIcon className="size-5" /> },
@@ -12,6 +31,8 @@ const SNS_LINKS = [
 ];
 
 export default function Footer() {
+  const navigate = useNavigate();
+
   return (
     <footer className="flex w-full flex-col items-center gap-4 bg-gray-50">
       <div className="mx-auto flex w-full max-w-content flex-col items-center gap-10 px-4">
@@ -44,10 +65,14 @@ export default function Footer() {
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
-              {SERVICE_LINKS.map((label) => (
-                <div key={label} className="flex items-center gap-1">
+              {SERVICE_LINKS.map(({ label, path }) => (
+                <div
+                  key={label}
+                  className={`flex items-center gap-1 ${path ? 'cursor-pointer' : ''}`}
+                  {...(path && { onClick: () => navigate(path) })}
+                >
                   <span className="body-05 w-35 text-gray-700">{label}</span>
-                  <span className="size-icon-xs text-gray-700">〉</span>
+                  <ChevronIcon className="size-icon-xs rotate-180 text-gray-700" />
                 </div>
               ))}
             </div>
@@ -55,7 +80,7 @@ export default function Footer() {
               {SNS_LINKS.map(({ label, icon }) => (
                 <span
                   key={label}
-                  className="flex size-8.5 items-center justify-center rounded-full bg-white shadow-01"
+                  className="flex size-8.5 items-center justify-center rounded-full bg-white"
                 >
                   {icon}
                 </span>
@@ -66,13 +91,14 @@ export default function Footer() {
       </div>
 
       <div className="flex w-full flex-col items-center gap-px">
-        <hr className="w-full border-gray-200" />
+        <hr className="w-full border-gray-100 mb-4" />
         <div className="mx-auto flex w-full max-w-content flex-wrap items-center justify-between gap-2 px-4 pb-3">
           <div className="flex flex-wrap items-center">
-            {POLICY_LINKS.map((label, index) => (
+            {POLICY_LINKS.map(({ label, path }, index) => (
               <span
                 key={label}
-                className={`body-03 px-2.5 py-1 ${index === 0 ? 'title-03 text-primary-600' : 'text-gray-700'}`}
+                className={`body-03 px-2.5 py-1 ${index === 0 ? 'title-03 text-primary-600' : 'text-gray-700'} ${path ? 'cursor-pointer' : ''}`}
+                {...(path && { onClick: () => navigate(path) })}
               >
                 {label}
               </span>
