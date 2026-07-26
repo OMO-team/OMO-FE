@@ -4,6 +4,9 @@ import Footer from "../../../shared/components/Footer";
 import BackHeader from "../../../shared/components/BackHeader";
 import ModalOverlay from "../../../shared/components/ModalOverlay";
 import ProfileCard from "../components/ProfileCard";
+import ProfileEditModal from "../components/ProfileEditModal";
+import PasswordChangeModal from "../components/PasswordChangeModal";
+import ForgotPasswordModal from "../../auth/components/ForgotPasswordModal";
 import SettingsSectionHeader from "../components/SettingSectionHeader";
 import SettingActionItem from "../components/SettingActionItem";
 import ToggleSwitch from "../components/ToggleSwitch";
@@ -24,16 +27,23 @@ interface SettingsPageProps {
   onNavigateToTerms?: () => void;
   onLogout?: () => void;
   onDeleteAccount?: () => void;
+  onPasswordChangeSuccess?: () => void;
 }
 
 export default function SettingsPage({
   onNavigateToTerms,
   onLogout,
   onDeleteAccount,
+  onPasswordChangeSuccess,
 }: SettingsPageProps) {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
-  const [activeModal, setActiveModal] = useState<"logout" | "delete" | null>(null);
+  const [activeModal, setActiveModal] = useState<
+    "logout" | "delete" | "profile" | "password-change" | "password-find" | null
+  >(null);
+  const [profileName, setProfileName] = useState("OMO");
+  const [profileEmail] = useState("omo@naver.com");
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
@@ -43,9 +53,10 @@ export default function SettingsPage({
         <BackHeader title="설정" onBack={() => window.history.back()} />
 
         <ProfileCard
-          name="OMO 님"
-          email="omo@naver.com"
-          onEditProfile={() => {}}
+          name={`${profileName} 님`}
+          email={profileEmail}
+          avatarUrl={avatarUrl}
+          onEditProfile={() => setActiveModal("profile")}
         />
 
         <div className="flex flex-col gap-[30px]">
@@ -78,7 +89,7 @@ export default function SettingsPage({
                 iconBgClassName="bg-secondary-50"
                 title="비밀번호 변경"
                 description="안전한 계정 관리를 위해 비밀번호를 변경할 수 있어요."
-                onClick={() => {}}
+                onClick={() => setActiveModal("password-change")}
               />
               <SettingActionItem
                 iconSrc={refreshIcon}
@@ -138,6 +149,34 @@ export default function SettingsPage({
       </main>
 
       <Footer />
+
+      {activeModal === "profile" && (
+        <ProfileEditModal
+          name={profileName}
+          email={profileEmail}
+          avatarUrl={avatarUrl}
+          onClose={() => setActiveModal(null)}
+          onSave={({ name, avatarFile }) => {
+            setProfileName(name);
+            if (avatarFile) setAvatarUrl(URL.createObjectURL(avatarFile));
+          }}
+        />
+      )}
+
+      {activeModal === "password-change" && (
+        <PasswordChangeModal
+          onClose={() => setActiveModal(null)}
+          onForgotPassword={() => setActiveModal("password-find")}
+          onSubmit={() => onPasswordChangeSuccess?.()}
+        />
+      )}
+
+      {activeModal === "password-find" && (
+        <ForgotPasswordModal
+          onClose={() => setActiveModal(null)}
+          onSuccess={onPasswordChangeSuccess}
+        />
+      )}
 
       {activeModal === "logout" && (
         <ModalOverlay onClose={() => setActiveModal(null)}>

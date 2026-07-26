@@ -10,9 +10,10 @@ import { passwordRegex } from '../constants/passwordRegex';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
+  onSuccess?: () => void;
 };
 
-export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
+export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -64,6 +65,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
     try {
       await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
       onClose();
+      onSuccess?.();
     } catch (error) {
       if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 404) {
         setEmailError('가입되지 않은 이메일입니다.');

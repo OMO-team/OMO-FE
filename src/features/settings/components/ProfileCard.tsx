@@ -16,14 +16,21 @@ export default function ProfileCard({
   return (
     <div className="flex items-start gap-[30px] self-stretch rounded-4 bg-white px-10 py-[30px]">
       <div
-        className="size-[86px] shrink-0 overflow-hidden rounded-full bg-gray-100"
+        className="size-[86px] shrink-0 rounded-full"
         style={{ boxShadow: "0px 3px 8px 0 rgba(6,49,88,0.16)" }}
       >
-        <img
-          src={avatarUrl || profileImage}
-          alt={name}
-          className="h-full w-full object-cover"
-        />
+        <div className="relative size-full overflow-hidden rounded-full bg-gray-100">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
+          ) : (
+            <img
+              src={profileImage}
+              alt={name}
+              className="absolute max-w-none"
+              style={{ left: "-8px", top: "-5px", width: "102px", height: "102px" }}
+            />
+          )}
+        </div>
       </div>
       <div className="flex w-[107px] flex-col items-start justify-center gap-5">
         <div className="flex flex-col items-start gap-1">

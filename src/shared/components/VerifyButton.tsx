@@ -1,9 +1,10 @@
 type VerifyButtonProps = {
   active: boolean;
   onClick?: () => void;
+  label?: string;
 };
 
-export default function VerifyButton({ active, onClick }: VerifyButtonProps) {
+export default function VerifyButton({ active, onClick, label = '인증' }: VerifyButtonProps) {
   return (
     <button
       type="button"
@@ -16,7 +17,7 @@ export default function VerifyButton({ active, onClick }: VerifyButtonProps) {
           : 'bg-gray-100 text-gray-400 cursor-default',
       ].join(' ')}
     >
-      인증
+      {label}
     </button>
   );
 }
