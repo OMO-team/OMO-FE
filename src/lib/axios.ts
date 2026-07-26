@@ -16,12 +16,20 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
+const AUTH_PATHS = ['/auth/v1/login', '/auth/v1/reissue'];
+
 instance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
+  async (error: AxiosError & { _retried?: boolean }) => {
     const originalRequest = error.config!;
 
-    if (error.response?.status !== 401) return Promise.reject(error);
+    if (
+      error.response?.status !== 401 ||
+      error._retried ||
+      AUTH_PATHS.some((p) => originalRequest.url?.includes(p))
+    ) return Promise.reject(error);
+
+    originalRequest._retried = true;
 
     if (!refreshTokenPromise) {
       refreshTokenPromise = (async () => {
