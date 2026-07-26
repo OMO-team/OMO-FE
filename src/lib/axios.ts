@@ -17,19 +17,20 @@ instance.interceptors.request.use((config) => {
 });
 
 const AUTH_PATHS = ['/auth/v1/login', '/auth/v1/reissue'];
+const retriedRequests = new WeakSet<object>();
 
 instance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError & { _retried?: boolean }) => {
+  async (error: AxiosError) => {
     const originalRequest = error.config!;
 
     if (
       error.response?.status !== 401 ||
-      error._retried ||
+      retriedRequests.has(originalRequest) ||
       AUTH_PATHS.some((p) => originalRequest.url?.includes(p))
     ) return Promise.reject(error);
 
-    originalRequest._retried = true;
+    retriedRequests.add(originalRequest);
 
     if (!refreshTokenPromise) {
       refreshTokenPromise = (async () => {
