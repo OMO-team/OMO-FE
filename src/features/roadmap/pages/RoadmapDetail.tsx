@@ -102,7 +102,7 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
     <div className="flex min-h-screen flex-col bg-gray-20">
       <div className="relative">
         <div className="absolute inset-x-0 top-0 z-10">
-          <Header isLoggedIn={false} variant="overlay" />
+          <Header variant="overlay" />
         </div>
         {onBack && (
           <button

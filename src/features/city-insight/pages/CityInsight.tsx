@@ -1,26 +1,40 @@
-import backArrow from '../../../assets/icons/back-arrow.svg';
-import CategoryTab from '../../../shared/components/CategoryTab';
-import CityInsightCard from '../components/CityInsightCard';
-import SearchInputBar from '../../../shared/components/SearchInputBar';
-import DetailDropDown from '../components/DetailDropDown';
-import DropDown from '../../../shared/components/DropDown';
-import { DETAIL_OPTIONS } from '../constants/filterOptions';
-import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
-import PageNavigation from '../../../shared/components/PageNavigation';
-import RegionDropDown from '../components/RegionDropDown';
-import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
-import FilterChip from '../components/FilterChip';
-import FilterIcon from '../../../shared/components/FilterIcon';
+// react
 import { useEffect, useState } from 'react';
+
+// shared components
+import CategoryTab from '../../../shared/components/CategoryTab';
+import SearchInputBar from '../../../shared/components/SearchInputBar';
+import DropDown from '../../../shared/components/DropDown';
+import PageNavigation from '../../../shared/components/PageNavigation';
+import FilterIcon from '../../../shared/components/FilterIcon';
+
+// feature components
+import CityInsightCard from '../components/CityInsightCard';
+import DetailDropDown from '../components/DetailDropDown';
+import RegionDropDown from '../components/RegionDropDown';
+import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
-import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/mockData';
-import type { CityReportData } from '../../../shared/types/cityReport';
-import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
-import { useCompareStore } from '../../compare/store/useCompareStore';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
+
+// stores
+import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
+import { useCompareStore } from '../../compare/store/useCompareStore';
+
+// types
+import type { CityReportData } from '../../../shared/types/cityReport';
+
+// constants & mocks
+import { DETAIL_OPTIONS } from '../constants/filterOptions';
+import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
+import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { mockCities } from '../../../shared/mocks/cities';
+
+// assets
+import backArrow from '../../../assets/icons/back-arrow.svg';
+import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
+import searchInputIcon from '../../../assets/icons/search-input-list.svg'
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
@@ -34,6 +48,7 @@ const CITY_COMPARE_ID: Record<string, string> = {
 };
 
 export default function CityInsight() {
+  const [input, setInput] = useState('')
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
@@ -100,7 +115,7 @@ export default function CityInsight() {
   return (
     <div className="w-full flex flex-col items-center justify-center">
       <div>
-        <div className="flex gap-5 mb-6">
+        <div className="mt-[50px] flex gap-5 mb-6">
           <img src={backArrow} alt="" />
           <h1 className="heading-05">추천 도시</h1>
         </div>
@@ -113,9 +128,10 @@ export default function CityInsight() {
           <SearchInputBar
             placeholder="원하는 도시 조건을 입력해 보세요"
             width="w-[974px]"
-            value=""
-            onChange={() => {}}
+            value={input}
+            onChange={setInput}
             onSearch={() => {}}
+            icon={searchInputIcon}
           />
           <div className="flex justify-between">
             <div className="flex gap-2">

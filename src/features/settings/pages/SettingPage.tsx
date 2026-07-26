@@ -21,14 +21,12 @@ import chevronDownIcon from "../../../assets/icons/chevron-down.svg";
 import exitIcon from "../../../assets/icons/exit.svg";
 
 interface SettingsPageProps {
-  isLoggedIn?: boolean;
   onNavigateToTerms?: () => void;
   onLogout?: () => void;
   onDeleteAccount?: () => void;
 }
 
 export default function SettingsPage({
-  isLoggedIn = true,
   onNavigateToTerms,
   onLogout,
   onDeleteAccount,
@@ -39,7 +37,7 @@ export default function SettingsPage({
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
-      <Header isLoggedIn={isLoggedIn} userAvatarUrl={undefined} />
+      <Header />
 
       <main className="mx-auto flex w-full max-w-content flex-col gap-[50px] px-[188px] pt-8">
         <BackHeader title="설정" onBack={() => window.history.back()} />
