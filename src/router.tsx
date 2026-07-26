@@ -21,6 +21,9 @@ import PasswordResetVerifyRoute from './features/auth/pages/PasswordResetVerifyR
 // shared
 import TermsAndPolicyRoute from './shared/pages/TermsAndPolicyRoute';
 
+// contact 
+import Contact from './features/contact/pages/Contact';
+
 export const router = createBrowserRouter([
   {
     element: <MainLayout />,
@@ -31,6 +34,7 @@ export const router = createBrowserRouter([
       { path: '/auth/email-verify', element: <EmailVerifyRoute /> },
       { path: '/auth/password-reset/verify', element: <PasswordResetVerifyRoute /> },
       { path: '/support/terms', element: <TermsAndPolicyRoute /> },
+      { path: '/contact', element: <Contact /> },
     ],
   },
   { path: '/myhome/dashboard/:cityId', element: <RoadmapDashboardRoute /> },
