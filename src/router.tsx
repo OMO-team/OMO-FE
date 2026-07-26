@@ -10,5 +10,5 @@ export const router = createBrowserRouter([
   { path: '/myhome/dashboard/:cityId', element: <RoadmapDashboardRoute /> },
   { path: '/myhome/task-detail', element: <TaskDetailRoute /> },
   { path: '/support/terms', element: <TermsAndPolicyRoute /> },
-  { path: '/myhome/setting', element: <SettingsApp /> },
+  { path: '/setting', element: <SettingsApp /> },
 ]);
