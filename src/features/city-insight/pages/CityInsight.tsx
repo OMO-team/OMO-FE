@@ -131,7 +131,7 @@ export default function CityInsight() {
             value={input}
             onChange={setInput}
             onSearch={() => {}}
-            icon={serachInputIcon}
+            icon={searchInputIcon}
           />
           <div className="flex justify-between">
             <div className="flex gap-2">
