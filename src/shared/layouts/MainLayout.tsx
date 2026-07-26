@@ -8,18 +8,36 @@ import SignupModal from '../../features/auth/components/SignupModal';
 import ForgotPasswordModal from '../../features/auth/components/ForgotPasswordModal';
 import LoginRequiredModal from '../../features/auth/components/LoginRequiredModal';
 import SearchModal from '../../features/search/components/SearchModal';
+import AIChatPanel from '../../features/chat/components/AIChatPanel';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
+import type { MainLayoutContext } from './useMainLayoutContext';
 
 export default function MainLayout() {
   const { modalType, openModal, closeModal, isSearchOpen, closeSearch } = useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const outletContext: MainLayoutContext = {
+    openChat: () => setIsChatOpen(true),
+    closeChat: () => setIsChatOpen(false),
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex flex-1 flex-col">
-        <Outlet />
-      </main>
+      <Header onSmartBriefingClick={() => setIsChatOpen(true)} />
+      <div className="flex flex-1">
+        <main className="flex min-w-0 flex-1 flex-col overflow-x-auto">
+          <Outlet context={outletContext} />
+        </main>
+
+        {isChatOpen && (
+          <AIChatPanel
+            hasChat={true}
+            onClose={() => setIsChatOpen(false)}
+            onNewChat={() => setIsChatOpen(false)}
+          />
+        )}
+      </div>
       <Footer />
 
       {isSearchOpen && (
