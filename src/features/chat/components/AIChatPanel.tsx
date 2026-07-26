@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
+import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
 import clipDarkIcon from '../../../assets/icons/icon-clip-dark.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
@@ -101,6 +102,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [noticeType, setNoticeType] = useState<NoticeType>(defaultNotice);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const hasText = value.trim().length > 0;
   const hasImages = noticeType === 'attachment';
@@ -108,6 +110,11 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
   const handleSubmit = () => {
     if (!hasText) return;
     setValue('');
+    setIsStreaming(true);
+  };
+
+  const handleStop = () => {
+    setIsStreaming(false);
   };
 
   const handleClipClick = () => {
@@ -149,8 +156,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
 
   return (
     <div
-      className="relative flex flex-col border-l border-gray-300 bg-white"
-      style={{ width: '670px', height: '1080px', flexShrink: 0 }}
+      className="relative flex h-full flex-col border-l border-gray-300 bg-white"
+      style={{ width: '670px', flexShrink: 0 }}
       onClick={() => {
         if (isDropdownOpen) setIsDropdownOpen(false);
         if (isMoreMenuOpen) setIsMoreMenuOpen(false);
@@ -365,8 +372,57 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
       </div>
 
       {/* 콘텐츠 영역 */}
-      <div className="flex-1 overflow-y-auto">
-        {hasChat && <AIChatThread />}
+      <div className={`flex-1 overflow-y-auto flex flex-col ${hasChat ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`} style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}>
+        {hasChat ? (
+          <AIChatThread />
+        ) : (
+          /* Frame 11205: Empty State */
+          <div
+            className="flex flex-col items-start"
+            style={{ width: '570px', gap: '26px', marginBottom: '62px' }}
+          >
+            {/* Frame 48: 타이틀 */}
+            <div className="flex flex-col items-start gap-2 self-stretch">
+              <img src={suitcaseIcon} alt="여행" width={32} height={32} />
+              <div className="flex flex-col items-start gap-2 self-stretch">
+                <h2 className="heading-05 text-black">어느 나라로 떠나고 싶으신가요?</h2>
+                <p className="title-02 text-gray-600 self-stretch">
+                  원하는 조건이나 예산을 자유롭게 적으면, OMO AI가 딱 맞는 도시를 찾아드릴게요.
+                </p>
+              </div>
+            </div>
+
+            {/* Frame 11204: S_suggestion_chip 목록 */}
+            <div className="flex flex-col items-start gap-2 self-stretch">
+              {[
+                '치안이 좋고 영어로 생활 가능한 200만원 이하 도시',
+                '유럽에서 생활비가 저렴하고 대중교통 좋은 곳',
+                '아시아 워킹홀리데이 추천, 한 달 150만원 예산',
+              ].map((text) => (
+                <button
+                  key={text}
+                  type="button"
+                  onClick={() => setValue(text)}
+                  className="flex items-center gap-1 bg-gray-20 hover:bg-gray-50 transition-colors"
+                  style={{ height: '38px', padding: '8px 20px', borderRadius: '10px' }}
+                >
+                  <span
+                    className="body-04 text-gray-700"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitBoxOrient: 'vertical',
+                      WebkitLineClamp: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {text}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Frame 11265: 하단 입력 영역 (그라데이션 + 입력창) */}
@@ -465,18 +521,32 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                 </div>
               </button>
 
-              {/* 전송 버튼 */}
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={!hasText}
-                className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
-                style={{ width: '32px', height: '32px', padding: '6.25px', boxSizing: 'border-box' }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <path d="M6.09375 11.4062L6.09375 0.781249M11.4063 6.09375L6.09375 0.781249L0.78125 6.09375" stroke="white" strokeWidth="1.5625" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
+              {/* 전송 / 중지 버튼 */}
+              {isStreaming ? (
+                <button
+                  type="button"
+                  aria-label="응답 중지"
+                  onClick={handleStop}
+                  className="flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400"
+                  style={{ width: '32px', height: '32px', padding: '6.25px', boxSizing: 'border-box' }}
+                >
+                  <div style={{ width: '17.5px', height: '17.5px', transform: 'rotate(-90deg)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div style={{ width: '10px', height: '10px', flexShrink: 0, borderRadius: '1.25px', background: '#fff' }} />
+                  </div>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={!hasText}
+                  className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
+                  style={{ width: '32px', height: '32px', padding: '6.25px', boxSizing: 'border-box' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M6.09375 11.4062L6.09375 0.781249M11.4063 6.09375L6.09375 0.781249L0.78125 6.09375" stroke="white" strokeWidth="1.5625" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         </div>

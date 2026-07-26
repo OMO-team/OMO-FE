@@ -3,19 +3,20 @@ type LargeFillButtonProps = {
   variant?: 'blue' | 'red' | 'outline';
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
 };
 
 const VARIANT_CLASS: Record<NonNullable<LargeFillButtonProps['variant']>, string> = {
-  blue: 'bg-primary-500 text-white',
-  red: 'bg-[#FF2A14] text-white',
-  outline: 'border border-gray-300 bg-white text-gray-600',
+  blue: 'title-02 w-full rounded-lg bg-primary-500 py-[14px] text-white hover:opacity-90 transition-opacity',
+  red: 'title-05 w-full rounded-lg bg-red-500 py-[14px] text-white hover:opacity-90 transition-opacity',
+  outline: 'title-02 w-[180px] shrink-0 rounded-lg bg-gray-100 px-[18px] py-3 text-gray-600 hover:bg-gray-200 transition-colors',
 };
 
-export default function LargeFillButton({ label, variant = 'blue', onClick, disabled }: LargeFillButtonProps) {
+export default function LargeFillButton({ label, variant = 'blue', onClick, disabled, className }: LargeFillButtonProps) {
   return (
     <button
       type="button"
-      className={`title-02 w-full rounded-2 px-24 py-3 disabled:opacity-50 ${VARIANT_CLASS[variant]}`}
+      className={`flex h-12 items-center justify-center gap-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${VARIANT_CLASS[variant]} ${className ?? ''}`}
       onClick={onClick}
       disabled={disabled}
     >

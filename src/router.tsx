@@ -20,6 +20,7 @@ import PasswordResetVerifyRoute from './features/auth/pages/PasswordResetVerifyR
 
 // shared
 import TermsAndPolicyRoute from './shared/pages/TermsAndPolicyRoute';
+import SettingsApp from './features/settings/pages/SettingsApp';
 
 // contact 
 import Contact from './features/contact/pages/Contact';
@@ -39,4 +40,5 @@ export const router = createBrowserRouter([
   },
   { path: '/myhome/dashboard/:cityId', element: <RoadmapDashboardRoute /> },
   { path: '/myhome/task-detail', element: <TaskDetailRoute /> },
+  { path: '/setting', element: <SettingsApp /> },
 ]);
