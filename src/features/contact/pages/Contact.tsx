@@ -1,8 +1,15 @@
+// react
 import { useState } from 'react'
+
+// assests
 import backArrow from '../../../assets/icons/back-arrow.svg'
 import cameraIcon from '../../../assets/icons/icon-camera.svg'
+
+// components
 import DropDown from '../../../shared/components/DropDown'
 import ContactSuccessModal from '../components/ContactSuccessModal'
+
+// constants
 import { CONTACT_TYPE_OPTIONS, type ContactType } from '../constants/contactOptions'
 
 export default function Contact() {
@@ -53,9 +60,9 @@ export default function Contact() {
     <div className='w-full flex flex-col items-center justify-center'>
         <div>
             {/* 헤더 */}
-            <div className='mb-14'>
+            <div className='mt-14 mb-14'>
                 <div className='flex gap-5 mb-4.5'>
-                    <img src={backArrow} alt="" />
+                    <img src={backArrow} alt="" onClick={()=>{}} />
                     <h1 className='heading-05'>1:1 문의하기</h1>
                 </div>
                 <p className='body-03 text-gray-600'>서비스 이용 중 궁금한 점이나 도움이 필요한 내용을 남겨주세요. 확인 후 빠르게 답변을 드리겠습니다.</p>
