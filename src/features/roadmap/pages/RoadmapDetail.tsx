@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Header from '../../../shared/components/Header';
 import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
 import RoadmapTimeline from '../components/RoadmapTimeline';
 import BudgetPlanCard from '../components/BudgetPlanCard';
 import AiReportCard from '../components/AiReportCard';
-import DocumentTaskDetailModal from '../components/DocumentTaskDetailModal';
 import DatePickerModal from '../components/DatePickerModal';
 import DocumentUploadModal from '../components/DocumentUploadModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
@@ -17,10 +17,15 @@ import {
   apostilleRequiredDocuments,
 } from '../mocks/mockData';
 import { useRoadmapStore } from '../store/useRoadmapStore';
-import type { UploadedFileItem } from '../types/roadmap';
+import type { UploadedFileItem, RequiredDocumentData } from '../types/roadmap';
 
-const APOSTILLE_INFO_BANNER =
-  '해외에서 한국 학력을 인정받기 위해 필요한 공증 절차입니다. 외교부 영사민원24를 통해 온라인으로 신청할 수 있습니다.';
+/** task-detail 자식 라우트(TaskDetailRoute)에 useOutletContext로 전달되는 값 */
+export type TaskDetailContext = {
+  documents: RequiredDocumentData[];
+  onCheck: (taskDocumentId: number) => void;
+  onOpenUpload: (taskDocumentId: number) => void;
+  onDateClick: () => void;
+};
 
 function parseDepartureDate(value: string | null) {
   const match = value?.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
@@ -35,6 +40,7 @@ type RoadmapDetailProps = {
 };
 
 export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
+  const navigate = useNavigate();
   const countryGroups = useRoadmapStore((s) => s.countryGroups);
   const allCities = countryGroups.flatMap((group) => group.cities);
   const city = allCities.find((c) => c.cityId === cityId) ?? allCities[0];
@@ -42,7 +48,6 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(4);
   const [months, setMonths] = useState(berlinBudgetPlan.months);
-  const [openTaskIndex, setOpenTaskIndex] = useState<number | null>(null);
   const [departureDate, setDepartureDate] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<string | null>(null);
   const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | 'task' | null>(null);
@@ -94,9 +99,21 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
     }
   };
 
-  const openTask = openTaskIndex !== null ? berlinRoadmapTasks[openTaskIndex] : null;
   const parsedDeparture = parseDepartureDate(departureDate);
   const parsedStart = parseDepartureDate(startDate);
+
+  const taskDetailContext: TaskDetailContext = {
+    documents,
+    onCheck: handleCheckDocument,
+    onOpenUpload: (taskDocumentId) => {
+      setUploadedFiles([]);
+      setUploadTargetDocumentId(taskDocumentId);
+    },
+    onDateClick: () => {
+      setDatePickerMode('day');
+      setDatePickerTarget('task');
+    },
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
@@ -138,7 +155,10 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
               setDatePickerTarget('departure');
             }}
           />
-          <RoadmapTimeline tasks={berlinRoadmapTasks} onTaskClick={setOpenTaskIndex} />
+          <RoadmapTimeline
+            tasks={berlinRoadmapTasks}
+            onTaskClick={(index) => navigate(`task-detail/${index}`)}
+          />
 
           {datePickerTarget === 'start' && (
             <>
@@ -227,29 +247,7 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
 
       <Footer />
 
-      {openTask && (
-        <ModalOverlay onClose={() => setOpenTaskIndex(null)}>
-          <DocumentTaskDetailModal
-            category={openTask.category}
-            title={openTask.title}
-            infoBanner={APOSTILLE_INFO_BANNER}
-            dDayLabel={openTask.dDay ? `D-${openTask.dDay}` : undefined}
-            scheduledDate={openTask.date}
-            onDateClick={() => {
-              setDatePickerMode('day');
-              setDatePickerTarget('task');
-            }}
-            onClose={() => setOpenTaskIndex(null)}
-            documents={documents}
-            locked={openTask.status === 'lock'}
-            onOpenUpload={(taskDocumentId) => {
-              setUploadedFiles([]);
-              setUploadTargetDocumentId(taskDocumentId);
-            }}
-            onCheck={handleCheckDocument}
-          />
-        </ModalOverlay>
-      )}
+      <Outlet context={taskDetailContext} />
 
       {uploadTargetDocumentId !== null && (
         <ModalOverlay zIndex={60} onClose={() => setUploadTargetDocumentId(null)}>

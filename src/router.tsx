@@ -33,6 +33,9 @@ export const router = createBrowserRouter([
       { path: '/support/terms', element: <TermsAndPolicyRoute /> },
     ],
   },
-  { path: '/myhome/dashboard/:cityId', element: <RoadmapDashboardRoute /> },
-  { path: '/myhome/task-detail', element: <TaskDetailRoute /> },
+  {
+    path: '/myhome/dashboard/:cityId',
+    element: <RoadmapDashboardRoute />,
+    children: [{ path: 'task-detail/:taskIndex', element: <TaskDetailRoute /> }],
+  },
 ]);
