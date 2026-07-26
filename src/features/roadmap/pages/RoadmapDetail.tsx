@@ -15,14 +15,12 @@ import {
   berlinBudgetPlan,
   berlinAiReport,
   apostilleRequiredDocuments,
-  countryRoadmapGroups,
 } from '../mocks/mockData';
-import type { CityRoadmapData, UploadedFileItem } from '../types/roadmap';
+import { useRoadmapStore } from '../store/useRoadmapStore';
+import type { UploadedFileItem } from '../types/roadmap';
 
 const APOSTILLE_INFO_BANNER =
   '해외에서 한국 학력을 인정받기 위해 필요한 공증 절차입니다. 외교부 영사민원24를 통해 온라인으로 신청할 수 있습니다.';
-
-const DEFAULT_CITY = countryRoadmapGroups[0].cities[0];
 
 function parseDepartureDate(value: string | null) {
   const match = value?.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
@@ -31,11 +29,16 @@ function parseDepartureDate(value: string | null) {
 }
 
 type RoadmapDetailProps = {
-  city?: CityRoadmapData;
+  /** URL의 :cityId로부터 전달 — 로드맵 목록에 없으면 첫 번째 도시로 대체 */
+  cityId?: string;
   onBack?: () => void;
 };
 
-export default function RoadmapDetail({ city = DEFAULT_CITY, onBack }: RoadmapDetailProps) {
+export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
+  const countryGroups = useRoadmapStore((s) => s.countryGroups);
+  const allCities = countryGroups.flatMap((group) => group.cities);
+  const city = allCities.find((c) => c.cityId === cityId) ?? allCities[0];
+
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(4);
   const [months, setMonths] = useState(berlinBudgetPlan.months);
