@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useMatches } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ModalOverlay from '../components/ModalOverlay';
@@ -10,13 +10,21 @@ import LoginRequiredModal from '../../features/auth/components/LoginRequiredModa
 import SearchModal from '../../features/search/components/SearchModal';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 
+type RouteHandle = { headerVariant?: 'default' | 'overlay' };
+
 export default function MainLayout() {
   const { modalType, openModal, closeModal, isSearchOpen, closeSearch } = useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const matches = useMatches();
+  const headerVariant =
+    matches.map((m) => (m.handle as RouteHandle | undefined)?.headerVariant).filter(Boolean).at(-1) ?? 'default';
+  const isOverlay = headerVariant === 'overlay';
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
+    <div className="relative flex min-h-screen flex-col">
+      <div className={isOverlay ? 'absolute inset-x-0 top-0 z-20' : undefined}>
+        <Header variant={headerVariant} />
+      </div>
       <main className="flex flex-1 flex-col">
         <Outlet />
       </main>

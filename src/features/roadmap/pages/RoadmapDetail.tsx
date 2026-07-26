@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import Header from '../../../shared/components/Header';
 import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
 import RoadmapTimeline from '../components/RoadmapTimeline';
@@ -9,7 +8,6 @@ import AiReportCard from '../components/AiReportCard';
 import DatePickerModal from '../components/DatePickerModal';
 import DocumentUploadModal from '../components/DocumentUploadModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
-import Footer from '../../../shared/components/Footer';
 import {
   berlinRoadmapTasks,
   berlinBudgetPlan,
@@ -118,9 +116,6 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
       <div className="relative">
-        <div className="absolute inset-x-0 top-0 z-10">
-          <Header variant="overlay" />
-        </div>
         {onBack && (
           <button
             type="button"
@@ -244,8 +239,6 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
           />
         </div>
       </div>
-
-      <Footer />
 
       <Outlet context={taskDetailContext} />
 
