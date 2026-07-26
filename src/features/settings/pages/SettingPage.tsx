@@ -5,6 +5,8 @@ import BackHeader from "../../../shared/components/BackHeader";
 import ModalOverlay from "../../../shared/components/ModalOverlay";
 import ProfileCard from "../components/ProfileCard";
 import ProfileEditModal from "../components/ProfileEditModal";
+import PasswordChangeModal from "../components/PasswordChangeModal";
+import ForgotPasswordModal from "../../auth/components/ForgotPasswordModal";
 import SettingsSectionHeader from "../components/SettingSectionHeader";
 import SettingActionItem from "../components/SettingActionItem";
 import ToggleSwitch from "../components/ToggleSwitch";
@@ -36,7 +38,9 @@ export default function SettingsPage({
 }: SettingsPageProps) {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
-  const [activeModal, setActiveModal] = useState<"logout" | "delete" | "profile" | null>(null);
+  const [activeModal, setActiveModal] = useState<
+    "logout" | "delete" | "profile" | "password-change" | "password-find" | null
+  >(null);
   const [profileName, setProfileName] = useState("OMO");
   const [profileEmail] = useState("omo@naver.com");
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
@@ -85,7 +89,7 @@ export default function SettingsPage({
                 iconBgClassName="bg-secondary-50"
                 title="비밀번호 변경"
                 description="안전한 계정 관리를 위해 비밀번호를 변경할 수 있어요."
-                onClick={() => {}}
+                onClick={() => setActiveModal("password-change")}
               />
               <SettingActionItem
                 iconSrc={refreshIcon}
@@ -157,6 +161,18 @@ export default function SettingsPage({
             if (avatarFile) setAvatarUrl(URL.createObjectURL(avatarFile));
           }}
         />
+      )}
+
+      {activeModal === "password-change" && (
+        <PasswordChangeModal
+          onClose={() => setActiveModal(null)}
+          onForgotPassword={() => setActiveModal("password-find")}
+          onSubmit={() => {}}
+        />
+      )}
+
+      {activeModal === "password-find" && (
+        <ForgotPasswordModal onClose={() => setActiveModal(null)} />
       )}
 
       {activeModal === "logout" && (

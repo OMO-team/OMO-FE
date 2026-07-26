@@ -14,11 +14,35 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d
 export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSendCode = () => {
+    if (!email) {
+      setEmailError('가입하신 이메일 주소를 입력해주세요.');
+      return;
+    }
+    setEmailError('');
+    // TODO: 인증번호 발송 API 연결
+    setOtpSent(true);
+  };
+
+  const handleVerifyOtp = () => {
+    if (!otp) {
+      setOtpError('인증번호를 입력해주세요.');
+      return;
+    }
+    setOtpError('');
+    // TODO: 인증번호 확인 API 연결
+    setOtpVerified(true);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,15 +54,18 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
 
     let hasError = false;
 
-    if (!email) {
-      setEmailError('가입하신 이메일 주소를 입력해주세요.');
+    if (!otpVerified) {
+      setOtpError('인증번호를 확인해주세요.');
       hasError = true;
     }
     if (!PASSWORD_REGEX.test(newPassword)) {
       setNewPasswordError('영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.');
       hasError = true;
     }
-    if (newPassword !== confirmPassword) {
+    if (confirmPassword.length < 8) {
+      setConfirmPasswordError('8글자 이상 입력해 주세요');
+      hasError = true;
+    } else if (newPassword !== confirmPassword) {
       setConfirmPasswordError('비밀번호가 일치하지 않습니다.');
       hasError = true;
     }
@@ -101,10 +128,27 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                         placeholder="이메일을 입력해주세요"
                         error={emailError}
+                        disabled={otpSent}
                       />
                     </div>
-                    <VerifyButton active={email.length > 0} />
+                    <VerifyButton active={email.length > 0 && !otpSent} onClick={handleSendCode} />
                   </div>
+
+                  {otpSent && (
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1">
+                        <Input
+                          type="text"
+                          value={otp}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
+                          placeholder="인증번호 입력하기"
+                          error={otpError}
+                          disabled={otpVerified}
+                        />
+                      </div>
+                      <VerifyButton active={otp.length > 0 && !otpVerified} onClick={handleVerifyOtp} label="확인" />
+                    </div>
+                  )}
                 </div>
 
                 {/* 비밀번호 섹션들 */}
