@@ -10,9 +10,10 @@ import { passwordRegex } from '../constants/passwordRegex';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
+  onSuccess?: () => void;
 };
 
-export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
+export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -64,6 +65,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
     try {
       await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
       onClose();
+      onSuccess?.();
     } catch (error) {
       if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 404) {
         setEmailError('가입되지 않은 이메일입니다.');
@@ -130,27 +132,27 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
 
                 {/* 비밀번호 섹션들 */}
                 <div className="flex flex-col items-start gap-4 self-stretch">
+                  <Input
+                    label="새 비밀번호"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+                    placeholder="비밀번호를 입력해주세요"
+                    error={newPasswordError}
+                  />
                   <div className="flex flex-col gap-2 self-stretch">
                     <Input
-                      label="새 비밀번호"
+                      label="새 비밀번호 확인"
                       type="password"
-                      value={newPassword}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
-                      placeholder="비밀번호를 입력해주세요"
-                      error={newPasswordError}
+                      value={confirmPassword}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                      placeholder="비밀번호를 다시 입력해주세요"
+                      error={confirmPasswordError}
                     />
                     {!newPasswordError && (
                       <span className="label-01 px-2 text-gray-600">영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.</span>
                     )}
                   </div>
-                  <Input
-                    label="새 비밀번호 확인"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-                    placeholder="비밀번호를 다시 입력해주세요"
-                    error={confirmPasswordError}
-                  />
                 </div>
               </div>
             </div>
