@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, type KeyboardEvent } from 'react';
 import Header from '../../../shared/components/Header';
 import Footer from '../../../shared/components/Footer';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
@@ -91,7 +91,7 @@ export default function EmailVerificationPage({
     if (digit && index < CODE_LENGTH - 1) inputRefs.current[index + 1]?.focus();
   };
 
-  const handleCodeKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleCodeKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
