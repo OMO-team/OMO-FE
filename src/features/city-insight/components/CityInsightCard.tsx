@@ -20,6 +20,7 @@ interface CityInsightCardProps {
   securityScore: number;
   languageScore: number;
   infrastructureScore: number;
+  onToggleWish?: () => void;
   onCompare: () => void;
   onReport: () => void;
 }
@@ -30,7 +31,7 @@ export default function CityInsightCard({
   accommodationPercent, accommodationLabel,
   visaPercent, visaLabel,
   securityScore, languageScore, infrastructureScore,
-  onCompare, onReport,
+  onToggleWish, onCompare, onReport,
 }: CityInsightCardProps) {
   const cityInfo = [
     { label: '치안', value: securityScore },
@@ -52,7 +53,7 @@ export default function CityInsightCard({
             <img src={starIcon} alt="star icon" className="w-4 h-4" />
             {rating}
           </span>
-          <button>
+          <button type="button" onClick={onToggleWish} aria-label="찜하기">
             <HeartIcon isWished={isWished} />
           </button>
         </div>

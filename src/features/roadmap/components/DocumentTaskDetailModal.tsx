@@ -9,8 +9,6 @@ type DocumentTaskDetailModalProps = {
   category: string;
   title: string;
   infoBanner: string;
-  completedCount: number;
-  totalCount: number;
   documents: RequiredDocumentData[];
   onClose?: () => void;
   /** 일정이 잡혀있을 때만 표시되는 D-day 태그 (예: "D-000") */
@@ -25,16 +23,16 @@ type DocumentTaskDetailModalProps = {
   onAddSchedule?: () => void;
   /** true면 선행 작업 미완료 상태 — 서류 목록 대신 안내 문구만 표시하고 체크 불가 */
   locked?: boolean;
-  /** 서류 카드의 "파일 업로드" 버튼 클릭 시 호출 (document.name) — Document Upload Modal을 여는 용도 */
-  onOpenUpload?: (documentName: string) => void;
+  /** 서류 카드의 "파일 업로드" 버튼 클릭 시 호출 — Document Upload Modal을 여는 용도 */
+  onOpenUpload?: (taskDocumentId: number) => void;
+  /** 촬영 자동 체크 성공 또는 수동 체크 시 호출 — PATCH /api/v1/task-documents/{taskDocumentId}/check */
+  onCheck?: (taskDocumentId: number) => void;
 };
 
 export default function DocumentTaskDetailModal({
   category,
   title,
   infoBanner,
-  completedCount,
-  totalCount,
   documents,
   onClose,
   dDayLabel,
@@ -45,7 +43,10 @@ export default function DocumentTaskDetailModal({
   onAddSchedule,
   locked = false,
   onOpenUpload,
+  onCheck,
 }: DocumentTaskDetailModalProps) {
+  const completedCount = documents.filter((d) => d.isChecked).length;
+  const totalCount = documents.length;
   const progressPercent = totalCount === 0 ? 0 : (completedCount / totalCount) * 100;
 
   return (
@@ -63,7 +64,7 @@ export default function DocumentTaskDetailModal({
             {scheduledDate && (
               <button
                 type="button"
-                className="body-02 flex items-center gap-2 rounded-2 px-2 py-1 text-gray-700"
+                className="body-02 flex items-center gap-2 rounded-2 px-2 py-1 text-gray-700 transition-colors hover:bg-gray-50"
                 onClick={onDateClick}
               >
                 <CalendarIcon className="size-icon-sm" />
@@ -125,9 +126,10 @@ export default function DocumentTaskDetailModal({
             <div className="flex flex-col gap-3">
               {documents.map((document) => (
                 <RequiredDocumentCard
-                  key={document.name}
+                  key={document.taskDocumentId}
                   document={document}
-                  onOpenUpload={() => onOpenUpload?.(document.name)}
+                  onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
+                  onCheck={() => onCheck?.(document.taskDocumentId)}
                 />
               ))}
             </div>

@@ -12,9 +12,26 @@ interface HeaderProps {
   userAvatarUrl?: string;
   onLoginClick?: () => void;
   onSignupClick?: () => void;
+  /** 이미지/사진 위에 겹쳐지는 히어로 배너 등에서 사용, 로고·아이콘·텍스트를 흰색으로 전환 */
+  variant?: "default" | "overlay";
+  onSearchClick?: () => void;
+  onExploreClick?: () => void;
+  onMyHomeClick?: () => void;
 }
 
-export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSignupClick }: HeaderProps) {
+export default function Header({
+  isLoggedIn,
+  userAvatarUrl,
+  onLoginClick,
+  onSignupClick,
+  variant = "default",
+  onSearchClick,
+  onExploreClick,
+  onMyHomeClick,
+}: HeaderProps) {
+  const isOverlay = variant === "overlay";
+  const iconFilter = isOverlay ? "brightness-0 invert" : "";
+
   // 임시 라우팅 주소
   const activeNav: ActiveNav =
     location.pathname === "/explore"
@@ -28,10 +45,10 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-center self-stretch">
-          <img src={omoLogo} alt="OMO 로고" style={{ width: '62px', height: '18.888px' }} />
+          <img src={omoLogo} alt="OMO 로고" style={{ width: '62px', height: '18.888px' }} className={iconFilter} />
         </div>
 
-        <div className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]">
+        <div className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]" onClick={onSearchClick}>
           <span className="body-03 flex-1 text-gray-400">
             도시나 키워드로 검색하기
           </span>
@@ -45,27 +62,33 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           <button
+            onClick={onExploreClick}
             className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
               activeNav === "explore"
                 ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
-                : "text-gray-700"
+                : isOverlay
+                  ? "text-white"
+                  : "text-gray-700"
             }`}
           >
             <Icon size="sm">
-              <ExploreIcon />
+              <ExploreIcon color={isOverlay && activeNav !== "explore" ? "#FFFFFF" : undefined} />
             </Icon>
             탐색
           </button>
 
           <button
+            onClick={onMyHomeClick}
             className={`flex w-20 items-center gap-1 rounded-2 py-2.5 pl-2.5 pr-3 body-02 ${
               activeNav === "myhome"
                 ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
-                : "text-gray-700"
+                : isOverlay
+                  ? "text-white"
+                  : "text-gray-700"
             }`}
           >
             <Icon size="sm">
-              <HomeIcon />
+              <HomeIcon color={isOverlay && activeNav !== "myhome" ? "#FFFFFF" : undefined} />
             </Icon>
             내 홈
           </button>
@@ -76,12 +99,15 @@ export default function Header({ isLoggedIn, userAvatarUrl, onLoginClick, onSign
             <img
               src={userAvatarUrl || profileImage}
               alt=""
-              className="size-10 rounded-full object-cover"
+              className={`size-10 rounded-full object-cover ${isOverlay ? "ring-2 ring-white" : ""}`}
             />
           </button>
         ) : (
           <div className="flex items-center gap-1">
-            <button onClick={onLoginClick} className="flex items-center rounded-2 px-[18px] py-2.5 body-03 text-gray-700">
+            <button
+              onClick={onLoginClick}
+              className={`flex items-center rounded-2 px-[18px] py-2.5 body-03 ${isOverlay ? "text-white" : "text-gray-700"}`}
+            >
               로그인
             </button>
             <button onClick={onSignupClick} className="flex items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white">

@@ -1,3 +1,5 @@
+import ChevronLeftIcon from './icons/ChevronLeftIcon';
+
 type PageNavigationProps = {
   currentPage: number;
   totalPages: number;
@@ -9,6 +11,15 @@ export default function PageNavigation({ currentPage, totalPages, onPageChange }
 
   return (
     <div className="flex items-center justify-center gap-2">
+      <button
+        type="button"
+        className="flex size-icon-sm items-center justify-center text-gray-600 disabled:opacity-40"
+        aria-label="이전 페이지"
+        disabled={currentPage <= 1}
+        onClick={() => onPageChange?.(Math.max(currentPage - 1, 1))}
+      >
+        <ChevronLeftIcon className="size-icon-sm" />
+      </button>
       <div className="flex items-center gap-3">
         {pages.map((page) => (
           <button
@@ -25,11 +36,12 @@ export default function PageNavigation({ currentPage, totalPages, onPageChange }
       </div>
       <button
         type="button"
-        className="flex size-icon-sm items-center justify-center text-gray-600"
+        className="flex size-icon-sm items-center justify-center text-gray-600 disabled:opacity-40"
         aria-label="다음 페이지"
+        disabled={currentPage >= totalPages}
         onClick={() => onPageChange?.(Math.min(currentPage + 1, totalPages))}
       >
-        〉
+        <ChevronLeftIcon className="size-icon-sm rotate-180" />
       </button>
     </div>
   );

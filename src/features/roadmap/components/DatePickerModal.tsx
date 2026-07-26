@@ -1,5 +1,6 @@
-import ChevronLeftIcon from './icons/ChevronLeftIcon';
+import ChevronLeftIcon from '../../../shared/components/icons/ChevronLeftIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
+import InfoCircleIcon from './icons/InfoCircleIcon';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -10,6 +11,8 @@ type DatePickerModalProps = {
   month: number;
   selectedDay?: number;
   selectedMonth?: number;
+  /** 있으면 달력 위에 빨간 경고 pill 표시 (예: "출국 예정일은 오늘 이후 날짜로 선택해 주세요") */
+  warningMessage?: string;
   onModeToggle?: () => void;
   onSelectDay?: (day: number) => void;
   onSelectMonth?: (month: number) => void;
@@ -41,6 +44,7 @@ export default function DatePickerModal({
   month,
   selectedDay,
   selectedMonth,
+  warningMessage,
   onModeToggle,
   onSelectDay,
   onSelectMonth,
@@ -50,6 +54,12 @@ export default function DatePickerModal({
 }: DatePickerModalProps) {
   return (
     <div className="flex w-[386px] flex-col items-center rounded-4 border border-gray-100 bg-white px-8 pb-[30px] pt-5 shadow-02">
+      {warningMessage && (
+        <div className="mb-3 flex h-9.5 w-full items-center gap-2 rounded-full bg-red-50 py-2 pl-5 pr-6 text-red-700">
+          <InfoCircleIcon className="size-icon-sm shrink-0" />
+          <p className="body-03 whitespace-nowrap">{warningMessage}</p>
+        </div>
+      )}
       <div className="flex w-full items-center justify-between pb-[30px] pt-3">
         <button type="button" className="title-01 flex items-center gap-0.5 text-gray-900" onClick={onModeToggle}>
           <span>
@@ -59,7 +69,7 @@ export default function DatePickerModal({
         </button>
         <button
           type="button"
-          className="flex size-icon-lg items-center justify-center rounded-full text-gray-700"
+          className="flex size-icon-lg items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-50"
           onClick={onClose}
           aria-label="닫기"
         >
@@ -86,8 +96,10 @@ export default function DatePickerModal({
                   type="button"
                   disabled={day === null}
                   onClick={() => day && onSelectDay?.(day)}
-                  className={`body-04 flex size-[30px] items-center justify-center rounded-full ${
-                    day === selectedDay ? 'bg-primary-100 text-primary-600' : 'text-gray-700'
+                  className={`body-04 flex size-[30px] items-center justify-center rounded-full transition-colors ${
+                    day === selectedDay
+                      ? 'bg-primary-100 text-primary-600'
+                      : 'text-gray-700 not-disabled:hover:bg-gray-50'
                   }`}
                 >
                   {day}
@@ -99,11 +111,21 @@ export default function DatePickerModal({
       ) : (
         <div className="flex flex-col items-center gap-10">
           <div className="flex items-center gap-2">
-            <button type="button" onClick={onYearPrev} aria-label="이전 해">
+            <button
+              type="button"
+              onClick={onYearPrev}
+              aria-label="이전 해"
+              className="rounded-full p-1 text-gray-700 transition-colors hover:bg-gray-50"
+            >
               <ChevronLeftIcon className="size-icon-sm" />
             </button>
             <span className="heading-05 text-primary-500">{year}년</span>
-            <button type="button" onClick={onYearNext} aria-label="다음 해">
+            <button
+              type="button"
+              onClick={onYearNext}
+              aria-label="다음 해"
+              className="rounded-full p-1 text-gray-700 transition-colors hover:bg-gray-50"
+            >
               <ChevronLeftIcon className="size-icon-sm rotate-180" />
             </button>
           </div>
@@ -113,8 +135,8 @@ export default function DatePickerModal({
                 key={m}
                 type="button"
                 onClick={() => onSelectMonth?.(m)}
-                className={`body-04 flex h-[34px] w-[66px] items-center justify-center rounded-full shadow-02 ${
-                  m === selectedMonth ? 'bg-primary-500 text-white' : 'bg-gray-50 text-gray-600'
+                className={`body-04 flex h-[34px] w-[66px] items-center justify-center rounded-full shadow-02 transition-colors ${
+                  m === selectedMonth ? 'bg-primary-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 {String(m).padStart(2, '0')}월

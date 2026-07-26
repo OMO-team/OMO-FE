@@ -1,7 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
-import EyeIcon from '../../../shared/components/EyeIcon';
+import Input from '../../../shared/components/Input';
+import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 
 type ForgotPasswordModalProps = {
@@ -17,8 +18,6 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
   const [newPasswordError, setNewPasswordError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -89,108 +88,46 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
               <div className="flex flex-col items-start gap-[30px]">
 
                 {/* 이메일 섹션 */}
-                <div className="flex justify-end items-end gap-2">
-                  <div className="flex flex-col items-start gap-2">
-                    <div className="flex flex-col items-start gap-1">
-                      <span className="body-02 text-gray-900">이메일</span>
-                      <span className="label-01 text-gray-600">
-                        가입하신 이메일 주소를 입력해주세요.
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
+                <div className="flex flex-col items-start gap-2">
+                  <div className="flex flex-col items-start gap-1">
+                    <span className="body-02 text-gray-900">이메일</span>
+                    <span className="label-01 text-gray-600">가입하신 이메일 주소를 입력해주세요.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1">
+                      <Input
                         type="email"
                         value={email}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                         placeholder="이메일을 입력해주세요"
-                        className={`w-[328px] h-[45px] px-4 py-3 rounded-lg outline-none body-03
-                          text-gray-900 placeholder:text-gray-300 bg-white
-                          border transition-colors
-                          ${emailError ? 'border-warning-400' : 'border-gray-100 focus:border-primary-400'}`}
+                        error={emailError}
                       />
-                      <button
-                        type="button"
-                        className="h-11 px-[18px] py-2 rounded-lg bg-primary-50 body-02 text-primary-500"
-                      >
-                        인증
-                      </button>
                     </div>
-                    {emailError && (
-                      <div className="flex items-center gap-2 px-2">
-                        <img src={errorReverseIcon} alt="" className="w-4 h-4 shrink-0" />
-                        <span className="label-01 text-[#FF2A14]">{emailError}</span>
-                      </div>
-                    )}
+                    <VerifyButton active={email.length > 0} />
                   </div>
                 </div>
 
                 {/* 비밀번호 섹션들 */}
                 <div className="flex flex-col items-start gap-4 self-stretch">
-
-                  {/* 새 비밀번호 */}
-                  <div className="flex flex-col items-start gap-2 self-stretch">
-                    <span className="body-02 text-gray-900 self-stretch">새 비밀번호</span>
-                    <div
-                      className={`flex items-center h-[45px] px-4 py-3 self-stretch rounded-lg bg-white border transition-colors gap-1
-                        ${newPasswordError ? 'border-warning-400' : 'border-gray-100 focus-within:border-primary-400'}`}
-                    >
-                      <input
-                        type={showNewPassword ? 'text' : 'password'}
-                        value={newPassword}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
-                        placeholder="비밀번호를 입력해주세요"
-                        className="flex-1 outline-none bg-transparent body-03 text-gray-900 placeholder:text-gray-300"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowNewPassword((p) => !p)}
-                        className="shrink-0 w-5 h-5 flex items-center justify-center"
-                      >
-                        <EyeIcon color={newPasswordError ? '#FF2A14' : showNewPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)'} />
-                      </button>
-                    </div>
-                    {newPasswordError && (
-                      <div className="flex items-center gap-1 px-2">
-                        <img src={errorReverseIcon} alt="" className="w-4 h-4 shrink-0" />
-                        <span className="label-01 text-[#FF2A14]">{newPasswordError}</span>
-                      </div>
-                    )}
+                  <div className="flex flex-col gap-2 self-stretch">
+                    <Input
+                      label="새 비밀번호"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+                      placeholder="비밀번호를 입력해주세요"
+                      error={newPasswordError}
+                    />
+                    <span className="label-01 px-2 text-gray-600">영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.</span>
                   </div>
-
-                  {/* 새 비밀번호 확인 */}
-                  <div className="flex flex-col items-start gap-2 self-stretch">
-                    <span className="body-02 text-gray-900 self-stretch">새 비밀번호 확인</span>
-                    <div
-                      className={`flex items-center h-[45px] px-4 py-3 self-stretch rounded-lg bg-white border transition-colors gap-1
-                        ${confirmPasswordError ? 'border-warning-400' : 'border-gray-100 focus-within:border-primary-400'}`}
-                    >
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        value={confirmPassword}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-                        placeholder="비밀번호를 다시 입력해주세요"
-                        className="flex-1 outline-none bg-transparent body-03 text-gray-900 placeholder:text-gray-300"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword((p) => !p)}
-                        className="shrink-0 w-5 h-5 flex items-center justify-center"
-                      >
-                        <EyeIcon color={confirmPasswordError ? '#FF2A14' : showConfirmPassword ? 'var(--color-primary-500)' : 'var(--color-gray-300)'} />
-                      </button>
-                    </div>
-                    {confirmPasswordError && (
-                      <div className="flex items-center gap-1 px-2">
-                        <img src={errorReverseIcon} alt="" className="w-4 h-4 shrink-0" />
-                        <span className="label-01 text-[#FF2A14]">{confirmPasswordError}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center px-2 gap-1">
-                      <span className="label-01 text-gray-600">
-                        영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.
-                      </span>
-                    </div>
-                  </div>
+                  <Input
+                    label="새 비밀번호 확인"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                    placeholder="비밀번호를 다시 입력해주세요"
+                    error={confirmPasswordError}
+                  />
                 </div>
               </div>
             </div>
