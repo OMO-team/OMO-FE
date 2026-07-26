@@ -1,15 +1,16 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import axios from 'axios';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
+import { authApi } from '../api/authApi';
+import { passwordRegex } from '../constants/passwordRegex';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
 };
-
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
 export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
@@ -19,6 +20,21 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+
+  const handleSendPasswordResetEmail = async () => {
+    if (!email) { setEmailError('가입하신 이메일 주소를 입력해주세요.'); return; }
+    if (isSendingCode) return;
+    setEmailError('');
+    setIsSendingCode(true);
+    try {
+      await authApi.sendPasswordResetEmail({ email });
+    } catch {
+      setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,8 +50,8 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
       setEmailError('가입하신 이메일 주소를 입력해주세요.');
       hasError = true;
     }
-    if (!PASSWORD_REGEX.test(newPassword)) {
-      setNewPasswordError('영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.');
+    if (!passwordRegex.test(newPassword)) {
+      setNewPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.');
       hasError = true;
     }
     if (newPassword !== confirmPassword) {
@@ -46,10 +62,14 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
 
     setIsSubmitting(true);
     try {
-      // TODO: API 연결
+      await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
       onClose();
-    } catch {
-      setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+    } catch (error) {
+      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 404) {
+        setEmailError('가입되지 않은 이메일입니다.');
+      } else {
+        setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -90,12 +110,13 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                 {/* 이메일 섹션 */}
                 <div className="flex flex-col items-start gap-2">
                   <div className="flex flex-col items-start gap-1">
-                    <span className="body-02 text-gray-900">이메일</span>
+                    <label htmlFor="forgot-email" className="body-02 text-gray-900">이메일</label>
                     <span className="label-01 text-gray-600">가입하신 이메일 주소를 입력해주세요.</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <div className="flex-1">
                       <Input
+                        id="forgot-email"
                         type="email"
                         value={email}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
@@ -103,7 +124,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                         error={emailError}
                       />
                     </div>
-                    <VerifyButton active={email.length > 0} />
+                    <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendPasswordResetEmail} />
                   </div>
                 </div>
 
@@ -118,7 +139,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                       placeholder="비밀번호를 입력해주세요"
                       error={newPasswordError}
                     />
-                    <span className="label-01 px-2 text-gray-600">영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.</span>
+                    <span className="label-01 px-2 text-gray-600">영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.</span>
                   </div>
                   <Input
                     label="새 비밀번호 확인"
