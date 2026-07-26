@@ -23,9 +23,12 @@ export const authApi = {
   },
 
   logout: async () => {
-    await instance.post('/auth/v1/logout');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    try {
+      await instance.post('/auth/v1/logout');
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
   },
 
   sendEmailCode: (body: EmailSendRequest) =>
