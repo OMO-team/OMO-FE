@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CountryRoadmapList from './CountryRoadmapList';
-import RoadmapDetail from './RoadmapDetail';
 import { cityInsightCatalog, initialWishedCityIds } from '../mocks/mockData';
 import { useRoadmapStore } from '../store/useRoadmapStore';
-import type { CityRoadmapData } from '../types/roadmap';
 
 const GROUPS_PER_PAGE = 2;
 
 export default function RoadmapApp() {
+  const navigate = useNavigate();
   const countryGroups = useRoadmapStore((s) => s.countryGroups);
-  const [selectedCity, setSelectedCity] = useState<CityRoadmapData | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [wishedCityIds, setWishedCityIds] = useState<Set<string>>(() => new Set(initialWishedCityIds));
 
@@ -33,10 +32,6 @@ export default function RoadmapApp() {
     });
   };
 
-  if (selectedCity) {
-    return <RoadmapDetail city={selectedCity} onBack={() => setSelectedCity(null)} />;
-  }
-
   return (
     <CountryRoadmapList
       countryGroups={pagedGroups}
@@ -45,7 +40,7 @@ export default function RoadmapApp() {
       currentPage={currentPage}
       totalPages={totalPages}
       onPageChange={setCurrentPage}
-      onViewRoadmap={setSelectedCity}
+      onViewRoadmap={(city) => navigate(`/myhome/dashboard/${city.cityId}`)}
       onToggleWish={handleToggleWish}
     />
   );
