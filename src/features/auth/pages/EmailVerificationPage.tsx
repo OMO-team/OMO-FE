@@ -389,7 +389,7 @@ export default function EmailVerificationPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header isLoggedIn={false} />
+      <Header />
       <main className="flex flex-1 justify-center items-center py-[100px]">
         {card}
       </main>
