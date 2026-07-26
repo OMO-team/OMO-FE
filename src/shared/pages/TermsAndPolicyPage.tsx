@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import BackHeader from '../components/BackHeader';
 import TermsTabSwitcher from '../components/TermsTabSwitcher';
 import { termsOfServiceChapters, privacyPolicyChapters, type ContentBlock } from '../mocks/termsContent';
@@ -8,7 +6,6 @@ import { termsOfServiceChapters, privacyPolicyChapters, type ContentBlock } from
 const TABS = ['이용약관', '개인정보 처리방침'] as const;
 
 type TermsAndPolicyPageProps = {
-  isLoggedIn?: boolean;
   onBack?: () => void;
 };
 
@@ -42,15 +39,13 @@ function ContentBlockView({ block }: { block: ContentBlock }) {
   );
 }
 
-export default function TermsAndPolicyPage({ isLoggedIn = true, onBack }: TermsAndPolicyPageProps) {
+export default function TermsAndPolicyPage({ onBack }: TermsAndPolicyPageProps) {
   const [activeTab, setActiveTab] = useState(0);
   const isTerms = activeTab === 0;
   const chapters = isTerms ? termsOfServiceChapters : privacyPolicyChapters;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-20">
-      <Header isLoggedIn={isLoggedIn} userAvatarUrl={undefined} />
-
+    <div className="flex flex-col bg-gray-20">
       <main className="mx-auto flex w-full max-w-content flex-col gap-8 px-1 py-8">
         <BackHeader title="이용약관 및 정책" onBack={onBack} />
 
@@ -102,8 +97,6 @@ export default function TermsAndPolicyPage({ isLoggedIn = true, onBack }: TermsA
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
