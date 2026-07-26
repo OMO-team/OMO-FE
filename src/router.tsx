@@ -14,6 +14,10 @@ import RoadmapApp from './features/roadmap/pages/RoadmapApp';
 import RoadmapDashboardRoute from './features/roadmap/pages/RoadmapDashboardRoute';
 import TaskDetailRoute from './features/roadmap/pages/TaskDetailRoute';
 
+// auth
+import EmailVerifyRoute from './features/auth/pages/EmailVerifyRoute';
+import PasswordResetVerifyRoute from './features/auth/pages/PasswordResetVerifyRoute';
+
 // shared
 import TermsAndPolicyRoute from './shared/pages/TermsAndPolicyRoute';
 
@@ -24,6 +28,8 @@ export const router = createBrowserRouter([
       { path: '/', element: <HomePage /> },
       { path: '/city-insight', element: <CityInsight /> },
       { path: '/myhome/empty', element: <RoadmapApp /> },
+      { path: '/auth/email-verify', element: <EmailVerifyRoute /> },
+      { path: '/auth/password-reset/verify', element: <PasswordResetVerifyRoute /> },
       { path: '/support/terms', element: <TermsAndPolicyRoute /> },
     ],
   },

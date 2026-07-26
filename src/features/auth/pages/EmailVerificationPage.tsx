@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef, useCallback, type KeyboardEvent } from 'react';
-import Header from '../../../shared/components/Header';
-import Footer from '../../../shared/components/Footer';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
 import mailIcon from '../../../assets/icons/icon-mail.svg';
 
@@ -388,12 +386,10 @@ export default function EmailVerificationPage({
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
+    <div className="flex flex-col bg-gray-50">
       <main className="flex flex-1 justify-center items-center py-[100px]">
         {card}
       </main>
-      <Footer />
     </div>
   );
 }
