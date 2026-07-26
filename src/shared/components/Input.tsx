@@ -43,7 +43,6 @@ export default function Input({
         className={[
           'flex h-[45px] w-full items-center gap-1 rounded-2 border px-4 py-3 transition-colors',
           'bg-white hover:bg-gray-50',
-          'focus-within:border-primary-500',
           error ? 'border-warning-400' : 'border-gray-100',
           disabled ? 'pointer-events-none opacity-60' : '',
         ].join(' ')}

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Header from '../../../shared/components/Header';
 import CategoryTab from '../../../shared/components/CategoryTab';
 import CityInsightCard from '../../city-insight/components/CityInsightCard';
 import CountryGroupHeader from '../components/CountryGroupHeader';
@@ -7,7 +6,6 @@ import CityRoadmapCard from '../components/CityRoadmapCard';
 import EmptyStateIcon from '../components/icons/EmptyStateIcon';
 import PageNavigation from '../../../shared/components/PageNavigation';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
-import Footer from '../../../shared/components/Footer';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import DeleteRoadmapModal from '../components/DeleteRoadmapModal';
 import RoadmapRemovedToast from '../components/RoadmapRemovedToast';
@@ -129,9 +127,7 @@ export default function CountryRoadmapList({
   const isCurrentTabEmpty = activeTab === 0 ? !hasRoadmaps : !hasWishlist;
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <Header isLoggedIn={false} />
-
+    <div className="flex flex-col bg-white">
       {removedRecord && (
         <RoadmapRemovedToast cityName={removedRecord.city.cityName} onUndo={handleUndo} onClose={() => setRemovedRecord(null)} />
       )}
@@ -211,8 +207,6 @@ export default function CountryRoadmapList({
           </div>
         )}
       </div>
-
-      <Footer />
 
       {deleteTarget && (
         <ModalOverlay onClose={() => setDeleteTarget(null)}>

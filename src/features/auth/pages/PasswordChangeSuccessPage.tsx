@@ -13,7 +13,7 @@ export default function PasswordChangeSuccessPage({
 }: PasswordChangeSuccessPageProps) {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header isLoggedIn />
+      <Header />
       <main
         className="flex flex-1 items-start justify-center bg-gray-50"
         style={{ paddingTop: '72px', paddingBottom: '300px' }}

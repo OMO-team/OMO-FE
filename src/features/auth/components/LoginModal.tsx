@@ -1,35 +1,64 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
+import { authApi } from '../api/authApi';
 
 type LoginModalProps = {
   onClose: () => void;
   onSignupClick?: () => void;
   onForgotPasswordClick?: () => void;
-  emailError?: string;
-  passwordError?: string;
-  formError?: string;
 };
 
 export default function LoginModal({
   onClose,
   onSignupClick,
   onForgotPasswordClick,
-  emailError,
-  passwordError,
-  formError,
 }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRemembered, setIsRemembered] = useState(false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setEmailError('');
+    setPasswordError('');
+    setFormError('');
+
+    let hasError = false;
+    if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
+    if (!password) { setPasswordError('비밀번호를 입력해주세요.'); hasError = true; }
+    if (hasError) return;
+
+    setIsSubmitting(true);
+    try {
+      await authApi.login({ email, password });
+      onClose();
+    } catch (error) {
+      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 401) {
+        setFormError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      } else {
+        setFormError('로그인에 실패했습니다. 다시 시도해주세요.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div
+    <form
+      onSubmit={handleSubmit}
       className="inline-flex justify-center items-start rounded-4 bg-white"
       style={{ padding: '30px 40px 40px 40px', gap: '4px' }}
       role="dialog"
@@ -118,8 +147,9 @@ export default function LoginModal({
 
             {/* 로그인 버튼 */}
             <button
-              type="button"
-              className="flex justify-center items-center rounded-2 bg-primary-500"
+              type="submit"
+              disabled={isSubmitting}
+              className="flex justify-center items-center rounded-2 bg-primary-500 disabled:opacity-50"
               style={{
                 marginTop: formError ? '16px' : '26px',
                 width: '400px',
@@ -131,7 +161,7 @@ export default function LoginModal({
                 className="text-white"
                 style={{ fontFamily: 'Pretendard Variable', fontSize: '16px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.32px' }}
               >
-                로그인
+                {isSubmitting ? '로그인 중...' : '로그인'}
               </span>
             </button>
           </div>
@@ -224,6 +254,6 @@ export default function LoginModal({
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

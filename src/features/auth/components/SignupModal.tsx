@@ -1,17 +1,17 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
+import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
+import { authApi } from '../api/authApi';
+import { passwordRegex } from '../constants/passwordRegex';
 
 type SignupModalProps = {
   onClose: () => void;
   onLoginClick?: () => void;
-  nameError?: string;
-  emailError?: string;
-  passwordError?: string;
-  confirmPasswordError?: string;
 };
 
 function CheckIcon({ color }: { color: string }) {
@@ -35,18 +35,17 @@ function ArrowIcon() {
   );
 }
 
-export default function SignupModal({
-  onClose,
-  onLoginClick,
-  nameError,
-  emailError,
-  passwordError,
-  confirmPasswordError,
-}: SignupModalProps) {
+export default function SignupModal({ onClose, onLoginClick }: SignupModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState(false);
@@ -74,8 +73,55 @@ export default function SignupModal({
     else if (agreeTerms) setAgreeAll(true);
   };
 
+  const handleSendEmailCode = async () => {
+    if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
+    if (isSendingCode) return;
+    setEmailError('');
+    setIsSendingCode(true);
+    try {
+      await authApi.sendEmailCode({ email });
+    } catch {
+      setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+
+    let hasError = false;
+    if (!name) { setNameError('이름을 입력해주세요.'); hasError = true; }
+    if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
+    if (!passwordRegex.test(password)) { setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.'); hasError = true; }
+    if (password !== confirmPassword) { setConfirmPasswordError('비밀번호가 일치하지 않습니다.'); hasError = true; }
+    if (!agreeTerms || !agreePrivacy) { setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.'); hasError = true; }
+    if (hasError) return;
+
+    setIsSubmitting(true);
+    try {
+      await authApi.signup({ name, email, password });
+      onClose();
+    } catch (error) {
+      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 409) {
+        setEmailError('이미 사용 중인 이메일입니다.');
+      } else {
+        setEmailError('회원가입에 실패했습니다. 다시 시도해주세요.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div
+    <form
+      onSubmit={handleSubmit}
       className="inline-flex justify-center items-start rounded-4 bg-white"
       style={{ padding: '30px 40px 40px 40px', gap: '4px' }}
       role="dialog"
@@ -116,10 +162,10 @@ export default function SignupModal({
 
               {/* 이메일 + 인증 버튼 */}
               <div className="flex flex-col gap-[6px] self-stretch">
+                <span className="body-02 text-gray-900 self-stretch">이메일</span>
                 <div className="flex items-start gap-2">
                   <div className="flex-1">
                     <Input
-                      label="이메일"
                       type="email"
                       value={email}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
@@ -127,7 +173,7 @@ export default function SignupModal({
                       error={emailError}
                     />
                   </div>
-                  <VerifyButton active={email.length > 0} />
+                  <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendEmailCode} />
                 </div>
               </div>
 
@@ -163,13 +209,18 @@ export default function SignupModal({
                 <div className="flex items-center" style={{ gap: '4px', alignSelf: 'stretch' }}>
                   <button
                     type="button"
+                    role="checkbox"
+                    aria-checked={agreeAll}
+                    aria-label="전체 동의하기"
                     onClick={handleAgreeAll}
                     className="flex justify-center items-center flex-shrink-0"
-                    style={{ width: '20px', height: '20px' }}
+                    style={{ width: '24px', height: '24px' }}
                   >
-                    <div className="flex justify-center items-center border border-gray-300 bg-white rounded-1" style={{ width: '18px', height: '18px' }}>
-                      {agreeAll && <CheckIcon color="var(--color-primary-500)" />}
-                    </div>
+                    {agreeAll ? (
+                      <img src={checkboxCheckedIcon} alt="체크됨" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                    ) : (
+                      <div className="border border-gray-300 bg-white rounded-1" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                    )}
                   </button>
                   <span className="body-02 text-gray-900">전체 동의하기</span>
                 </div>
@@ -212,11 +263,12 @@ export default function SignupModal({
 
               {/* 회원가입 버튼 */}
               <button
-                type="button"
-                className="flex justify-center items-center rounded-2 bg-primary-500 title-02 text-white"
+                type="submit"
+                disabled={isSubmitting}
+                className="flex justify-center items-center rounded-2 bg-primary-500 title-02 text-white disabled:opacity-50"
                 style={{ padding: '13px 169px', alignSelf: 'stretch' }}
               >
-                회원가입
+                {isSubmitting ? '처리 중...' : '회원가입'}
               </button>
             </div>
           </div>
@@ -277,6 +329,6 @@ export default function SignupModal({
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

@@ -4,7 +4,8 @@ interface SearchInputBarProps {
   onSearch: (value: string) => void;
   placeholder?: string;
   submittedQuery?: string | null;
-  width? : string
+  width?: string;
+  icon?: string;
 }
 
 export default function SearchInputBar({
@@ -13,11 +14,13 @@ export default function SearchInputBar({
   onSearch,
   placeholder = "검색어를 입력하세요",
   submittedQuery,
-  width = 'w-[730px]'
+  width = 'w-[730px]',
+  icon,
 }: SearchInputBarProps) {
   return (
     <div className='flex justify-start items-center gap-2'>
-      <div className={`flex justify-start items-center ${width} overflow-hidden gap-1 px-[27px] py-3 rounded-3 bg-white border border-primary-100`}>
+      <div className={`flex justify-start items-center ${width} overflow-hidden gap-1 ${icon ? 'px-6 py-4' : 'px-[27px] py-3'} rounded-3 bg-white border border-primary-100`}>
+        {icon && <img src={icon} alt="" className="shrink-0" />}
         {submittedQuery ? (
           <p className="text-base text-left text-gray-900 w-full truncate">
             {submittedQuery}

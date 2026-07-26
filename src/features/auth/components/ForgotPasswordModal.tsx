@@ -1,48 +1,40 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import axios from 'axios';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
+import { authApi } from '../api/authApi';
+import { passwordRegex } from '../constants/passwordRegex';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
   onSuccess?: () => void;
 };
 
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-
 export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState('');
-  const [otpVerified, setOtpVerified] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
 
-  const handleSendCode = () => {
-    if (!email) {
-      setEmailError('가입하신 이메일 주소를 입력해주세요.');
-      return;
-    }
+  const handleSendPasswordResetEmail = async () => {
+    if (!email) { setEmailError('가입하신 이메일 주소를 입력해주세요.'); return; }
+    if (isSendingCode) return;
     setEmailError('');
-    // TODO: 인증번호 발송 API 연결
-    setOtpSent(true);
-  };
-
-  const handleVerifyOtp = () => {
-    if (!otp) {
-      setOtpError('인증번호를 입력해주세요.');
-      return;
+    setIsSendingCode(true);
+    try {
+      await authApi.sendPasswordResetEmail({ email });
+    } catch {
+      setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSendingCode(false);
     }
-    setOtpError('');
-    // TODO: 인증번호 확인 API 연결
-    setOtpVerified(true);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -55,18 +47,15 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
     let hasError = false;
 
-    if (!otpVerified) {
-      setOtpError('인증번호를 확인해주세요.');
+    if (!email) {
+      setEmailError('가입하신 이메일 주소를 입력해주세요.');
       hasError = true;
     }
-    if (!PASSWORD_REGEX.test(newPassword)) {
-      setNewPasswordError('영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.');
+    if (!passwordRegex.test(newPassword)) {
+      setNewPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.');
       hasError = true;
     }
-    if (confirmPassword.length < 8) {
-      setConfirmPasswordError('8글자 이상 입력해 주세요');
-      hasError = true;
-    } else if (newPassword !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setConfirmPasswordError('비밀번호가 일치하지 않습니다.');
       hasError = true;
     }
@@ -74,11 +63,15 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
     setIsSubmitting(true);
     try {
-      // TODO: API 연결
+      await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
       onClose();
       onSuccess?.();
-    } catch {
-      setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+    } catch (error) {
+      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 404) {
+        setEmailError('가입되지 않은 이메일입니다.');
+      } else {
+        setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -110,70 +103,56 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
             </span>
           </div>
 
-          <div className="flex flex-col items-start gap-[60px]">
+          <div className="flex flex-col items-start gap-[60px] self-stretch">
 
             <div className="flex w-[400px] flex-col items-start gap-10">
 
-              <div className="flex flex-col items-start gap-[30px]">
+              <div className="flex flex-col items-start gap-[30px] self-stretch">
 
                 {/* 이메일 섹션 */}
-                <div className="flex flex-col items-start gap-2">
+                <div className="flex flex-col items-start gap-2 self-stretch">
                   <div className="flex flex-col items-start gap-1">
-                    <span className="body-02 text-gray-900">이메일</span>
+                    <label htmlFor="forgot-email" className="body-02 text-gray-900">이메일</label>
                     <span className="label-01 text-gray-600">가입하신 이메일 주소를 입력해주세요.</span>
                   </div>
-                  <div className="flex items-start gap-2">
+                  <div className="flex items-start gap-2 self-stretch">
                     <div className="flex-1">
                       <Input
+                        id="forgot-email"
                         type="email"
                         value={email}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                         placeholder="이메일을 입력해주세요"
                         error={emailError}
-                        disabled={otpSent}
                       />
                     </div>
-                    <VerifyButton active={email.length > 0 && !otpSent} onClick={handleSendCode} />
+                    <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendPasswordResetEmail} />
                   </div>
-
-                  {otpSent && (
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1">
-                        <Input
-                          type="text"
-                          value={otp}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
-                          placeholder="인증번호 입력하기"
-                          error={otpError}
-                          disabled={otpVerified}
-                        />
-                      </div>
-                      <VerifyButton active={otp.length > 0 && !otpVerified} onClick={handleVerifyOtp} label="확인" />
-                    </div>
-                  )}
                 </div>
 
                 {/* 비밀번호 섹션들 */}
                 <div className="flex flex-col items-start gap-4 self-stretch">
+                  <Input
+                    label="새 비밀번호"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+                    placeholder="비밀번호를 입력해주세요"
+                    error={newPasswordError}
+                  />
                   <div className="flex flex-col gap-2 self-stretch">
                     <Input
-                      label="새 비밀번호"
+                      label="새 비밀번호 확인"
                       type="password"
-                      value={newPassword}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
-                      placeholder="비밀번호를 입력해주세요"
-                      error={newPasswordError}
+                      value={confirmPassword}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                      placeholder="비밀번호를 다시 입력해주세요"
+                      error={confirmPasswordError}
                     />
-                    <span className="label-01 px-2 text-gray-600">영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.</span>
+                    {!newPasswordError && (
+                      <span className="label-01 px-2 text-gray-600">영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.</span>
+                    )}
                   </div>
-                  <Input
-                    label="새 비밀번호 확인"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-                    placeholder="비밀번호를 다시 입력해주세요"
-                    error={confirmPasswordError}
-                  />
                 </div>
               </div>
             </div>
@@ -182,7 +161,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
             <div className="flex w-[400px] flex-col items-start gap-4">
               <div className="flex items-start gap-2 self-stretch">
                 <img src={errorReverseIcon} alt="" className="w-4 h-4 shrink-0 mt-[1px]" />
-                <span className="label-01 text-[#FF2A14]">
+                <span className="label-01 text-red-500">
                   소셜 계정으로 가입한 사용자는 비밀번호 변경이 제한될 수 있어요.
                 </span>
               </div>
@@ -190,8 +169,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex justify-center items-center self-stretch rounded-lg bg-primary-500 disabled:opacity-50"
-                style={{ padding: '13px 169px' }}
+                className="flex justify-center items-center self-stretch rounded-lg bg-primary-500 py-[13px] whitespace-nowrap disabled:opacity-50"
               >
                 <span className="title-04 text-white">비밀번호 재설정</span>
               </button>
