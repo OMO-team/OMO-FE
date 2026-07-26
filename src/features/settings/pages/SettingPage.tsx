@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../../shared/components/Header";
 import Footer from "../../../shared/components/Footer";
 import BackHeader from "../../../shared/components/BackHeader";
@@ -34,8 +35,10 @@ export default function SettingsPage({
   const [pushEnabled, setPushEnabled] = useState(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   const [activeModal, setActiveModal] = useState<"logout" | "delete" | null>(null);
+  const navigate = useNavigate()
 
   return (
+
     <div className="flex min-h-screen flex-col bg-gray-20">
       <Header />
 
@@ -101,7 +104,7 @@ export default function SettingsPage({
               <SettingActionItem
                 title="1:1 문의하기"
                 right={<img src={chevronRightIcon} alt="" className="h-3.5" />}
-                onClick={() => {}}
+                onClick={() => navigate('/contact')}
               />
               <SettingActionItem
                 title="이용약관 및 정책"
