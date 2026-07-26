@@ -19,7 +19,7 @@ export default function SearchInputBar({
 }: SearchInputBarProps) {
   return (
     <div className='flex justify-start items-center gap-2'>
-      <div className={`flex justify-start items-center ${width} overflow-hidden gap-1 ${icon ? 'pl-6 py-4' : 'px-[27px] py-3'} rounded-3 bg-white border border-primary-100`}>
+      <div className={`flex justify-start items-center ${width} overflow-hidden gap-1 ${icon ? 'px-6 py-4' : 'px-[27px] py-3'} rounded-3 bg-white border border-primary-100`}>
         {icon && <img src={icon} alt="" className="shrink-0" />}
         {submittedQuery ? (
           <p className="text-base text-left text-gray-900 w-full truncate">
