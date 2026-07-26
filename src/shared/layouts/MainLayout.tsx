@@ -24,6 +24,7 @@ export default function MainLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <ScrollRestoration/>
       <Header onSmartBriefingClick={() => setIsChatOpen(true)} />
       <main className="flex flex-1 flex-col">
         <Outlet context={outletContext} />
