@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import OmoLogoIcon from './OmoLogoIcon';
 import ChevronIcon from './ChevronIcon';
 import NaverBlogIcon from './NaverBlogIcon';
@@ -31,8 +31,6 @@ const SNS_LINKS = [
 ];
 
 export default function Footer() {
-  const navigate = useNavigate();
-
   return (
     <footer className="flex w-full flex-col items-center gap-4 bg-gray-50">
       <div className="mx-auto flex w-full max-w-content flex-col items-center gap-10 px-4">
@@ -65,16 +63,16 @@ export default function Footer() {
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
-              {SERVICE_LINKS.map(({ label, path }) => (
-                <div
-                  key={label}
-                  className={`flex items-center gap-1 ${path ? 'cursor-pointer' : ''}`}
-                  {...(path && { onClick: () => navigate(path) })}
-                >
-                  <span className="body-05 w-35 text-gray-700">{label}</span>
-                  <ChevronIcon className="size-icon-xs rotate-180 text-gray-700" />
-                </div>
-              ))}
+              {SERVICE_LINKS.map(({ label, path }) =>
+                path ? (
+                  <Link key={label} to={path} className="flex items-center gap-1">
+                    <span className="body-05 w-35 text-gray-700">{label}</span>
+                    <ChevronIcon className="size-icon-xs rotate-180 text-gray-700" />
+                  </Link>
+                ) : (
+                  <span key={label} className="body-05 w-35 text-gray-700">{label}</span>
+                ),
+              )}
             </div>
             <div className="flex items-center justify-end gap-2 pr-3">
               {SNS_LINKS.map(({ label, icon }) => (
@@ -94,15 +92,18 @@ export default function Footer() {
         <hr className="w-full border-gray-100 mb-4" />
         <div className="mx-auto flex w-full max-w-content flex-wrap items-center justify-between gap-2 px-4 pb-3">
           <div className="flex flex-wrap items-center">
-            {POLICY_LINKS.map(({ label, path }, index) => (
-              <span
-                key={label}
-                className={`body-03 px-2.5 py-1 ${index === 0 ? 'title-03 text-primary-600' : 'text-gray-700'} ${path ? 'cursor-pointer' : ''}`}
-                {...(path && { onClick: () => navigate(path) })}
-              >
-                {label}
-              </span>
-            ))}
+            {POLICY_LINKS.map(({ label, path }, index) => {
+              const className = `body-03 px-2.5 py-1 ${index === 0 ? 'title-03 text-primary-600' : 'text-gray-700'}`;
+              return path ? (
+                <Link key={label} to={path} className={className}>
+                  {label}
+                </Link>
+              ) : (
+                <span key={label} className={className}>
+                  {label}
+                </span>
+              );
+            })}
           </div>
           <p className="body-03 text-gray-600">© OMO. All rights reserved.</p>
         </div>
