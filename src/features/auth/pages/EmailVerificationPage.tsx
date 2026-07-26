@@ -88,7 +88,15 @@ export default function EmailVerificationPage({
   const seconds = String(secondsLeft % 60).padStart(2, '0');
 
   const handleCodeChange = (index: number, value: string) => {
-    const digit = value.replace(/\D/g, '').slice(-1);
+    const digits = value.replace(/\D/g, '');
+    if (digits.length > 1) {
+      const next = [...code];
+      digits.split('').slice(0, CODE_LENGTH - index).forEach((d, i) => { next[index + i] = d; });
+      setCode(next);
+      inputRefs.current[Math.min(index + digits.length, CODE_LENGTH - 1)]?.focus();
+      return;
+    }
+    const digit = digits.slice(-1);
     const next = [...code];
     next[index] = digit;
     setCode(next);
@@ -162,6 +170,8 @@ export default function EmailVerificationPage({
             value={digit}
             onChange={(e) => handleCodeChange(i, e.target.value)}
             onKeyDown={(e) => handleCodeKeyDown(i, e)}
+            aria-label={`인증번호 ${i + 1}번째 자리`}
+            autoComplete="one-time-code"
             className={`text-center outline-none rounded-xl bg-white text-gray-900 border ${digit ? 'border-primary-500' : 'border-gray-200'}`}
             style={{ width: '46px', height: '60px', fontFamily: 'Pretendard Variable', fontSize: '24px', fontWeight: 600 }}
           />
@@ -189,7 +199,7 @@ export default function EmailVerificationPage({
                 </span>
                 <div className="flex flex-col items-center self-stretch" style={{ gap: '2px' }}>
                   <div className="flex items-center justify-center self-stretch">
-                    <span className="text-gray-700 whitespace-nowrap" style={descStyle}>{email}</span>
+                    <span className="text-gray-700 break-all" style={descStyle}>{email}</span>
                     <span className="text-gray-700" style={descStyle}>로 인증 메일이 발송되었습니다.</span>
                   </div>
                   <span className="self-stretch text-center text-gray-700" style={descStyle}>
@@ -311,7 +321,7 @@ export default function EmailVerificationPage({
             {/* InfoBox: 위쪽 24px */}
             <div className="self-stretch mt-[24px]">
               <InfoBox>
-                <span className="body-04 text-gray-500 self-stretch">인증 메일을 받지 못하셨나요?</span>
+                <span className="body-02 text-gray-500 self-stretch">인증 메일을 받지 못하셨나요?</span>
                 <span className="body-04 text-gray-500 self-stretch">7일 이내에 이메일의 인증 링크를 클릭해 주시면 회원가입이 완료됩니다.</span>
                 <span className="body-04 text-gray-500 self-stretch">메일을 받지 못했다면 스팸함을 확인해 주세요.</span>
               </InfoBox>

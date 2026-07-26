@@ -28,8 +28,8 @@ export default function PasswordChangeSuccessPage({ onLoginClick }: PasswordChan
 
           {/* 타이틀 + 설명 + 안내박스 */}
           <div className="flex flex-col items-center self-stretch" style={{ gap: '40px' }}>
-            <div className="flex flex-col items-center gap-[4px]">
-              <p className="heading-05 h-[32px] self-stretch text-center text-black">비밀번호 변경이 완료되었습니다.</p>
+            <div className="flex flex-col items-center gap-[4px] self-stretch">
+              <p className="heading-05 min-h-[32px] self-stretch text-center text-black">비밀번호 변경이 완료되었습니다.</p>
               <p className="body-01 self-stretch text-center text-gray-700">새 비밀번호로 안전하게 변경되었습니다.</p>
             </div>
 
