@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { type AxiosError } from 'axios';
+import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
@@ -46,9 +46,7 @@ export default function LoginModal({
       await authApi.login({ email, password });
       onClose();
     } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
-      const status = axiosError.response?.status;
-      if (status === 401) {
+      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 401) {
         setFormError('이메일 또는 비밀번호가 올바르지 않습니다.');
       } else {
         setFormError('로그인에 실패했습니다. 다시 시도해주세요.');
