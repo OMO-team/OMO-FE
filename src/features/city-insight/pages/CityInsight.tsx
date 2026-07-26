@@ -34,7 +34,7 @@ import { mockCities } from '../../../shared/mocks/cities';
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
-import serachInputIcon from '../../../assets/icons/search-input-list.svg'
+import searchInputIcon from '../../../assets/icons/search-input-list.svg'
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
