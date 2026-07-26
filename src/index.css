@@ -292,4 +292,16 @@
     gap: var(--spacing-gutter);
     padding-inline: 16px;
   }
+
+  /* ---------- Scrollbar Hide ----------
+     스크롤 기능은 유지하되 스크롤바만 시각적으로 숨김
+     사용법: <div className="overflow-y-auto scrollbar-hide">...</div>
+  */
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE, Edge */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
 }

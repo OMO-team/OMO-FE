@@ -8,7 +8,11 @@ const SUGGESTION_CHIPS = [
   '아시아 워킹홀리데이 추천, 한 달 150만원 예산',
 ];
 
-export default function AIPromptSection() {
+type AIPromptSectionProps = {
+  onSubmit?: (value: string) => void;
+};
+
+export default function AIPromptSection({ onSubmit }: AIPromptSectionProps) {
   const [inputValue, setInputValue] = useState('');
 
   return (
@@ -31,7 +35,7 @@ export default function AIPromptSection() {
 
       {/* Frame 109: 입력창 + 추천 프롬프트 */}
       <div className="flex flex-col items-start gap-[36px]">
-        <PromptInput value={inputValue} onChange={setInputValue} />
+        <PromptInput value={inputValue} onChange={setInputValue} onSubmit={onSubmit} />
 
         {/* Frame 108: 추천 프롬프트 */}
         <div className="flex flex-col items-start gap-4 self-stretch">
