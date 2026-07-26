@@ -1,7 +1,7 @@
 import { useState } from "react"
 import RegionFilterIcon from "../../../shared/components/RegionFilterIcon"
 import ChevronDownIcon from "../../../shared/components/ChevronDownIcon"
-import searchIcon from '../../../assets/icons/icon-search.svg'
+import searchIcon from '../../../assets/icons/icon-search[18].svg'
 import Chip from "../../../shared/components/Chip"
 import { REGION_DATA } from '../mocks/regionData'
 

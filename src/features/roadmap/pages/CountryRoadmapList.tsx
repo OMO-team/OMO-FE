@@ -18,6 +18,7 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
+import { useRoadmapStore } from '../store/useRoadmapStore';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -58,7 +59,9 @@ export default function CountryRoadmapList({
   onExploreCity,
   onToggleWish,
 }: CountryRoadmapListProps) {
-  const [groups, setGroups] = useState<CountryGroupData[]>(countryGroups);
+  const removeCity = useRoadmapStore((s) => s.removeCity);
+  const restoreCity = useRoadmapStore((s) => s.restoreCity);
+  const groups = countryGroups;
   const [activeTab, setActiveTab] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<CityRoadmapData | null>(null);
   const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
@@ -69,10 +72,6 @@ export default function CountryRoadmapList({
   const closeCompareModal = useCompareStore((s) => s.closeModal);
   const compareCities = wishlistCities.map(toCompareCity);
   const reportCity = wishlistCities.find((city) => city.cityId === reportCityId) ?? null;
-
-  useEffect(() => {
-    setGroups(countryGroups);
-  }, [countryGroups]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -92,40 +91,14 @@ export default function CountryRoadmapList({
 
   const handleConfirmDelete = () => {
     if (!deleteTarget) return;
-    const group = groups.find((g) => g.countryName === deleteTarget.countryName);
-    const cityIndex = group?.cities.findIndex((c) => c.cityName === deleteTarget.cityName) ?? -1;
-    if (!group || cityIndex === -1) {
-      setDeleteTarget(null);
-      return;
-    }
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.countryName === deleteTarget.countryName
-          ? { ...g, cities: g.cities.filter((c) => c.cityName !== deleteTarget.cityName), cityCount: g.cityCount - 1 }
-          : g,
-      ),
-    );
-    setRemovedRecord({ city: deleteTarget, countryName: deleteTarget.countryName, index: cityIndex });
+    const record = removeCity(deleteTarget.countryName, deleteTarget.cityId);
+    if (record) setRemovedRecord(record);
     setDeleteTarget(null);
   };
 
   const handleUndo = () => {
     if (!removedRecord) return;
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.countryName === removedRecord.countryName
-          ? {
-              ...g,
-              cities: [
-                ...g.cities.slice(0, removedRecord.index),
-                removedRecord.city,
-                ...g.cities.slice(removedRecord.index),
-              ],
-              cityCount: g.cityCount + 1,
-            }
-          : g,
-      ),
-    );
+    restoreCity(removedRecord);
     setRemovedRecord(null);
   };
 
