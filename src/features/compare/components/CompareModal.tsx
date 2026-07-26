@@ -21,7 +21,8 @@ export default function CompareModal({
 
   const selectedCities = compareList
     .map((id) => cities.find((city) => city.id === id))
-    .filter((city): city is CompareCity => Boolean(city));
+    .filter((city): city is CompareCity => Boolean(city))
+    .sort((a, b) => b.rating - a.rating);
 
   return (
     <div

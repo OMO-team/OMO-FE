@@ -17,9 +17,20 @@ import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/m
 import type { CityReportData } from '../../../shared/types/cityReport';
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
+import { useCompareStore } from '../../compare/store/useCompareStore';
+import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
+import CompareModal from '../../compare/components/CompareModal';
+import { mockCities } from '../../../shared/mocks/cities';
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
+};
+
+// TODO: 도시별 실제 데이터 연동 전까지, 비교 목데이터가 있는 도시만 매핑
+const CITY_COMPARE_ID: Record<string, string> = {
+  베를린: 'berlin',
+  도쿄: 'tokyo',
+  시드니: 'sydney',
 };
 
 export default function CityInsight() {
@@ -29,6 +40,13 @@ export default function CityInsight() {
   const [reportCityName, setReportCityName] = useState<string | null>(null);
   const [addedCityName, setAddedCityName] = useState<string | null>(null);
   const addCity = useRoadmapStore(s => s.addCity);
+  const toggleCompare = useCompareStore(s => s.toggleCompare);
+
+  const handleCompare = (cityName: string) => {
+    const id = CITY_COMPARE_ID[cityName];
+    if (!id) return;
+    toggleCompare(id);
+  };
 
   useEffect(() => {
     if (!addedCityName) return;
@@ -140,7 +158,7 @@ export default function CityInsight() {
                 <CityInsightCard
                   key={card.cityName}
                   {...card}
-                  onCompare={() => {}}
+                  onCompare={() => handleCompare(card.cityName)}
                   onReport={() => setReportCityName(card.cityName)}
                 />
               ))}
@@ -179,6 +197,8 @@ export default function CityInsight() {
       {addedCityName && (
         <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
       )}
+      <CompareSelectionBar cities={mockCities} />
+      <CompareModal cities={mockCities} />
     </div>
   );
 }
