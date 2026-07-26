@@ -7,11 +7,12 @@ import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
+  onSuccess?: () => void;
 };
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
-export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
+export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
@@ -75,6 +76,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
     try {
       // TODO: API 연결
       onClose();
+      onSuccess?.();
     } catch {
       setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
     } finally {

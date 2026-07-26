@@ -28,6 +28,7 @@ interface SettingsPageProps {
   onNavigateToTerms?: () => void;
   onLogout?: () => void;
   onDeleteAccount?: () => void;
+  onPasswordChangeSuccess?: () => void;
 }
 
 export default function SettingsPage({
@@ -35,6 +36,7 @@ export default function SettingsPage({
   onNavigateToTerms,
   onLogout,
   onDeleteAccount,
+  onPasswordChangeSuccess,
 }: SettingsPageProps) {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
@@ -167,12 +169,15 @@ export default function SettingsPage({
         <PasswordChangeModal
           onClose={() => setActiveModal(null)}
           onForgotPassword={() => setActiveModal("password-find")}
-          onSubmit={() => {}}
+          onSubmit={() => onPasswordChangeSuccess?.()}
         />
       )}
 
       {activeModal === "password-find" && (
-        <ForgotPasswordModal onClose={() => setActiveModal(null)} />
+        <ForgotPasswordModal
+          onClose={() => setActiveModal(null)}
+          onSuccess={onPasswordChangeSuccess}
+        />
       )}
 
       {activeModal === "logout" && (
