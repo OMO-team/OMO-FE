@@ -25,20 +25,20 @@ export default function MainLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header onSmartBriefingClick={() => setIsChatOpen(true)} />
-      <div className="flex flex-1">
-        <main className="flex min-w-0 flex-1 flex-col overflow-x-auto">
-          <Outlet context={outletContext} />
-        </main>
+      <main className="flex flex-1 flex-col">
+        <Outlet context={outletContext} />
+      </main>
+      <Footer />
 
-        {isChatOpen && (
+      {isChatOpen && (
+        <div className="fixed inset-y-0 right-0 z-40">
           <AIChatPanel
             hasChat={true}
             onClose={() => setIsChatOpen(false)}
             onNewChat={() => setIsChatOpen(false)}
           />
-        )}
-      </div>
-      <Footer />
+        </div>
+      )}
 
       {isSearchOpen && (
         <ModalOverlay onClose={closeSearch}>

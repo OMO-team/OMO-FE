@@ -156,8 +156,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
 
   return (
     <div
-      className="relative flex flex-col border-l border-gray-300 bg-white"
-      style={{ width: '670px', height: '1080px', flexShrink: 0 }}
+      className="relative flex h-full flex-col border-l border-gray-300 bg-white"
+      style={{ width: '670px', flexShrink: 0 }}
       onClick={() => {
         if (isDropdownOpen) setIsDropdownOpen(false);
         if (isMoreMenuOpen) setIsMoreMenuOpen(false);
