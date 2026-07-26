@@ -1,17 +1,16 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { type AxiosError } from 'axios';
+import axios from 'axios';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 import { authApi } from '../api/authApi';
+import { passwordRegex } from '../constants/passwordRegex';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
 };
-
-const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,20}$|^(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$|^(?=.*\d)(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$/;
 
 export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProps) {
   const [email, setEmail] = useState('');
@@ -21,14 +20,19 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
 
   const handleSendPasswordResetEmail = async () => {
     if (!email) { setEmailError('가입하신 이메일 주소를 입력해주세요.'); return; }
+    if (isSendingCode) return;
     setEmailError('');
+    setIsSendingCode(true);
     try {
       await authApi.sendPasswordResetEmail({ email });
     } catch {
       setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSendingCode(false);
     }
   };
 
@@ -46,7 +50,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
       setEmailError('가입하신 이메일 주소를 입력해주세요.');
       hasError = true;
     }
-    if (!PASSWORD_REGEX.test(newPassword)) {
+    if (!passwordRegex.test(newPassword)) {
       setNewPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.');
       hasError = true;
     }
@@ -61,8 +65,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
       await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
       onClose();
     } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
-      if (axiosError.response?.status === 404) {
+      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 404) {
         setEmailError('가입되지 않은 이메일입니다.');
       } else {
         setEmailError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
@@ -121,7 +124,7 @@ export default function ForgotPasswordModal({ onClose }: ForgotPasswordModalProp
                         error={emailError}
                       />
                     </div>
-                    <VerifyButton active={email.length > 0} onClick={handleSendPasswordResetEmail} />
+                    <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendPasswordResetEmail} />
                   </div>
                 </div>
 

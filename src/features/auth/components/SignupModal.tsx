@@ -1,13 +1,12 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { type AxiosError } from 'axios';
+import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import { authApi } from '../api/authApi';
-
-const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,20}$|^(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$|^(?=.*\d)(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{8,20}$/;
+import { passwordRegex } from '../constants/passwordRegex';
 
 type SignupModalProps = {
   onClose: () => void;
@@ -45,6 +44,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState(false);
@@ -74,11 +74,15 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
   const handleSendEmailCode = async () => {
     if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
+    if (isSendingCode) return;
     setEmailError('');
+    setIsSendingCode(true);
     try {
       await authApi.sendEmailCode({ email });
     } catch {
       setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSendingCode(false);
     }
   };
 
@@ -94,9 +98,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     let hasError = false;
     if (!name) { setNameError('이름을 입력해주세요.'); hasError = true; }
     if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
-    if (!PASSWORD_REGEX.test(password)) { setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.'); hasError = true; }
+    if (!passwordRegex.test(password)) { setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.'); hasError = true; }
     if (password !== confirmPassword) { setConfirmPasswordError('비밀번호가 일치하지 않습니다.'); hasError = true; }
-    if (!agreeTerms || !agreePrivacy) { hasError = true; }
+    if (!agreeTerms || !agreePrivacy) { setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.'); hasError = true; }
     if (hasError) return;
 
     setIsSubmitting(true);
@@ -104,8 +108,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       await authApi.signup({ name, email, password });
       onClose();
     } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
-      if (axiosError.response?.status === 409) {
+      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 409) {
         setEmailError('이미 사용 중인 이메일입니다.');
       } else {
         setEmailError('회원가입에 실패했습니다. 다시 시도해주세요.');
@@ -169,7 +172,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                       error={emailError}
                     />
                   </div>
-                  <VerifyButton active={email.length > 0} onClick={handleSendEmailCode} />
+                  <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendEmailCode} />
                 </div>
               </div>
 
