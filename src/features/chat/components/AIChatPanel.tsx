@@ -525,6 +525,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
               {isStreaming ? (
                 <button
                   type="button"
+                  aria-label="응답 중지"
                   onClick={handleStop}
                   className="flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400"
                   style={{ width: '32px', height: '32px', padding: '6.25px', boxSizing: 'border-box' }}
