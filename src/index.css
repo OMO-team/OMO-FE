@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css");
+@import "tailwindcss";
 
 @theme {
   /* =========================================
@@ -41,12 +41,12 @@
   --color-red-800: #990e00;
   --color-red-700: #cc1300;
   --color-red-600: #eb1600;
-  --color-red-500: #ff5241;
+  --color-red-500: #ff2a14;
   --color-red-400: #ff4633;
   --color-red-300: #ff7466;
   --color-red-200: #ff998f;
   --color-red-100: #ffbeb8;
-  --color-red-50: #ffe3e0;
+  --color-red-50: #ffeceb;
 
   /* ---------- Gray Scale ---------- */
   --color-black: #16181c;
@@ -291,5 +291,17 @@
     grid-template-columns: repeat(var(--grid-columns), 1fr);
     gap: var(--spacing-gutter);
     padding-inline: 16px;
+  }
+
+  /* ---------- Scrollbar Hide ----------
+     스크롤 기능은 유지하되 스크롤바만 시각적으로 숨김
+     사용법: <div className="overflow-y-auto scrollbar-hide">...</div>
+  */
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE, Edge */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
   }
 }
