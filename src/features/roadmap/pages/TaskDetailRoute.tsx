@@ -15,7 +15,7 @@ export default function TaskDetailRoute() {
   const task = berlinRoadmapTasks[Number(taskIndex)];
   if (!task) return null;
 
-  const closeTaskDetail = () => navigate('..');
+  const closeTaskDetail = () => navigate('..', { preventScrollReset: true });
 
   return (
     <ModalOverlay onClose={closeTaskDetail}>

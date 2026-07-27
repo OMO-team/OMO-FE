@@ -152,7 +152,7 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
           />
           <RoadmapTimeline
             tasks={berlinRoadmapTasks}
-            onTaskClick={(index) => navigate(`task-detail/${index}`)}
+            onTaskClick={(index) => navigate(`task-detail/${index}`, { preventScrollReset: true })}
           />
 
           {datePickerTarget === 'start' && (
