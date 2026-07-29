@@ -17,6 +17,27 @@ export type TaskCategory = 'VISA' | 'INSURANCE' | 'DOCUMENT' | 'FLIGHT' | 'ACCOM
 
 export type TaskStatus = 'LOCKED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
+export interface CityInfo {
+  cityId: number;
+  name: string;
+  countryId: number;
+  countryName: string;
+  imageUrl: string;
+  rating: number;
+  description: string;
+  monthlyCost: number;
+  safetyScore: number;
+  housingScore: number;
+  visaScore: number;
+  languageScore: number;
+  infraScore: number;
+}
+
+export interface CityListResult {
+  totalCount: number;
+  cities: CityInfo[];
+}
+
 export interface RoadmapListItem {
   roadmapId: number;
   title: string;
