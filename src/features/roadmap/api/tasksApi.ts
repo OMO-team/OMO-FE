@@ -1,71 +1,38 @@
-import axios from 'axios';
 import { instance } from '../../../lib/axios';
+import { unwrap } from './apiUtils';
 import type {
   ApiResponse,
-  TaskDetail,
-  TaskListItem,
-  TaskStatus,
-  CreateTaskRequest,
-  CreateTaskResult,
-  UpdateTaskRequest,
-  UpdateTaskResult,
+  CompleteTaskResult,
+  RoadmapTaskItem,
+  UpdateRoadmapScheduleResult,
+  UpdateTaskScheduleRequest,
 } from '../types/api';
 
-function unwrap<T>(data: ApiResponse<T>): T {
-  if (!data.isSuccess) throw new Error(data.message);
-  return data.result;
-}
-
-function isNotFound(error: unknown): boolean {
-  return axios.isAxiosError(error) && error.response?.status === 404;
-}
-
 export const tasksApi = {
-  get: async (taskId: number): Promise<TaskDetail | null> => {
-    try {
-      const { data } = await instance.get<ApiResponse<TaskDetail>>(`/api/v1/tasks/${taskId}`);
-      return unwrap(data);
-    } catch (error) {
-      if (isNotFound(error)) return null;
-      throw error;
-    }
-  },
-
-  listByRoadmap: async (roadmapId: number, status?: TaskStatus): Promise<TaskListItem[]> => {
-    try {
-      const { data } = await instance.get<ApiResponse<TaskListItem[]>>(`/api/v1/roadmaps/${roadmapId}/tasks`, {
-        params: status === undefined ? undefined : { status },
-      });
-      return unwrap(data);
-    } catch (error) {
-      if (isNotFound(error)) return [];
-      throw error;
-    }
-  },
-
-  create: async (roadmapId: number, payload: CreateTaskRequest): Promise<CreateTaskResult> => {
-    const { data } = await instance.post<ApiResponse<CreateTaskResult>>(`/api/v1/roadmaps/${roadmapId}/tasks`, payload);
+  /**
+   * 스웨거 스펙 상 응답 스키마가 로드맵 상세 조회와 같은 이름(DetailResultDTO)으로 잡혀있어
+   * 문서 생성 시 이름이 충돌했을 가능성이 있음 — 실제 응답은 RoadmapTaskItem에 가까울 것으로
+   * 추정하고 우선 이렇게 타입을 잡음. 실 연동 테스트 시 응답 확인 후 수정 필요.
+   */
+  get: async (taskId: number): Promise<RoadmapTaskItem> => {
+    const { data } = await instance.get<ApiResponse<RoadmapTaskItem>>(`/api/v1/tasks/${taskId}`);
     return unwrap(data);
   },
 
-  update: async (taskId: number, payload: UpdateTaskRequest): Promise<UpdateTaskResult | null> => {
-    try {
-      const { data } = await instance.patch<ApiResponse<UpdateTaskResult>>(`/api/v1/tasks/${taskId}`, payload);
-      return unwrap(data);
-    } catch (error) {
-      if (isNotFound(error)) return null;
-      throw error;
-    }
+  /** 서류가 필요 없는 태스크를 수동으로 완료 처리 */
+  complete: async (taskId: number): Promise<CompleteTaskResult> => {
+    const { data } = await instance.patch<ApiResponse<CompleteTaskResult>>(`/api/v1/tasks/${taskId}/complete`);
+    return unwrap(data);
   },
 
-  remove: async (taskId: number): Promise<boolean> => {
-    try {
-      const { data } = await instance.delete<ApiResponse<null>>(`/api/v1/tasks/${taskId}`);
-      unwrap(data);
-      return true;
-    } catch (error) {
-      if (isNotFound(error)) return false;
-      throw error;
-    }
+  updateSchedule: async (
+    taskId: number,
+    payload: UpdateTaskScheduleRequest,
+  ): Promise<UpdateRoadmapScheduleResult> => {
+    const { data } = await instance.patch<ApiResponse<UpdateRoadmapScheduleResult>>(
+      `/api/v1/tasks/${taskId}/schedule`,
+      payload,
+    );
+    return unwrap(data);
   },
 };

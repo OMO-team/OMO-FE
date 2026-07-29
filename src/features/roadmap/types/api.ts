@@ -13,97 +13,115 @@ export interface ApiErrorResponse {
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
+export type TaskCategory = 'VISA' | 'INSURANCE' | 'DOCUMENT' | 'FLIGHT' | 'ACCOMMODATION' | 'BANKING';
+
+export type TaskStatus = 'LOCKED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+
+export interface RoadmapListItem {
+  roadmapId: number;
+  title: string;
+  cityId: number;
+  cityName: string;
+  cityImageUrl: string;
+  purposeId: number;
+  purposeName: string;
+  departureDate: string | null;
+  stayMonths: number | null;
+  departureDDay: number | null;
+  completedTaskCount: number;
+  totalTaskCount: number;
+  progressRate: number;
+  nextTaskId: number | null;
+  nextTaskName: string | null;
+  nextScheduleDate: string | null;
+  nextScheduleDDay: number | null;
+  isNextScheduleOverdue: boolean;
+}
+
+export interface RoadmapBudget {
+  initialSettlementCost: number;
+  monthlyCost: number;
+  totalCost: number;
+}
+
+export interface RoadmapTaskItem {
+  taskId: number;
+  name: string;
+  category: TaskCategory;
+  dueDate: string | null;
+  scheduleDDay: number | null;
+  isOverdue: boolean;
+  status: TaskStatus;
+  isCompleted: boolean;
+}
+
+/** 로드맵 목록 항목 + 예산/태스크 목록 (로드맵 상세 조회 응답) */
+export interface RoadmapDetail extends RoadmapListItem {
+  budget: RoadmapBudget | null;
+  tasks: RoadmapTaskItem[];
+}
+
 export interface CreateRoadmapRequest {
   cityId: number;
   purposeId: number;
-  departureDate: string;
-  stayMonths: number;
 }
 
 export interface CreateRoadmapResult {
   roadmapId: number;
+  title: string;
   cityId: number;
   purposeId: number;
-  departureDate: string;
-  dDay: number;
+  /** 최초 생성 시점에는 미설정(null) — 이후 updateSchedule로 설정 */
+  departureDate: string | null;
+  taskCount: number;
+}
+
+export interface UpdateRoadmapBudgetRequest {
   stayMonths: number;
-  isActive: boolean;
-  createdAt: string;
 }
 
-export interface RoadmapResult extends CreateRoadmapResult {
-  updatedAt: string;
-}
-
-export interface RoadmapListItem {
+export interface UpdateRoadmapBudgetResult {
   roadmapId: number;
-  cityId: number;
-  departureDate: string;
-  dDay: number;
   stayMonths: number;
-  isActive: boolean;
+  initialSettlementCost: number;
+  monthlyCost: number;
+  totalCost: number;
 }
 
-export type UpdateRoadmapRequest = Partial<Pick<CreateRoadmapRequest, 'departureDate' | 'stayMonths'>>;
+export interface UpdateRoadmapScheduleRequest {
+  departureDate: string;
+}
 
-export interface UpdateRoadmapResult {
+export interface TaskSchedule {
+  taskId: number;
+  dueDate: string;
+}
+
+export interface UpdateRoadmapScheduleResult {
   roadmapId: number;
   departureDate: string;
-  dDay: number;
-  stayMonths: number;
-  updatedAt: string;
+  departureDDay: number;
+  taskSchedules: TaskSchedule[];
 }
 
-export type TaskStatus = 'locked' | 'pending' | 'inProgress' | 'completed';
-
-export interface TaskDetail {
-  taskId: number;
-  roadmapId: number;
-  taskName: string;
+export interface UpdateTaskScheduleRequest {
   dueDate: string;
-  priority: number;
-  isCompleted: boolean;
-  status: TaskStatus;
-  createdAt: string;
-  updatedAt: string;
 }
 
-export interface TaskListItem {
+export interface CompleteTaskResult {
   taskId: number;
-  roadmapId: number;
-  taskName: string;
-  dueDate: string;
-  priority: number;
   isCompleted: boolean;
+  completedAt: string;
   status: TaskStatus;
 }
 
-export interface CreateTaskRequest {
-  taskName: string;
-  dueDate: string;
-  priority: number;
+export interface UpdateTaskDocumentCheckRequest {
+  checked: boolean;
 }
 
-export interface CreateTaskResult {
-  taskId: number;
-  roadmapId: number;
-  taskName: string;
-  dueDate: string;
-  priority: number;
-  isCompleted: boolean;
-  status: TaskStatus;
-  createdAt: string;
-}
-
-export type UpdateTaskRequest = Partial<
-  Pick<CreateTaskRequest, 'taskName' | 'dueDate' | 'priority'> & { isCompleted: boolean }
->;
-
-export interface UpdateTaskResult {
-  taskId: number;
-  isCompleted: boolean;
-  status: TaskStatus;
-  /** 이 작업 완료로 잠금 해제된(lock -> upcoming) 후속 태스크 ID 목록 */
-  unlockedTaskIds: number[];
-  updatedAt: string;
+export interface UpdateTaskDocumentCheckResult {
+  taskDocumentId: number;
+  checked: boolean;
+  completedCount: number;
+  totalCount: number;
 }
