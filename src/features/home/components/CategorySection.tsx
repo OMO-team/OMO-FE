@@ -1,14 +1,9 @@
 import { useState } from 'react';
 import CategoryTab from '../../../shared/components/CategoryTab';
-import CityCard, { CITY_IMAGES } from './CityCard';
+import CityCard from './CityCard';
 import chevronRightIcon from '../../../assets/icons/chevron-right.svg';
 import { usePurposes } from '../hooks/usePurposes';
-
-const CITIES = [
-  { name: '독일', count: 5 },
-  { name: '호주', count: 12 },
-  { name: '일본', count: 15 },
-];
+import { useCountriesByPurpose } from '../hooks/useCountriesByPurpose';
 
 export default function CategorySection() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -16,6 +11,8 @@ export default function CategorySection() {
 
   const activePurpose = purposes[activeIndex];
   const categoryNames = purposes.map(p => p.name);
+
+  const { data: countries = [] } = useCountriesByPurpose(activePurpose?.type);
 
   return (
     <div className="flex flex-col items-start w-[1064px] gap-[40px]">
@@ -51,12 +48,12 @@ export default function CategorySection() {
 
         <div className="flex items-center gap-4 self-stretch">
           <div className="flex items-center gap-4">
-            {CITIES.map((city, i) => (
+            {countries.map(country => (
               <CityCard
-                key={city.name}
-                name={city.name}
-                cityCount={city.count}
-                imagePath={CITY_IMAGES[i]}
+                key={country.countryId}
+                name={country.name}
+                code={country.code}
+                imageUrl={country.imageUrl}
               />
             ))}
           </div>
