@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
 import RoadmapTimeline from '../components/RoadmapTimeline';
@@ -12,16 +13,11 @@ import BagIcon from '../components/icons/BagIcon';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { roadmapsApi } from '../api/roadmapsApi';
+import { roadmapQueryKeys } from '../api/queryKeys';
 import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
-
-/** task-detail 자식 라우트(TaskDetailRoute)에 useOutletContext로 전달되는 값 */
-export type TaskDetailContext = {
-  /** 태스크 일정 변경/완료 처리 성공 시 호출 — 타임라인·진행률을 최신 상태로 갱신 */
-  onTaskUpdated: () => void;
-};
 
 function parseDotDate(value?: string) {
   if (!value) return null;
@@ -38,8 +34,7 @@ type RoadmapDetailProps = {
 
 export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps) {
   const navigate = useNavigate();
-  const [detail, setDetail] = useState<RoadmapDetailResult | null | undefined>(undefined);
-  const [months, setMonths] = useState(1);
+  const queryClient = useQueryClient();
   /** 준비 시작일은 아직 백엔드 스펙에 없는 필드라 화면에서만 임시로 관리 (서버 미반영) */
   const [startDate, setStartDate] = useState<string | undefined>(undefined);
   const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | null>(null);
@@ -50,19 +45,35 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   const isValidRoadmapId = Number.isFinite(roadmapId);
 
-  useEffect(() => {
-    if (!isValidRoadmapId) return;
-    roadmapsApi
-      .get(roadmapId)
-      .then((result) => {
-        setDetail(result);
-        if (result) setMonths(result.stayMonths ?? 1);
-      })
-      .catch((error) => {
-        console.error('로드맵 상세 조회 실패', error);
-        setDetail(null);
-      });
-  }, [roadmapId, isValidRoadmapId]);
+  const { data: detail } = useQuery({
+    queryKey: roadmapQueryKeys.detail(roadmapId),
+    queryFn: () => roadmapsApi.get(roadmapId),
+    enabled: isValidRoadmapId,
+  });
+
+  /** 체류 기간 변경은 즉시 화면에 반영(낙관적 업데이트)하고, 실패하면 이전 값으로 되돌림 */
+  const updateBudgetMutation = useMutation({
+    mutationFn: (newMonths: number) => roadmapsApi.updateBudget(roadmapId, { stayMonths: newMonths }),
+    onMutate: async (newMonths) => {
+      await queryClient.cancelQueries({ queryKey: roadmapQueryKeys.detail(roadmapId) });
+      const previous = queryClient.getQueryData<RoadmapDetailResult>(roadmapQueryKeys.detail(roadmapId));
+      queryClient.setQueryData<RoadmapDetailResult>(roadmapQueryKeys.detail(roadmapId), (old) =>
+        old ? { ...old, stayMonths: newMonths } : old,
+      );
+      return { previous };
+    },
+    onError: (_error, _newMonths, context) => {
+      console.error('예산 계획 변경 실패');
+      if (context?.previous) queryClient.setQueryData(roadmapQueryKeys.detail(roadmapId), context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.detail(roadmapId) }),
+  });
+
+  const updateScheduleMutation = useMutation({
+    mutationFn: (departureDate: string) => roadmapsApi.updateSchedule(roadmapId, { departureDate }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.detail(roadmapId) }),
+    onError: () => console.error('출국일 변경 실패'),
+  });
 
   if (isValidRoadmapId && detail === undefined) {
     return <RoadmapDetailSkeleton />;
@@ -82,41 +93,17 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
     );
   }
 
-  const refreshDetail = async () => {
-    const refreshed = await roadmapsApi.get(roadmapId);
-    setDetail(refreshed);
-    if (refreshed) setMonths(refreshed.stayMonths ?? 1);
-  };
-
-  const handleMonthsChange = async (newMonths: number) => {
-    setMonths(newMonths);
-    try {
-      await roadmapsApi.updateBudget(roadmapId, { stayMonths: newMonths });
-      await refreshDetail();
-    } catch (error) {
-      console.error('예산 계획 변경 실패', error);
-    }
-  };
-
-  const handleSelectDeparture = async (day: number) => {
+  const handleSelectDeparture = (day: number) => {
     setDatePickerTarget(null);
     const iso = `${datePickerViewYear}-${String(datePickerViewMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    try {
-      await roadmapsApi.updateSchedule(roadmapId, { departureDate: iso });
-      await refreshDetail();
-    } catch (error) {
-      console.error('출국일 변경 실패', error);
-    }
+    updateScheduleMutation.mutate(iso);
   };
 
   const departureDate = formatDotDate(detail.departureDate);
   const parsedDeparture = parseDotDate(departureDate);
   const parsedStart = parseDotDate(startDate);
 
-  const taskDetailContext: TaskDetailContext = {
-    onTaskUpdated: refreshDetail,
-  };
-
+  const months = detail.stayMonths ?? 1;
   const budget = detail.budget;
   const livingCostSubtotal = (budget?.monthlyCost ?? 0) * months;
   const totalBudget = budget?.totalCost ?? (budget?.initialSettlementCost ?? 0) + livingCostSubtotal;
@@ -256,7 +243,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
         <div className="flex flex-col gap-7.5">
           <BudgetPlanCard
             months={months}
-            onMonthsChange={handleMonthsChange}
+            onMonthsChange={(newMonths) => updateBudgetMutation.mutate(newMonths)}
             initialSettlementCost={budget?.initialSettlementCost ?? 0}
             monthlyLivingCost={budget?.monthlyCost ?? 0}
             stayMonths={months}
@@ -272,7 +259,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
         </div>
       </div>
 
-      <Outlet context={taskDetailContext} />
+      <Outlet />
 
       {isReportOpen && (
         <CityReportModal
