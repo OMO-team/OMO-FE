@@ -117,6 +117,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollStartTimeRef = useRef<number>(0);
   const currentEntryIdRef = useRef<string | null>(null);
+  const initialSubmittedRef = useRef(false);
 
   const hasChatStarted = chatHistory.length > 0;
 
@@ -189,9 +190,10 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
 
   useEffect(() => {
     const query = initialMessage?.trim();
-    if (!query) return;
+    if (!query || initialSubmittedRef.current) return;
+    initialSubmittedRef.current = true;
     submitQuery(query, null);
-  // 마운트 시 한 번만 실행
+  // 마운트 시 한 번만 실행 (StrictMode 이중 실행 방지)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
