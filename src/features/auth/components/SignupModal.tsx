@@ -9,6 +9,7 @@ import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import { authApi } from '../api/authApi';
 import { passwordRegex } from '../constants/passwordRegex';
+import { EMAIL_REGEX } from '../constants/emailRegex';
 import { useAuthStore } from '../store/useAuthStore';
 
 type SignupModalProps = {
@@ -54,6 +55,8 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(signupDraft?.isEmailVerified ?? false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState('');
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState((signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false);
@@ -83,6 +86,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
   const handleSendEmailCode = async () => {
     if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
+    if (!EMAIL_REGEX.test(email)) { setEmailError('올바른 이메일 형식을 입력해주세요.'); return; }
     if (isSendingCode) return;
     setEmailError('');
     setIsSendingCode(true);
@@ -103,6 +107,26 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSendingCode(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    if (isGoogleLoading) return;
+    if (!agreeTerms || !agreePrivacy) {
+      setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.');
+      return;
+    }
+    setIsGoogleLoading(true);
+    const agreedTermsIds = [
+      ...(agreeTerms ? [1] : []),
+      ...(agreePrivacy ? [2] : []),
+    ];
+    try {
+      const { authorizationUrl } = await authApi.getGoogleSignupUrl({ agreedTermsIds });
+      window.location.href = authorizationUrl;
+    } catch {
+      setIsGoogleLoading(false);
+      setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -341,7 +365,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
                 <button
                   type="button"
-                  className="flex flex-col justify-center items-center rounded-2"
+                  onClick={handleGoogleSignup}
+                  disabled={isGoogleLoading}
+                  className="flex flex-col justify-center items-center rounded-2 disabled:opacity-50"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
                   style={{ width: '400px', height: '48px', padding: '8px 12px 8px 10px', background: isGoogleHovered ? '#E7E6E6' : '#F2F2F2', gap: '4px', transition: 'background 0.15s' }}
@@ -353,6 +379,10 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                   </div>
                 </button>
               </div>
+
+              {googleError && (
+                <span className="body-02 text-[#FF2A14] self-start">{googleError}</span>
+              )}
 
               {/* 로그인 유도 */}
               <div className="flex items-center" style={{ gap: '8px' }}>

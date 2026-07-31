@@ -20,6 +20,7 @@ export default function LoginModal({
   onForgotPasswordClick,
 }: LoginModalProps) {
   const signIn = useAuthStore((s) => s.signIn);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -56,6 +57,18 @@ export default function LoginModal({
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (isGoogleLoading) return;
+    setIsGoogleLoading(true);
+    try {
+      const { authorizationUrl } = await authApi.getGoogleLoginUrl();
+      window.location.href = authorizationUrl;
+    } catch {
+      setIsGoogleLoading(false);
+      setFormError('Google 로그인에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -221,7 +234,9 @@ export default function LoginModal({
                 {/* 구글 로그인 */}
                 <button
                   type="button"
-                  className="flex flex-col justify-center items-center rounded-2"
+                  onClick={handleGoogleLogin}
+                  disabled={isGoogleLoading}
+                  className="flex flex-col justify-center items-center rounded-2 disabled:opacity-50"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
                   style={{

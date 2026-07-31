@@ -15,6 +15,7 @@ type ProfileEditModalProps = {
   onSave: (data: { name: string; avatarFile: File | null }) => void;
   onConnectKakao?: () => void;
   onConnectGoogle?: () => void;
+  isGoogleConnecting?: boolean;
 };
 
 export default function ProfileEditModal({
@@ -25,6 +26,7 @@ export default function ProfileEditModal({
   onSave,
   onConnectKakao,
   onConnectGoogle,
+  isGoogleConnecting = false,
 }: ProfileEditModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [nameValue, setNameValue] = useState(name);
@@ -185,7 +187,8 @@ export default function ProfileEditModal({
               <button
                 type="button"
                 onClick={onConnectGoogle}
-                className="flex h-[50px] w-full items-center justify-between"
+                disabled={isGoogleConnecting}
+                className="flex h-[50px] w-full items-center justify-between disabled:opacity-50"
               >
                 <span className="flex items-center gap-2">
                   <img src={googleIcon} alt="" className="size-6" />

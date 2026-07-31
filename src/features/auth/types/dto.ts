@@ -52,3 +52,22 @@ export type ReissueRequest = {
 export type ReissueResult = {
   accessToken: string;
 };
+
+// 구글 OAuth
+export type GoogleSignupRequest = {
+  agreedTermsIds: number[];
+};
+
+export type GoogleAuthorizationUrlResult = {
+  authorizationUrl: string;
+};
+
+export type GoogleExchangeRequest = {
+  ticket: string;
+};
+
+export type GoogleLoginResult = {
+  memberId: number;
+  accessToken: string;
+  refreshToken: string;
+};
