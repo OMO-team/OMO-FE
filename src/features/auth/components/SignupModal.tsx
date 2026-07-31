@@ -248,7 +248,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
               />
 
               {/* 비밀번호 확인 */}
-              <div className="flex flex-col gap-[8px] self-stretch">
+              <div className="flex flex-col gap-[6px] self-stretch">
                 <Input
                   type="password"
                   value={confirmPassword}
