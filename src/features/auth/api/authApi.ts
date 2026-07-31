@@ -65,4 +65,9 @@ export const authApi = {
     localStorage.setItem('refreshToken', data.result.refreshToken);
     return data.result;
   },
+
+  getGoogleLinkUrl: async () => {
+    const { data } = await instance.get<ApiResponse<GoogleAuthorizationUrlResult>>('/api/v1/members/me/social-accounts/google/link');
+    return data.result;
+  },
 };
