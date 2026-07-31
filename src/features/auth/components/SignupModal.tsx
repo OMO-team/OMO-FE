@@ -9,6 +9,7 @@ import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import { authApi } from '../api/authApi';
 import { passwordRegex } from '../constants/passwordRegex';
+import { EMAIL_REGEX } from '../constants/emailRegex';
 import { useAuthStore } from '../store/useAuthStore';
 
 type SignupModalProps = {
@@ -85,6 +86,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
   const handleSendEmailCode = async () => {
     if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
+    if (!EMAIL_REGEX.test(email)) { setEmailError('올바른 이메일 형식을 입력해주세요.'); return; }
     if (isSendingCode) return;
     setEmailError('');
     setIsSendingCode(true);
