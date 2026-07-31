@@ -9,7 +9,6 @@ import DatePickerModal from '../components/DatePickerModal';
 import RoadmapAlertCard from '../components/RoadmapAlertCard';
 import RoadmapDetailSkeleton from './RoadmapDetailSkeleton';
 import BagIcon from '../components/icons/BagIcon';
-import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { roadmapsApi } from '../api/roadmapsApi';
@@ -20,7 +19,8 @@ import type { CityInsightData } from '../types/cityInsight';
 
 /** task-detail 자식 라우트(TaskDetailRoute)에 useOutletContext로 전달되는 값 */
 export type TaskDetailContext = {
-  onDateClick: () => void;
+  /** 태스크 일정 변경/완료 처리 성공 시 호출 — 타임라인·진행률을 최신 상태로 갱신 */
+  onTaskUpdated: () => void;
 };
 
 function parseDotDate(value?: string) {
@@ -42,7 +42,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const [months, setMonths] = useState(1);
   /** 준비 시작일은 아직 백엔드 스펙에 없는 필드라 화면에서만 임시로 관리 (서버 미반영) */
   const [startDate, setStartDate] = useState<string | undefined>(undefined);
-  const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | 'task' | null>(null);
+  const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | null>(null);
   const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
   const [datePickerViewYear, setDatePickerViewYear] = useState(new Date().getFullYear());
   const [datePickerViewMonth, setDatePickerViewMonth] = useState(new Date().getMonth() + 1);
@@ -114,12 +114,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const parsedStart = parseDotDate(startDate);
 
   const taskDetailContext: TaskDetailContext = {
-    onDateClick: () => {
-      setDatePickerViewYear(new Date().getFullYear());
-      setDatePickerViewMonth(new Date().getMonth() + 1);
-      setDatePickerMode('day');
-      setDatePickerTarget('task');
-    },
+    onTaskUpdated: refreshDetail,
   };
 
   const budget = detail.budget;
@@ -278,26 +273,6 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
       </div>
 
       <Outlet context={taskDetailContext} />
-
-      {datePickerTarget === 'task' && (
-        <ModalOverlay zIndex={60} onClose={() => setDatePickerTarget(null)}>
-          <DatePickerModal
-            mode={datePickerMode}
-            year={datePickerViewYear}
-            month={datePickerViewMonth}
-            selectedMonth={datePickerViewMonth}
-            onClose={() => setDatePickerTarget(null)}
-            onModeToggle={() => setDatePickerMode((m) => (m === 'day' ? 'month' : 'day'))}
-            onSelectMonth={(m) => {
-              setDatePickerViewMonth(m);
-              setDatePickerMode('day');
-            }}
-            onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
-            onYearNext={() => setDatePickerViewYear((y) => y + 1)}
-            onSelectDay={() => setDatePickerTarget(null)}
-          />
-        </ModalOverlay>
-      )}
 
       {isReportOpen && (
         <CityReportModal

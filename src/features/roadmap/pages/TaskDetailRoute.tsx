@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import DocumentTaskDetailModal from '../components/DocumentTaskDetailModal';
 import DocumentUploadModal from '../components/DocumentUploadModal';
+import DatePickerModal from '../components/DatePickerModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import { tasksApi } from '../api/tasksApi';
 import { taskDocumentsApi } from '../api/taskDocumentsApi';
@@ -10,16 +11,29 @@ import type { TaskDetailContext } from './RoadmapDetail';
 import type { RequiredDocumentData, UploadedFileItem } from '../types/roadmap';
 import type { TaskDetailResult } from '../types/api';
 
+function parseIsoDate(value: string | null) {
+  if (!value) return null;
+  const [year, month, day] = value.split('-').map(Number);
+  if (!year || !month || !day) return null;
+  return { year, month, day };
+}
+
 export default function TaskDetailRoute() {
   const navigate = useNavigate();
   const location = useLocation();
   const { taskId } = useParams<{ taskId: string }>();
-  const { onDateClick } = useOutletContext<TaskDetailContext>();
+  const { onTaskUpdated } = useOutletContext<TaskDetailContext>();
 
   const [taskDetail, setTaskDetail] = useState<TaskDetailResult | undefined>(undefined);
   const [documents, setDocuments] = useState<RequiredDocumentData[]>([]);
   const [uploadTargetDocumentId, setUploadTargetDocumentId] = useState<number | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
+  const [datePickerViewYear, setDatePickerViewYear] = useState(new Date().getFullYear());
+  const [datePickerViewMonth, setDatePickerViewMonth] = useState(new Date().getMonth() + 1);
+
+  const numericTaskId = Number(taskId);
 
   /**
    * 태스크 모달은 타임라인에서 push로 열리므로, 닫을 때도 push('..')가 아니라 -1로 되돌려야
@@ -34,12 +48,7 @@ export default function TaskDetailRoute() {
     }
   };
 
-  useEffect(() => {
-    const numericTaskId = Number(taskId);
-    if (!Number.isFinite(numericTaskId)) {
-      closeTaskDetail();
-      return;
-    }
+  const loadTaskDetail = () => {
     tasksApi
       .get(numericTaskId)
       .then((result) => {
@@ -50,6 +59,14 @@ export default function TaskDetailRoute() {
         console.error('태스크 상세 조회 실패', error);
         closeTaskDetail();
       });
+  };
+
+  useEffect(() => {
+    if (!Number.isFinite(numericTaskId)) {
+      closeTaskDetail();
+      return;
+    }
+    loadTaskDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
@@ -58,6 +75,9 @@ export default function TaskDetailRoute() {
     setDocuments((prev) => prev.map((d) => (d.taskDocumentId === taskDocumentId ? { ...d, isChecked: true } : d)));
     try {
       await taskDocumentsApi.updateCheck(taskDocumentId, { checked: true });
+      // 모든 서류가 체크되면 백엔드가 태스크를 자동 완료 처리하므로, 진행률/타임라인 갱신을 위해 상세를 다시 불러옴
+      loadTaskDetail();
+      onTaskUpdated();
     } catch (error) {
       console.error('서류 체크 실패', error);
       setDocuments((prev) => prev.map((d) => (d.taskDocumentId === taskDocumentId ? { ...d, isChecked: false } : d)));
@@ -84,7 +104,39 @@ export default function TaskDetailRoute() {
     });
   };
 
+  const handleOpenDatePicker = () => {
+    const parsed = parseIsoDate(taskDetail?.dueDate ?? null);
+    setDatePickerViewYear(parsed?.year ?? new Date().getFullYear());
+    setDatePickerViewMonth(parsed?.month ?? new Date().getMonth() + 1);
+    setDatePickerMode('day');
+    setIsDatePickerOpen(true);
+  };
+
+  const handleSelectDay = async (day: number) => {
+    setIsDatePickerOpen(false);
+    const iso = `${datePickerViewYear}-${String(datePickerViewMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    try {
+      await tasksApi.updateSchedule(numericTaskId, { dueDate: iso });
+      loadTaskDetail();
+      onTaskUpdated();
+    } catch (error) {
+      console.error('태스크 일정 변경 실패', error);
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      await tasksApi.complete(numericTaskId);
+      loadTaskDetail();
+      onTaskUpdated();
+    } catch (error) {
+      console.error('태스크 완료 처리 실패', error);
+    }
+  };
+
   if (!taskDetail) return null;
+
+  const parsedDue = parseIsoDate(taskDetail.dueDate);
 
   return (
     <>
@@ -95,7 +147,7 @@ export default function TaskDetailRoute() {
           infoBanner={taskDetail.description}
           dDayLabel={taskDetail.scheduleDDay != null ? `D-${taskDetail.scheduleDDay}` : undefined}
           scheduledDate={formatDotDate(taskDetail.dueDate)}
-          onDateClick={onDateClick}
+          onDateClick={handleOpenDatePicker}
           onClose={closeTaskDetail}
           documents={documents}
           locked={taskDetail.status === 'LOCKED'}
@@ -104,6 +156,8 @@ export default function TaskDetailRoute() {
             setUploadTargetDocumentId(taskDocumentId);
           }}
           onCheck={handleCheckDocument}
+          isCompleted={taskDetail.isCompleted}
+          onComplete={handleComplete}
         />
       </ModalOverlay>
 
@@ -118,6 +172,31 @@ export default function TaskDetailRoute() {
               setUploadTargetDocumentId(null);
             }}
             onClose={() => setUploadTargetDocumentId(null)}
+          />
+        </ModalOverlay>
+      )}
+
+      {isDatePickerOpen && (
+        <ModalOverlay zIndex={60} onClose={() => setIsDatePickerOpen(false)}>
+          <DatePickerModal
+            mode={datePickerMode}
+            year={datePickerViewYear}
+            month={datePickerViewMonth}
+            selectedDay={
+              parsedDue?.year === datePickerViewYear && parsedDue?.month === datePickerViewMonth
+                ? parsedDue.day
+                : undefined
+            }
+            selectedMonth={datePickerViewMonth}
+            onClose={() => setIsDatePickerOpen(false)}
+            onModeToggle={() => setDatePickerMode((m) => (m === 'day' ? 'month' : 'day'))}
+            onSelectMonth={(m) => {
+              setDatePickerViewMonth(m);
+              setDatePickerMode('day');
+            }}
+            onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
+            onYearNext={() => setDatePickerViewYear((y) => y + 1)}
+            onSelectDay={handleSelectDay}
           />
         </ModalOverlay>
       )}
