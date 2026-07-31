@@ -619,7 +619,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
                   }
                 }}
                 placeholder="원하는 나라 조건을 자유롭게 입력해보세요. 예: 유럽에서 생활비가 저렴한 도시 추천해줘"
-                className="text-gray-400 bg-transparent border-none outline-none resize-none"
+                className="body-03 text-gray-900 placeholder:text-gray-400 bg-transparent border-none outline-none resize-none"
                 style={{
                   height: '48px',
                   alignSelf: 'stretch',

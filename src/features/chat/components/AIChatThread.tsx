@@ -110,15 +110,7 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
                       <>
                         <p
                           key={text}
-                          className="text-black"
-                          style={{
-                            fontFamily: 'var(--font-pretendard)',
-                            fontSize: '14px',
-                            fontWeight: 400,
-                            lineHeight: '150%',
-                            letterSpacing: '-0.28px',
-                            alignSelf: 'stretch',
-                          }}
+                          className="body-03 text-gray-900 self-stretch"
                         >
                           {text}
                         </p>
