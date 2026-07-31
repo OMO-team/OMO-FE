@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -15,9 +15,14 @@ import type { MainLayoutContext } from './useMainLayoutContext';
 type RouteHandle = { headerVariant?: 'default' | 'overlay' };
 
 export default function MainLayout() {
-  const { modalType, openModal, closeModal, isSearchOpen, closeSearch } = useAuthStore();
+  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn } = useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) signIn();
+  }, []);
   const matches = useMatches();
   const headerVariant =
     matches.map((m) => (m.handle as RouteHandle | undefined)?.headerVariant).filter(Boolean).at(-1) ?? 'default';
