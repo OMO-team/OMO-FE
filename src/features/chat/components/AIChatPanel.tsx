@@ -527,7 +527,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
                   <button
                     key={chip.id}
                     type="button"
-                    onClick={() => setValue(chip.title)}
+                    onClick={() => { if (!isStreaming) submitQuery(chip.title, sessionId); }}
                     className="flex items-center gap-1 bg-gray-20 hover:bg-gray-50 transition-colors"
                     style={{ height: '38px', padding: '8px 20px', borderRadius: '10px' }}
                   >
