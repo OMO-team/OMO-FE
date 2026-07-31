@@ -1,4 +1,5 @@
 import axios, { type AxiosError } from 'axios';
+import { useAuthStore } from '../features/auth/store/useAuthStore';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -51,6 +52,7 @@ instance.interceptors.response.use(
     } catch {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      useAuthStore.getState().signOut();
       return Promise.reject(error);
     }
   },
