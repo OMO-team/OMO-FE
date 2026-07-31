@@ -17,20 +17,29 @@ export type TaskCategory = 'VISA' | 'INSURANCE' | 'DOCUMENT' | 'FLIGHT' | 'ACCOM
 
 export type TaskStatus = 'LOCKED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
+export interface CityCountryInfo {
+  countryId: number;
+  name: string;
+}
+
+/**
+ * 실제 GET /api/v1/my-home/wishlist 응답으로 확인한 구조.
+ * 스웨거 문서상 스키마는 countryId/countryName을 평평하게 나열했지만,
+ * 실 응답은 country 객체로 중첩되어 있고 미준비 필드는 null로 내려옴(2026-07-31 확인).
+ */
 export interface CityInfo {
   cityId: number;
   name: string;
-  countryId: number;
-  countryName: string;
-  imageUrl: string;
-  rating: number;
-  description: string;
-  monthlyCost: number;
-  safetyScore: number;
-  housingScore: number;
-  visaScore: number;
-  languageScore: number;
-  infraScore: number;
+  country: CityCountryInfo;
+  imageUrl: string | null;
+  rating: number | null;
+  description: string | null;
+  monthlyCost: number | null;
+  safetyScore: number | null;
+  housingScore: number | null;
+  visaScore: number | null;
+  languageScore: number | null;
+  infraScore: number | null;
 }
 
 export interface CityListResult {
