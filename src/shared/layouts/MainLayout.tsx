@@ -54,12 +54,12 @@ export default function MainLayout() {
           type="button"
           onClick={() => setIsChatOpen((prev) => !prev)}
           aria-label={isChatOpen ? 'AI 채팅 닫기' : 'AI 채팅 열기'}
-          className="flex h-full items-center cursor-pointer"
+          className="flex h-full items-center cursor-pointer outline-none border-0"
           style={{
             width: '40px',
             paddingLeft: '10px',
-            border: 'none',
-            background: isChatOpen ? 'var(--color-white, #FFF)' : 'transparent',
+            background: '#FFF',
+            borderLeft: '1px solid #E7EAEF',
           }}
         >
           <div

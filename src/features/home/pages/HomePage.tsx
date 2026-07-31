@@ -12,9 +12,8 @@ export default function HomePage() {
       <div
         className="fixed top-0 left-0 pointer-events-none"
         style={{
-          width: '1440px',
+          width: 'calc(100vw - 40px)',
           height: '770px',
-          aspectRatio: '144/77',
           zIndex: 0,
           background: `linear-gradient(286deg, rgba(255, 255, 255, 0.50) -1.67%, rgba(255, 255, 255, 0.00) 96.85%), url(${mapBg}) lightgray -437.967px -0.41px / 160.828% 168.621% no-repeat`,
         }}
