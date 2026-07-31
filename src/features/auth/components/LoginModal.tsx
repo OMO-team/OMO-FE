@@ -6,6 +6,7 @@ import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
 import { authApi } from '../api/authApi';
+import { useAuthStore } from '../store/useAuthStore';
 
 type LoginModalProps = {
   onClose: () => void;
@@ -18,6 +19,7 @@ export default function LoginModal({
   onSignupClick,
   onForgotPasswordClick,
 }: LoginModalProps) {
+  const signIn = useAuthStore((s) => s.signIn);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -44,6 +46,7 @@ export default function LoginModal({
     setIsSubmitting(true);
     try {
       await authApi.login({ email, password });
+      signIn();
       onClose();
     } catch (error) {
       if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 401) {
