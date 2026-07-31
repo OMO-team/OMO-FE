@@ -18,6 +18,7 @@ export default function MainLayout() {
   const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn } = useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -29,7 +30,10 @@ export default function MainLayout() {
   const isOverlay = headerVariant === 'overlay';
 
   const outletContext: MainLayoutContext = {
-    openChat: () => setIsChatOpen(true),
+    openChat: (initialMessage?: string) => {
+      setChatInitialMessage(initialMessage);
+      setIsChatOpen(true);
+    },
     closeChat: () => setIsChatOpen(false),
   };
 
@@ -47,7 +51,8 @@ export default function MainLayout() {
       {isChatOpen && (
         <div className="fixed inset-y-0 right-0 z-40">
           <AIChatPanel
-            onClose={() => setIsChatOpen(false)}
+            initialMessage={chatInitialMessage}
+            onClose={() => { setIsChatOpen(false); setChatInitialMessage(undefined); }}
             onNewChat={() => setIsChatOpen(false)}
           />
         </div>

@@ -38,6 +38,12 @@ export default function PromptInput({ value: externalValue, onChange, onSubmit }
             placeholder="영어로 생활 가능하고, 한 달 예산 200만 원 이하인 유럽 도시 추천해 줘"
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
           />

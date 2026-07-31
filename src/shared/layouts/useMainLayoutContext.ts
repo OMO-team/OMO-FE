@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom';
 
 export type MainLayoutContext = {
-  openChat: () => void;
+  openChat: (initialMessage?: string) => void;
   closeChat: () => void;
 };
 

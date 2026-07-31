@@ -32,6 +32,7 @@ type AIChatPanelProps = {
   onClose?: () => void;
   onNewChat?: () => void;
   defaultNotice?: NoticeType;
+  initialMessage?: string;
 };
 
 type BarConfig = {
@@ -91,7 +92,7 @@ const NOTICE_CONFIGS: Record<NonNullable<NoticeType>, BarConfig> = {
   },
 };
 
-export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null }: AIChatPanelProps) {
+export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, initialMessage }: AIChatPanelProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isTitleHovered, setIsTitleHovered] = useState(false);
@@ -115,6 +116,25 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null }
   useEffect(() => {
     chatApi.getRecommendChips().then(setChips).catch(() => {});
     return () => stopPolling();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const query = initialMessage?.trim();
+    if (!query) return;
+    setUserMessage(query);
+    setIsStreaming(true);
+    setHasChatStarted(true);
+    chatApi.startBriefing({ searchQuery: query, isRefine: false })
+      .then(({ sessionId: newSessionId, taskId }) => {
+        setSessionId(newSessionId);
+        startPolling(taskId);
+      })
+      .catch(() => {
+        setIsStreaming(false);
+        setNoticeType('briefing-error');
+      });
+  // 마운트 시 한 번만 실행
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -592,6 +612,12 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null }
               <textarea
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
                 placeholder="원하는 나라 조건을 자유롭게 입력해보세요. 예: 유럽에서 생활비가 저렴한 도시 추천해줘"
                 className="text-gray-400 bg-transparent border-none outline-none resize-none"
                 style={{
