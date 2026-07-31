@@ -62,7 +62,7 @@ export default function Contact() {
         })
     }
 
-    const isValid = contactType !== null && name.trim() !== '' && email.trim() !== '' && content.length >= 10 && content.length <= 1000
+    const isValid = contactType !== null && name.trim() !== '' && email.trim() !== '' && content.trim().length >= 10 && content.trim().length <= 1000
 
     const handleSubmit = async () => {
         setIsSubmitting(true)
