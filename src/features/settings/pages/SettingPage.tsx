@@ -55,7 +55,13 @@ export default function SettingsPage({
   const [profileName, setProfileName] = useState("OMO");
   const [profileEmail] = useState("omo@naver.com");
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
-  const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(googleLinkResult);
+  const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(() => {
+    if (googleLinkResult) {
+      // state 소비 후 히스토리 엔트리에서 제거 (새로고침 시 배너 재표시 방지)
+      navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
+    }
+    return googleLinkResult;
+  });
   const [isGoogleLinking, setIsGoogleLinking] = useState(false);
 
   const handleConnectGoogle = async () => {
@@ -64,7 +70,8 @@ export default function SettingsPage({
     try {
       const { authorizationUrl } = await authApi.getGoogleLinkUrl();
       window.location.href = authorizationUrl;
-    } catch {
+    } catch (error) {
+      console.error('Google 계정 연결 URL 조회 실패:', error);
       setIsGoogleLinking(false);
       setGoogleLinkBanner('error');
     }
