@@ -22,6 +22,9 @@ import PasswordResetVerifyRoute from './features/auth/pages/PasswordResetVerifyR
 import TermsAndPolicyRoute from './shared/pages/TermsAndPolicyRoute';
 import SettingsApp from './features/settings/pages/SettingsApp';
 
+// contact 
+import Contact from './features/contact/pages/Contact';
+
 export const router = createBrowserRouter([
   {
     element: <MainLayout />,
@@ -32,9 +35,14 @@ export const router = createBrowserRouter([
       { path: '/auth/email-verify', element: <EmailVerifyRoute /> },
       { path: '/auth/password-reset/verify', element: <PasswordResetVerifyRoute /> },
       { path: '/support/terms', element: <TermsAndPolicyRoute /> },
+      { path: '/contact', element: <Contact /> },
+      {
+        path: '/myhome/dashboard/:cityId',
+        element: <RoadmapDashboardRoute />,
+        handle: { headerVariant: 'overlay' },
+        children: [{ path: 'task-detail/:taskIndex', element: <TaskDetailRoute /> }],
+      },
     ],
   },
-  { path: '/myhome/dashboard/:cityId', element: <RoadmapDashboardRoute /> },
-  { path: '/myhome/task-detail', element: <TaskDetailRoute /> },
   { path: '/setting', element: <SettingsApp /> },
 ]);
