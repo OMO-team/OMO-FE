@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -11,6 +11,7 @@ import SearchModal from '../../features/search/components/SearchModal';
 import AIChatPanel from '../../features/chat/components/AIChatPanel';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import type { MainLayoutContext } from './useMainLayoutContext';
+import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
 type RouteHandle = { headerVariant?: 'default' | 'overlay' };
 
@@ -29,13 +30,17 @@ export default function MainLayout() {
     matches.map((m) => (m.handle as RouteHandle | undefined)?.headerVariant).filter(Boolean).at(-1) ?? 'default';
   const isOverlay = headerVariant === 'overlay';
 
-  const outletContext: MainLayoutContext = {
-    openChat: (initialMessage?: string) => {
-      setChatInitialMessage(initialMessage);
-      setIsChatOpen(true);
-    },
-    closeChat: () => setIsChatOpen(false),
-  };
+  const openChat = useCallback((initialMessage?: string) => {
+    setChatInitialMessage(initialMessage);
+    setIsChatOpen(true);
+  }, []);
+
+  const closeChat = useCallback(() => {
+    setIsChatOpen(false);
+    setChatInitialMessage(undefined);
+  }, []);
+
+  const outletContext: MainLayoutContext = useMemo(() => ({ openChat, closeChat }), [openChat, closeChat]);
 
   return (
     <div className="relative flex min-h-screen flex-col">
@@ -56,7 +61,7 @@ export default function MainLayout() {
           aria-label={isChatOpen ? 'AI 채팅 닫기' : 'AI 채팅 열기'}
           className="flex h-full items-center cursor-pointer outline-none border-0"
           style={{
-            width: '40px',
+            width: `${SIDEBAR_HANDLE_WIDTH}px`,
             paddingLeft: '10px',
             background: '#FFF',
             borderLeft: '1px solid #E7EAEF',
@@ -71,8 +76,8 @@ export default function MainLayout() {
         {isChatOpen && (
           <AIChatPanel
             initialMessage={chatInitialMessage}
-            onClose={() => { setIsChatOpen(false); setChatInitialMessage(undefined); }}
-            onNewChat={() => setIsChatOpen(false)}
+            onClose={closeChat}
+            onNewChat={closeChat}
           />
         )}
       </div>
