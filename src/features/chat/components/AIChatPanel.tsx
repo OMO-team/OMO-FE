@@ -29,7 +29,6 @@ const TIMEOUT_MS = 60000;
 type NoticeType = 'attachment' | 'briefing-error' | 'file-error' | 'timeout' | null;
 
 type AIChatPanelProps = {
-  hasChat?: boolean;
   onClose?: () => void;
   onNewChat?: () => void;
   defaultNotice?: NoticeType;
@@ -92,7 +91,7 @@ const NOTICE_CONFIGS: Record<NonNullable<NoticeType>, BarConfig> = {
   },
 };
 
-export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defaultNotice = null }: AIChatPanelProps) {
+export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null }: AIChatPanelProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isTitleHovered, setIsTitleHovered] = useState(false);
@@ -108,13 +107,15 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
   const [userMessage, setUserMessage] = useState<string>('');
   const [briefingData, setBriefingData] = useState<BriefingData | null>(null);
   const [thinkingTime, setThinkingTime] = useState<number>(0);
-  const [hasChatStarted, setHasChatStarted] = useState(hasChat);
+  const [hasChatStarted, setHasChatStarted] = useState(false);
 
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollStartTimeRef = useRef<number>(0);
 
   useEffect(() => {
     chatApi.getRecommendChips().then(setChips).catch(() => {});
+    return () => stopPolling();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const stopPolling = () => {
@@ -395,7 +396,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             </div>
 
             {/* More Menu(...) 버튼 — 채팅 시작 후에만 노출 */}
-            {hasChat && (
+            {hasChatStarted && (
               <div className="relative">
                 <button
                   type="button"

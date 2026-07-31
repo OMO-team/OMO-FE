@@ -47,7 +47,6 @@ export default function MainLayout() {
       {isChatOpen && (
         <div className="fixed inset-y-0 right-0 z-40">
           <AIChatPanel
-            hasChat={true}
             onClose={() => setIsChatOpen(false)}
             onNewChat={() => setIsChatOpen(false)}
           />
