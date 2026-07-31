@@ -1,12 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { instance } from '../../../lib/axios';
 import type { ApiResponse } from '../../../shared/types/api';
+import type { Purpose } from '../types/home';
 
-export interface Purpose {
-  purposeId: number;
-  type: 'WORKING_HOLIDAY' | 'EXCHANGE_STUDENT' | 'INTERNSHIP';
-  name: string;
-}
+export type { Purpose };
 
 export function usePurposes() {
   return useQuery({
