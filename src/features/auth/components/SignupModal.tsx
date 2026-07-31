@@ -55,6 +55,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(signupDraft?.isEmailVerified ?? false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState('');
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState((signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false);
@@ -123,6 +124,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       window.location.href = authorizationUrl;
     } catch {
       setIsGoogleLoading(false);
+      setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -375,6 +377,10 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                   </div>
                 </button>
               </div>
+
+              {googleError && (
+                <span className="body-02 text-[#FF2A14] self-start">{googleError}</span>
+              )}
 
               {/* 로그인 유도 */}
               <div className="flex items-center" style={{ gap: '8px' }}>
