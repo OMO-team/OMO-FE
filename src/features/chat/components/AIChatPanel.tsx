@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
@@ -15,6 +15,13 @@ import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
 import AIChatThread from './AIChatThread';
 import { chatApi } from '../api/chatApi';
 import type { BriefingData, ChipInfo } from '../types/dto';
+
+type ChatEntry = {
+  id: string;
+  userMessage: string;
+  thinkingTime: number;
+  briefingData: BriefingData | null;
+};
 
 const MOCK_IMAGES = [
   { id: '1', isDark: false },
@@ -105,47 +112,22 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
 
   const [chips, setChips] = useState<ChipInfo[]>([]);
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const [userMessage, setUserMessage] = useState<string>('');
-  const [briefingData, setBriefingData] = useState<BriefingData | null>(null);
-  const [thinkingTime, setThinkingTime] = useState<number>(0);
-  const [hasChatStarted, setHasChatStarted] = useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
 
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollStartTimeRef = useRef<number>(0);
+  const currentEntryIdRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    chatApi.getRecommendChips().then(setChips).catch(() => {});
-    return () => stopPolling();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const hasChatStarted = chatHistory.length > 0;
 
-  useEffect(() => {
-    const query = initialMessage?.trim();
-    if (!query) return;
-    setUserMessage(query);
-    setIsStreaming(true);
-    setHasChatStarted(true);
-    chatApi.startBriefing({ searchQuery: query, isRefine: false })
-      .then(({ sessionId: newSessionId, taskId }) => {
-        setSessionId(newSessionId);
-        startPolling(taskId);
-      })
-      .catch(() => {
-        setIsStreaming(false);
-        setNoticeType('briefing-error');
-      });
-  // 마운트 시 한 번만 실행
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const stopPolling = () => {
+  const stopPolling = useCallback(() => {
     if (pollTimerRef.current) {
       clearInterval(pollTimerRef.current);
       pollTimerRef.current = null;
     }
-  };
+  }, []);
 
-  const startPolling = (taskId: string) => {
+  const startPolling = useCallback((taskId: string) => {
     pollStartTimeRef.current = Date.now();
     pollTimerRef.current = setInterval(async () => {
       if (Date.now() - pollStartTimeRef.current > TIMEOUT_MS) {
@@ -160,8 +142,12 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
           stopPolling();
           setIsStreaming(false);
           if (result.briefingData) {
-            setBriefingData(result.briefingData);
-            setThinkingTime(result.briefingData.thinkingTime);
+            const entryId = currentEntryIdRef.current;
+            setChatHistory(prev => prev.map(e =>
+              e.id === entryId
+                ? { ...e, briefingData: result.briefingData, thinkingTime: result.briefingData!.thinkingTime }
+                : e
+            ));
           }
         } else if (result.status === 'FAILED') {
           stopPolling();
@@ -174,7 +160,40 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
         setNoticeType('briefing-error');
       }
     }, POLL_INTERVAL_MS);
-  };
+  }, [stopPolling]);
+
+  const submitQuery = useCallback(async (query: string, currentSessionId: number | null) => {
+    const entryId = Date.now().toString();
+    currentEntryIdRef.current = entryId;
+    setChatHistory(prev => [...prev, { id: entryId, userMessage: query, thinkingTime: 0, briefingData: null }]);
+    setIsStreaming(true);
+    setNoticeType(null);
+    try {
+      const { sessionId: newSessionId, taskId } = await chatApi.startBriefing({
+        searchQuery: query,
+        isRefine: currentSessionId !== null,
+        sessionId: currentSessionId ?? undefined,
+      });
+      setSessionId(newSessionId);
+      startPolling(taskId);
+    } catch {
+      setIsStreaming(false);
+      setNoticeType('briefing-error');
+    }
+  }, [startPolling]);
+
+  useEffect(() => {
+    chatApi.getRecommendChips().then(setChips).catch(() => {});
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  useEffect(() => {
+    const query = initialMessage?.trim();
+    if (!query) return;
+    submitQuery(query, null);
+  // 마운트 시 한 번만 실행
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasText = value.trim().length > 0;
   const hasImages = noticeType === 'attachment';
@@ -183,23 +202,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
     if (!hasText || isStreaming) return;
     const query = value.trim();
     setValue('');
-    setUserMessage(query);
-    setIsStreaming(true);
-    setBriefingData(null);
-    setNoticeType(null);
-    setHasChatStarted(true);
-    try {
-      const { sessionId: newSessionId, taskId } = await chatApi.startBriefing({
-        searchQuery: query,
-        isRefine: sessionId !== null,
-        sessionId: sessionId ?? undefined,
-      });
-      setSessionId(newSessionId);
-      startPolling(taskId);
-    } catch {
-      setIsStreaming(false);
-      setNoticeType('briefing-error');
-    }
+    await submitQuery(query, sessionId);
   };
 
   const handleStop = () => {
@@ -210,9 +213,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
   const handleNewChat = async () => {
     stopPolling();
     setIsStreaming(false);
-    setBriefingData(null);
-    setUserMessage('');
-    setHasChatStarted(false);
+    setChatHistory([]);
     setNoticeType(null);
     if (sessionId !== null) {
       chatApi.deleteSession(sessionId).catch(() => {});
@@ -479,25 +480,29 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
       {/* 콘텐츠 영역 */}
       <div className={`flex-1 overflow-y-auto flex flex-col ${hasChatStarted ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`} style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}>
         {hasChatStarted ? (
-          briefingData ? (
-            <AIChatThread
-              userMessage={userMessage}
-              thinkingTime={thinkingTime}
-              briefingData={briefingData}
-            />
-          ) : (
-            // 스트리밍(로딩) 중 표시
-            <div className="flex flex-col items-start" style={{ padding: '76px 50px 0 50px', alignSelf: 'stretch' }}>
-              <div className="flex flex-col items-end" style={{ padding: '40px 0 40px 160px', alignSelf: 'stretch' }}>
-                <div className="flex items-center justify-center rounded-3 bg-primary-50 px-4 py-2">
-                  <span className="body-04 text-primary-700">{userMessage}</span>
+          <div className="flex flex-col items-start w-full">
+            {chatHistory.map((entry) =>
+              entry.briefingData ? (
+                <AIChatThread
+                  key={entry.id}
+                  userMessage={entry.userMessage}
+                  thinkingTime={entry.thinkingTime}
+                  briefingData={entry.briefingData}
+                />
+              ) : (
+                <div key={entry.id} className="flex flex-col items-start" style={{ padding: '76px 50px 0 50px', alignSelf: 'stretch' }}>
+                  <div className="flex flex-col items-end" style={{ padding: '40px 0 40px 160px', alignSelf: 'stretch' }}>
+                    <div className="flex items-center justify-center rounded-3 bg-primary-50 px-4 py-2">
+                      <span className="body-04 text-primary-700">{entry.userMessage}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>
-              </div>
-            </div>
-          )
+              )
+            )}
+          </div>
         ) : (
           /* Frame 11205: Empty State */
           <div
