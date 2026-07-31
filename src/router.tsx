@@ -18,6 +18,7 @@ import TaskDetailRoute from './features/roadmap/pages/TaskDetailRoute';
 import EmailVerifyRoute from './features/auth/pages/EmailVerifyRoute';
 import PasswordResetVerifyRoute from './features/auth/pages/PasswordResetVerifyRoute';
 import OAuthCallbackRoute from './features/auth/pages/OAuthCallbackRoute';
+import GoogleLinkCallbackRoute from './features/auth/pages/GoogleLinkCallbackRoute';
 
 // shared
 import TermsAndPolicyRoute from './shared/pages/TermsAndPolicyRoute';
@@ -47,4 +48,5 @@ export const router = createBrowserRouter([
     ],
   },
   { path: '/setting', element: <SettingsApp /> },
+  { path: '/settings/account', element: <GoogleLinkCallbackRoute /> },
 ]);
