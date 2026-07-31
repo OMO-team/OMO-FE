@@ -16,19 +16,19 @@ export default function AIPromptSection({ onSubmit }: AIPromptSectionProps) {
   const [inputValue, setInputValue] = useState('');
 
   return (
-    <div className="flex flex-col items-start w-[1064px] gap-[48px]">
+    <div className="flex flex-col items-start w-[1064px] gap-[50px]">
 
       {/* Frame 48: 타이틀 영역 */}
-      <div className="flex flex-col items-start w-[563px] gap-4">
+      <div className="flex flex-col items-start w-[563px] gap-3">
         <div className="flex flex-col items-start gap-2">
           <div className="w-8 h-8">
             <img src={suitcaseIcon} alt="여행" />
           </div>
-          <h2 className="heading-01 text-gray-900">
+          <h2 className="heading-02 text-gray-900">
             어느 나라로 떠나고 싶으신가요?
           </h2>
         </div>
-        <p className="title-01 text-gray-600 self-stretch">
+        <p className="title-02 text-gray-600 self-stretch">
           원하는 조건이나 예산을 자유롭게 적으면, OMO AI가 딱 맞는 도시를 찾아드릴게요.
         </p>
       </div>
