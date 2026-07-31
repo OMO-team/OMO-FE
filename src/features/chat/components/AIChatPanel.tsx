@@ -274,9 +274,15 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
       onDrop={(e) => { e.preventDefault(); setIsDragOver(false); }}
     >
       {/* Sidebar_Collapse_Handle */}
-      <div className="absolute left-0 top-0 bottom-0 flex items-center" style={{ paddingLeft: '10px', pointerEvents: 'none' }}>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="사이드바 닫기"
+        className="absolute left-0 top-0 bottom-0 flex items-center bg-transparent border-none cursor-pointer"
+        style={{ paddingLeft: '10px' }}
+      >
         <div className="bg-gray-200 flex-shrink-0" style={{ width: '6px', height: '120px', borderRadius: '10px' }} />
-      </div>
+      </button>
 
       {/* Image Upload Dropzone 오버레이 */}
       {isDragOver && (

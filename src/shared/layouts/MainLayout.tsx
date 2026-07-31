@@ -48,15 +48,28 @@ export default function MainLayout() {
       </main>
       <Footer />
 
-      {isChatOpen && (
-        <div className="fixed inset-y-0 right-0 z-40">
+      <div className="fixed inset-y-0 right-0 z-40">
+        {isChatOpen ? (
           <AIChatPanel
             initialMessage={chatInitialMessage}
             onClose={() => { setIsChatOpen(false); setChatInitialMessage(undefined); }}
             onNewChat={() => setIsChatOpen(false)}
           />
-        </div>
-      )}
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsChatOpen(true)}
+            className="flex h-full items-center bg-transparent border-none cursor-pointer"
+            style={{ width: '40px', paddingLeft: '10px' }}
+            aria-label="AI 채팅 열기"
+          >
+            <div
+              className="flex flex-col items-start flex-shrink-0 bg-gray-200"
+              style={{ width: '6px', height: '120px', borderRadius: '10px' }}
+            />
+          </button>
+        )}
+      </div>
 
       {isSearchOpen && (
         <ModalOverlay onClose={closeSearch}>
