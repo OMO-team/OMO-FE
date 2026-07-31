@@ -125,7 +125,9 @@ export default function Contact() {
             {/* 헤더 */}
             <div className='mt-14 mb-14'>
                 <div className='flex gap-5 mb-4.5'>
-                    <img src={backArrow} alt="" onClick={()=>navigate('/setting')} />
+                    <button type="button" onClick={() => navigate('/setting')} aria-label="설정으로 돌아가기">
+                        <img src={backArrow} alt="" />
+                    </button>
                     <h1 className='heading-05'>1:1 문의하기</h1>
                 </div>
                 <p className='body-03 text-gray-600'>서비스 이용 중 궁금한 점이나 도움이 필요한 내용을 남겨주세요. 확인 후 빠르게 답변을 드리겠습니다.</p>
