@@ -23,12 +23,13 @@ export default function Contact() {
     const [content, setContent] = useState('')
     const [contactType, setContactType] = useState<ContactType | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [preview, setPreview] = useState<string[]>([])
     const [files, setFiles] = useState<(File | null)[]>([null, null, null])
 
     const { mutateAsync: getUploadUrls } = useGetUploadUrls()
     const { mutateAsync: uploadFileToS3 } = useUploadFileToS3()
-    const { mutateAsync: postInquiry, isPending } = usePostInquiry()
+    const { mutateAsync: postInquiry } = usePostInquiry()
 
     const handeFileChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const file = e.target.files?.[0]
@@ -64,41 +65,48 @@ export default function Contact() {
     const isValid = contactType !== null && name.trim() !== '' && email.trim() !== '' && content.length >= 10 && content.length <= 1000
 
     const handleSubmit = async () => {
-        // 파일 필터링
-        const validFiles = files.filter((f): f is File => f !== null)
+        setIsSubmitting(true)
+        try {
+            const validFiles = files.filter((f): f is File => f !== null)
 
-        let uploadToken = ''
-        let attachmentKeys: string[] = []
+            let uploadToken = ''
+            let attachmentKeys: string[] = []
 
-        if (validFiles.length > 0) {
-            const { data } = await getUploadUrls({
-                files: validFiles.map(f => ({
-                    fileName: f.name,
-                    contentType: f.type,
-                    fileSize: f.size,
-                })),
+            if (validFiles.length > 0) {
+                const { data } = await getUploadUrls({
+                    files: validFiles.map(f => ({
+                        fileName: f.name,
+                        contentType: f.type,
+                        fileSize: f.size,
+                    })),
+                })
+
+                uploadToken = data.result.uploadToken
+                attachmentKeys = data.result.uploads.map(u => u.objectKey)
+
+                await Promise.all(
+                    data.result.uploads.map((upload, i) =>
+                        uploadFileToS3({ uploadUrl: upload.uploadUrl, file: validFiles[i] })
+                    )
+                )
+            }
+
+            await postInquiry({
+                type: CONTACT_TYPE_MAP[contactType!],
+                name,
+                email,
+                content,
+                uploadToken,
+                attachmentKeys,
             })
 
-            uploadToken = data.result.uploadToken
-            attachmentKeys = data.result.uploads.map(u => u.objectKey)
-
-            await Promise.all(
-                data.result.uploads.map((upload, i) =>
-                    uploadFileToS3({ uploadUrl: upload.uploadUrl, file: validFiles[i] })
-                )
-            )
+            setIsModalOpen(true)
+        } catch (error) {
+            console.error('문의 제출 중 오류가 발생했습니다.', error)
+            alert('문의 제출 중 오류가 발생했습니다. 다시 시도해 주세요.')
+        } finally {
+            setIsSubmitting(false)
         }
-
-        await postInquiry({
-            type: CONTACT_TYPE_MAP[contactType!],
-            name,
-            email,
-            content,
-            uploadToken,
-            attachmentKeys,
-        })
-
-        setIsModalOpen(true)
     }
 
     const handleModalClose = () => {
@@ -225,7 +233,7 @@ export default function Contact() {
 
                 {/* 문의하기 버튼 */}
                 <div className='w-full flex justify-end mb-[300px]'>
-                    <button disabled={!isValid || isPending} onClick={handleSubmit} className='mt-20 w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02 disabled:bg-gray-400'>{isPending ? '제출 중...' : '문의하기'}</button>
+                    <button disabled={!isValid || isSubmitting} onClick={handleSubmit} className='mt-20 w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02 disabled:bg-gray-400'>{isSubmitting ? '제출 중...' : '문의하기'}</button>
                 </div>
             </div>
         </div>
