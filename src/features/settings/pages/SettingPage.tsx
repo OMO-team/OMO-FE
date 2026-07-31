@@ -209,6 +209,7 @@ export default function SettingsPage({
             if (avatarFile) setAvatarUrl(URL.createObjectURL(avatarFile));
           }}
           onConnectGoogle={handleConnectGoogle}
+          isGoogleConnecting={isGoogleLinking}
         />
       )}
 
