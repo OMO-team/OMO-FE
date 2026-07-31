@@ -1,5 +1,6 @@
 // react
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 // shared components
 import CategoryTab from '../../../shared/components/CategoryTab';
@@ -17,6 +18,9 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
+
+// hooks
+import { usePurposes } from '../../home/hooks/usePurposes';
 
 // stores
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
@@ -48,6 +52,19 @@ const CITY_COMPARE_ID: Record<string, string> = {
 };
 
 export default function CityInsight() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { data: purposes = [] } = usePurposes();
+
+  const purposeIdParam = Number(searchParams.get('purposeId'));
+  const activeIndex = Math.max(0, purposes.findIndex(p => p.purposeId === purposeIdParam));
+  const categoryNames = purposes.map(p => p.name);
+
+  const handleCategoryChange = (index: number) => {
+    const selected = purposes[index];
+    if (!selected) return;
+    setSearchParams({ purposeId: String(selected.purposeId) });
+  };
+
   const [input, setInput] = useState('')
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -121,9 +138,9 @@ export default function CityInsight() {
         </div>
         <div className="flex flex-col gap-4">
           <CategoryTab
-            categories={['워킹홀리데이', '교환학생', '인턴십']}
-            activeIndex={0}
-            onChange={() => {}}
+            categories={categoryNames}
+            activeIndex={activeIndex}
+            onChange={handleCategoryChange}
           />
           <SearchInputBar
             placeholder="원하는 도시 조건을 입력해 보세요"
