@@ -3,19 +3,15 @@ import { unwrap } from './apiUtils';
 import type {
   ApiResponse,
   CompleteTaskResult,
-  RoadmapTaskItem,
+  TaskDetailResult,
   UpdateRoadmapScheduleResult,
   UpdateTaskScheduleRequest,
 } from '../types/api';
 
 export const tasksApi = {
-  /**
-   * 스웨거 스펙 상 응답 스키마가 로드맵 상세 조회와 같은 이름(DetailResultDTO)으로 잡혀있어
-   * 문서 생성 시 이름이 충돌했을 가능성이 있음 — 실제 응답은 RoadmapTaskItem에 가까울 것으로
-   * 추정하고 우선 이렇게 타입을 잡음. 실 연동 테스트 시 응답 확인 후 수정 필요.
-   */
-  get: async (taskId: number): Promise<RoadmapTaskItem> => {
-    const { data } = await instance.get<ApiResponse<RoadmapTaskItem>>(`/api/v1/tasks/${taskId}`);
+  /** 태스크 이름/카테고리/일정/상태와 필요한 서류 목록(documents)까지 포함된 상세 */
+  get: async (taskId: number): Promise<TaskDetailResult> => {
+    const { data } = await instance.get<ApiResponse<TaskDetailResult>>(`/api/v1/tasks/${taskId}`);
     return unwrap(data);
   },
 

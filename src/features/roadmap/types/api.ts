@@ -76,6 +76,32 @@ export interface RoadmapTaskItem {
   isCompleted: boolean;
 }
 
+export interface DocumentItem {
+  taskDocumentId: number;
+  documentName: string;
+  description: string;
+  ocrSupport: boolean;
+  checked: boolean;
+}
+
+export interface TaskDetailResult {
+  taskId: number;
+  roadmapId: number;
+  name: string;
+  description: string;
+  category: TaskCategory;
+  displayOrder: number;
+  status: TaskStatus;
+  isCompleted: boolean;
+  dueDate: string | null;
+  scheduleDDay: number | null;
+  isOverdue: boolean;
+  completedAt: string | null;
+  completedDocumentCount: number;
+  totalDocumentCount: number;
+  documents: DocumentItem[];
+}
+
 /** 로드맵 목록 항목 + 예산/태스크 목록 (로드맵 상세 조회 응답) */
 export interface RoadmapDetail extends RoadmapListItem {
   budget: RoadmapBudget | null;
