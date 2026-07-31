@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import thinkingIcon from '../../../assets/icons/icon-thinking.svg';
 import checkConditionIcon from '../../../assets/icons/icon-check-condition.svg';
@@ -27,7 +27,6 @@ const divider = (
 );
 
 function ResourceCard({ resource }: { resource: ResourceDTO }) {
-  const [hovered, setHovered] = useState(false);
   const tag = RESOURCE_TYPE_LABEL[resource.resourceType] ?? {
     label: resource.resourceType,
     bgClass: 'bg-gray-100',
@@ -39,9 +38,7 @@ function ResourceCard({ resource }: { resource: ResourceDTO }) {
       href={resource.url}
       target="_blank"
       rel="noopener noreferrer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={`flex flex-col items-start gap-1 rounded-2 border border-gray-100 transition-colors ${hovered ? 'bg-gray-50' : 'bg-white'}`}
+      className="flex flex-col items-start gap-1 rounded-2 border border-gray-100 bg-white transition-colors hover:bg-gray-50"
       style={{ padding: '8px 16px', alignSelf: 'stretch' }}
     >
       <div className="flex items-center justify-center gap-2" style={{ height: '26px', alignSelf: 'stretch' }}>
@@ -107,15 +104,10 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
                   {/* 요약 텍스트 */}
                   <div className="flex flex-col items-start gap-3" style={{ alignSelf: 'stretch' }}>
                     {paragraphs.map((text, i) => (
-                      <>
-                        <p
-                          key={text}
-                          className="body-03 text-gray-900 self-stretch"
-                        >
-                          {text}
-                        </p>
+                      <Fragment key={`${i}-${text}`}>
+                        <p className="body-03 text-gray-900 self-stretch">{text}</p>
                         {i < paragraphs.length - 1 && divider}
-                      </>
+                      </Fragment>
                     ))}
                   </div>
 
@@ -144,7 +136,7 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
                 {firstCity && (
                   <button
                     type="button"
-                    onClick={() => navigate(`/city-insight`)}
+                    onClick={() => navigate(`/city-insight?cityId=${firstCity.cityId}`)}
                     className="flex items-start gap-1"
                     style={{ alignSelf: 'stretch' }}
                   >

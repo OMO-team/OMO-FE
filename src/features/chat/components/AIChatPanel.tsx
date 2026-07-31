@@ -21,6 +21,7 @@ type ChatEntry = {
   userMessage: string;
   thinkingTime: number;
   briefingData: BriefingData | null;
+  status: 'loading' | 'completed' | 'empty' | 'cancelled';
 };
 
 const MOCK_IMAGES = [
@@ -114,7 +115,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
 
-  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollStartTimeRef = useRef<number>(0);
   const currentEntryIdRef = useRef<string | null>(null);
   const initialSubmittedRef = useRef(false);
@@ -123,50 +124,66 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
 
   const stopPolling = useCallback(() => {
     if (pollTimerRef.current) {
-      clearInterval(pollTimerRef.current);
+      clearTimeout(pollTimerRef.current);
       pollTimerRef.current = null;
     }
   }, []);
 
   const startPolling = useCallback((taskId: string) => {
     pollStartTimeRef.current = Date.now();
-    pollTimerRef.current = setInterval(async () => {
+
+    const poll = async () => {
+      if (!pollTimerRef.current) return;
+
       if (Date.now() - pollStartTimeRef.current > TIMEOUT_MS) {
         stopPolling();
         setIsStreaming(false);
         setNoticeType('timeout');
         return;
       }
+
       try {
         const result = await chatApi.getBriefingStatus(taskId);
+
+        if (!pollTimerRef.current) return; // await 후 stale 체크
+
         if (result.status === 'COMPLETED') {
           stopPolling();
           setIsStreaming(false);
+          const entryId = currentEntryIdRef.current;
           if (result.briefingData) {
-            const entryId = currentEntryIdRef.current;
             setChatHistory(prev => prev.map(e =>
               e.id === entryId
-                ? { ...e, briefingData: result.briefingData, thinkingTime: result.briefingData!.thinkingTime }
+                ? { ...e, briefingData: result.briefingData, thinkingTime: result.briefingData!.thinkingTime, status: 'completed' }
                 : e
+            ));
+          } else {
+            setChatHistory(prev => prev.map(e =>
+              e.id === entryId ? { ...e, status: 'empty' } : e
             ));
           }
         } else if (result.status === 'FAILED') {
           stopPolling();
           setIsStreaming(false);
           setNoticeType('briefing-error');
+        } else {
+          pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
         }
       } catch {
+        if (!pollTimerRef.current) return;
         stopPolling();
         setIsStreaming(false);
         setNoticeType('briefing-error');
       }
-    }, POLL_INTERVAL_MS);
+    };
+
+    pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
   }, [stopPolling]);
 
   const submitQuery = useCallback(async (query: string, currentSessionId: number | null) => {
     const entryId = Date.now().toString();
     currentEntryIdRef.current = entryId;
-    setChatHistory(prev => [...prev, { id: entryId, userMessage: query, thinkingTime: 0, briefingData: null }]);
+    setChatHistory(prev => [...prev, { id: entryId, userMessage: query, thinkingTime: 0, briefingData: null, status: 'loading' }]);
     setIsStreaming(true);
     setNoticeType(null);
     try {
@@ -210,6 +227,12 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
   const handleStop = () => {
     stopPolling();
     setIsStreaming(false);
+    const entryId = currentEntryIdRef.current;
+    if (entryId) {
+      setChatHistory(prev => prev.map(e =>
+        e.id === entryId && e.status === 'loading' ? { ...e, status: 'cancelled' } : e
+      ));
+    }
   };
 
   const handleNewChat = async () => {
@@ -479,7 +502,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
         {hasChatStarted ? (
           <div className="flex flex-col items-start w-full pb-[200px]">
             {chatHistory.map((entry) =>
-              entry.briefingData ? (
+              entry.status === 'completed' && entry.briefingData ? (
                 <AIChatThread
                   key={entry.id}
                   userMessage={entry.userMessage}
@@ -494,7 +517,9 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>
+                    {entry.status === 'loading' && <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>}
+                    {entry.status === 'empty' && <span className="body-04 text-gray-400">조건에 맞는 결과를 찾지 못했어요.</span>}
+                    {entry.status === 'cancelled' && <span className="body-04 text-gray-400">응답이 중단되었어요.</span>}
                   </div>
                 </div>
               )
@@ -621,7 +646,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
                   }
                 }}
                 placeholder="원하는 나라 조건을 자유롭게 입력해보세요. 예: 유럽에서 생활비가 저렴한 도시 추천해줘"
-                className="body-03 text-gray-900 placeholder:text-gray-400 bg-transparent border-none outline-none resize-none"
+                className="body-03 text-gray-900 placeholder:text-gray-400 bg-transparent border-none outline-hidden resize-none"
                 style={{
                   height: '48px',
                   alignSelf: 'stretch',
