@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
@@ -13,12 +13,8 @@ import alertRedIcon from '../../../assets/icons/icon-alert-red.svg';
 import fileErrorIcon from '../../../assets/icons/icon-file-error.svg';
 import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
 import AIChatThread from './AIChatThread';
-
-const MOCK_HISTORY = [
-  { id: 1, title: '독일 어학연수' },
-  { id: 2, title: '독일 교환학생 비용' },
-  { id: 3, title: '독일 숙소비' },
-];
+import { chatApi } from '../api/chatApi';
+import type { BriefingData, ChipInfo } from '../types/dto';
 
 const MOCK_IMAGES = [
   { id: '1', isDark: false },
@@ -26,6 +22,9 @@ const MOCK_IMAGES = [
   { id: '3', isDark: false },
   { id: '4', isDark: true },
 ];
+
+const POLL_INTERVAL_MS = 2000;
+const TIMEOUT_MS = 60000;
 
 type NoticeType = 'attachment' | 'briefing-error' | 'file-error' | 'timeout' | null;
 
@@ -104,17 +103,101 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
   const [isDragOver, setIsDragOver] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
 
+  const [chips, setChips] = useState<ChipInfo[]>([]);
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [userMessage, setUserMessage] = useState<string>('');
+  const [briefingData, setBriefingData] = useState<BriefingData | null>(null);
+  const [thinkingTime, setThinkingTime] = useState<number>(0);
+  const [hasChatStarted, setHasChatStarted] = useState(hasChat);
+
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollStartTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    chatApi.getRecommendChips().then(setChips).catch(() => {});
+  }, []);
+
+  const stopPolling = () => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  };
+
+  const startPolling = (taskId: string) => {
+    pollStartTimeRef.current = Date.now();
+    pollTimerRef.current = setInterval(async () => {
+      if (Date.now() - pollStartTimeRef.current > TIMEOUT_MS) {
+        stopPolling();
+        setIsStreaming(false);
+        setNoticeType('timeout');
+        return;
+      }
+      try {
+        const result = await chatApi.getBriefingStatus(taskId);
+        if (result.status === 'COMPLETED') {
+          stopPolling();
+          setIsStreaming(false);
+          if (result.briefingData) {
+            setBriefingData(result.briefingData);
+            setThinkingTime(result.briefingData.thinkingTime);
+          }
+        } else if (result.status === 'FAILED') {
+          stopPolling();
+          setIsStreaming(false);
+          setNoticeType('briefing-error');
+        }
+      } catch {
+        stopPolling();
+        setIsStreaming(false);
+        setNoticeType('briefing-error');
+      }
+    }, POLL_INTERVAL_MS);
+  };
+
   const hasText = value.trim().length > 0;
   const hasImages = noticeType === 'attachment';
 
-  const handleSubmit = () => {
-    if (!hasText) return;
+  const handleSubmit = async () => {
+    if (!hasText || isStreaming) return;
+    const query = value.trim();
     setValue('');
+    setUserMessage(query);
     setIsStreaming(true);
+    setBriefingData(null);
+    setNoticeType(null);
+    setHasChatStarted(true);
+    try {
+      const { sessionId: newSessionId, taskId } = await chatApi.startBriefing({
+        searchQuery: query,
+        isRefine: sessionId !== null,
+        sessionId: sessionId ?? undefined,
+      });
+      setSessionId(newSessionId);
+      startPolling(taskId);
+    } catch {
+      setIsStreaming(false);
+      setNoticeType('briefing-error');
+    }
   };
 
   const handleStop = () => {
+    stopPolling();
     setIsStreaming(false);
+  };
+
+  const handleNewChat = async () => {
+    stopPolling();
+    setIsStreaming(false);
+    setBriefingData(null);
+    setUserMessage('');
+    setHasChatStarted(false);
+    setNoticeType(null);
+    if (sessionId !== null) {
+      chatApi.deleteSession(sessionId).catch(() => {});
+      setSessionId(null);
+    }
+    onNewChat?.();
   };
 
   const handleClipClick = () => {
@@ -260,7 +343,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                   <span className="body-05 text-gray-600">지난 30일</span>
                 </div>
                 <div className="flex flex-col items-start" style={{ alignSelf: 'stretch' }}>
-                  {MOCK_HISTORY.map((item) => (
+                  {/* 세션 히스토리 API 미구현 — 추후 연동 */}
+                  {[].map((item: { id: number; title: string }) => (
                     <button
                       key={item.id}
                       type="button"
@@ -291,7 +375,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             <div className="relative">
               <button
                 type="button"
-                onClick={onNewChat}
+                onClick={handleNewChat}
                 onMouseEnter={() => setIsNewChatHovered(true)}
                 onMouseLeave={() => setIsNewChatHovered(false)}
                 className="size-icon-md flex items-center justify-center bg-transparent border-none cursor-pointer p-0"
@@ -372,9 +456,27 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
       </div>
 
       {/* 콘텐츠 영역 */}
-      <div className={`flex-1 overflow-y-auto flex flex-col ${hasChat ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`} style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}>
-        {hasChat ? (
-          <AIChatThread />
+      <div className={`flex-1 overflow-y-auto flex flex-col ${hasChatStarted ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`} style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}>
+        {hasChatStarted ? (
+          briefingData ? (
+            <AIChatThread
+              userMessage={userMessage}
+              thinkingTime={thinkingTime}
+              briefingData={briefingData}
+            />
+          ) : (
+            // 스트리밍(로딩) 중 표시
+            <div className="flex flex-col items-start" style={{ padding: '76px 50px 0 50px', alignSelf: 'stretch' }}>
+              <div className="flex flex-col items-end" style={{ padding: '40px 0 40px 160px', alignSelf: 'stretch' }}>
+                <div className="flex items-center justify-center rounded-3 bg-primary-50 px-4 py-2">
+                  <span className="body-04 text-primary-700">{userMessage}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>
+              </div>
+            </div>
+          )
         ) : (
           /* Frame 11205: Empty State */
           <div
@@ -392,35 +494,33 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
               </div>
             </div>
 
-            {/* Frame 11204: S_suggestion_chip 목록 */}
-            <div className="flex flex-col items-start gap-2 self-stretch">
-              {[
-                '치안이 좋고 영어로 생활 가능한 200만원 이하 도시',
-                '유럽에서 생활비가 저렴하고 대중교통 좋은 곳',
-                '아시아 워킹홀리데이 추천, 한 달 150만원 예산',
-              ].map((text) => (
-                <button
-                  key={text}
-                  type="button"
-                  onClick={() => setValue(text)}
-                  className="flex items-center gap-1 bg-gray-20 hover:bg-gray-50 transition-colors"
-                  style={{ height: '38px', padding: '8px 20px', borderRadius: '10px' }}
-                >
-                  <span
-                    className="body-04 text-gray-700"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitBoxOrient: 'vertical',
-                      WebkitLineClamp: 1,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
+            {/* 추천 프롬프트 칩 목록 */}
+            {chips.length > 0 && (
+              <div className="flex flex-col items-start gap-2 self-stretch">
+                {chips.map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setValue(chip.title)}
+                    className="flex items-center gap-1 bg-gray-20 hover:bg-gray-50 transition-colors"
+                    style={{ height: '38px', padding: '8px 20px', borderRadius: '10px' }}
                   >
-                    {text}
-                  </span>
-                </button>
-              ))}
-            </div>
+                    <span
+                      className="body-04 text-gray-700"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 1,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {chip.title}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
