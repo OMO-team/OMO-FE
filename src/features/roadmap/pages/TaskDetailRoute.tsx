@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import DocumentTaskDetailModal from '../components/DocumentTaskDetailModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
-import { berlinRoadmapTasks } from '../mocks/mockData';
+import { roadmapDetailByCityId } from '../mocks/mockData';
 import type { TaskDetailContext } from './RoadmapDetail';
 
 const apostilleInfoBanner =
@@ -9,13 +9,14 @@ const apostilleInfoBanner =
 
 export default function TaskDetailRoute() {
   const navigate = useNavigate();
-  const { taskIndex } = useParams<{ taskIndex: string }>();
+  const { cityId, taskIndex } = useParams<{ cityId: string; taskIndex: string }>();
   const { documents, onCheck, onOpenUpload, onDateClick } = useOutletContext<TaskDetailContext>();
 
-  const task = berlinRoadmapTasks[Number(taskIndex)];
+  const tasks = cityId ? roadmapDetailByCityId[cityId]?.tasks : undefined;
+  const task = tasks?.[Number(taskIndex)];
   if (!task) return null;
 
-  const closeTaskDetail = () => navigate('..');
+  const closeTaskDetail = () => navigate('..', { preventScrollReset: true });
 
   return (
     <ModalOverlay onClose={closeTaskDetail}>

@@ -50,6 +50,21 @@ export const berlinAiReport: AiReportData = {
   summary: '다양한 문화와 학생 친화적인 환경이 어우러진 열린 배움의 도시',
 };
 
+export type RoadmapDetailData = {
+  tasks: RoadmapTaskData[];
+  budgetPlan: BudgetPlanData;
+  aiReport: AiReportData;
+};
+
+/** 도시별 로드맵 상세(타임라인/예산/AI리포트) 데이터 — 현재는 베를린만 준비되어 있음 */
+export const roadmapDetailByCityId: Record<string, RoadmapDetailData> = {
+  berlin: {
+    tasks: berlinRoadmapTasks,
+    budgetPlan: berlinBudgetPlan,
+    aiReport: berlinAiReport,
+  },
+};
+
 export const apostilleRequiredDocuments: RequiredDocumentData[] = [
   {
     taskDocumentId: 53,

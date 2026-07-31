@@ -7,13 +7,10 @@ import BudgetPlanCard from '../components/BudgetPlanCard';
 import AiReportCard from '../components/AiReportCard';
 import DatePickerModal from '../components/DatePickerModal';
 import DocumentUploadModal from '../components/DocumentUploadModal';
+import RoadmapAlertCard from '../components/RoadmapAlertCard';
+import BagIcon from '../components/icons/BagIcon';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
-import {
-  berlinRoadmapTasks,
-  berlinBudgetPlan,
-  berlinAiReport,
-  apostilleRequiredDocuments,
-} from '../mocks/mockData';
+import { roadmapDetailByCityId, apostilleRequiredDocuments } from '../mocks/mockData';
 import { useRoadmapStore } from '../store/useRoadmapStore';
 import type { UploadedFileItem, RequiredDocumentData } from '../types/roadmap';
 
@@ -32,7 +29,7 @@ function parseDepartureDate(value: string | null) {
 }
 
 type RoadmapDetailProps = {
-  /** URL의 :cityId로부터 전달 — 로드맵 목록에 없으면 첫 번째 도시로 대체 */
+  /** URL의 :cityId로부터 전달 — 로드맵 목록에 없는 값이면 "찾을 수 없음" 상태를 보여줌 */
   cityId?: string;
   onBack?: () => void;
 };
@@ -41,11 +38,12 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
   const navigate = useNavigate();
   const countryGroups = useRoadmapStore((s) => s.countryGroups);
   const allCities = countryGroups.flatMap((group) => group.cities);
-  const city = allCities.find((c) => c.cityId === cityId) ?? allCities[0];
+  const city = allCities.find((c) => c.cityId === cityId);
+  const roadmapDetail = city ? roadmapDetailByCityId[city.cityId] : undefined;
 
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(4);
-  const [months, setMonths] = useState(berlinBudgetPlan.months);
+  const [months, setMonths] = useState(roadmapDetail?.budgetPlan.months ?? 12);
   const [departureDate, setDepartureDate] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<string | null>(null);
   const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | 'task' | null>(null);
@@ -55,6 +53,20 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
   const [documents, setDocuments] = useState(apostilleRequiredDocuments);
   const [uploadTargetDocumentId, setUploadTargetDocumentId] = useState<number | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+
+  if (!city) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gray-20 px-4">
+        <RoadmapAlertCard
+          icon={<BagIcon className="size-full" />}
+          title="도시를 찾을 수 없습니다"
+          description="요청하신 도시의 로드맵 정보가 존재하지 않습니다"
+          actionLabel={onBack ? '목록으로 돌아가기' : undefined}
+          onAction={onBack}
+        />
+      </div>
+    );
+  }
 
   const handleCheckDocument = (taskDocumentId: number) => {
     setDocuments((prev) => prev.map((d) => (d.taskDocumentId === taskDocumentId ? { ...d, isChecked: true } : d)));
@@ -113,6 +125,34 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
     },
   };
 
+  if (!roadmapDetail) {
+    return (
+      <div className="flex min-h-screen flex-col bg-gray-20">
+        <div className="relative">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="body-02 absolute left-6 top-24 z-10 rounded-2 bg-black/30 px-4 py-2 text-white"
+            >
+              〈 목록으로
+            </button>
+          )}
+          <CityHeroBanner cityName={city.cityName} progressPercent={city.progressPercent} imageUrl={city.imageUrl} />
+        </div>
+        <div className="mx-auto flex w-full max-w-content flex-1 items-center justify-center px-4 py-20">
+          <RoadmapAlertCard
+            icon={<BagIcon className="size-full" />}
+            title="아직 준비된 로드맵 데이터가 없습니다"
+            description={`${city.cityName}의 로드맵 정보를 준비 중이에요`}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const { tasks, budgetPlan, aiReport } = roadmapDetail;
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
       <div className="relative">
@@ -151,8 +191,8 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
             }}
           />
           <RoadmapTimeline
-            tasks={berlinRoadmapTasks}
-            onTaskClick={(index) => navigate(`task-detail/${index}`)}
+            tasks={tasks}
+            onTaskClick={(index) => navigate(`task-detail/${index}`, { preventScrollReset: true })}
           />
 
           {datePickerTarget === 'start' && (
@@ -226,16 +266,16 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
           <BudgetPlanCard
             months={months}
             onMonthsChange={setMonths}
-            initialSettlementCost={berlinBudgetPlan.initialSettlementCost}
-            monthlyLivingCost={berlinBudgetPlan.monthlyLivingCost}
-            stayMonths={berlinBudgetPlan.stayMonths}
-            livingCostSubtotal={berlinBudgetPlan.livingCostSubtotal}
-            totalBudget={berlinBudgetPlan.totalBudget}
+            initialSettlementCost={budgetPlan.initialSettlementCost}
+            monthlyLivingCost={budgetPlan.monthlyLivingCost}
+            stayMonths={budgetPlan.stayMonths}
+            livingCostSubtotal={budgetPlan.livingCostSubtotal}
+            totalBudget={budgetPlan.totalBudget}
           />
           <AiReportCard
-            score={berlinAiReport.score}
-            cityName={berlinAiReport.cityName}
-            summary={berlinAiReport.summary}
+            score={aiReport.score}
+            cityName={aiReport.cityName}
+            summary={aiReport.summary}
           />
         </div>
       </div>
