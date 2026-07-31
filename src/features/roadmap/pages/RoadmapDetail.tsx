@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
@@ -6,61 +6,75 @@ import RoadmapTimeline from '../components/RoadmapTimeline';
 import BudgetPlanCard from '../components/BudgetPlanCard';
 import AiReportCard from '../components/AiReportCard';
 import DatePickerModal from '../components/DatePickerModal';
-import DocumentUploadModal from '../components/DocumentUploadModal';
 import RoadmapAlertCard from '../components/RoadmapAlertCard';
+import RoadmapDetailSkeleton from './RoadmapDetailSkeleton';
 import BagIcon from '../components/icons/BagIcon';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
-import { roadmapDetailByCityId, apostilleRequiredDocuments } from '../mocks/mockData';
-import { useRoadmapStore } from '../store/useRoadmapStore';
-import type { UploadedFileItem, RequiredDocumentData } from '../types/roadmap';
+import CityReportModal from '../../city-ai-report/components/CityReportModal';
+import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
+import { roadmapsApi } from '../api/roadmapsApi';
+import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
+import { buildCityReportData } from '../utils/buildCityReportData';
+import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
+import type { CityInsightData } from '../types/cityInsight';
 
 /** task-detail 자식 라우트(TaskDetailRoute)에 useOutletContext로 전달되는 값 */
 export type TaskDetailContext = {
-  documents: RequiredDocumentData[];
-  onCheck: (taskDocumentId: number) => void;
-  onOpenUpload: (taskDocumentId: number) => void;
   onDateClick: () => void;
 };
 
-function parseDepartureDate(value: string | null) {
-  const match = value?.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
-  if (!match) return null;
-  return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
+function parseDotDate(value?: string) {
+  if (!value) return null;
+  const [year, month, day] = value.split('.').map(Number);
+  if (!year || !month || !day) return null;
+  return { year, month, day };
 }
 
 type RoadmapDetailProps = {
-  /** URL의 :cityId로부터 전달 — 로드맵 목록에 없는 값이면 "찾을 수 없음" 상태를 보여줌 */
-  cityId?: string;
+  /** URL의 :roadmapId로부터 전달 — 존재하지 않는 값이면 "찾을 수 없음" 상태를 보여줌 */
+  roadmapId: number;
   onBack?: () => void;
 };
 
-export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
+export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps) {
   const navigate = useNavigate();
-  const countryGroups = useRoadmapStore((s) => s.countryGroups);
-  const allCities = countryGroups.flatMap((group) => group.cities);
-  const city = allCities.find((c) => c.cityId === cityId);
-  const roadmapDetail = city ? roadmapDetailByCityId[city.cityId] : undefined;
-
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(4);
-  const [months, setMonths] = useState(roadmapDetail?.budgetPlan.months ?? 12);
-  const [departureDate, setDepartureDate] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState<string | null>(null);
+  const [detail, setDetail] = useState<RoadmapDetailResult | null | undefined>(undefined);
+  const [months, setMonths] = useState(1);
+  /** 준비 시작일은 아직 백엔드 스펙에 없는 필드라 화면에서만 임시로 관리 (서버 미반영) */
+  const [startDate, setStartDate] = useState<string | undefined>(undefined);
   const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | 'task' | null>(null);
   const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
-  const [datePickerViewYear, setDatePickerViewYear] = useState(2026);
-  const [datePickerViewMonth, setDatePickerViewMonth] = useState(4);
-  const [documents, setDocuments] = useState(apostilleRequiredDocuments);
-  const [uploadTargetDocumentId, setUploadTargetDocumentId] = useState<number | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+  const [datePickerViewYear, setDatePickerViewYear] = useState(new Date().getFullYear());
+  const [datePickerViewMonth, setDatePickerViewMonth] = useState(new Date().getMonth() + 1);
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
-  if (!city) {
+  const isValidRoadmapId = Number.isFinite(roadmapId);
+
+  useEffect(() => {
+    if (!isValidRoadmapId) return;
+    roadmapsApi
+      .get(roadmapId)
+      .then((result) => {
+        setDetail(result);
+        if (result) setMonths(result.stayMonths ?? 1);
+      })
+      .catch((error) => {
+        console.error('로드맵 상세 조회 실패', error);
+        setDetail(null);
+      });
+  }, [roadmapId, isValidRoadmapId]);
+
+  if (isValidRoadmapId && detail === undefined) {
+    return <RoadmapDetailSkeleton />;
+  }
+
+  if (!isValidRoadmapId || !detail) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gray-20 px-4">
         <RoadmapAlertCard
           icon={<BagIcon className="size-full" />}
-          title="도시를 찾을 수 없습니다"
-          description="요청하신 도시의 로드맵 정보가 존재하지 않습니다"
+          title="로드맵을 찾을 수 없습니다"
+          description="요청하신 로드맵 정보가 존재하지 않습니다"
           actionLabel={onBack ? '목록으로 돌아가기' : undefined}
           onAction={onBack}
         />
@@ -68,90 +82,68 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
     );
   }
 
-  const handleCheckDocument = (taskDocumentId: number) => {
-    setDocuments((prev) => prev.map((d) => (d.taskDocumentId === taskDocumentId ? { ...d, isChecked: true } : d)));
+  const refreshDetail = async () => {
+    const refreshed = await roadmapsApi.get(roadmapId);
+    setDetail(refreshed);
+    if (refreshed) setMonths(refreshed.stayMonths ?? 1);
   };
 
-  const handleSelectFiles = (fileList: FileList) => {
-    const newItems: UploadedFileItem[] = Array.from(fileList).map((file) => ({
-      name: file.name,
-      uploadedSizeMB: 0,
-      totalSizeMB: Math.max(1, Math.round(file.size / 1024 / 1024)),
-      status: 'uploading',
-    }));
-    setUploadedFiles((prev) => [...prev, ...newItems]);
-    newItems.forEach((item) => {
-      setTimeout(() => {
-        setUploadedFiles((prev) =>
-          prev.map((f) => (f.name === item.name ? { ...f, uploadedSizeMB: f.totalSizeMB, status: 'processing' } : f)),
-        );
-      }, 1500);
-      setTimeout(() => {
-        setUploadedFiles((prev) => prev.map((f) => (f.name === item.name ? { ...f, status: 'completed' } : f)));
-      }, 3000);
-    });
-  };
-
-  const handlePrevMonth = () => {
-    if (month === 1) {
-      setYear((y) => y - 1);
-      setMonth(12);
-    } else {
-      setMonth((m) => m - 1);
-    }
-  };
-  const handleNextMonth = () => {
-    if (month === 12) {
-      setYear((y) => y + 1);
-      setMonth(1);
-    } else {
-      setMonth((m) => m + 1);
+  const handleMonthsChange = async (newMonths: number) => {
+    setMonths(newMonths);
+    try {
+      await roadmapsApi.updateBudget(roadmapId, { stayMonths: newMonths });
+      await refreshDetail();
+    } catch (error) {
+      console.error('예산 계획 변경 실패', error);
     }
   };
 
-  const parsedDeparture = parseDepartureDate(departureDate);
-  const parsedStart = parseDepartureDate(startDate);
+  const handleSelectDeparture = async (day: number) => {
+    setDatePickerTarget(null);
+    const iso = `${datePickerViewYear}-${String(datePickerViewMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    try {
+      await roadmapsApi.updateSchedule(roadmapId, { departureDate: iso });
+      await refreshDetail();
+    } catch (error) {
+      console.error('출국일 변경 실패', error);
+    }
+  };
+
+  const departureDate = formatDotDate(detail.departureDate);
+  const parsedDeparture = parseDotDate(departureDate);
+  const parsedStart = parseDotDate(startDate);
 
   const taskDetailContext: TaskDetailContext = {
-    documents,
-    onCheck: handleCheckDocument,
-    onOpenUpload: (taskDocumentId) => {
-      setUploadedFiles([]);
-      setUploadTargetDocumentId(taskDocumentId);
-    },
     onDateClick: () => {
+      setDatePickerViewYear(new Date().getFullYear());
+      setDatePickerViewMonth(new Date().getMonth() + 1);
       setDatePickerMode('day');
       setDatePickerTarget('task');
     },
   };
 
-  if (!roadmapDetail) {
-    return (
-      <div className="flex min-h-screen flex-col bg-gray-20">
-        <div className="relative">
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="body-02 absolute left-6 top-24 z-10 rounded-2 bg-black/30 px-4 py-2 text-white"
-            >
-              〈 목록으로
-            </button>
-          )}
-          <CityHeroBanner cityName={city.cityName} progressPercent={city.progressPercent} imageUrl={city.imageUrl} />
-        </div>
-        <div className="mx-auto flex w-full max-w-content flex-1 items-center justify-center px-4 py-20">
-          <RoadmapAlertCard
-            icon={<BagIcon className="size-full" />}
-            title="아직 준비된 로드맵 데이터가 없습니다"
-            description={`${city.cityName}의 로드맵 정보를 준비 중이에요`}
-          />
-        </div>
-      </div>
-    );
-  }
+  const budget = detail.budget;
+  const livingCostSubtotal = (budget?.monthlyCost ?? 0) * months;
+  const totalBudget = budget?.totalCost ?? (budget?.initialSettlementCost ?? 0) + livingCostSubtotal;
 
-  const { tasks, budgetPlan, aiReport } = roadmapDetail;
+  /** AI 탐색 리포트는 city-ai-report 도메인 데이터라 로드맵 API에는 없음 — 준비된 값만 채우고 나머지는 준비중으로 표시 */
+  const reportCityData: CityInsightData = {
+    cityId: String(detail.cityId),
+    cityName: detail.cityName,
+    countryName: detail.countryName,
+    imageUrl: detail.cityImageUrl,
+    description: '준비중',
+    rating: 0,
+    monthlyCost: '준비중',
+    costPercent: 0,
+    accommodationPercent: 0,
+    accommodationLabel: '준비중',
+    visaPercent: 0,
+    visaLabel: '준비중',
+    securityScore: 0,
+    languageScore: 0,
+    infrastructureScore: 0,
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
@@ -165,34 +157,43 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
             〈 목록으로
           </button>
         )}
-        <CityHeroBanner cityName={city.cityName} progressPercent={city.progressPercent} imageUrl={city.imageUrl} />
+        <CityHeroBanner cityName={detail.cityName} progressPercent={detail.progressRate} imageUrl={detail.cityImageUrl} />
       </div>
 
-      <div className="mx-auto flex w-full max-w-content gap-[30px] px-4 py-10">
+      <div className="mx-auto flex w-full max-w-content gap-7.5 px-4 py-10">
         <div className="relative flex flex-col gap-5">
           <RoadmapHeader
-            year={year}
-            month={month}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            startDate={startDate ?? undefined}
+            year={datePickerViewYear}
+            month={datePickerViewMonth}
+            onPrevMonth={() => {
+              setDatePickerViewMonth((m) => (m === 1 ? 12 : m - 1));
+              if (datePickerViewMonth === 1) setDatePickerViewYear((y) => y - 1);
+            }}
+            onNextMonth={() => {
+              setDatePickerViewMonth((m) => (m === 12 ? 1 : m + 1));
+              if (datePickerViewMonth === 12) setDatePickerViewYear((y) => y + 1);
+            }}
+            startDate={startDate}
             onStartDateClick={() => {
-              setDatePickerViewYear(parsedStart?.year ?? year);
-              setDatePickerViewMonth(parsedStart?.month ?? month);
+              setDatePickerViewYear(parsedStart?.year ?? datePickerViewYear);
+              setDatePickerViewMonth(parsedStart?.month ?? datePickerViewMonth);
               setDatePickerMode('day');
               setDatePickerTarget('start');
             }}
-            departureDate={departureDate ?? undefined}
+            departureDate={departureDate}
             onDepartureDateClick={() => {
-              setDatePickerViewYear(parsedDeparture?.year ?? year);
-              setDatePickerViewMonth(parsedDeparture?.month ?? month);
+              setDatePickerViewYear(parsedDeparture?.year ?? datePickerViewYear);
+              setDatePickerViewMonth(parsedDeparture?.month ?? datePickerViewMonth);
               setDatePickerMode('day');
               setDatePickerTarget('departure');
             }}
           />
           <RoadmapTimeline
-            tasks={tasks}
-            onTaskClick={(index) => navigate(`task-detail/${index}`, { preventScrollReset: true })}
+            tasks={detail.tasks.map(toRoadmapTaskData)}
+            onTaskClick={(index) => {
+              const taskId = detail.tasks[index]?.taskId;
+              if (taskId != null) navigate(`task-detail/${taskId}`, { preventScrollReset: true });
+            }}
           />
 
           {datePickerTarget === 'start' && (
@@ -219,7 +220,7 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
                   onYearNext={() => setDatePickerViewYear((y) => y + 1)}
                   onSelectDay={(day) => {
                     setStartDate(
-                      `${datePickerViewYear}년 ${String(datePickerViewMonth).padStart(2, '0')}월 ${String(day).padStart(2, '0')}일`,
+                      `${datePickerViewYear}.${String(datePickerViewMonth).padStart(2, '0')}.${String(day).padStart(2, '0')}`,
                     );
                     setDatePickerTarget(null);
                   }}
@@ -250,72 +251,61 @@ export default function RoadmapDetail({ cityId, onBack }: RoadmapDetailProps) {
                   }}
                   onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
                   onYearNext={() => setDatePickerViewYear((y) => y + 1)}
-                  onSelectDay={(day) => {
-                    setDepartureDate(
-                      `${datePickerViewYear}년 ${String(datePickerViewMonth).padStart(2, '0')}월 ${String(day).padStart(2, '0')}일`,
-                    );
-                    setDatePickerTarget(null);
-                  }}
+                  onSelectDay={handleSelectDeparture}
                 />
               </div>
             </>
           )}
         </div>
 
-        <div className="flex flex-col gap-[30px]">
+        <div className="flex flex-col gap-7.5">
           <BudgetPlanCard
             months={months}
-            onMonthsChange={setMonths}
-            initialSettlementCost={budgetPlan.initialSettlementCost}
-            monthlyLivingCost={budgetPlan.monthlyLivingCost}
-            stayMonths={budgetPlan.stayMonths}
-            livingCostSubtotal={budgetPlan.livingCostSubtotal}
-            totalBudget={budgetPlan.totalBudget}
+            onMonthsChange={handleMonthsChange}
+            initialSettlementCost={budget?.initialSettlementCost ?? 0}
+            monthlyLivingCost={budget?.monthlyCost ?? 0}
+            stayMonths={months}
+            livingCostSubtotal={livingCostSubtotal}
+            totalBudget={totalBudget}
           />
           <AiReportCard
-            score={aiReport.score}
-            cityName={aiReport.cityName}
-            summary={aiReport.summary}
+            score={0}
+            cityName={detail.cityName}
+            summary="준비중"
+            onViewReport={() => setIsReportOpen(true)}
           />
         </div>
       </div>
 
       <Outlet context={taskDetailContext} />
 
-      {uploadTargetDocumentId !== null && (
-        <ModalOverlay zIndex={60} onClose={() => setUploadTargetDocumentId(null)}>
-          <DocumentUploadModal
-            files={uploadedFiles}
-            onSelectFiles={handleSelectFiles}
-            onRemoveFile={(name) => setUploadedFiles((prev) => prev.filter((f) => f.name !== name))}
-            onComplete={() => {
-              handleCheckDocument(uploadTargetDocumentId);
-              setUploadTargetDocumentId(null);
-            }}
-            onClose={() => setUploadTargetDocumentId(null)}
-          />
-        </ModalOverlay>
-      )}
-
       {datePickerTarget === 'task' && (
         <ModalOverlay zIndex={60} onClose={() => setDatePickerTarget(null)}>
           <DatePickerModal
             mode={datePickerMode}
-            year={year}
-            month={month}
-            selectedDay={15}
-            selectedMonth={month}
+            year={datePickerViewYear}
+            month={datePickerViewMonth}
+            selectedMonth={datePickerViewMonth}
             onClose={() => setDatePickerTarget(null)}
             onModeToggle={() => setDatePickerMode((m) => (m === 'day' ? 'month' : 'day'))}
             onSelectMonth={(m) => {
-              setMonth(m);
+              setDatePickerViewMonth(m);
               setDatePickerMode('day');
             }}
-            onYearPrev={() => setYear((y) => y - 1)}
-            onYearNext={() => setYear((y) => y + 1)}
+            onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
+            onYearNext={() => setDatePickerViewYear((y) => y + 1)}
             onSelectDay={() => setDatePickerTarget(null)}
           />
         </ModalOverlay>
+      )}
+
+      {isReportOpen && (
+        <CityReportModal
+          isOpen
+          onClose={() => setIsReportOpen(false)}
+          data={buildCityReportData(reportCityData)}
+          onSearch={mockSearchResult}
+        />
       )}
     </div>
   );
