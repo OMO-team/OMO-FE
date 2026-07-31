@@ -9,6 +9,10 @@ import type {
   PasswordResetEmailRequest,
   PasswordResetVerifyRequest,
   PasswordResetRequest,
+  GoogleSignupRequest,
+  GoogleAuthorizationUrlResult,
+  GoogleExchangeRequest,
+  GoogleLoginResult,
 } from '../types/dto';
 
 export const authApi = {
@@ -44,4 +48,21 @@ export const authApi = {
 
   resetPassword: (body: PasswordResetRequest) =>
     instance.patch<ApiResponse<null>>('/auth/v1/password/reset', body),
+
+  getGoogleLoginUrl: async () => {
+    const { data } = await instance.get<ApiResponse<GoogleAuthorizationUrlResult>>('/auth/v1/oauth/google/login');
+    return data.result;
+  },
+
+  getGoogleSignupUrl: async (body: GoogleSignupRequest) => {
+    const { data } = await instance.post<ApiResponse<GoogleAuthorizationUrlResult>>('/auth/v1/oauth/google/signup', body);
+    return data.result;
+  },
+
+  exchangeGoogleTicket: async (body: GoogleExchangeRequest) => {
+    const { data } = await instance.post<ApiResponse<GoogleLoginResult>>('/auth/v1/oauth/google/exchange', body);
+    localStorage.setItem('accessToken', data.result.accessToken);
+    localStorage.setItem('refreshToken', data.result.refreshToken);
+    return data.result;
+  },
 };
