@@ -264,7 +264,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
   return (
     <div
       className="relative flex h-full flex-col border-l border-gray-300 bg-white"
-      style={{ width: '670px', flexShrink: 0 }}
+      style={{ width: '670px', minWidth: '40px', maxWidth: '1000px', flexShrink: 0 }}
       onClick={() => {
         if (isDropdownOpen) setIsDropdownOpen(false);
         if (isMoreMenuOpen) setIsMoreMenuOpen(false);

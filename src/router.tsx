@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
   {
     element: <MainLayout />,
     children: [
-      { path: '/', element: <HomePage /> },
+      { path: '/', element: <HomePage />, handle: { headerVariant: 'overlay' } },
       { path: '/city-insight', element: <CityInsight /> },
       { path: '/myhome/empty', element: <RoadmapApp /> },
       { path: '/auth/email-verify', element: <EmailVerifyRoute /> },
