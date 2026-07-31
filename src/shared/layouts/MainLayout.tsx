@@ -48,26 +48,32 @@ export default function MainLayout() {
       </main>
       <Footer />
 
-      <div className="fixed inset-y-0 right-0 z-40">
-        {isChatOpen ? (
+      <div className="fixed inset-y-0 right-0 z-40 flex">
+        {/* Sidebar_Collapse_Handle */}
+        <button
+          type="button"
+          onClick={() => setIsChatOpen((prev) => !prev)}
+          aria-label={isChatOpen ? 'AI 채팅 닫기' : 'AI 채팅 열기'}
+          className="flex h-full items-center cursor-pointer"
+          style={{
+            width: '40px',
+            paddingLeft: '10px',
+            border: 'none',
+            background: isChatOpen ? 'var(--color-white, #FFF)' : 'transparent',
+          }}
+        >
+          <div
+            className="flex flex-col items-start flex-shrink-0 bg-gray-200"
+            style={{ width: '6px', height: '120px', borderRadius: '10px' }}
+          />
+        </button>
+
+        {isChatOpen && (
           <AIChatPanel
             initialMessage={chatInitialMessage}
             onClose={() => { setIsChatOpen(false); setChatInitialMessage(undefined); }}
             onNewChat={() => setIsChatOpen(false)}
           />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsChatOpen(true)}
-            className="flex h-full items-center bg-transparent border-none cursor-pointer"
-            style={{ width: '40px', paddingLeft: '10px' }}
-            aria-label="AI 채팅 열기"
-          >
-            <div
-              className="flex flex-col items-start flex-shrink-0 bg-gray-200"
-              style={{ width: '6px', height: '120px', borderRadius: '10px' }}
-            />
-          </button>
         )}
       </div>
 
