@@ -55,6 +55,8 @@ export interface UploadedFileItem {
 export interface CityRoadmapData {
   /** 위시리스트 등 다른 도메인과 도시를 매칭할 때 쓰는 공용 식별자 */
   cityId: string;
+  /** 로드맵 상세 조회/삭제 등 실 API 호출에 필요한 식별자 — mock 데이터에는 없을 수 있음 */
+  roadmapId?: number;
   cityName: string;
   countryName: string;
   progressPercent: number;

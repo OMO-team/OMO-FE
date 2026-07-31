@@ -16,14 +16,12 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
-import { useRoadmapStore } from '../store/useRoadmapStore';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
 
 type RemovedRecord = {
   city: CityRoadmapData;
   countryName: string;
-  index: number;
 };
 
 type RemovedWish = {
@@ -44,6 +42,12 @@ type CountryRoadmapListProps = {
   onExploreCity?: () => void;
   /** 하트 on = 위시리스트 등록, 하트 off = 위시리스트에서 제거 */
   onToggleWish?: (cityId: string) => void;
+  /** 로드맵 삭제 확정 시 호출 (아직 실 삭제 API는 호출하지 않음 — onCommitDeleteCity에서 처리) */
+  onDeleteCity?: (cityId: string) => void;
+  /** 삭제 토스트의 "실행 취소" 클릭 시 호출 */
+  onRestoreCity?: () => void;
+  /** 삭제 토스트가 실행 취소 없이 사라질 때(타임아웃/닫기) 호출 — 이 시점에 실 삭제 API 호출 */
+  onCommitDeleteCity?: () => void;
 };
 
 export default function CountryRoadmapList({
@@ -56,15 +60,18 @@ export default function CountryRoadmapList({
   onViewRoadmap,
   onExploreCity,
   onToggleWish,
+  onDeleteCity,
+  onRestoreCity,
+  onCommitDeleteCity,
 }: CountryRoadmapListProps) {
-  const removeCity = useRoadmapStore((s) => s.removeCity);
-  const restoreCity = useRoadmapStore((s) => s.restoreCity);
   const groups = countryGroups;
   const [activeTab, setActiveTab] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<CityRoadmapData | null>(null);
   const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
   const [removedWish, setRemovedWish] = useState<RemovedWish | null>(null);
   const [reportCityId, setReportCityId] = useState<string | null>(null);
+  /** 기본은 전부 펼친 상태 — 여기 담긴 국가만 접힌 상태로 표시 */
+  const [collapsedCountries, setCollapsedCountries] = useState<Set<string>>(new Set());
 
   const toggleCompare = useCompareStore((s) => s.toggleCompare);
   const closeCompareModal = useCompareStore((s) => s.closeModal);
@@ -77,9 +84,17 @@ export default function CountryRoadmapList({
 
   useEffect(() => {
     if (!removedRecord) return;
-    const timer = setTimeout(() => setRemovedRecord(null), 5000);
+    const timer = setTimeout(() => {
+      setRemovedRecord(null);
+      onCommitDeleteCity?.();
+    }, 5000);
     return () => clearTimeout(timer);
-  }, [removedRecord]);
+  }, [removedRecord, onCommitDeleteCity]);
+
+  useEffect(() => {
+    /** 실행 취소 창이 끝나기 전에 페이지를 벗어나도 삭제가 유실되지 않도록, 언마운트 시 남아있는 삭제를 확정 */
+    return () => onCommitDeleteCity?.();
+  }, [onCommitDeleteCity]);
 
   useEffect(() => {
     if (!removedWish) return;
@@ -89,15 +104,21 @@ export default function CountryRoadmapList({
 
   const handleConfirmDelete = () => {
     if (!deleteTarget) return;
-    const record = removeCity(deleteTarget.countryName, deleteTarget.cityId);
-    if (record) setRemovedRecord(record);
+    onDeleteCity?.(deleteTarget.cityId);
+    setRemovedRecord({ city: deleteTarget, countryName: deleteTarget.countryName });
     setDeleteTarget(null);
   };
 
   const handleUndo = () => {
     if (!removedRecord) return;
-    restoreCity(removedRecord);
+    onRestoreCity?.();
     setRemovedRecord(null);
+  };
+
+  /** 실행 취소 없이 토스트를 직접 닫으면 삭제를 그대로 확정 */
+  const handleCloseRemovedToast = () => {
+    setRemovedRecord(null);
+    onCommitDeleteCity?.();
   };
 
   /** 하트 클릭 시점의 위시 상태를 알고 있어야 "껐을 때만" 토스트를 띄울 수 있음 */
@@ -106,6 +127,15 @@ export default function CountryRoadmapList({
       setRemovedWish({ cityId, cityName });
     }
     onToggleWish?.(cityId);
+  };
+
+  const toggleCountryGroup = (countryName: string) => {
+    setCollapsedCountries((prev) => {
+      const next = new Set(prev);
+      if (next.has(countryName)) next.delete(countryName);
+      else next.add(countryName);
+      return next;
+    });
   };
 
   const handleUndoWish = () => {
@@ -129,7 +159,7 @@ export default function CountryRoadmapList({
   return (
     <div className="flex flex-col bg-white">
       {removedRecord && (
-        <RoadmapRemovedToast cityName={removedRecord.city.cityName} onUndo={handleUndo} onClose={() => setRemovedRecord(null)} />
+        <RoadmapRemovedToast cityName={removedRecord.city.cityName} onUndo={handleUndo} onClose={handleCloseRemovedToast} />
       )}
       {removedWish && (
         <RoadmapRemovedToast
@@ -157,23 +187,33 @@ export default function CountryRoadmapList({
         ) : activeTab === 0 ? (
           hasRoadmaps ? (
             <div className="flex w-full flex-col gap-12.5">
-              {groups.map((group) => (
-                <div key={group.countryName} className="flex w-full flex-col gap-3">
-                  <CountryGroupHeader countryName={group.countryName} cityCount={group.cityCount} />
-                  <div className="flex w-full flex-wrap items-center gap-5">
-                    {group.cities.map((city) => (
-                      <CityRoadmapCard
-                        key={city.cityId}
-                        {...city}
-                        isWished={wishedCityIds.has(city.cityId)}
-                        onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
-                        onViewRoadmap={() => onViewRoadmap?.(city)}
-                        onDelete={() => setDeleteTarget(city)}
-                      />
-                    ))}
+              {groups.map((group) => {
+                const isExpanded = !collapsedCountries.has(group.countryName);
+                return (
+                  <div key={group.countryName} className="flex w-full flex-col gap-3">
+                    <CountryGroupHeader
+                      countryName={group.countryName}
+                      cityCount={group.cityCount}
+                      isExpanded={isExpanded}
+                      onToggle={() => toggleCountryGroup(group.countryName)}
+                    />
+                    {isExpanded && (
+                      <div className="flex w-full flex-wrap items-center gap-5">
+                        {group.cities.map((city) => (
+                          <CityRoadmapCard
+                            key={city.cityId}
+                            {...city}
+                            isWished={wishedCityIds.has(city.cityId)}
+                            onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
+                            onViewRoadmap={() => onViewRoadmap?.(city)}
+                            onDelete={() => setDeleteTarget(city)}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="flex w-full flex-col items-center gap-4 py-20">
