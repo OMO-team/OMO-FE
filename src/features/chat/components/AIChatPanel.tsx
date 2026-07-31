@@ -480,7 +480,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
       {/* 콘텐츠 영역 */}
       <div className={`flex-1 overflow-y-auto flex flex-col ${hasChatStarted ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`} style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}>
         {hasChatStarted ? (
-          <div className="flex flex-col items-start w-full">
+          <div className="flex flex-col items-start w-full pb-[200px]">
             {chatHistory.map((entry) =>
               entry.briefingData ? (
                 <AIChatThread
