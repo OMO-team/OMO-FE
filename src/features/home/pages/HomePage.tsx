@@ -1,6 +1,7 @@
 import AIPromptSection from '../components/AIPromptSection';
 import CategorySection from '../components/CategorySection';
 import { useMainLayoutContext } from '../../../shared/layouts/useMainLayoutContext';
+import { SIDEBAR_HANDLE_WIDTH } from '../../../shared/constants/layout';
 import mapBg from '../../../assets/images/map-bg.png';
 
 export default function HomePage() {
@@ -12,7 +13,7 @@ export default function HomePage() {
       <div
         className="fixed top-0 left-0 pointer-events-none"
         style={{
-          width: 'calc(100vw - 40px)',
+          width: `calc(100dvw - ${SIDEBAR_HANDLE_WIDTH}px)`,
           height: '770px',
           zIndex: 0,
           background: `linear-gradient(286deg, rgba(255, 255, 255, 0.50) -1.67%, rgba(255, 255, 255, 0.00) 96.85%), url(${mapBg}) lightgray -437.967px -0.41px / 160.828% 168.621% no-repeat`,
