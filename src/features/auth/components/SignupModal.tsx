@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
@@ -8,6 +9,7 @@ import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import { authApi } from '../api/authApi';
 import { passwordRegex } from '../constants/passwordRegex';
+import { useAuthStore } from '../store/useAuthStore';
 
 type SignupModalProps = {
   onClose: () => void;
@@ -36,21 +38,27 @@ function ArrowIcon() {
 }
 
 export default function SignupModal({ onClose, onLoginClick }: SignupModalProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
+  const signupDraft = useAuthStore((s) => s.signupDraft);
+  const setSignupDraft = useAuthStore((s) => s.setSignupDraft);
+  const clearSignupDraft = useAuthStore((s) => s.clearSignupDraft);
+
+  const [name, setName] = useState(signupDraft?.name ?? '');
+  const [email, setEmail] = useState(signupDraft?.email ?? '');
+  const [password, setPassword] = useState(signupDraft?.password ?? '');
+  const [confirmPassword, setConfirmPassword] = useState(signupDraft?.confirmPassword ?? '');
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(signupDraft?.isEmailVerified ?? false);
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
-  const [agreeAll, setAgreeAll] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [agreeAll, setAgreeAll] = useState((signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false);
+  const [agreeTerms, setAgreeTerms] = useState(signupDraft?.agreeTerms ?? false);
+  const [agreePrivacy, setAgreePrivacy] = useState(signupDraft?.agreePrivacy ?? false);
 
   const handleAgreeAll = () => {
     const next = !agreeAll;
@@ -80,6 +88,17 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     setIsSendingCode(true);
     try {
       await authApi.sendEmailCode({ email });
+      setSignupDraft({
+        name,
+        email,
+        password,
+        confirmPassword,
+        agreeTerms,
+        agreePrivacy,
+        isEmailVerified: false,
+      });
+      onClose();
+      navigate('/auth/email-verify', { state: { email } });
     } catch {
       setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
     } finally {
@@ -101,12 +120,19 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
     if (!passwordRegex.test(password)) { setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.'); hasError = true; }
     if (password !== confirmPassword) { setConfirmPasswordError('비밀번호가 일치하지 않습니다.'); hasError = true; }
+    if (!isEmailVerified) { setEmailError('이메일 인증을 완료해주세요.'); hasError = true; }
     if (!agreeTerms || !agreePrivacy) { setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.'); hasError = true; }
     if (hasError) return;
 
     setIsSubmitting(true);
     try {
-      await authApi.signup({ name, email, password });
+      // 약관 ID: 1 = 이용약관, 2 = 개인정보처리방침 (GET /api/v1/terms 기준, 백엔드 확정값)
+      const agreedTermsIds = [
+        ...(agreeTerms ? [1] : []),
+        ...(agreePrivacy ? [2] : []),
+      ];
+      await authApi.signup({ name, email, password, passwordConfirm: confirmPassword, agreedTermsIds });
+      clearSignupDraft();
       onClose();
     } catch (error) {
       if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 409) {
@@ -168,13 +194,23 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                     <Input
                       type="email"
                       value={email}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        setEmail(e.target.value);
+                        if (isEmailVerified) setIsEmailVerified(false);
+                      }}
                       placeholder="이메일을 입력해주세요"
                       error={emailError}
                     />
                   </div>
-                  <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendEmailCode} />
+                  <VerifyButton
+                    active={email.length > 0 && !isSendingCode && !isEmailVerified}
+                    onClick={handleSendEmailCode}
+                    label={isEmailVerified ? '인증완료' : isSendingCode ? '발송 중...' : '인증'}
+                  />
                 </div>
+                {isEmailVerified && (
+                  <span className="body-04 text-primary-500">이메일 인증이 완료되었습니다.</span>
+                )}
               </div>
 
               {/* 비밀번호 */}
