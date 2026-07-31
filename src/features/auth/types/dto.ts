@@ -1,10 +1,3 @@
-export type ApiResponse<T> = {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: T;
-};
-
 // 회원가입
 export type SignupRequest = {
   name: string;

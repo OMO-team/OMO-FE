@@ -1,6 +1,6 @@
 import { instance } from '../../../lib/axios';
+import type { ApiResponse } from '../../../shared/types/api';
 import type {
-  ApiResponse,
   SignupRequest,
   LoginRequest,
   LoginResult,
