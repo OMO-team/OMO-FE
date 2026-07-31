@@ -4,7 +4,7 @@ import RoadmapDetail from './RoadmapDetail';
 export default function RoadmapDashboardRoute() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cityId } = useParams<{ cityId: string }>();
+  const { roadmapId } = useParams<{ roadmapId: string }>();
 
   const handleBack = () => {
     /** location.key === 'default'면 이 세션에서 뒤로 갈 히스토리가 없다는 뜻 (직접 URL 진입/새로고침) */
@@ -15,5 +15,5 @@ export default function RoadmapDashboardRoute() {
     }
   };
 
-  return <RoadmapDetail cityId={cityId} onBack={handleBack} />;
+  return <RoadmapDetail roadmapId={Number(roadmapId)} onBack={handleBack} />;
 }

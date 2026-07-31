@@ -37,10 +37,10 @@ export const router = createBrowserRouter([
       { path: '/support/terms', element: <TermsAndPolicyRoute /> },
       { path: '/contact', element: <Contact /> },
       {
-        path: '/myhome/dashboard/:cityId',
+        path: '/myhome/dashboard/:roadmapId',
         element: <RoadmapDashboardRoute />,
         handle: { headerVariant: 'overlay' },
-        children: [{ path: 'task-detail/:taskIndex', element: <TaskDetailRoute /> }],
+        children: [{ path: 'task-detail/:taskId', element: <TaskDetailRoute /> }],
       },
     ],
   },
