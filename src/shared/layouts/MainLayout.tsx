@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ModalOverlay from '../components/ModalOverlay';
@@ -17,7 +18,7 @@ import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 type RouteHandle = { headerVariant?: 'default' | 'overlay' };
 
 export default function MainLayout() {
-  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn } = useAuthStore();
+  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } = useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
@@ -27,7 +28,13 @@ export default function MainLayout() {
     if (!token) return;
     memberApi.getMyInfo()
       .then((info) => signIn(info.profileImageUrl ?? undefined))
-      .catch(() => signIn());
+      .catch((error: unknown) => {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          signOut();
+        } else {
+          signIn();
+        }
+      });
   }, []);
   const matches = useMatches();
   const headerVariant =
