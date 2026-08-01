@@ -57,6 +57,7 @@ export const memberApi = {
       method: 'PUT',
       headers: { 'Content-Type': contentType },
       body: file,
+      signal: AbortSignal.timeout(30_000),
     }),
 
   updateProfileImage: async (body: ProfileImageUpdateRequest) => {
