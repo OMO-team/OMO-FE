@@ -147,7 +147,10 @@ export default function SettingsPage({
 
   const handleDeleteAvatar = useCallback(async () => {
     await memberApi.deleteProfileImage();
-    setAvatarUrl(undefined);
+    setAvatarUrl((prev) => {
+      if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return undefined;
+    });
   }, []);
 
   const handleUnlinkGoogle = useCallback(async () => {
