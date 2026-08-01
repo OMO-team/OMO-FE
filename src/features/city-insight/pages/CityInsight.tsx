@@ -27,7 +27,7 @@ import { useCities } from '../hooks/useCities';
 import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
-import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
+import type { CityQueryParams, ContinentType, DifficultyType, StayDurationType } from '../types/cityInsight';
 
 // stores
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
@@ -101,6 +101,7 @@ export default function CityInsight() {
   }, [urlKeyword]);
   const [page, setPage] = useState(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [selectedContinent, setSelectedContinent] = useState<ContinentType | undefined>(undefined);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
@@ -112,14 +113,15 @@ export default function CityInsight() {
 
   const queryParams = useMemo<CityQueryParams>(() => ({
     keyword: keyword || undefined,
-    purposeType: activePurpose?.type,
+    purposeType: isFromSearch ? undefined : activePurpose?.type,
     countryCode: urlCountryCode,
+    continent: selectedContinent,
     maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
     minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
     housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
     visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
     stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
-  }), [keyword, activePurpose, urlCountryCode, selectedOptions]);
+  }), [keyword, activePurpose, urlCountryCode, selectedContinent, selectedOptions]);
 
   const { data: cities = [] } = useCities(queryParams);
 
@@ -143,9 +145,9 @@ export default function CityInsight() {
     return () => clearTimeout(timer);
   }, [addedCityName]);
 
-  // 지역 필터 칩 추가 
-  const handleSelect = (country: string) => {
-    setSelectedFilters(prev => (prev.includes(country) ? prev : [...prev, country]));
+  const handleSelect = (continent: ContinentType) => {
+    setSelectedFilters(prev => (prev.includes(continent) ? prev : [...prev, continent]));
+    setSelectedContinent(continent);
   };
 
   const handleSelectOption = (title: string, option: string) => {
@@ -165,6 +167,7 @@ export default function CityInsight() {
     setInput('');
     setKeyword('');
     setSelectedFilters([]);
+    setSelectedContinent(undefined);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
   };
@@ -236,8 +239,9 @@ export default function CityInsight() {
               <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
               <RegionDropDown
                 key={`region-${resetKey}`}
+                purposeType={activePurpose?.type}
                 onSelect={handleSelect}
-                onReset={() => setSelectedFilters([])}
+                onReset={() => { setSelectedFilters([]); setSelectedContinent(undefined); }}
               />
               <div className="w-px h-7 bg-gray-300"></div>
               {DETAIL_OPTIONS.map(({ title, options }) => (

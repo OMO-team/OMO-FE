@@ -6,7 +6,7 @@ import type { CityQueryParams, CityItem, CitiesResponse } from '../types/cityIns
 export function useCities(params: CityQueryParams) {
   return useQuery({
     queryKey: ['cities', params],
-    enabled: !!params.purposeType,
+    enabled: !!params.purposeType || !!params.keyword,
     queryFn: async (): Promise<CityItem[]> => {
       const cleanParams = Object.fromEntries(
         Object.entries(params).filter(([, v]) => v !== undefined),
