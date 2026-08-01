@@ -1,18 +1,20 @@
 import { useState, type FormEvent } from 'react';
+import axios from 'axios';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
+import { memberApi } from '../api/memberApi';
 
 type PasswordChangeModalProps = {
   onClose: () => void;
   onForgotPassword: () => void;
-  onSubmit: (data: { currentPassword: string; newPassword: string }) => void;
+  onSuccess?: () => void;
 };
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
-export default function PasswordChangeModal({ onClose, onForgotPassword, onSubmit }: PasswordChangeModalProps) {
+export default function PasswordChangeModal({ onClose, onForgotPassword, onSuccess }: PasswordChangeModalProps) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [currentPasswordError, setCurrentPasswordError] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -50,9 +52,15 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSubmi
 
     setIsSubmitting(true);
     try {
-      // TODO: API 연결
-      onSubmit({ currentPassword, newPassword });
+      await memberApi.changePassword({ currentPassword, newPassword, newPasswordConfirm: confirmPassword });
+      onSuccess?.();
       onClose();
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setCurrentPasswordError('현재 비밀번호가 일치하지 않습니다.');
+      } else {
+        setCurrentPasswordError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsSubmitting(false);
     }
