@@ -82,7 +82,9 @@ export default function CityInsight() {
   const handleCategoryChange = (index: number) => {
     const selected = purposes[index];
     if (!selected) return;
-    setSearchParams({ purposeId: String(selected.purposeId) });
+    const params: Record<string, string> = { purposeId: String(selected.purposeId) };
+    if (urlCountryCode) params.countryCode = urlCountryCode;
+    setSearchParams(params);
   };
 
   const urlKeyword = searchParams.get('keyword') ?? '';
