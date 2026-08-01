@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import searchIcon from '../../../assets/icons/icon-search[18].svg';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import trashIcon from '../../../assets/icons/icon-trash.svg';
@@ -15,7 +17,15 @@ export default function SearchModal({
   onRemove,
   onClearAll,
 }: SearchModalProps) {
+  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState('');
   const hasSearches = recentSearches.length > 0;
+
+  const handleSearch = () => {
+    if (!searchValue.trim()) return;
+    navigate(`/city-insight?keyword=${encodeURIComponent(searchValue.trim())}`);
+    onClose();
+  };
 
   return (
     <div
@@ -27,13 +37,16 @@ export default function SearchModal({
       <div className="flex w-[1440px] flex-col items-center">
         <div className="flex w-[1064px] items-center justify-between px-5 pb-6 pt-9">
           <div className="flex flex-1 items-center gap-[57px]">
-            <div className="flex size-6 shrink-0 items-center justify-center">
+            <button type="button" onClick={handleSearch} className="flex size-6 shrink-0 items-center justify-center">
               <img src={searchIcon} alt="검색" className="size-[18px]" />
-            </div>
+            </button>
             <input
               type="text"
               className="body-02 flex-1 bg-transparent outline-none placeholder:text-gray-500"
               placeholder="도시나 키워드로 검색하기"
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
             />
           </div>
           <button

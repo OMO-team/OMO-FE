@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import thinkingIcon from '../../../assets/icons/icon-thinking.svg';
 import checkConditionIcon from '../../../assets/icons/icon-check-condition.svg';
 import chevronRightBlueIcon from '../../../assets/icons/icon-chevron-right-blue.svg';
@@ -30,6 +31,7 @@ const divider = (
 );
 
 export default function AIChatThread() {
+  const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
@@ -108,13 +110,14 @@ export default function AIChatThread() {
 
                 {/* 추천 도시 보러가기 */}
                 <div className="flex items-start gap-1" style={{ alignSelf: 'stretch' }}>
-                  <a
-                    href="#"
+                  <button
+                    type="button"
+                    onClick={() => navigate('/city-insight')}
                     className="body-02 text-primary-500 underline"
                     style={{ textDecorationStyle: 'solid' }}
                   >
                     추천 도시 보러가기
-                  </a>
+                  </button>
                   <div className="size-icon-sm flex items-center justify-center">
                     <img src={chevronRightBlueIcon} alt="이동" width={6} height={12} />
                   </div>

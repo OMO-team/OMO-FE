@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CategoryTab from '../../../shared/components/CategoryTab';
 import CityCard from './CityCard';
 import ChevronDownIcon from '../../../shared/components/ChevronDownIcon';
@@ -6,6 +7,7 @@ import { usePurposes } from '../hooks/usePurposes';
 import { useCountriesByPurpose } from '../hooks/useCountriesByPurpose';
 
 export default function CategorySection() {
+  const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
   const { data: purposes = [] } = usePurposes();
@@ -61,6 +63,7 @@ export default function CategorySection() {
               name={country.name}
               imageUrl={country.imageUrl}
               recommendedCityCount={country.recommendedCityCount}
+              onClick={() => navigate(`/city-insight?purposeId=${activePurpose?.purposeId}&countryCode=${country.code}`)}
             />
           ))}
         </div>

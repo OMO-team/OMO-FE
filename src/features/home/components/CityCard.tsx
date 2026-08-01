@@ -4,11 +4,12 @@ type CityCardProps = {
   name: string;
   imageUrl: string;
   recommendedCityCount: number;
+  onClick?: () => void;
 };
 
-export default function CityCard({ name, imageUrl, recommendedCityCount }: CityCardProps) {
+export default function CityCard({ name, imageUrl, recommendedCityCount, onClick }: CityCardProps) {
   return (
-    <div className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0">
+    <div className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0 cursor-pointer" onClick={onClick}>
       <img
         src={imageUrl}
         alt={name}

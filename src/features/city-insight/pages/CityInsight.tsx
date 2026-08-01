@@ -1,6 +1,6 @@
 // react
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 // shared components
 import CategoryTab from '../../../shared/components/CategoryTab';
@@ -71,6 +71,7 @@ const CITY_COMPARE_ID: Record<string, string> = {
 };
 
 export default function CityInsight() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: purposes = [] } = usePurposes();
 
@@ -84,8 +85,15 @@ export default function CityInsight() {
     setSearchParams({ purposeId: String(selected.purposeId) });
   };
 
-  const [input, setInput] = useState('');
-  const [keyword, setKeyword] = useState('');
+  const urlKeyword = searchParams.get('keyword') ?? '';
+  const urlCountryCode = searchParams.get('countryCode') ?? undefined;
+
+  // 진입 경로 판단
+  const isFromCountry = !!urlCountryCode;  
+  const isFromSearch = !!urlKeyword;       
+
+  const [input, setInput] = useState(urlKeyword);
+  const [keyword, setKeyword] = useState(urlKeyword);
   const [page, setPage] = useState(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -100,12 +108,13 @@ export default function CityInsight() {
   const queryParams = useMemo<CityQueryParams>(() => ({
     keyword: keyword || undefined,
     purposeType: activePurpose?.type,
+    countryCode: urlCountryCode,
     maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
     minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
     housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
     visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
     stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
-  }), [keyword, activePurpose, selectedOptions]);
+  }), [keyword, activePurpose, urlCountryCode, selectedOptions]);
 
   const { data: cities = [] } = useCities(queryParams);
 
@@ -178,26 +187,45 @@ export default function CityInsight() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div>
-        <div className="mt-[50px] flex gap-5 mb-6">
-          <img src={backArrow} alt="" />
-          <h1 className="heading-05">추천 도시</h1>
-        </div>
+    <div className="w-full flex flex-col items-center justify-center mt-[30px]">
+      <div className="w-full px-[188px]">
+        {!isFromCountry && (
+          <div className={`mt-[50px] mb-6 ${isFromSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
+            {isFromSearch ? (
+              <h1 className="heading-05">
+                <span className="text-blue-500">'{urlKeyword}'</span>에 대한 검색 결과
+              </h1>
+            ) : (
+              <div className="flex items-center gap-5">
+                <button type="button" onClick={() => navigate('/')}>
+                  <img src={backArrow} alt="뒤로가기" />
+                </button>
+                <h1 className="heading-05">추천 도시</h1>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex flex-col gap-4">
-          <CategoryTab
-            categories={categoryNames}
-            activeIndex={activeIndex}
-            onChange={handleCategoryChange}
-          />
-          <SearchInputBar
-            placeholder="원하는 도시 조건을 입력해 보세요"
-            width="w-[974px]"
-            value={input}
-            onChange={setInput}
-            onSearch={handleSearch}
-            icon={searchInputIcon}
-          />
+          {!isFromSearch && (
+            <>
+              <CategoryTab
+                categories={categoryNames}
+                activeIndex={activeIndex}
+                onChange={handleCategoryChange}
+              />
+              <SearchInputBar
+                placeholder="원하는 도시 조건을 입력해 보세요"
+                width="w-full"
+                value={input}
+                onChange={setInput}
+                onSearch={handleSearch}
+                icon={searchInputIcon}
+              />
+            </>
+          )}
+           {isFromSearch && (
+              <p className="body-03 text-gray-500">총 {cities.length}개의 검색결과가 나왔어요</p>
+            )}
           <div className="flex justify-between">
             <div className="flex gap-2">
               <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
