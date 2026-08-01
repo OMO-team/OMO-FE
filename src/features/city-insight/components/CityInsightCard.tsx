@@ -40,7 +40,7 @@ export default function CityInsightCard({
   ]
 
   return (
-    <div className='w-[522px] h-[596px] bg-white rounded-4 shadow-02 hover:border border-primary-500 overflow-hidden'>
+    <div className='w-[522px] h-[596px] bg-white rounded-4 shadow-02 hover:border border-primary-500 overflow-hidden cursor-pointer'>
 
       {/* 카드 배경 */}
       <div
