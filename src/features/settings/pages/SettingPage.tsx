@@ -68,31 +68,37 @@ export default function SettingsPage({
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
   // 구글 연결 배너
-  const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(() => {
-    if (googleLinkResult) {
-      navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
-    }
-    return googleLinkResult;
-  });
+  const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(googleLinkResult);
   const [isGoogleLinking, setIsGoogleLinking] = useState(false);
+
+  useEffect(() => {
+    if (!googleLinkResult) return;
+    navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
+  }, []);
 
   // 초기 데이터 로드
   useEffect(() => {
     let ignore = false;
 
-    Promise.all([
+    Promise.allSettled([
       memberApi.getMyInfo(),
       memberApi.getSettings(),
       memberApi.getSocialAccountStatus(),
-    ]).then(([info, settings, social]) => {
+    ]).then(([infoRes, settingsRes, socialRes]) => {
       if (ignore) return;
-      setProfileName(info.name);
-      setProfileEmail(info.email);
-      setAvatarUrl(info.profileImageUrl ?? undefined);
-      setPushEnabled(settings.pushNotification);
-      setAutoSyncEnabled(settings.autoSave);
-      setGoogleLinked(social.googleLinked);
-    }).catch(() => {});
+      if (infoRes.status === 'fulfilled') {
+        setProfileName(infoRes.value.name);
+        setProfileEmail(infoRes.value.email);
+        setAvatarUrl(infoRes.value.profileImageUrl ?? undefined);
+      }
+      if (settingsRes.status === 'fulfilled') {
+        setPushEnabled(settingsRes.value.pushNotification);
+        setAutoSyncEnabled(settingsRes.value.autoSave);
+      }
+      if (socialRes.status === 'fulfilled') {
+        setGoogleLinked(socialRes.value.googleLinked);
+      }
+    });
 
     return () => { ignore = true; };
   }, []);
@@ -132,7 +138,10 @@ export default function SettingsPage({
       const s3Res = await memberApi.uploadProfileImageToS3(uploadUrl, avatarFile, contentType);
       if (!s3Res.ok) throw new Error('S3 업로드 실패');
       await memberApi.updateProfileImage({ objectKey });
-      setAvatarUrl(URL.createObjectURL(avatarFile));
+      setAvatarUrl((prev) => {
+        if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(avatarFile);
+      });
     }
   }, [profileName]);
 
