@@ -39,6 +39,7 @@ export default function ProfileEditModal({
   const [avatarPreview, setAvatarPreview] = useState(avatarUrl);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,14 +51,16 @@ export default function ProfileEditModal({
 
   const handleAvatarDelete = async () => {
     if (avatarFile !== null) {
-      // 로컬에서 선택한 이미지만 취소 — API 불필요
       setAvatarFile(null);
       setAvatarPreview(avatarUrl);
       return;
     }
-    // 서버에 저장된 이미지 삭제
-    await onDeleteAvatar?.();
-    setAvatarPreview(undefined);
+    try {
+      await onDeleteAvatar?.();
+      setAvatarPreview(undefined);
+    } catch {
+      setSaveError('프로필 이미지 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const hasAvatar = Boolean(avatarPreview);
@@ -65,10 +68,13 @@ export default function ProfileEditModal({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+    setSaveError('');
     setIsSubmitting(true);
     try {
       await onSave({ name: nameValue.trim(), avatarFile });
       onClose();
+    } catch {
+      setSaveError('저장에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
@@ -234,13 +240,18 @@ export default function ProfileEditModal({
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="title-02 w-[400px] rounded-2 bg-primary-500 py-[13px] text-center text-white disabled:opacity-50"
-        >
-          저장하기
-        </button>
+        <div className="flex w-[400px] flex-col gap-3">
+          {saveError && (
+            <span className="body-04 text-center text-[#FF2A14]">{saveError}</span>
+          )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="title-02 w-full rounded-2 bg-primary-500 py-[13px] text-center text-white disabled:opacity-50"
+          >
+            저장하기
+          </button>
+        </div>
       </form>
     </ModalOverlay>
   );

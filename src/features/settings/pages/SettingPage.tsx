@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import { authApi } from "../../auth/api/authApi";
 import { memberApi } from "../api/memberApi";
 import TopAlertBanner from "../../../shared/components/TopAlertBanner";
@@ -65,6 +64,9 @@ export default function SettingsPage({
   // 소셜 연결 여부
   const [googleLinked, setGoogleLinked] = useState(false);
 
+  // 일반 에러 배너
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+
   // 구글 연결 배너
   const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(() => {
     if (googleLinkResult) {
@@ -101,6 +103,7 @@ export default function SettingsPage({
       await memberApi.updateSettings({ pushNotification: next });
     } catch {
       setPushEnabled(!next);
+      setErrorBanner('푸시 알림 설정 변경에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -110,54 +113,37 @@ export default function SettingsPage({
       await memberApi.updateSettings({ autoSave: next });
     } catch {
       setAutoSyncEnabled(!next);
+      setErrorBanner('자동 동기화 설정 변경에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
   const handleProfileSave = useCallback(async ({ name, avatarFile }: { name: string; avatarFile: File | null }) => {
-    try {
-      if (name !== profileName) {
-        const result = await memberApi.updateProfile({ name });
-        setProfileName(result.name);
-      }
+    if (name !== profileName) {
+      const result = await memberApi.updateProfile({ name });
+      setProfileName(result.name);
+    }
 
-      if (avatarFile !== null) {
-        const { uploadUrl, objectKey, contentType } = await memberApi.getProfileImageUploadUrl({
-          fileName: avatarFile.name,
-          contentType: avatarFile.type,
-          fileSize: avatarFile.size,
-        });
-        const s3Res = await memberApi.uploadProfileImageToS3(uploadUrl, avatarFile, contentType);
-        if (!s3Res.ok) throw new Error('S3 업로드 실패');
-        await memberApi.updateProfileImage({ objectKey });
-        setAvatarUrl(URL.createObjectURL(avatarFile));
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('프로필 저장 실패:', error.response?.data);
-      }
+    if (avatarFile !== null) {
+      const { uploadUrl, objectKey, contentType } = await memberApi.getProfileImageUploadUrl({
+        fileName: avatarFile.name,
+        contentType: avatarFile.type,
+        fileSize: avatarFile.size,
+      });
+      const s3Res = await memberApi.uploadProfileImageToS3(uploadUrl, avatarFile, contentType);
+      if (!s3Res.ok) throw new Error('S3 업로드 실패');
+      await memberApi.updateProfileImage({ objectKey });
+      setAvatarUrl(URL.createObjectURL(avatarFile));
     }
   }, [profileName]);
 
   const handleDeleteAvatar = useCallback(async () => {
-    try {
-      await memberApi.deleteProfileImage();
-      setAvatarUrl(undefined);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('이미지 삭제 실패:', error.response?.data);
-      }
-    }
+    await memberApi.deleteProfileImage();
+    setAvatarUrl(undefined);
   }, []);
 
   const handleUnlinkGoogle = useCallback(async () => {
-    try {
-      await memberApi.unlinkGoogle();
-      setGoogleLinked(false);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Google 연결 해제 실패:', error.response?.data);
-      }
-    }
+    await memberApi.unlinkGoogle();
+    setGoogleLinked(false);
   }, []);
 
   const handleConnectGoogle = async () => {
@@ -179,6 +165,13 @@ export default function SettingsPage({
       <main className="mx-auto flex w-full max-w-content flex-col gap-[50px] px-[188px] pt-8">
         <BackHeader title="설정" onBack={() => window.history.back()} />
 
+        {errorBanner && (
+          <TopAlertBanner
+            variant="red"
+            message={errorBanner}
+            onClose={() => setErrorBanner(null)}
+          />
+        )}
         {googleLinkBanner === 'success' && (
           <TopAlertBanner
             variant="teal"

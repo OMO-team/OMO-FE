@@ -5,14 +5,13 @@ import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 import { memberApi } from '../api/memberApi';
+import { passwordRegex } from '../../auth/constants/passwordRegex';
 
 type PasswordChangeModalProps = {
   onClose: () => void;
   onForgotPassword: () => void;
   onSuccess?: () => void;
 };
-
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
 export default function PasswordChangeModal({ onClose, onForgotPassword, onSuccess }: PasswordChangeModalProps) {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -37,8 +36,8 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
       setCurrentPasswordError('현재 비밀번호를 입력해주세요.');
       hasError = true;
     }
-    if (!PASSWORD_REGEX.test(newPassword)) {
-      setNewPasswordError('영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.');
+    if (!passwordRegex.test(newPassword)) {
+      setNewPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.');
       hasError = true;
     }
     if (confirmPassword.length < 8) {
@@ -108,7 +107,7 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
                     error={newPasswordError}
                   />
                   <span className="label-01 px-2 text-gray-600">
-                    영문, 숫자 특수문자를 포함해 8자 이상 입력해주세요.
+                    영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.
                   </span>
                 </div>
                 <Input
