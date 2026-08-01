@@ -10,6 +10,7 @@ import LoginRequiredModal from '../../features/auth/components/LoginRequiredModa
 import SearchModal from '../../features/search/components/SearchModal';
 import AIChatPanel from '../../features/chat/components/AIChatPanel';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
+import { memberApi } from '../../features/settings/api/memberApi';
 import type { MainLayoutContext } from './useMainLayoutContext';
 import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
@@ -23,7 +24,10 @@ export default function MainLayout() {
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    if (token) signIn();
+    if (!token) return;
+    memberApi.getMyInfo()
+      .then((info) => signIn(info.profileImageUrl ?? undefined))
+      .catch(() => signIn());
   }, []);
   const matches = useMatches();
   const headerVariant =
