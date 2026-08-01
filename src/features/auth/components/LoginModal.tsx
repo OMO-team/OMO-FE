@@ -6,6 +6,7 @@ import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
 import { authApi } from '../api/authApi';
+import { memberApi } from '../../settings/api/memberApi';
 import { useAuthStore } from '../store/useAuthStore';
 
 type LoginModalProps = {
@@ -47,7 +48,8 @@ export default function LoginModal({
     setIsSubmitting(true);
     try {
       await authApi.login({ email, password });
-      signIn();
+      const info = await memberApi.getMyInfo().catch(() => null);
+      signIn(info?.profileImageUrl ?? undefined);
       onClose();
     } catch (error) {
       if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 401) {
