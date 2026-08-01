@@ -26,15 +26,21 @@ export default function MainLayout() {
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
+    const controller = new AbortController();
     memberApi.getMyInfo()
-      .then((info) => signIn(info.profileImageUrl ?? undefined))
+      .then((info) => {
+        if (controller.signal.aborted) return;
+        if (localStorage.getItem('accessToken') !== token) return;
+        signIn(info.profileImageUrl ?? undefined);
+      })
       .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
         if (axios.isAxiosError(error) && error.response?.status === 401) {
+          localStorage.removeItem('accessToken');
           signOut();
-        } else {
-          signIn();
         }
       });
+    return () => { controller.abort(); };
   }, []);
   const matches = useMatches();
   const headerVariant =
