@@ -9,6 +9,8 @@ export interface Country {
   name: string;
   code: string;
   imageUrl: string;
+  continent: string
+  recommendedCityCount: number
 }
 
 export interface CountriesResponse {
