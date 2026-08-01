@@ -94,6 +94,11 @@ export default function CityInsight() {
 
   const [input, setInput] = useState(urlKeyword);
   const [keyword, setKeyword] = useState(urlKeyword);
+
+  useEffect(() => {
+    setInput(urlKeyword);
+    setKeyword(urlKeyword);
+  }, [urlKeyword]);
   const [page, setPage] = useState(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
