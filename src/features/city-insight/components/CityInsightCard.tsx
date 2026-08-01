@@ -40,11 +40,11 @@ export default function CityInsightCard({
   ]
 
   return (
-    <div className='w-full aspect-[522/598] flex flex-col bg-white rounded-4 shadow-02 hover:border border-primary-500 overflow-hidden cursor-pointer'>
+    <div className='w-[522px] h-[596px] flex flex-col bg-white rounded-4 shadow-02 hover:border border-primary-500 overflow-hidden cursor-pointer'>
 
       {/* 카드 배경 */}
       <div
-        className="relative h-[42%] bg-cover bg-center"
+        className="relative h-[250px] bg-cover bg-center"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
@@ -59,7 +59,7 @@ export default function CityInsightCard({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col px-[6.9%] py-[3.8%]">
+      <div className="flex flex-1 flex-col px-[36px] py-[20px]">
 
         {/* 도시 정보 */}
         <div className="flex flex-col gap-1.5">
@@ -71,8 +71,8 @@ export default function CityInsightCard({
         </div>
 
         {/* 월 평균 생활비 */}
-        <div className='mt-[3.8%]'>
-          <div className='flex items-center justify-between mb-[1.3%]'>
+        <div className='mt-[20px]'>
+          <div className='flex items-center justify-between mb-[7px]'>
             <p className='body-02'>월 평균 생활비</p>
             <p className='body-02'>{monthlyCost} 만원</p>
           </div>
@@ -80,7 +80,7 @@ export default function CityInsightCard({
         </div>
 
         {/* 숙소 및 비자 구하기 난이도 */}
-        <div className='flex gap-[5.7%] mt-[2.3%]'>
+        <div className='flex gap-[30px] mt-3'>
           <div className='flex-1'>
             <ProgressBar percent={accommodationPercent} leftLabel='숙소 구하기' rightLabel={accommodationLabel} />
           </div>
@@ -90,7 +90,7 @@ export default function CityInsightCard({
         </div>
 
         {/* 치안 & 어학 & 인프라 평점 */}
-        <div className='flex justify-around items-center mt-[3.1%] divide-x divide-gray-200'>
+        <div className='flex justify-around items-center mt-4 divide-x divide-gray-200'>
           {cityInfo.map((info, index) => (
             <div key={index} className='flex flex-col items-center gap-1.5 flex-1'>
               <p className='label-01'>{info.label}</p>
@@ -99,7 +99,7 @@ export default function CityInsightCard({
           ))}
         </div>
 
-        <div className="mt-auto mb-[5.7%]">
+        <div className="mt-auto mb-[30px]">
           <CardButtonGroup onCompare={onCompare} onReport={onReport} />
         </div>
       </div>

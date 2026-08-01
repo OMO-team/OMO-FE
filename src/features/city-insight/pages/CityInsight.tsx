@@ -188,9 +188,9 @@ export default function CityInsight() {
 
   return (
     <div className="w-full flex flex-col items-center justify-center mt-[30px]">
-      <div className="w-full px-[188px]">
+      <div className="w-[1064px]">
         {!isFromCountry && (
-          <div className={`mt-[50px] mb-6 ${isFromSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
+          <div className={`mb-6 ${isFromSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
             {isFromSearch ? (
               <h1 className="heading-05">
                 <span className="text-blue-500">'{urlKeyword}'</span>에 대한 검색 결과
@@ -215,7 +215,7 @@ export default function CityInsight() {
               />
               <SearchInputBar
                 placeholder="원하는 도시 조건을 입력해 보세요"
-                width="w-full"
+                width="w-[974px]"
                 value={input}
                 onChange={setInput}
                 onSearch={handleSearch}
