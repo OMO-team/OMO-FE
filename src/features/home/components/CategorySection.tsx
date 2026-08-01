@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import CategoryTab from '../../../shared/components/CategoryTab';
 import CityCard from './CityCard';
-import chevronRightIcon from '../../../assets/icons/chevron-right.svg';
+import ChevronDownIcon from '../../../shared/components/ChevronDownIcon';
 import { usePurposes } from '../hooks/usePurposes';
 import { useCountriesByPurpose } from '../hooks/useCountriesByPurpose';
 
 export default function CategorySection() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [showMore, setShowMore] = useState(false);
   const { data: purposes = [] } = usePurposes();
 
   const activePurpose = purposes[activeIndex];
   const categoryNames = purposes.map(p => p.name);
 
   const { data: countries = [] } = useCountriesByPurpose(activePurpose?.type);
+  const visibleCountries = countries.slice(0, showMore ? 6 : 3);
 
   return (
     <div className="flex flex-col items-start w-[1064px] gap-[40px]">
@@ -35,28 +37,32 @@ export default function CategorySection() {
             </p>
           </div>
 
-          <button
-            type="button"
-            className="flex justify-center items-center pl-[18px] pr-[12px] py-2 gap-1 rounded-2 bg-primary-50"
-          >
-            <span className="body-02 text-primary-500">더보기</span>
-            <div className="flex justify-center items-center w-4 h-4">
-              <img src={chevronRightIcon} alt="더보기" />
-            </div>
-          </button>
+          {countries.length > 3 && (
+            <button
+              type="button"
+              className="flex justify-center items-center pl-[18px] pr-[12px] py-2 gap-1 rounded-2 bg-primary-50"
+              onClick={() => setShowMore(prev => !prev)}
+            >
+              <span className="body-02 text-primary-500">더보기</span>
+              <div className="flex justify-center items-center w-4 h-4">
+                <ChevronDownIcon
+                  color="#3b82f6"
+                  className={`transition-transform duration-200 ${showMore ? '' : '-rotate-90'}`}
+                />
+              </div>
+            </button>
+          )}
         </div>
 
-        <div className="flex items-center gap-4 self-stretch">
-          <div className="flex items-center gap-4">
-            {countries.map(country => (
-              <CityCard
-                key={country.countryId}
-                name={country.name}
-                code={country.code}
-                imageUrl={country.imageUrl}
-              />
-            ))}
-          </div>
+        <div className="grid grid-cols-3 gap-4 self-stretch">
+          {visibleCountries.map(country => (
+            <CityCard
+              key={country.countryId}
+              name={country.name}
+              imageUrl={country.imageUrl}
+              recommendedCityCount={country.recommendedCityCount}
+            />
+          ))}
         </div>
 
       </div>
