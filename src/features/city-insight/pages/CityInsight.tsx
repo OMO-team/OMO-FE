@@ -1,5 +1,5 @@
 // react
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 // shared components
@@ -21,6 +21,13 @@ import CompareModal from '../../compare/components/CompareModal';
 
 // hooks
 import { usePurposes } from '../../home/hooks/usePurposes';
+import { useCities } from '../hooks/useCities';
+
+// utils
+import { adaptCityToCardProps } from '../utils/cityAdapter';
+
+// types
+import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
 
 // stores
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
@@ -31,20 +38,32 @@ import type { CityReportData } from '../../../shared/types/cityReport';
 
 // constants & mocks
 import { DETAIL_OPTIONS } from '../constants/filterOptions';
-import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
 import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { mockCities } from '../../../shared/mocks/cities';
 
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
-import searchInputIcon from '../../../assets/icons/search-input-list.svg'
+import searchInputIcon from '../../../assets/icons/search-input-list.svg';
+
+// API 파라미터 값 변환
+const MONTHLY_COST_MAP: Record<string, number> = {
+  '150 만원': 150, '200 만원': 200, '300 만원': 300,
+};
+const SAFETY_SCORE_MAP: Record<string, number> = {
+  '5점': 5, '4점': 4, '3점': 3,
+};
+const DIFFICULTY_MAP: Record<string, DifficultyType> = {
+  '쉬움': 'EASY', '보통': 'NORMAL', '어려움': 'HARD',
+};
+const STAY_DURATION_MAP: Record<string, StayDurationType> = {
+  '3개월 이하': 'SHORT', '3 - 6개월': 'MEDIUM', '6개월 - 1년': 'LONG', '1년 이상': 'VERY_LONG',
+};
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
 };
 
-// TODO: 도시별 실제 데이터 연동 전까지, 비교 목데이터가 있는 도시만 매핑
 const CITY_COMPARE_ID: Record<string, string> = {
   베를린: 'berlin',
   도쿄: 'tokyo',
@@ -65,7 +84,9 @@ export default function CityInsight() {
     setSearchParams({ purposeId: String(selected.purposeId) });
   };
 
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [page, setPage] = useState(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
@@ -73,6 +94,28 @@ export default function CityInsight() {
   const [addedCityName, setAddedCityName] = useState<string | null>(null);
   const addCity = useRoadmapStore(s => s.addCity);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
+
+  const activePurpose = purposes[activeIndex];
+
+  const queryParams = useMemo<CityQueryParams>(() => ({
+    keyword: keyword || undefined,
+    purposeType: activePurpose?.type,
+    maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
+    minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
+    housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
+    visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
+    stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
+  }), [keyword, activePurpose, selectedOptions]);
+
+  const { data: cities = [] } = useCities(queryParams);
+
+  const PAGE_SIZE = 6;
+  const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
+  const pagedCities = cities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [cities]);
 
   const handleCompare = (cityName: string) => {
     const id = CITY_COMPARE_ID[cityName];
@@ -86,6 +129,7 @@ export default function CityInsight() {
     return () => clearTimeout(timer);
   }, [addedCityName]);
 
+  // 지역 필터 칩 추가 
   const handleSelect = (country: string) => {
     setSelectedFilters(prev => (prev.includes(country) ? prev : [...prev, country]));
   };
@@ -100,7 +144,12 @@ export default function CityInsight() {
     });
   };
 
+  const handleSearch = () => setKeyword(input);
+
+  // 필터 전체 초기화
   const handleReset = () => {
+    setInput('');
+    setKeyword('');
     setSelectedFilters([]);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
@@ -109,16 +158,15 @@ export default function CityInsight() {
   const reportData = reportCityName ? CITY_REPORT_DATA[reportCityName] : null;
 
   const handleAddToRoadmap = () => {
-    const card = CITY_INSIGHT_CARDS.find(c => c.cityName === reportCityName);
-    if (!card) return;
+    const city = cities.find(c => c.name === reportCityName);
+    if (!city) return;
     addCity({
-      // TODO: CITY_INSIGHT_CARDS에 실제 cityId가 생기면 교체 (지금은 cityName을 임시 식별자로 사용)
-      cityId: card.cityName,
-      cityName: card.cityName,
-      countryName: card.countryName,
-      description: card.description,
-      rating: card.rating,
-      imageUrl: card.imageUrl,
+      cityId: String(city.cityId),
+      cityName: city.name,
+      countryName: city.country.name,
+      description: city.description,
+      rating: city.rating,
+      imageUrl: city.imageUrl,
       progressPercent: 0,
       costProgressPercent: 0,
       completedSteps: 0,
@@ -126,7 +174,7 @@ export default function CityInsight() {
       nextSchedule: '아직 일정이 없어요',
     });
     setReportCityName(null);
-    setAddedCityName(card.cityName);
+    setAddedCityName(city.name);
   };
 
   return (
@@ -147,7 +195,7 @@ export default function CityInsight() {
             width="w-[974px]"
             value={input}
             onChange={setInput}
-            onSearch={() => {}}
+            onSearch={handleSearch}
             icon={searchInputIcon}
           />
           <div className="flex justify-between">
@@ -184,20 +232,34 @@ export default function CityInsight() {
             />
           ))}
         </div>
-        {CITY_INSIGHT_CARDS.length !== 0 ? (
+        {cities.length !== 0 ? (
           <>
             <div className="mt-11 grid grid-cols-2 gap-5">
-              {CITY_INSIGHT_CARDS.map(card => (
+              {pagedCities.map(city => (
                 <CityInsightCard
-                  key={card.cityName}
-                  {...card}
-                  onCompare={() => handleCompare(card.cityName)}
-                  onReport={() => setReportCityName(card.cityName)}
+                  key={city.cityId}
+                  imageUrl={city.imageUrl}
+                  rating={city.rating}
+                  isWishlisted={city.isWishlisted}
+                  name={city.name}
+                  countryName={city.country.name}
+                  description={city.description}
+                  monthlyCost={city.monthlyCost}
+                  safetyScore={city.safetyScore}
+                  languageScore={city.languageScore}
+                  internetScore={city.internetScore}
+                  {...adaptCityToCardProps(city)}
+                  onCompare={() => handleCompare(city.name)}
+                  onReport={() => setReportCityName(city.name)}
                 />
               ))}
             </div>
             <div className="mt-25 mb-[304px]">
-              <PageNavigation currentPage={1} totalPages={3} />
+              <PageNavigation
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             </div>
           </>
         ) : (
