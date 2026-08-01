@@ -54,7 +54,7 @@ export default function CityInsightCard({
             {rating}
           </span>
           <button type="button" onClick={onToggleWish} aria-label="찜하기">
-            <HeartIcon isWished={isWishlisted} />
+            <HeartIcon isWishlisted={isWishlisted} />
           </button>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function CityInsightCard({
           ))}
         </div>
 
-        <div className="mt-auto mb-[30px]">
+        <div className="mt-auto mb-[10px]">
           <CardButtonGroup onCompare={onCompare} onReport={onReport} />
         </div>
       </div>
