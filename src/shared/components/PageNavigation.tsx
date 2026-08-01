@@ -1,5 +1,7 @@
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
 
+const GROUP_SIZE = 3;
+
 type PageNavigationProps = {
   currentPage: number;
   totalPages: number;
@@ -7,21 +9,36 @@ type PageNavigationProps = {
 };
 
 export default function PageNavigation({ currentPage, totalPages, onPageChange }: PageNavigationProps) {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const currentGroup = Math.floor((currentPage - 1) / GROUP_SIZE);
+  const totalGroups = Math.ceil(totalPages / GROUP_SIZE);
+
+  const groupStart = currentGroup * GROUP_SIZE + 1;
+  const groupEnd = Math.min(groupStart + GROUP_SIZE - 1, totalPages);
+  const visiblePages = Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i);
+
+  const handlePrev = () => {
+    if (currentGroup <= 0) return;
+    onPageChange?.((currentGroup - 1) * GROUP_SIZE + 1);
+  };
+
+  const handleNext = () => {
+    if (currentGroup >= totalGroups - 1) return;
+    onPageChange?.((currentGroup + 1) * GROUP_SIZE + 1);
+  };
 
   return (
     <div className="flex items-center justify-center gap-2">
       <button
         type="button"
         className="flex size-icon-sm items-center justify-center text-gray-600 disabled:opacity-40"
-        aria-label="이전 페이지"
-        disabled={currentPage <= 1}
-        onClick={() => onPageChange?.(Math.max(currentPage - 1, 1))}
+        aria-label="이전 페이지 그룹"
+        disabled={currentGroup <= 0}
+        onClick={handlePrev}
       >
         <ChevronLeftIcon className="size-icon-sm" />
       </button>
       <div className="flex items-center gap-3">
-        {pages.map((page) => (
+        {visiblePages.map((page) => (
           <button
             key={page}
             type="button"
@@ -37,9 +54,9 @@ export default function PageNavigation({ currentPage, totalPages, onPageChange }
       <button
         type="button"
         className="flex size-icon-sm items-center justify-center text-gray-600 disabled:opacity-40"
-        aria-label="다음 페이지"
-        disabled={currentPage >= totalPages}
-        onClick={() => onPageChange?.(Math.min(currentPage + 1, totalPages))}
+        aria-label="다음 페이지 그룹"
+        disabled={currentGroup >= totalGroups - 1}
+        onClick={handleNext}
       >
         <ChevronLeftIcon className="size-icon-sm rotate-180" />
       </button>
