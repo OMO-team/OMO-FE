@@ -1,8 +1,9 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import RegionFilterIcon from "../../../shared/components/RegionFilterIcon"
 import ChevronDownIcon from "../../../shared/components/ChevronDownIcon"
 import searchIcon from '../../../assets/icons/icon-search[18].svg'
 import { useCountriesByPurpose } from "../../home/hooks/useCountriesByPurpose"
+import { useOutsideClick } from "../../../shared/hooks/useOutsideClick"
 import type { Purpose } from "../../home/types/home"
 
 interface RegionDropDownProps {
@@ -16,6 +17,8 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
   const [openContinents, setOpenContinents] = useState<string[]>([])
   const [selectedCountry, setSelectedCountry] = useState<{ name: string; code: string } | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
+  useOutsideClick(containerRef, () => setIsOpen(false))
 
   const { data: countries = [] } = useCountriesByPurpose(isOpen ? purposeType : undefined)
 
@@ -55,7 +58,7 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
   }
 
   return (
-    <div className="relative cursor-pointer">
+    <div ref={containerRef} className="relative cursor-pointer">
       <div
         className={`inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer ${isOpen ? 'bg-primary-500' : 'bg-gray-50 hover:bg-gray-100'}`}
         onClick={() => setIsOpen(!isOpen)}
