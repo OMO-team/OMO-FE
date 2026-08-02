@@ -5,7 +5,7 @@ import type { Purpose } from '../types/home';
 
 export type { Purpose };
 
-export function usePurposes() {
+export function usePurposes(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['purposes'],
     queryFn: async (): Promise<Purpose[]> => {
@@ -14,5 +14,6 @@ export function usePurposes() {
       return data.result;
     },
     staleTime: Infinity,
+    enabled: options?.enabled ?? true,
   });
 }

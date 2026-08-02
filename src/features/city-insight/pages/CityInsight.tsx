@@ -27,7 +27,7 @@ import { useCities } from '../hooks/useCities';
 import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
-import type { CityQueryParams, ContinentType, DifficultyType, StayDurationType } from '../types/cityInsight';
+import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
 
 // stores
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
@@ -73,7 +73,15 @@ const CITY_COMPARE_ID: Record<string, string> = {
 export default function CityInsight() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { data: purposes = [] } = usePurposes();
+
+  const urlKeyword = searchParams.get('keyword') ?? '';
+  const urlCountryCode = searchParams.get('countryCode') ?? undefined;
+
+  // 진입 경로 판단
+  const isFromCountry = !!urlCountryCode;
+  const isFromSearch = !!urlKeyword;
+
+  const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
   const activeIndex = Math.max(0, purposes.findIndex(p => p.purposeId === purposeIdParam));
@@ -85,14 +93,7 @@ export default function CityInsight() {
     const params: Record<string, string> = { purposeId: String(selected.purposeId) };
     if (urlCountryCode) params.countryCode = urlCountryCode;
     setSearchParams(params);
-  };
-
-  const urlKeyword = searchParams.get('keyword') ?? '';
-  const urlCountryCode = searchParams.get('countryCode') ?? undefined;
-
-  // 진입 경로 판단
-  const isFromCountry = !!urlCountryCode;  
-  const isFromSearch = !!urlKeyword;       
+  };       
 
   const [input, setInput] = useState(urlKeyword);
   const [keyword, setKeyword] = useState(urlKeyword);
@@ -103,7 +104,7 @@ export default function CityInsight() {
   }, [urlKeyword]);
   const [page, setPage] = useState(1);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [selectedContinent, setSelectedContinent] = useState<ContinentType | undefined>(undefined);
+  const [selectedCountryCode, setSelectedCountryCode] = useState<string | undefined>(undefined);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
@@ -116,16 +117,17 @@ export default function CityInsight() {
   const queryParams = useMemo<CityQueryParams>(() => ({
     keyword: keyword || undefined,
     purposeType: isFromSearch ? undefined : activePurpose?.type,
-    countryCode: urlCountryCode,
-    continent: selectedContinent,
+    countryCode: selectedCountryCode ?? urlCountryCode,
     maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
     minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
     housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
     visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
     stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
-  }), [keyword, activePurpose, urlCountryCode, selectedContinent, selectedOptions]);
+  }), [keyword, activePurpose, urlCountryCode, selectedCountryCode, selectedOptions]);
 
-  const { data: cities = [] } = useCities(queryParams);
+  const { data: cities = [] } = useCities(queryParams, {
+    enabled: isFromSearch || !!activePurpose,
+  });
 
   const PAGE_SIZE = 6;
   const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
@@ -147,9 +149,9 @@ export default function CityInsight() {
     return () => clearTimeout(timer);
   }, [addedCityName]);
 
-  const handleSelect = (continent: ContinentType) => {
-    setSelectedFilters(prev => (prev.includes(continent) ? prev : [...prev, continent]));
-    setSelectedContinent(continent);
+  const handleSelect = (countryCode: string, countryName: string) => {
+    setSelectedFilters(prev => (prev.includes(countryName) ? prev : [...prev, countryName]));
+    setSelectedCountryCode(countryCode);
   };
 
   const handleSelectOption = (title: string, option: string) => {
@@ -169,7 +171,7 @@ export default function CityInsight() {
     setInput('');
     setKeyword('');
     setSelectedFilters([]);
-    setSelectedContinent(undefined);
+    setSelectedCountryCode(undefined);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
   };
@@ -243,7 +245,7 @@ export default function CityInsight() {
                 key={`region-${resetKey}`}
                 purposeType={activePurpose?.type}
                 onSelect={handleSelect}
-                onReset={() => { setSelectedFilters([]); setSelectedContinent(undefined); }}
+                onReset={() => { setSelectedFilters([]); setSelectedCountryCode(undefined); }}
               />
               <div className="w-px h-7 bg-gray-300"></div>
               {DETAIL_OPTIONS.map(({ title, options }) => (
