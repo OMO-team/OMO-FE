@@ -269,7 +269,10 @@ export default function CityInsight() {
             <FilterChip
               key={filter}
               label={filter}
-              onRemove={() => setSelectedFilters(prev => prev.filter(v => v !== filter))}
+              onRemove={() => {
+                setSelectedFilters(prev => prev.filter(v => v !== filter));
+                setSelectedCountryCode(undefined);
+              }}
             />
           ))}
         </div>
