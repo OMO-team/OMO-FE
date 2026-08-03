@@ -14,6 +14,7 @@ import DetailDropDown from '../components/DetailDropDown';
 import RegionDropDown from '../components/RegionDropDown';
 import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
+import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
@@ -28,7 +29,7 @@ import type { CityReportData } from '../../../shared/types/cityReport';
 // constants & mocks
 import { DETAIL_OPTIONS } from '../constants/filterOptions';
 import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
-import { berlinReportData, mockSearchResult } from '../../city-ai-report/mocks/mockData';
+import { berlinReportData } from '../../city-ai-report/mocks/mockData';
 import { mockCities } from '../../../shared/mocks/cities';
 
 // assets
@@ -90,13 +91,15 @@ export default function CityInsight() {
   };
 
   const reportData = reportCityName ? CITY_REPORT_DATA[reportCityName] : null;
+  const reportCard = reportCityName
+    ? CITY_INSIGHT_CARDS.find(c => c.cityName === reportCityName)
+    : null;
 
   const handleAddToRoadmap = () => {
     const card = CITY_INSIGHT_CARDS.find(c => c.cityName === reportCityName);
     if (!card) return;
     addCity({
-      // TODO: CITY_INSIGHT_CARDS에 실제 cityId가 생기면 교체 (지금은 cityName을 임시 식별자로 사용)
-      cityId: card.cityName,
+      cityId: String(card.cityId),
       cityName: card.cityName,
       countryName: card.countryName,
       description: card.description,
@@ -201,12 +204,12 @@ export default function CityInsight() {
           </div>
         )}
       </div>
-      {reportData && (
+      {reportData && reportCard && (
         <CityReportModal
           isOpen
           onClose={() => setReportCityName(null)}
           data={reportData}
-          onSearch={mockSearchResult}
+          onSearch={question => cityAiReportApi.askQuestion(reportCard.cityId, { question })}
           onAddToRoadmap={handleAddToRoadmap}
         />
       )}

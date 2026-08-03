@@ -26,18 +26,22 @@ export interface ReviewItem {
   content: string;
 }
 
-export interface RelatedDocument {
-  id: string;
-  category: string;
+export interface AiReportResource {
+  topic: string;
+  resourceType: string;
   title: string;
+  source: string;
+  url: string;
 }
 
 export interface AISearchResultData {
-  answer: string;
-  documents: RelatedDocument[];
+  summary: string;
+  resources: AiReportResource[];
 }
 
 export interface CityReportData {
+  /** AI 맞춤 검색(POST /api/v1/cities/{cityId}/ai-report) 호출에 쓰는 식별자 */
+  cityId: number;
   cityName: string;
   heroImageUrl: string;
   ratingBadge: number;

@@ -1,5 +1,6 @@
 export const CITY_INSIGHT_CARDS = [
   {
+    cityId: 1,
     imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800',
     rating: 4.5,
     isWished: false,
@@ -17,6 +18,7 @@ export const CITY_INSIGHT_CARDS = [
     infrastructureScore: 4.9,
   },
   {
+    cityId: 2,
     imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
     rating: 4.2,
     isWished: true,
@@ -34,6 +36,7 @@ export const CITY_INSIGHT_CARDS = [
     infrastructureScore: 4.6,
   },
   {
+    cityId: 3,
     imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
     rating: 4.0,
     isWished: false,
@@ -51,6 +54,7 @@ export const CITY_INSIGHT_CARDS = [
     infrastructureScore: 4.4,
   },
   {
+    cityId: 4,
     imageUrl: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800',
     rating: 4.3,
     isWished: true,
@@ -68,6 +72,7 @@ export const CITY_INSIGHT_CARDS = [
     infrastructureScore: 4.7,
   },
   {
+    cityId: 5,
     imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800',
     rating: 3.9,
     isWished: false,
@@ -85,6 +90,7 @@ export const CITY_INSIGHT_CARDS = [
     infrastructureScore: 4.8,
   },
   {
+    cityId: 6,
     imageUrl: 'https://images.unsplash.com/photo-1555921015-5532091f6026?w=800',
     rating: 4.1,
     isWished: false,

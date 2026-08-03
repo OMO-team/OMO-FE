@@ -15,7 +15,7 @@ interface CityReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   data: CityReportData;
-  onSearch: (query: string) => AISearchResultData;
+  onSearch: (query: string) => Promise<AISearchResultData>;
   onAddToRoadmap?: () => void;
 }
 

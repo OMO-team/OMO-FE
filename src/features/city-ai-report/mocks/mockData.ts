@@ -1,9 +1,7 @@
-import type {
-  CityReportData,
-  AISearchResultData,
-} from "../../../shared/types/cityReport";
+import type { CityReportData } from "../../../shared/types/cityReport";
 
 export const berlinReportData: CityReportData = {
+  cityId: 4,
   cityName: "베를린",
   heroImageUrl: "/src/assets/berlin.jpg",
   ratingBadge: 4.5,
@@ -85,11 +83,3 @@ export const berlinReportData: CityReportData = {
     },
   ],
 };
-
-export const mockSearchResult = (query: string): AISearchResultData => ({
-  answer: `베를린의 ${query}에 대한 정보입니다. 필요 서류는 여권, 재정증명서, 보험가입증명서입니다. 평균 처리기간은 4-6주이며 ...`,
-  documents: [
-    { id: "1", category: "비자", title: "독일 워킹홀리데이 비자 신청 가이드" },
-    { id: "2", category: "숙소", title: "WG-Gesucht 사용법 완벽 정리" },
-  ],
-});
