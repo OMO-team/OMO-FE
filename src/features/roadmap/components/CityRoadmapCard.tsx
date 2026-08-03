@@ -56,7 +56,7 @@ export default function CityRoadmapCard({
               className="size-6"
               aria-label={isWished ? '위시리스트에서 제거' : '위시리스트에 추가'}
             >
-              <HeartIcon isWished={isWished} />
+              <HeartIcon isWishlisted={isWished} />
             </button>
             <button
               type="button"

@@ -226,8 +226,21 @@ export default function CountryRoadmapList({
             {wishlistCities.map((city) => (
               <CityInsightCard
                 key={city.cityId}
-                {...city}
-                isWished
+                imageUrl={city.imageUrl}
+                rating={city.rating}
+                isWishlisted
+                name={city.cityName}
+                countryName={city.countryName}
+                description={city.description}
+                monthlyCost={Number(city.monthlyCost)}
+                costPercent={city.costPercent}
+                accommodationPercent={city.accommodationPercent}
+                accommodationLabel={city.accommodationLabel}
+                visaPercent={city.visaPercent}
+                visaLabel={city.visaLabel}
+                safetyScore={city.securityScore}
+                languageScore={city.languageScore}
+                internetScore={city.infrastructureScore}
                 onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
                 onCompare={() => toggleCompare(city.cityId)}
                 onReport={() => setReportCityId(city.cityId)}
