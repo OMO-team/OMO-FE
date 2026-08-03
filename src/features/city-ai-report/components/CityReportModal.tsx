@@ -9,6 +9,8 @@ import VlogReviews from './VlogReviews';
 import RealReviews from './RealReviews';
 import CityReportFooter from './CityReportFooter';
 import CloseButton from '../../../shared/components/CloseButton';
+import { useCityStats } from '../hooks/useCityStats';
+import { toKeyMetrics } from '../utils/statsAdapter';
 import type { AISearchResultData, CityReportData } from '../../../shared/types/cityReport';
 
 interface CityReportModalProps {
@@ -26,6 +28,9 @@ export default function CityReportModal({
   onSearch,
   onAddToRoadmap,
 }: CityReportModalProps) {
+  const { data: stats } = useCityStats(data.cityId);
+  const keyMetrics = stats ? toKeyMetrics(stats) : [];
+
   useEffect(() => {
     if (!isOpen) return;
     const originalOverflow = document.body.style.overflow;
@@ -66,7 +71,7 @@ export default function CityReportModal({
               </div>
               <div className="flex justify-start items-center self-stretch gap-4">
                 <div className="flex flex-col justify-start items-start w-[432px] gap-[60px]">
-                  <KeyMetrics metrics={data.keyMetrics} />
+                  <KeyMetrics metrics={keyMetrics} />
                   <ProsCons pros={data.pros} cons={data.cons} />
                 </div>
                 <div className="flex flex-col justify-start items-start w-[448px] gap-5">

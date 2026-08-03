@@ -7,8 +7,10 @@ export interface KeySummaryItem {
 export interface KeyMetricItem {
   id: string;
   label: string;
-  percentage: number;
+  /** null이면 기준치(maxValue)가 없는 지표라 막대 없이 displayValue만 표시 */
+  percentage: number | null;
   barColor: "gray" | "gradient";
+  displayValue: string;
 }
 
 export interface VlogItem {
@@ -49,7 +51,6 @@ export interface CityReportData {
   oneLineSummary: string;
   searchKeywords: string[];
   keySummary: KeySummaryItem[];
-  keyMetrics: KeyMetricItem[];
   pros: string[];
   cons: string[];
   vlogs: VlogItem[];

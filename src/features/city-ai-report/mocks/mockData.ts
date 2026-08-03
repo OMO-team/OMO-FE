@@ -47,12 +47,6 @@ export const berlinReportData: CityReportData = {
       description: "영어 사용 가능, 독일어 B1 수준 권장",
     },
   ],
-  keyMetrics: [
-    { id: "1", label: "생활비", percentage: 60, barColor: "gray" },
-    { id: "2", label: "인터넷", percentage: 85, barColor: "gradient" },
-    { id: "3", label: "치안", percentage: 75, barColor: "gray" },
-    { id: "4", label: "선호도", percentage: 70, barColor: "gradient" },
-  ],
   pros: [
     "합리적인 생활비",
     "활발한 스타트업 씬",
