@@ -42,8 +42,8 @@ type CountryRoadmapListProps = {
   onExploreCity?: () => void;
   /** 하트 on = 위시리스트 등록, 하트 off = 위시리스트에서 제거 */
   onToggleWish?: (cityId: string) => void;
-  /** 로드맵 삭제 확정 시 호출 (아직 실 삭제 API는 호출하지 않음 — onCommitDeleteCity에서 처리) */
-  onDeleteCity?: (cityId: string) => void;
+  /** 로드맵 삭제 확정 시 호출 (아직 실 삭제 API는 호출하지 않음 — onCommitDeleteCity에서 처리). 한 도시에 목적이 다른 로드맵이 여러 개 있을 수 있어 cityId 대신 roadmapId로 식별 */
+  onDeleteCity?: (roadmapId: number) => void;
   /** 삭제 토스트의 "실행 취소" 클릭 시 호출 */
   onRestoreCity?: () => void;
   /** 삭제 토스트가 실행 취소 없이 사라질 때(타임아웃/닫기) 호출 — 이 시점에 실 삭제 API 호출 */
@@ -103,8 +103,8 @@ export default function CountryRoadmapList({
   }, [removedWish]);
 
   const handleConfirmDelete = () => {
-    if (!deleteTarget) return;
-    onDeleteCity?.(deleteTarget.cityId);
+    if (!deleteTarget || deleteTarget.roadmapId == null) return;
+    onDeleteCity?.(deleteTarget.roadmapId);
     setRemovedRecord({ city: deleteTarget, countryName: deleteTarget.countryName });
     setDeleteTarget(null);
   };
@@ -201,7 +201,7 @@ export default function CountryRoadmapList({
                       <div className="flex w-full flex-wrap items-center gap-5">
                         {group.cities.map((city) => (
                           <CityRoadmapCard
-                            key={city.cityId}
+                            key={city.roadmapId ?? city.cityId}
                             {...city}
                             isWished={wishedCityIds.has(city.cityId)}
                             onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
