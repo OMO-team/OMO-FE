@@ -16,6 +16,7 @@ import { roadmapsApi } from '../api/roadmapsApi';
 import { roadmapQueryKeys } from '../api/queryKeys';
 import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
+import { CITY_INFO_KO } from '../mocks/cityCountryMap';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -108,11 +109,15 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const livingCostSubtotal = (budget?.monthlyCost ?? 0) * months;
   const totalBudget = budget?.totalCost ?? (budget?.initialSettlementCost ?? 0) + livingCostSubtotal;
 
+  // 상세 API도 도시명이 영문으로, country 정보는 아예 안 내려줘서 시드 데이터 기반 한글 매핑으로 대신 채움
+  const cityInfo = CITY_INFO_KO[detail.cityId];
+  const cityNameKo = cityInfo?.cityName ?? detail.cityName;
+
   /** AI 탐색 리포트는 city-ai-report 도메인 데이터라 로드맵 API에는 없음 — 준비된 값만 채우고 나머지는 준비중으로 표시 */
   const reportCityData: CityInsightData = {
     cityId: String(detail.cityId),
-    cityName: detail.cityName,
-    countryName: detail.countryName,
+    cityName: cityNameKo,
+    countryName: cityInfo?.countryName ?? '준비중',
     imageUrl: detail.cityImageUrl,
     description: '준비중',
     rating: 0,
@@ -139,7 +144,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             〈 목록으로
           </button>
         )}
-        <CityHeroBanner cityName={detail.cityName} progressPercent={detail.progressRate} imageUrl={detail.cityImageUrl} />
+        <CityHeroBanner cityName={cityNameKo} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
       </div>
 
       <div className="mx-auto flex w-full max-w-content gap-7.5 px-4 py-10">
@@ -252,7 +257,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           />
           <AiReportCard
             score={0}
-            cityName={detail.cityName}
+            cityName={cityNameKo}
             summary="준비중"
             onViewReport={() => setIsReportOpen(true)}
           />

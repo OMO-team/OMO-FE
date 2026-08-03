@@ -52,8 +52,6 @@ export interface RoadmapListItem {
   title: string;
   cityId: number;
   cityName: string;
-  /** 국가별 그룹화를 프론트에서 처리하기로 하고 백엔드에 추가 요청한 필드 */
-  countryName: string;
   cityImageUrl: string;
   purposeId: number;
   purposeName: string;
