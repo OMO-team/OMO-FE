@@ -272,6 +272,8 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           onClose={() => setIsReportOpen(false)}
           data={buildCityReportData(reportCityData)}
           onSearch={mockSearchResult}
+          // 이 화면은 이미 만들어진 로드맵의 상세라, 같은 도시를 또 추가할 일이 없음
+          isAddDisabled
         />
       )}
     </div>
