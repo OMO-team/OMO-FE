@@ -8,7 +8,7 @@ import { roadmapQueryKeys, wishlistQueryKeys } from '../api/queryKeys';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { groupByCountry } from '../utils/roadmapAdapter';
 import { useAuthStore } from '../../auth/store/useAuthStore';
-import type { CityListResult, RoadmapListItem } from '../types/api';
+import type { CityListResult, CreateRoadmapResult, RoadmapListItem } from '../types/api';
 
 const GROUPS_PER_PAGE = 2;
 
@@ -87,6 +87,13 @@ export default function RoadmapApp() {
     mutationFn: (roadmapId: number) => roadmapsApi.remove(roadmapId),
   });
 
+  /** 목적 선택 모달이 로딩/에러 상태를 직접 다룰 수 있도록 Promise를 그대로 반환 */
+  const handleCreateRoadmap = async (cityId: number, purposeId: number): Promise<CreateRoadmapResult> => {
+    const result = await roadmapsApi.create({ cityId, purposeId });
+    await queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.list });
+    return result;
+  };
+
   const handleDeleteCity = (roadmapId: number) => {
     const target = roadmapItems.find((item) => item.roadmapId === roadmapId);
     if (!target) return;
@@ -142,6 +149,8 @@ export default function RoadmapApp() {
       onDeleteCity={handleDeleteCity}
       onRestoreCity={handleRestoreCity}
       onCommitDeleteCity={handleCommitDeleteCity}
+      onAddRoadmap={handleCreateRoadmap}
+      onViewCreatedRoadmap={(roadmapId) => navigate(`/myhome/dashboard/${roadmapId}`)}
     />
   );
 }

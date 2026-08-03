@@ -10,3 +10,7 @@ export const taskQueryKeys = {
 export const wishlistQueryKeys = {
   list: ['wishlist'] as const,
 };
+
+export const purposeQueryKeys = {
+  list: ['purposes'] as const,
+};

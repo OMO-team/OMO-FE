@@ -9,6 +9,8 @@ import LargeFillButton from '../../../shared/components/LargeFillButton';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import DeleteRoadmapModal from '../components/DeleteRoadmapModal';
 import RoadmapRemovedToast from '../components/RoadmapRemovedToast';
+import RoadmapAddedToast from '../components/RoadmapAddedToast';
+import SelectPurposeModal from '../components/SelectPurposeModal';
 import { useCompareStore } from '../../compare/store/useCompareStore';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
@@ -16,8 +18,10 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
+import { getErrorMessage } from '../api/apiUtils';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
+import type { CreateRoadmapResult } from '../types/api';
 
 type RemovedRecord = {
   city: CityRoadmapData;
@@ -48,6 +52,10 @@ type CountryRoadmapListProps = {
   onRestoreCity?: () => void;
   /** 삭제 토스트가 실행 취소 없이 사라질 때(타임아웃/닫기) 호출 — 이 시점에 실 삭제 API 호출 */
   onCommitDeleteCity?: () => void;
+  /** 목적 선택 모달에서 목적을 고르면 호출 — 실패 시(지원 안 하는 목적 등) 에러 메시지를 그대로 보여주기 위해 throw를 그대로 전달받음 */
+  onAddRoadmap?: (cityId: number, purposeId: number) => Promise<CreateRoadmapResult>;
+  /** 로드맵 생성 완료 토스트의 "보러가기" 클릭 시 호출 */
+  onViewCreatedRoadmap?: (roadmapId: number) => void;
 };
 
 export default function CountryRoadmapList({
@@ -63,6 +71,8 @@ export default function CountryRoadmapList({
   onDeleteCity,
   onRestoreCity,
   onCommitDeleteCity,
+  onAddRoadmap,
+  onViewCreatedRoadmap,
 }: CountryRoadmapListProps) {
   const groups = countryGroups;
   const [activeTab, setActiveTab] = useState(0);
@@ -70,6 +80,10 @@ export default function CountryRoadmapList({
   const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
   const [removedWish, setRemovedWish] = useState<RemovedWish | null>(null);
   const [reportCityId, setReportCityId] = useState<string | null>(null);
+  const [purposeModalCity, setPurposeModalCity] = useState<CityInsightData | null>(null);
+  const [isCreatingRoadmap, setIsCreatingRoadmap] = useState(false);
+  const [createRoadmapError, setCreateRoadmapError] = useState<string | null>(null);
+  const [createdRoadmap, setCreatedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
   /** 기본은 전부 펼친 상태 — 여기 담긴 국가만 접힌 상태로 표시 */
   const [collapsedCountries, setCollapsedCountries] = useState<Set<string>>(new Set());
 
@@ -101,6 +115,12 @@ export default function CountryRoadmapList({
     const timer = setTimeout(() => setRemovedWish(null), 5000);
     return () => clearTimeout(timer);
   }, [removedWish]);
+
+  useEffect(() => {
+    if (!createdRoadmap) return;
+    const timer = setTimeout(() => setCreatedRoadmap(null), 5000);
+    return () => clearTimeout(timer);
+  }, [createdRoadmap]);
 
   const handleConfirmDelete = () => {
     if (!deleteTarget || deleteTarget.roadmapId == null) return;
@@ -148,6 +168,30 @@ export default function CountryRoadmapList({
   const handleSelectCompareCity = (cityId: string) => {
     closeCompareModal();
     setReportCityId(cityId);
+  };
+
+  /** AI 리포트의 "로드맵에 추가하기" → 리포트 모달을 닫고 목적 선택 모달을 띄움 */
+  const handleOpenPurposeModal = () => {
+    if (!reportCity) return;
+    setCreateRoadmapError(null);
+    setPurposeModalCity(reportCity);
+    setReportCityId(null);
+  };
+
+  /** 성공하면 화면에 이미 있는 로드맵 목록 쿼리가 무효화되어 "나라별 로드맵" 탭에 새 카드가 자동으로 반영됨(탭은 직접 전환하지 않음) */
+  const handleSelectPurpose = async (purposeId: number) => {
+    if (!purposeModalCity || !onAddRoadmap) return;
+    setIsCreatingRoadmap(true);
+    setCreateRoadmapError(null);
+    try {
+      const result = await onAddRoadmap(Number(purposeModalCity.cityId), purposeId);
+      setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: purposeModalCity.cityName });
+      setPurposeModalCity(null);
+    } catch (error) {
+      setCreateRoadmapError(getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.'));
+    } finally {
+      setIsCreatingRoadmap(false);
+    }
   };
 
   const hasRoadmaps = groups.length > 0;
@@ -267,6 +311,30 @@ export default function CountryRoadmapList({
           onClose={() => setReportCityId(null)}
           data={buildCityReportData(reportCity)}
           onSearch={mockSearchResult}
+          onAddToRoadmap={handleOpenPurposeModal}
+        />
+      )}
+
+      {purposeModalCity && (
+        <ModalOverlay onClose={() => !isCreatingRoadmap && setPurposeModalCity(null)}>
+          <SelectPurposeModal
+            cityName={purposeModalCity.cityName}
+            isSubmitting={isCreatingRoadmap}
+            errorMessage={createRoadmapError}
+            onSelectPurpose={handleSelectPurpose}
+            onClose={() => setPurposeModalCity(null)}
+          />
+        </ModalOverlay>
+      )}
+
+      {createdRoadmap && (
+        <RoadmapAddedToast
+          cityName={createdRoadmap.cityName}
+          onViewRoadmap={() => {
+            onViewCreatedRoadmap?.(createdRoadmap.roadmapId);
+            setCreatedRoadmap(null);
+          }}
+          onClose={() => setCreatedRoadmap(null)}
         />
       )}
     </div>
