@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { authApi } from "../../auth/api/authApi";
+import TopAlertBanner from "../../../shared/components/TopAlertBanner";
 import Header from "../../../shared/components/Header";
 import Footer from "../../../shared/components/Footer";
 import BackHeader from "../../../shared/components/BackHeader";
@@ -38,6 +40,13 @@ export default function SettingsPage({
   onPasswordChangeSuccess,
 }: SettingsPageProps) {
   const navigate = useNavigate()
+  const location = useLocation();
+  const locationState = location.state as Record<string, unknown> | null;
+  const googleLinkResult =
+    typeof locationState?.googleLinkResult === 'string'
+      ? (locationState.googleLinkResult as 'success' | 'error')
+      : null;
+
   const [pushEnabled, setPushEnabled] = useState(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   const [activeModal, setActiveModal] = useState<
@@ -46,6 +55,27 @@ export default function SettingsPage({
   const [profileName, setProfileName] = useState("OMO");
   const [profileEmail] = useState("omo@naver.com");
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+  const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(() => {
+    if (googleLinkResult) {
+      // state 소비 후 히스토리 엔트리에서 제거 (새로고침 시 배너 재표시 방지)
+      navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
+    }
+    return googleLinkResult;
+  });
+  const [isGoogleLinking, setIsGoogleLinking] = useState(false);
+
+  const handleConnectGoogle = async () => {
+    if (isGoogleLinking) return;
+    setIsGoogleLinking(true);
+    try {
+      const { authorizationUrl } = await authApi.getGoogleLinkUrl();
+      window.location.href = authorizationUrl;
+    } catch (error) {
+      console.error('Google 계정 연결 URL 조회 실패:', error);
+      setIsGoogleLinking(false);
+      setGoogleLinkBanner('error');
+    }
+  };
 
   return (
 
@@ -54,6 +84,21 @@ export default function SettingsPage({
 
       <main className="mx-auto flex w-full max-w-content flex-col gap-[50px] px-[188px] pt-8">
         <BackHeader title="설정" onBack={() => window.history.back()} />
+
+        {googleLinkBanner === 'success' && (
+          <TopAlertBanner
+            variant="teal"
+            message="Google 계정이 성공적으로 연결되었어요."
+            onClose={() => setGoogleLinkBanner(null)}
+          />
+        )}
+        {googleLinkBanner === 'error' && (
+          <TopAlertBanner
+            variant="red"
+            message="Google 계정 연결에 실패했습니다. 다시 시도해 주세요."
+            onClose={() => setGoogleLinkBanner(null)}
+          />
+        )}
 
         <ProfileCard
           name={`${profileName} 님`}
@@ -163,6 +208,8 @@ export default function SettingsPage({
             setProfileName(name);
             if (avatarFile) setAvatarUrl(URL.createObjectURL(avatarFile));
           }}
+          onConnectGoogle={handleConnectGoogle}
+          isGoogleConnecting={isGoogleLinking}
         />
       )}
 
