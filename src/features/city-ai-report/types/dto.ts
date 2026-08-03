@@ -16,3 +16,10 @@ export interface CityCoreSummaryItem {
   title: string;
   content: string;
 }
+
+export interface CityProsConsResult {
+  pros: string[];
+  cons: string[];
+  prosEmpty: boolean;
+  consEmpty: boolean;
+}

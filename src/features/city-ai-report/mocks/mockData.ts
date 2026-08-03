@@ -8,8 +8,6 @@ export const berlinReportData: CityReportData = {
   totalScore: 4.5,
   oneLineSummary: '다양한 문화와 학생 친화적인 환경이 어우러진 열린 배움의 도시',
   searchKeywords: ['비자 신청 절차', '주거비용', '아르바이트 구하기', '보험 가입', '여행지 추천'],
-  pros: ['합리적인 생활비', '활발한 스타트업 씬', '대중교통 발달', '다양한 문화 행사'],
-  cons: ['겨울이 길고 추움', '관공서 처리 느림', '독일어 필수인 경우 많음'],
   vlogs: [
     { id: '1', tag: '독일살이', title: '베를린 워홀 브이로그 #1 첫날' },
     { id: '2', tag: '유럽 워홀러', title: '베를린에서 일자리 구하는 법' },

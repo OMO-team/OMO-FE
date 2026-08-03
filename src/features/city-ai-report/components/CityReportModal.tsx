@@ -11,6 +11,7 @@ import CityReportFooter from './CityReportFooter';
 import CloseButton from '../../../shared/components/CloseButton';
 import { useCityStats } from '../hooks/useCityStats';
 import { useCityCoreSummaries } from '../hooks/useCityCoreSummaries';
+import { useCityProsCons } from '../hooks/useCityProsCons';
 import { toKeyMetrics } from '../utils/statsAdapter';
 import type { AISearchResultData, CityReportData, KeySummaryItem } from '../../../shared/types/cityReport';
 
@@ -39,6 +40,9 @@ export default function CityReportModal({
       title: item.title,
       description: item.content,
     })) ?? [];
+
+  const { data: prosCons } = useCityProsCons(data.cityId);
+  const showProsCons = !!prosCons && !(prosCons.prosEmpty && prosCons.consEmpty);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -81,7 +85,14 @@ export default function CityReportModal({
               <div className="flex justify-start items-center self-stretch gap-4">
                 <div className="flex flex-col justify-start items-start w-[432px] gap-[60px]">
                   <KeyMetrics metrics={keyMetrics} />
-                  <ProsCons pros={data.pros} cons={data.cons} />
+                  {showProsCons && (
+                    <ProsCons
+                      pros={prosCons!.pros}
+                      cons={prosCons!.cons}
+                      prosEmpty={prosCons!.prosEmpty}
+                      consEmpty={prosCons!.consEmpty}
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col justify-start items-start w-[448px] gap-5">
                   <VlogReviews vlogs={data.vlogs} />
