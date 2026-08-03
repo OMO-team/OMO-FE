@@ -14,14 +14,12 @@ export default function AISearchPanel({
   onSearch,
 }: AISearchPanelProps) {
   const [inputValue, setInputValue] = useState("");
-  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
   const [result, setResult] = useState<AISearchResultData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   const runSearch = async (query: string) => {
     if (!query.trim()) return;
-    setSubmittedQuery(query);
     setResult(null);
     setHasError(false);
     setIsLoading(true);
@@ -53,7 +51,6 @@ export default function AISearchPanel({
             onChange={setInputValue}
             onSearch={runSearch}
             placeholder="궁금한 내용을 물어보세요"
-            submittedQuery={submittedQuery}
           />
           <div className="flex justify-start items-center gap-1.5">
             {keywords.map((keyword) => (
