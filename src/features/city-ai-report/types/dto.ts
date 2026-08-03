@@ -10,3 +10,9 @@ export interface CityStatItem {
   maxValue: number | null;
   unit: string;
 }
+
+export interface CityCoreSummaryItem {
+  category: string;
+  title: string;
+  content: string;
+}

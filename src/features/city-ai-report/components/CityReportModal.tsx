@@ -10,8 +10,9 @@ import RealReviews from './RealReviews';
 import CityReportFooter from './CityReportFooter';
 import CloseButton from '../../../shared/components/CloseButton';
 import { useCityStats } from '../hooks/useCityStats';
+import { useCityCoreSummaries } from '../hooks/useCityCoreSummaries';
 import { toKeyMetrics } from '../utils/statsAdapter';
-import type { AISearchResultData, CityReportData } from '../../../shared/types/cityReport';
+import type { AISearchResultData, CityReportData, KeySummaryItem } from '../../../shared/types/cityReport';
 
 interface CityReportModalProps {
   isOpen: boolean;
@@ -30,6 +31,14 @@ export default function CityReportModal({
 }: CityReportModalProps) {
   const { data: stats } = useCityStats(data.cityId);
   const keyMetrics = stats ? toKeyMetrics(stats) : [];
+
+  const { data: coreSummaries } = useCityCoreSummaries(data.cityId);
+  const keySummary: KeySummaryItem[] =
+    coreSummaries?.map((item) => ({
+      id: item.category,
+      title: item.title,
+      description: item.content,
+    })) ?? [];
 
   useEffect(() => {
     if (!isOpen) return;
@@ -67,7 +76,7 @@ export default function CityReportModal({
                   cityName={data.cityName}
                   oneLineSummary={data.oneLineSummary}
                 />
-                <KeySummary items={data.keySummary} />
+                <KeySummary items={keySummary} />
               </div>
               <div className="flex justify-start items-center self-stretch gap-4">
                 <div className="flex flex-col justify-start items-start w-[432px] gap-[60px]">

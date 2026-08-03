@@ -50,7 +50,6 @@ export interface CityReportData {
   totalScore: number;
   oneLineSummary: string;
   searchKeywords: string[];
-  keySummary: KeySummaryItem[];
   pros: string[];
   cons: string[];
   vlogs: VlogItem[];
