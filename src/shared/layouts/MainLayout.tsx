@@ -13,7 +13,7 @@ import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import type { MainLayoutContext } from './useMainLayoutContext';
 import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
-type RouteHandle = { headerVariant?: 'default' | 'overlay' };
+type RouteHandle = { headerVariant?: 'default' | 'overlay' | 'overlay-light' };
 
 export default function MainLayout() {
   const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn } = useAuthStore();
@@ -28,7 +28,7 @@ export default function MainLayout() {
   const matches = useMatches();
   const headerVariant =
     matches.map((m) => (m.handle as RouteHandle | undefined)?.headerVariant).filter(Boolean).at(-1) ?? 'default';
-  const isOverlay = headerVariant === 'overlay';
+  const isOverlay = headerVariant === 'overlay' || headerVariant === 'overlay-light';
 
   const openChat = useCallback((initialMessage?: string) => {
     setChatInitialMessage(initialMessage);

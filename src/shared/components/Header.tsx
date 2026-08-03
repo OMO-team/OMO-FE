@@ -11,8 +11,12 @@ import { useAuthStore } from "../../features/auth/store/useAuthStore";
 type ActiveNav = "explore" | "myhome" | null;
 
 interface HeaderProps {
-  /** 이미지/사진 위에 겹쳐지는 히어로 배너 등에서 사용, 로고·아이콘·텍스트를 흰색으로 전환 */
-  variant?: "default" | "overlay";
+  /**
+   * default: 흰 배경 헤더, 어두운 텍스트
+   * overlay: 어두운 히어로 배너/사진 위에 겹칠 때 사용, 배경 투명 + 로고·아이콘·텍스트 흰색
+   * overlay-light: 밝은 배경 이미지 위에 겹칠 때 사용, 배경 투명 + 로고·아이콘·텍스트는 default와 동일하게 어두운 색 유지
+   */
+  variant?: "default" | "overlay" | "overlay-light";
   onSmartBriefingClick?: () => void;
 }
 
@@ -20,6 +24,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
   const { isLoggedIn, userAvatarUrl, openModal, openSearch } = useAuthStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const isTransparent = variant === "overlay" || variant === "overlay-light";
   const isOverlay = variant === "overlay";
 
   const activeNav: ActiveNav =
@@ -54,7 +59,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
         : "text-gray-700";
 
   return (
-    <header className={`flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay ? "bg-transparent" : "bg-white"}`}>
+    <header className={`flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isTransparent ? "bg-transparent" : "bg-white"}`}>
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-center self-stretch">
