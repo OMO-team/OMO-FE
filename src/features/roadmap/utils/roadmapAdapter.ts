@@ -13,6 +13,7 @@ function toCityRoadmapData(item: RoadmapListItem): CityRoadmapData {
     // 목록 API가 도시명은 영문으로, country 정보는 아예 안 내려줘서 시드 데이터 기반 한글 매핑으로 대신 채움
     cityName: cityInfo?.cityName ?? item.cityName,
     countryName: cityInfo?.countryName ?? NOT_READY,
+    purposeName: item.purposeName,
     // progressRate는 0~100 퍼센트 값(실 데이터로 확인됨) — 소수점이 길게 내려와서 반올림
     progressPercent: Math.round(item.progressRate),
     costProgressPercent: Math.round(item.progressRate),
