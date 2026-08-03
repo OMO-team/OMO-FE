@@ -15,6 +15,12 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 export type TaskCategory = 'VISA' | 'INSURANCE' | 'DOCUMENT' | 'FLIGHT' | 'ACCOMMODATION' | 'BANKING';
 
+export interface Purpose {
+  purposeId: number;
+  type: string;
+  name: string;
+}
+
 export type TaskStatus = 'LOCKED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 export interface CityCountryInfo {
@@ -162,6 +168,14 @@ export interface UpdateRoadmapScheduleResult {
 
 export interface UpdateTaskScheduleRequest {
   dueDate: string;
+}
+
+/** 실 응답으로 확인됨(2026-08-03) — 로드맵 전체가 아니라 변경된 태스크 자체 필드만 내려옴 */
+export interface UpdateTaskScheduleResult {
+  taskId: number;
+  dueDate: string;
+  scheduleDDay: number;
+  isOverdue: boolean;
 }
 
 export interface CompleteTaskResult {
