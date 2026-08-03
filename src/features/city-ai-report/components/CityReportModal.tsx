@@ -17,6 +17,8 @@ interface CityReportModalProps {
   data: CityReportData;
   onSearch: (query: string) => AISearchResultData;
   onAddToRoadmap?: () => void;
+  /** 추가가 끝났거나 진행 중이면 "로드맵에 추가하기" 버튼을 비활성화 */
+  isAddDisabled?: boolean;
 }
 
 export default function CityReportModal({
@@ -25,6 +27,7 @@ export default function CityReportModal({
   data,
   onSearch,
   onAddToRoadmap,
+  isAddDisabled,
 }: CityReportModalProps) {
   useEffect(() => {
     if (!isOpen) return;
@@ -77,7 +80,11 @@ export default function CityReportModal({
             </div>
           </div>
         </div>
-        <CityReportFooter cityName={data.cityName} onAddToRoadmap={onAddToRoadmap} />
+        <CityReportFooter
+          cityName={data.cityName}
+          onAddToRoadmap={onAddToRoadmap}
+          isAddDisabled={isAddDisabled}
+        />
       </div>
     </div>
   );

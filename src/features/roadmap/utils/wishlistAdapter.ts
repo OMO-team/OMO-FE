@@ -21,8 +21,9 @@ export function toCityInsightData(city: CityInfo): CityInsightData {
     cityId: String(city.cityId),
     cityName: cityInfo?.cityName ?? city.name,
     countryName: cityInfo?.countryName ?? city.country.name,
-    // purposeName은 위시리스트가 도시 단위로만 저장돼서 아직 못 채움 — 도시+목적 조합으로 바뀌면 여기서 전달
-
+    // 위시리스트가 도시+목적 조합으로 바뀌면 값이 들어오기 시작함 (그전까지는 undefined)
+    purposeId: city.purposeId,
+    purposeName: city.purposeName,
     imageUrl: city.imageUrl ?? '',
     description: city.description ?? NOT_READY,
     rating: city.rating ?? 0,

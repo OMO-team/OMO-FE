@@ -10,7 +10,6 @@ import ModalOverlay from '../../../shared/components/ModalOverlay';
 import DeleteRoadmapModal from '../components/DeleteRoadmapModal';
 import RoadmapRemovedToast from '../components/RoadmapRemovedToast';
 import RoadmapAddedToast from '../components/RoadmapAddedToast';
-import SelectPurposeModal from '../components/SelectPurposeModal';
 import { useCompareStore } from '../../compare/store/useCompareStore';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
@@ -18,7 +17,6 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
-import { getErrorMessage } from '../api/apiUtils';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
 import type { CreateRoadmapResult } from '../types/api';
@@ -32,6 +30,12 @@ type RemovedWish = {
   cityId: string;
   cityName: string;
 };
+
+/**
+ * 위시리스트가 아직 도시 단위로만 저장돼서 목적을 못 받아옴.
+ * 백엔드가 도시+목적 조합으로 바꿔주면 항목의 purposeId를 그대로 쓰고 이 상수는 지울 것.
+ */
+const FALLBACK_PURPOSE_ID = 1;
 
 type CountryRoadmapListProps = {
   countryGroups: CountryGroupData[];
@@ -80,10 +84,10 @@ export default function CountryRoadmapList({
   const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
   const [removedWish, setRemovedWish] = useState<RemovedWish | null>(null);
   const [reportCityId, setReportCityId] = useState<string | null>(null);
-  const [purposeModalCity, setPurposeModalCity] = useState<CityInsightData | null>(null);
   const [isCreatingRoadmap, setIsCreatingRoadmap] = useState(false);
-  const [createRoadmapError, setCreateRoadmapError] = useState<string | null>(null);
   const [createdRoadmap, setCreatedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
+  /** 이미 추가한 도시는 리포트를 다시 열어도 버튼이 비활성 상태로 유지되도록 기억 */
+  const [addedCityIds, setAddedCityIds] = useState<Set<string>>(new Set());
   /** 기본은 전부 펼친 상태 — 여기 담긴 국가만 접힌 상태로 표시 */
   const [collapsedCountries, setCollapsedCountries] = useState<Set<string>>(new Set());
 
@@ -170,25 +174,22 @@ export default function CountryRoadmapList({
     setReportCityId(cityId);
   };
 
-  /** AI 리포트의 "로드맵에 추가하기" → 리포트 모달을 닫고 목적 선택 모달을 띄움 */
-  const handleOpenPurposeModal = () => {
-    if (!reportCity) return;
-    setCreateRoadmapError(null);
-    setPurposeModalCity(reportCity);
-    setReportCityId(null);
-  };
-
-  /** 성공하면 화면에 이미 있는 로드맵 목록 쿼리가 무효화되어 "나라별 로드맵" 탭에 새 카드가 자동으로 반영됨(탭은 직접 전환하지 않음) */
-  const handleSelectPurpose = async (purposeId: number) => {
-    if (!purposeModalCity || !onAddRoadmap) return;
+  /**
+   * AI 리포트의 "로드맵에 추가하기" — 목적은 위시리스트 항목이 들고 있으므로 따로 묻지 않고 바로 생성.
+   * 성공하면 로드맵 목록 쿼리가 무효화되어 "나라별 로드맵" 탭에 새 카드가 자동 반영됨(탭은 직접 전환하지 않음).
+   */
+  const handleAddToRoadmap = async () => {
+    if (!reportCity || !onAddRoadmap || isCreatingRoadmap) return;
     setIsCreatingRoadmap(true);
-    setCreateRoadmapError(null);
     try {
-      const result = await onAddRoadmap(Number(purposeModalCity.cityId), purposeId);
-      setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: purposeModalCity.cityName });
-      setPurposeModalCity(null);
+      const result = await onAddRoadmap(
+        Number(reportCity.cityId),
+        reportCity.purposeId ?? FALLBACK_PURPOSE_ID,
+      );
+      setAddedCityIds((prev) => new Set(prev).add(reportCity.cityId));
+      setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: reportCity.cityName });
     } catch (error) {
-      setCreateRoadmapError(getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.'));
+      console.error('로드맵 생성 실패', error);
     } finally {
       setIsCreatingRoadmap(false);
     }
@@ -311,20 +312,9 @@ export default function CountryRoadmapList({
           onClose={() => setReportCityId(null)}
           data={buildCityReportData(reportCity)}
           onSearch={mockSearchResult}
-          onAddToRoadmap={handleOpenPurposeModal}
+          onAddToRoadmap={handleAddToRoadmap}
+          isAddDisabled={isCreatingRoadmap || addedCityIds.has(reportCity.cityId)}
         />
-      )}
-
-      {purposeModalCity && (
-        <ModalOverlay onClose={() => !isCreatingRoadmap && setPurposeModalCity(null)}>
-          <SelectPurposeModal
-            cityName={purposeModalCity.cityName}
-            isSubmitting={isCreatingRoadmap}
-            errorMessage={createRoadmapError}
-            onSelectPurpose={handleSelectPurpose}
-            onClose={() => setPurposeModalCity(null)}
-          />
-        </ModalOverlay>
       )}
 
       {createdRoadmap && (

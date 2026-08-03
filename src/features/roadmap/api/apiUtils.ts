@@ -9,12 +9,3 @@ export function unwrap<T>(data: ApiResponse<T>): T {
 export function isNotFound(error: unknown): boolean {
   return axios.isAxiosError(error) && error.response?.status === 404;
 }
-
-/** 백엔드가 4xx/5xx에도 {isSuccess:false, message}를 담아 보내므로, axios 에러 바디의 message를 우선 사용 */
-export function getErrorMessage(error: unknown, fallback: string): string {
-  if (axios.isAxiosError(error)) {
-    const message = (error.response?.data as { message?: string } | undefined)?.message;
-    if (message) return message;
-  }
-  return fallback;
-}

@@ -15,12 +15,6 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 export type TaskCategory = 'VISA' | 'INSURANCE' | 'DOCUMENT' | 'FLIGHT' | 'ACCOMMODATION' | 'BANKING';
 
-export interface Purpose {
-  purposeId: number;
-  type: string;
-  name: string;
-}
-
 export type TaskStatus = 'LOCKED' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 export interface CityCountryInfo {
@@ -37,6 +31,9 @@ export interface CityInfo {
   cityId: number;
   name: string;
   country: CityCountryInfo;
+  /** 위시리스트를 도시+목적 조합으로 저장하도록 백엔드 수정 예정 — 반영 전까지는 안 내려옴 */
+  purposeId?: number;
+  purposeName?: string;
   imageUrl: string | null;
   rating: number | null;
   description: string | null;
