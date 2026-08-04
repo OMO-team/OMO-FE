@@ -6,7 +6,6 @@ import KeySummary from './KeySummary';
 import KeyMetrics from './KeyMetrics';
 import ProsCons from './ProsCons';
 import VlogReviews from './VlogReviews';
-import RealReviews from './RealReviews';
 import CityReportFooter from './CityReportFooter';
 import CloseButton from '../../../shared/components/CloseButton';
 import { useCityStats } from '../hooks/useCityStats';
@@ -82,7 +81,7 @@ export default function CityReportModal({
                 />
                 <KeySummary items={keySummary} />
               </div>
-              <div className="flex justify-start items-center self-stretch gap-4">
+              <div className="flex justify-start items-start self-stretch gap-4">
                 <div className="flex flex-col justify-start items-start w-[432px] gap-[60px]">
                   <KeyMetrics metrics={keyMetrics} />
                   {showProsCons && (
@@ -96,7 +95,6 @@ export default function CityReportModal({
                 </div>
                 <div className="flex flex-col justify-start items-start w-[448px] gap-5">
                   <VlogReviews vlogs={data.vlogs} />
-                  <RealReviews reviews={data.reviews} />
                 </div>
               </div>
             </div>
