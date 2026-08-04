@@ -1,7 +1,6 @@
 import AIPromptSection from '../components/AIPromptSection';
 import CategorySection from '../components/CategorySection';
 import { useMainLayoutContext } from '../../../shared/layouts/useMainLayoutContext';
-import { SIDEBAR_HANDLE_WIDTH } from '../../../shared/constants/layout';
 import mapBg from '../../../assets/images/map-bg.png';
 
 export default function HomePage() {
