@@ -1,12 +1,13 @@
 import ThumbnailVideo from "./ThumbnailVideo";
-import type { VlogItem } from "../../../shared/types/cityReport";
+import { getYoutubeThumbnailUrl, stripYoutubeSuffix } from "../utils/youtube";
+import type { AiReportResource } from "../../../shared/types/cityReport";
 
 interface VlogReviewsProps {
-  vlogs: VlogItem[];
+  vlogs: AiReportResource[];
 }
 
 export default function VlogReviews({ vlogs }: VlogReviewsProps) {
-  const rows: VlogItem[][] = [];
+  const rows: AiReportResource[][] = [];
   for (let i = 0; i < vlogs.length; i += 2) {
     rows.push(vlogs.slice(i, i + 2));
   }
@@ -22,10 +23,11 @@ export default function VlogReviews({ vlogs }: VlogReviewsProps) {
           >
             {row.map((vlog) => (
               <ThumbnailVideo
-                key={vlog.id}
-                tag={vlog.tag}
+                key={`${vlog.topic}-${vlog.url}`}
+                tag={stripYoutubeSuffix(vlog.source)}
                 title={vlog.title}
-                thumbnailUrl={vlog.thumbnailUrl}
+                thumbnailUrl={getYoutubeThumbnailUrl(vlog.url)}
+                url={vlog.url}
               />
             ))}
           </div>

@@ -11,6 +11,7 @@ import CloseButton from '../../../shared/components/CloseButton';
 import { useCityStats } from '../hooks/useCityStats';
 import { useCityCoreSummaries } from '../hooks/useCityCoreSummaries';
 import { useCityProsCons } from '../hooks/useCityProsCons';
+import { useCityResources } from '../hooks/useCityResources';
 import { toKeyMetrics } from '../utils/statsAdapter';
 import type { AISearchResultData, CityReportData, KeySummaryItem } from '../../../shared/types/cityReport';
 
@@ -42,6 +43,8 @@ export default function CityReportModal({
 
   const { data: prosCons } = useCityProsCons(data.cityId);
   const showProsCons = !!prosCons && !(prosCons.prosEmpty && prosCons.consEmpty);
+
+  const { data: vlogs } = useCityResources(data.cityId, { resourceType: 'VIDEO' });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -94,7 +97,7 @@ export default function CityReportModal({
                   )}
                 </div>
                 <div className="flex flex-col justify-start items-start w-[448px] gap-5">
-                  <VlogReviews vlogs={data.vlogs} />
+                  <VlogReviews vlogs={vlogs ?? []} />
                 </div>
               </div>
             </div>
