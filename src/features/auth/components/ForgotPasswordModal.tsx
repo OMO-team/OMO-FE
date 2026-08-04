@@ -72,7 +72,10 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
     let hasError = false;
 
-    if (!isVerified) {
+    if (!emailSent) {
+      setEmailError('인증코드를 먼저 발송해주세요.');
+      hasError = true;
+    } else if (!isVerified) {
       setCodeError('이메일 인증을 완료해주세요.');
       hasError = true;
     }
