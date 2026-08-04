@@ -23,6 +23,11 @@ export type EmailSendRequest = {
   email: string;
 };
 
+export type EmailSendResult = {
+  email: string;
+  expiresInSeconds: number;
+};
+
 export type EmailVerifyRequest = {
   email: string;
   code: string;
