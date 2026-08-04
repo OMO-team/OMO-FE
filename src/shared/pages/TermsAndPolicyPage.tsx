@@ -1,48 +1,48 @@
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
 import BackHeader from '../components/BackHeader';
 import TermsTabSwitcher from '../components/TermsTabSwitcher';
-import { termsOfServiceChapters, privacyPolicyChapters, type ContentBlock } from '../mocks/termsContent';
+import { useTerms } from '../../features/auth/hooks/useTerms';
+import type { TermType } from '../../features/auth/types/dto';
 
 const TABS = ['이용약관', '개인정보 처리방침'] as const;
+const TAB_TYPES: readonly TermType[] = ['TERMS_OF_SERVICE', 'PRIVACY_POLICY'];
 
 type TermsAndPolicyPageProps = {
   onBack?: () => void;
+  initialTab?: number;
 };
 
-function ContentBlockView({ block }: { block: ContentBlock }) {
-  if (block.type === 'text') {
-    return (
-      <>
-        {block.lines.map((line) => (
-          <p key={line}>{line}</p>
-        ))}
-      </>
-    );
-  }
-
-  if (block.type === 'unordered') {
-    return (
-      <ul className="list-disc ms-10.5">
-        {block.items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    );
-  }
-
-  return (
-    <ol className="list-decimal ms-5.25" start={block.start}>
-      {block.items.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ol>
-  );
+function getMarkdownComponents(isTerms: boolean): Components {
+  return {
+    h2: (props) => <p className="title-01 mt-10 mb-4 text-gray-900 first:mt-0" {...props} />,
+    h3: (props) =>
+      isTerms ? (
+        <p className="body-02 mt-4 mb-1 flex items-center gap-1 text-gray-700">
+          <span aria-hidden="true">•</span>
+          <span {...props} />
+        </p>
+      ) : (
+        <p className="title-05 mt-6 mb-1 text-gray-900" {...props} />
+      ),
+    p: (props) => <p className="body-03 mb-1 leading-normal text-gray-700" {...props} />,
+    strong: (props) => <strong className="font-semibold text-gray-900" {...props} />,
+    ul: (props) => <ul className="body-03 mb-1 list-disc text-gray-700 ms-10.5" {...props} />,
+    ol: (props) => <ol className="body-03 mb-1 list-decimal text-gray-700 ms-5.25" {...props} />,
+    li: (props) => <li className="mb-1" {...props} />,
+    blockquote: (props) => (
+      <blockquote className="body-03 border-l-2 border-gray-300 pl-3 text-gray-500" {...props} />
+    ),
+  };
 }
 
-export default function TermsAndPolicyPage({ onBack }: TermsAndPolicyPageProps) {
-  const [activeTab, setActiveTab] = useState(0);
+export default function TermsAndPolicyPage({ onBack, initialTab = 0 }: TermsAndPolicyPageProps) {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const isTerms = activeTab === 0;
-  const chapters = isTerms ? termsOfServiceChapters : privacyPolicyChapters;
+
+  const { data: termsData, isLoading, isError } = useTerms();
+  const term = termsData?.terms.find((t) => t.type === TAB_TYPES[activeTab]);
 
   return (
     <div className="flex flex-col bg-gray-20">
@@ -52,48 +52,14 @@ export default function TermsAndPolicyPage({ onBack }: TermsAndPolicyPageProps) 
         <TermsTabSwitcher tabs={TABS} activeIndex={activeTab} onChange={setActiveTab} />
 
         <div className="mb-25 flex flex-col rounded-4 bg-white px-10 py-8">
-          {!isTerms && (
-            <div className="body-03 mb-8 flex flex-col gap-1 text-gray-700">
-              <p>
-                OMO는 「개인정보 보호법」 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고
-                원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보처리방침을 수립·공개합니다.
-              </p>
-              <p className="text-gray-500">시행일자: 0000년 00월 00일</p>
-            </div>
+          {isLoading && <p className="body-02 text-gray-500">약관을 불러오는 중...</p>}
+          {isError && (
+            <p className="body-02 text-red-500">약관을 불러오지 못했어요. 다시 시도해주세요.</p>
           )}
-
-          <div className="flex flex-col gap-18.5">
-            {chapters.map((chapter, chapterIndex) => (
-              <div key={chapter.title ?? chapterIndex} className="flex flex-col gap-7.5">
-                {chapter.title && <p className="title-01 text-gray-900">{chapter.title}</p>}
-                <div className="flex flex-col gap-6">
-                  {chapter.sections.map((section) => (
-                    <div key={section.heading} className="flex flex-col gap-2">
-                      {isTerms ? (
-                        <p className="body-02 flex items-center gap-1 text-gray-700">
-                          <span aria-hidden="true">•</span>
-                          <span>{section.heading}</span>
-                        </p>
-                      ) : (
-                        <p className="title-05 text-gray-900">{section.heading}</p>
-                      )}
-                      <div className="body-03 flex flex-col gap-1 leading-normal text-gray-700">
-                        {section.blocks.map((block, blockIndex) => (
-                          <ContentBlockView key={blockIndex} block={block} />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {isTerms && (
-            <div className="mt-14 flex flex-col gap-1">
-              <p className="text-base font-normal leading-[1.4] tracking-[-0.02em] text-gray-900">부칙</p>
-              <p className="body-02 text-gray-900">본 약관은 2026년 00월 00일부터 시행합니다.</p>
-            </div>
+          {term && (
+            <ReactMarkdown components={getMarkdownComponents(isTerms)}>
+              {term.content}
+            </ReactMarkdown>
           )}
         </div>
       </main>

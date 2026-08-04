@@ -71,3 +71,20 @@ export type GoogleLoginResult = {
   accessToken: string;
   refreshToken: string;
 };
+
+// 약관
+export type TermType = 'TERMS_OF_SERVICE' | 'PRIVACY_POLICY';
+
+export type TermItem = {
+  id: number;
+  title: string;
+  content: string;
+  type: TermType;
+  required: boolean;
+  version: string;
+  effectiveAt: string;
+};
+
+export type TermsResult = {
+  terms: TermItem[];
+};
