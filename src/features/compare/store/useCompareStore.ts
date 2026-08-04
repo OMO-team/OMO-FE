@@ -4,11 +4,11 @@ const MAX_COMPARE_COUNT = 3;
 const MIN_COMPARE_COUNT = 2;
 
 interface CompareState {
-  compareList: string[];
+  compareList: number[];
   isModalOpen: boolean;
   showMaxWarning: boolean;
-  toggleCompare: (cityId: string) => void;
-  removeFromCompare: (cityId: string) => void;
+  toggleCompare: (cityId: number) => void;
+  removeFromCompare: (cityId: number) => void;
   clearCompare: () => void;
   openModal: () => void;
   closeModal: () => void;

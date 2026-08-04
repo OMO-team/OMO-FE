@@ -14,7 +14,6 @@ import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
-import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
@@ -75,7 +74,10 @@ export default function CountryRoadmapList({
 
   const toggleCompare = useCompareStore((s) => s.toggleCompare);
   const closeCompareModal = useCompareStore((s) => s.closeModal);
-  const compareCities = wishlistCities.map(toCompareCity);
+  const compareSelectableCities = wishlistCities.map((city) => ({
+    cityId: Number(city.cityId),
+    cityName: city.cityName,
+  }));
   const reportCity = wishlistCities.find((city) => city.cityId === reportCityId) ?? null;
 
   useEffect(() => {
@@ -145,9 +147,9 @@ export default function CountryRoadmapList({
   };
 
   /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 */
-  const handleSelectCompareCity = (cityId: string) => {
+  const handleSelectCompareCity = (cityId: number) => {
     closeCompareModal();
-    setReportCityId(cityId);
+    setReportCityId(String(cityId));
   };
 
   const hasRoadmaps = groups.length > 0;
@@ -229,7 +231,7 @@ export default function CountryRoadmapList({
                 {...city}
                 isWished
                 onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
-                onCompare={() => toggleCompare(city.cityId)}
+                onCompare={() => toggleCompare(Number(city.cityId))}
                 onReport={() => setReportCityId(city.cityId)}
               />
             ))}
@@ -258,8 +260,8 @@ export default function CountryRoadmapList({
         </ModalOverlay>
       )}
 
-      <CompareSelectionBar cities={compareCities} />
-      <CompareModal cities={compareCities} onSelectCity={handleSelectCompareCity} />
+      <CompareSelectionBar cities={compareSelectableCities} />
+      <CompareModal onSelectCity={handleSelectCompareCity} />
 
       {reportCity && (
         <CityReportModal

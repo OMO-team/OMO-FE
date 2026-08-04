@@ -30,7 +30,6 @@ import type { CityReportData } from '../../../shared/types/cityReport';
 import { DETAIL_OPTIONS } from '../constants/filterOptions';
 import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
 import { berlinReportData } from '../../city-ai-report/mocks/mockData';
-import { mockCities } from '../../../shared/mocks/cities';
 
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
@@ -39,13 +38,6 @@ import searchInputIcon from '../../../assets/icons/search-input-list.svg'
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
-};
-
-// TODO: 도시별 실제 데이터 연동 전까지, 비교 목데이터가 있는 도시만 매핑
-const CITY_COMPARE_ID: Record<string, string> = {
-  베를린: 'berlin',
-  도쿄: 'tokyo',
-  시드니: 'sydney',
 };
 
 export default function CityInsight() {
@@ -57,12 +49,6 @@ export default function CityInsight() {
   const [addedCityName, setAddedCityName] = useState<string | null>(null);
   const addCity = useRoadmapStore(s => s.addCity);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
-
-  const handleCompare = (cityName: string) => {
-    const id = CITY_COMPARE_ID[cityName];
-    if (!id) return;
-    toggleCompare(id);
-  };
 
   useEffect(() => {
     if (!addedCityName) return;
@@ -177,7 +163,7 @@ export default function CityInsight() {
                 <CityInsightCard
                   key={card.cityName}
                   {...card}
-                  onCompare={() => handleCompare(card.cityName)}
+                  onCompare={() => toggleCompare(card.cityId)}
                   onReport={() => setReportCityName(card.cityName)}
                 />
               ))}
@@ -216,8 +202,8 @@ export default function CityInsight() {
       {addedCityName && (
         <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
       )}
-      <CompareSelectionBar cities={mockCities} />
-      <CompareModal cities={mockCities} />
+      <CompareSelectionBar cities={CITY_INSIGHT_CARDS} />
+      <CompareModal />
     </div>
   );
 }
