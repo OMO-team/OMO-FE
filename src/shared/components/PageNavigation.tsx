@@ -9,6 +9,8 @@ type PageNavigationProps = {
 };
 
 export default function PageNavigation({ currentPage, totalPages, onPageChange }: PageNavigationProps) {
+  if (totalPages <= 0) return null;
+
   const currentGroup = Math.floor((currentPage - 1) / GROUP_SIZE);
   const totalGroups = Math.ceil(totalPages / GROUP_SIZE);
 

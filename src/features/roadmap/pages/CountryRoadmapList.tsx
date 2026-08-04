@@ -203,7 +203,7 @@ export default function CountryRoadmapList({
                           <CityRoadmapCard
                             key={city.cityId}
                             {...city}
-                            isWished={wishedCityIds.has(city.cityId)}
+                            isWishlisted={wishedCityIds.has(city.cityId)}
                             onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
                             onViewRoadmap={() => onViewRoadmap?.(city)}
                             onDelete={() => setDeleteTarget(city)}

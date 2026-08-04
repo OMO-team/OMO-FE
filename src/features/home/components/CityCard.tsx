@@ -9,7 +9,7 @@ type CityCardProps = {
 
 export default function CityCard({ name, imageUrl, recommendedCityCount, onClick }: CityCardProps) {
   return (
-    <div className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0 cursor-pointer" onClick={onClick}>
+    <button type="button" className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0 cursor-pointer" onClick={onClick}>
       <img
         src={imageUrl}
         alt={name}
@@ -28,6 +28,6 @@ export default function CityCard({ name, imageUrl, recommendedCityCount, onClick
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }

@@ -62,7 +62,7 @@ export interface CityRoadmapData {
   progressPercent: number;
   description: string;
   rating: number;
-  isWished?: boolean;
+  isWishlisted?: boolean;
   costProgressPercent: number;
   completedSteps: number;
   totalSteps: number;

@@ -96,12 +96,12 @@ export default function CityInsight() {
   };
 
   const [input, setInput] = useState(urlKeyword);
-  const [keyword, setKeyword] = useState(urlKeyword);
-
-  useEffect(() => {
+  const [prevUrlKeyword, setPrevUrlKeyword] = useState(urlKeyword);
+  if (prevUrlKeyword !== urlKeyword) {
+    setPrevUrlKeyword(urlKeyword);
     setInput(urlKeyword);
-    setKeyword(urlKeyword);
-  }, [urlKeyword]);
+  }
+  const keyword = urlKeyword;
   const [page, setPage] = useState(1);
   const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -113,19 +113,27 @@ export default function CityInsight() {
 
   const activePurpose = purposes[activeIndex];
 
-  const selectedCodes = selectedCountries.map(c => c.code);
-  const activeCodes = selectedCodes.length > 0 ? selectedCodes : urlCountryCodes;
+  const queryParams = useMemo<CityQueryParams>(() => {
+    const currentCountryCodes = searchParams.getAll('countryCodes');
+    const selectedCodes = selectedCountries.map(c => c.code);
+    const activeCodes = selectedCodes.length > 0 ? selectedCodes : currentCountryCodes;
+    return {
+      keyword: keyword || undefined,
+      purposeType: isFromSearch ? undefined : activePurpose?.type,
+      countryCodes: activeCodes.length > 0 ? activeCodes : undefined,
+      maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
+      minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
+      housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
+      visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
+      stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
+    };
+  }, [urlKeyword, isFromSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
 
-  const queryParams = useMemo<CityQueryParams>(() => ({
-    keyword: keyword || undefined,
-    purposeType: isFromSearch ? undefined : activePurpose?.type,
-    countryCodes: activeCodes.length > 0 ? activeCodes : undefined,
-    maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
-    minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
-    housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
-    visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
-    stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
-  }), [keyword, activePurpose, activeCodes, selectedOptions]);
+  const [prevQueryParams, setPrevQueryParams] = useState(queryParams);
+  if (prevQueryParams !== queryParams) {
+    setPrevQueryParams(queryParams);
+    setPage(1);
+  }
 
   const { data: cities = [] } = useCities(queryParams, {
     enabled: isFromSearch || !!activePurpose,
@@ -133,11 +141,8 @@ export default function CityInsight() {
 
   const PAGE_SIZE = 6;
   const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
-  const pagedCities = cities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  useEffect(() => {
-    setPage(1);
-  }, [cities]);
+  const effectivePage = Math.min(page, totalPages);
+  const pagedCities = cities.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
 
   const handleCompare = (cityName: string) => {
     const id = CITY_COMPARE_ID[cityName];
@@ -165,12 +170,16 @@ export default function CityInsight() {
     });
   };
 
-  const handleSearch = () => setKeyword(input);
+  const handleSearch = () => {
+    const next = new URLSearchParams(searchParams);
+    if (input) next.set('keyword', input);
+    else next.delete('keyword');
+    setSearchParams(next);
+  };
 
   // 필터 전체 초기화
   const handleReset = () => {
     setInput('');
-    setKeyword('');
     setSelectedCountries([]);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
@@ -297,7 +306,7 @@ export default function CityInsight() {
             </div>
             <div className="mt-25 mb-[304px]">
               <PageNavigation
-                currentPage={page}
+                currentPage={effectivePage}
                 totalPages={totalPages}
                 onPageChange={setPage}
               />

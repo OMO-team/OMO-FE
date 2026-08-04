@@ -12,7 +12,7 @@ type CityRoadmapCardProps = {
   progressPercent: number;
   description: string;
   rating: number;
-  isWished?: boolean;
+  isWishlisted?: boolean;
   costProgressPercent: number;
   completedSteps: number;
   totalSteps: number;
@@ -28,7 +28,7 @@ export default function CityRoadmapCard({
   countryName,
   description,
   rating,
-  isWished = false,
+  isWishlisted = false,
   costProgressPercent,
   completedSteps,
   totalSteps,
@@ -54,9 +54,9 @@ export default function CityRoadmapCard({
               type="button"
               onClick={onToggleWish}
               className="size-6"
-              aria-label={isWished ? '위시리스트에서 제거' : '위시리스트에 추가'}
+              aria-label={isWishlisted ? '위시리스트에서 제거' : '위시리스트에 추가'}
             >
-              <HeartIcon isWishlisted={isWished} />
+              <HeartIcon isWishlisted={isWishlisted} />
             </button>
             <button
               type="button"

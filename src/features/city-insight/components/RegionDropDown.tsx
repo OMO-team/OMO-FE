@@ -89,27 +89,27 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
               const isContinentOpen = openContinents.includes(continent)
               return (
                 <div key={continent} className="mb-3">
-                  <div className="h-6 flex items-center justify-between cursor-pointer" onClick={() => toggleContinent(continent)}>
+                  <button type="button" className="h-6 w-full flex items-center justify-between cursor-pointer" onClick={() => toggleContinent(continent)}>
                     <div className="flex items-center">
                       <ChevronDownIcon className={`transition-transform duration-200 ${isContinentOpen ? 'rotate-0' : '-rotate-90'}`} />
                       <p className="ml-1 body-02 text-gray-800">{continent}</p>
                       <p className="ml-0.5 body-03 text-gray-300">({countryList.length})</p>
                     </div>
                     <div className={`flex justify-center items-center w-[39px] h-6  rounded-[6px] label-02 ${isContinentOpen ? 'bg-gray-200 text-gray-500' : 'bg-gray-20 text-gray-300'}`}>전체</div>
-                  </div>
+                  </button>
                   {isContinentOpen && (
                     <div className="mt-2 flex flex-col gap-2 pl-4">
                       {countryList.map(country => {
                         const isSelected = selectedCountries.some(c => c.code === country.code)
                         return (
-                          <div key={country.countryId} className="flex gap-2 items-center cursor-pointer py-1" onClick={() => toggleCountry(country.name, country.code)}>
+                          <label key={country.countryId} className="flex gap-2 items-center cursor-pointer py-1">
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              readOnly
+                              onChange={() => toggleCountry(country.name, country.code)}
                             />
                             <p className="body-05 text-gray-600">{country.name}</p>
-                          </div>
+                          </label>
                         )
                       })}
                     </div>

@@ -135,7 +135,7 @@ export const countryRoadmapGroups: CountryGroupData[] = [
     countryName: '독일',
     cityCount: 2,
     cities: [
-      { ...SUPPORTED_CITIES[0], rating: 4.5, progressPercent: 43, costProgressPercent: 22, completedSteps: 0, totalSteps: 0, nextSchedule: '비자 신청서류 준비', isWished: true },
+      { ...SUPPORTED_CITIES[0], rating: 4.5, progressPercent: 43, costProgressPercent: 22, completedSteps: 0, totalSteps: 0, nextSchedule: '비자 신청서류 준비', isWishlisted: true },
       { ...SUPPORTED_CITIES[1], rating: 4.3, progressPercent: 10, costProgressPercent: 15, completedSteps: 0, totalSteps: 0, nextSchedule: '어학 성적 제출' },
     ],
   },
@@ -157,7 +157,7 @@ export const countryRoadmapGroups: CountryGroupData[] = [
     countryName: '네덜란드',
     cityCount: 1,
     cities: [
-      { ...SUPPORTED_CITIES[4], rating: 4.6, progressPercent: 18, costProgressPercent: 12, completedSteps: 0, totalSteps: 0, nextSchedule: '어학 성적 제출', isWished: true },
+      { ...SUPPORTED_CITIES[4], rating: 4.6, progressPercent: 18, costProgressPercent: 12, completedSteps: 0, totalSteps: 0, nextSchedule: '어학 성적 제출', isWishlisted: true },
     ],
   },
   {
