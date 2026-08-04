@@ -159,8 +159,15 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       clearSignupDraft();
       onClose();
     } catch (error) {
-      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 409) {
-        setEmailError('이미 사용 중인 이메일입니다.');
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.status === 400) {
+        const code = error.response.data?.code;
+        if (code === 'MEMBER400_1') {
+          setEmailError('이미 사용 중인 이메일입니다.');
+        } else if (code === 'AUTH400_3') {
+          setEmailError('이메일 인증을 완료해주세요.');
+        } else {
+          setEmailError('회원가입에 실패했습니다. 다시 시도해주세요.');
+        }
       } else {
         setEmailError('회원가입에 실패했습니다. 다시 시도해주세요.');
       }
