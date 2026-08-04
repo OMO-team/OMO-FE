@@ -6,7 +6,7 @@ import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 import { authApi } from '../api/authApi';
-import { passwordRegex } from '../constants/passwordRegex';
+import { passwordRegex } from '../../../shared/constants/passwordRegex';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;

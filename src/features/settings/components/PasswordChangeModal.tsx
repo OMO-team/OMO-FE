@@ -5,7 +5,7 @@ import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 import { memberApi } from '../api/memberApi';
-import { passwordRegex } from '../../auth/constants/passwordRegex';
+import { passwordRegex } from '../../../shared/constants/passwordRegex';
 
 type PasswordChangeModalProps = {
   onClose: () => void;
