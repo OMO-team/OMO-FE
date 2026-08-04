@@ -8,4 +8,9 @@ export const compareItemsApi = {
     const { data } = await instance.get<ApiResponse<CompareItem[]>>('/api/v1/members/me/compare-items');
     return data.result;
   },
+
+  /** 비교함에 도시 담기(최대 3개). 이미 담겨있거나(COMPARE409_1) 3개 초과(COMPARE400_1)면 에러 */
+  add: async (cityId: number): Promise<void> => {
+    await instance.post<ApiResponse<null>>('/api/v1/members/me/compare-items', { cityId });
+  },
 };

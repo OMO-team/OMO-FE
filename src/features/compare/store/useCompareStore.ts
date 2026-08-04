@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { useAuthStore } from "../../auth/store/useAuthStore";
+import { compareItemsApi } from "../api/compareItemsApi";
 
 const MAX_COMPARE_COUNT = 3;
 const MIN_COMPARE_COUNT = 2;
@@ -7,7 +9,7 @@ interface CompareState {
   compareList: number[];
   isModalOpen: boolean;
   showMaxWarning: boolean;
-  toggleCompare: (cityId: number) => void;
+  toggleCompare: (cityId: number) => Promise<void>;
   removeFromCompare: (cityId: number) => void;
   setCompareList: (cityIds: number[]) => void;
   clearCompare: () => void;
@@ -21,9 +23,10 @@ export const useCompareStore = create<CompareState>((set, get) => ({
   isModalOpen: false,
   showMaxWarning: false,
 
-  toggleCompare: (cityId) => {
+  toggleCompare: async (cityId) => {
     const { compareList } = get();
     if (compareList.includes(cityId)) {
+      // TODO: DELETE 스펙 나오면 로그인 상태에서 서버에도 반영
       set({ compareList: compareList.filter((id) => id !== cityId) });
       return;
     }
@@ -31,7 +34,14 @@ export const useCompareStore = create<CompareState>((set, get) => ({
       set({ showMaxWarning: true }); // 최대 3개 초과 시 추가 무시하고 경고만 표시
       return;
     }
-    set({ compareList: [...compareList, cityId] });
+    if (useAuthStore.getState().isLoggedIn) {
+      try {
+        await compareItemsApi.add(cityId);
+      } catch {
+        return; // 담기 실패 시 로컬 상태는 바꾸지 않음
+      }
+    }
+    set({ compareList: [...get().compareList, cityId] });
   },
 
   hideMaxWarning: () => set({ showMaxWarning: false }),
