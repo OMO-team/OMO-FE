@@ -17,6 +17,7 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
+import { wishKey } from '../utils/wishlistAdapter';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
 import type { CreateRoadmapResult } from '../types/api';
@@ -37,7 +38,8 @@ type CountryRoadmapListProps = {
   countryGroups: CountryGroupData[];
   /** 준비 시작 전 관심 도시를 보관하는 위시리스트 — 로드맵과 별도로 관리되는 경량 목록 */
   wishlistCities: CityInsightData[];
-  wishedCityIds: Set<string>;
+  /** 위시 여부는 도시가 아니라 도시+목적 조합으로 판단 — wishKey()로 만든 키 집합 */
+  wishedKeys: Set<string>;
   currentPage: number;
   totalPages: number;
   onPageChange?: (page: number) => void;
@@ -61,7 +63,7 @@ type CountryRoadmapListProps = {
 export default function CountryRoadmapList({
   countryGroups,
   wishlistCities,
-  wishedCityIds,
+  wishedKeys,
   currentPage,
   totalPages,
   onPageChange,
@@ -79,18 +81,20 @@ export default function CountryRoadmapList({
   const [deleteTarget, setDeleteTarget] = useState<CityRoadmapData | null>(null);
   const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
   const [removedWish, setRemovedWish] = useState<RemovedWish | null>(null);
-  const [reportCityId, setReportCityId] = useState<string | null>(null);
+  /** 같은 도시가 목적별로 여러 장 있을 수 있어 도시가 아니라 조합 키로 어느 카드의 리포트인지 식별 */
+  const [reportCityKey, setReportCityKey] = useState<string | null>(null);
   const [isCreatingRoadmap, setIsCreatingRoadmap] = useState(false);
   const [createdRoadmap, setCreatedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
   /** 이미 추가한 도시는 리포트를 다시 열어도 버튼이 비활성 상태로 유지되도록 기억 */
-  const [addedCityIds, setAddedCityIds] = useState<Set<string>>(new Set());
+  const [addedKeys, setAddedKeys] = useState<Set<string>>(new Set());
   /** 기본은 전부 펼친 상태 — 여기 담긴 국가만 접힌 상태로 표시 */
   const [collapsedCountries, setCollapsedCountries] = useState<Set<string>>(new Set());
 
   const toggleCompare = useCompareStore((s) => s.toggleCompare);
   const closeCompareModal = useCompareStore((s) => s.closeModal);
   const compareCities = wishlistCities.map(toCompareCity);
-  const reportCity = wishlistCities.find((city) => city.cityId === reportCityId) ?? null;
+  const reportCity =
+    wishlistCities.find((city) => wishKey(city.cityId, city.purposeId) === reportCityKey) ?? null;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -143,7 +147,7 @@ export default function CountryRoadmapList({
 
   /** 하트 클릭 시점의 위시 상태를 알고 있어야 "껐을 때만" 토스트를 띄울 수 있음 */
   const handleToggleWish = (cityId: string, cityName: string, purposeId?: number) => {
-    if (wishedCityIds.has(cityId)) {
+    if (wishedKeys.has(wishKey(cityId, purposeId))) {
       setRemovedWish({ cityId, cityName, purposeId });
     }
     onToggleWish?.(cityId, purposeId);
@@ -164,10 +168,11 @@ export default function CountryRoadmapList({
     setRemovedWish(null);
   };
 
-  /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 */
+  /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 (비교는 도시 단위라 목적이 여러 개면 첫 항목 기준) */
   const handleSelectCompareCity = (cityId: string) => {
     closeCompareModal();
-    setReportCityId(cityId);
+    const matched = wishlistCities.find((city) => city.cityId === cityId);
+    setReportCityKey(matched ? wishKey(matched.cityId, matched.purposeId) : null);
   };
 
   /**
@@ -183,7 +188,7 @@ export default function CountryRoadmapList({
     setIsCreatingRoadmap(true);
     try {
       const result = await onAddRoadmap(Number(reportCity.cityId), reportCity.purposeId);
-      setAddedCityIds((prev) => new Set(prev).add(reportCity.cityId));
+      setAddedKeys((prev) => new Set(prev).add(wishKey(reportCity.cityId, reportCity.purposeId)));
       setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: reportCity.cityName });
     } catch (error) {
       console.error('로드맵 생성 실패', error);
@@ -245,7 +250,7 @@ export default function CountryRoadmapList({
                           <CityRoadmapCard
                             key={city.roadmapId ?? city.cityId}
                             {...city}
-                            isWished={wishedCityIds.has(city.cityId)}
+                            isWished={wishedKeys.has(wishKey(city.cityId, city.purposeId))}
                             onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
                             onViewRoadmap={() => onViewRoadmap?.(city)}
                             onDelete={() => setDeleteTarget(city)}
@@ -267,12 +272,12 @@ export default function CountryRoadmapList({
           <div className="grid w-full grid-cols-2 gap-5">
             {wishlistCities.map((city) => (
               <CityInsightCard
-                key={city.cityId}
+                key={wishKey(city.cityId, city.purposeId)}
                 {...city}
                 isWished
                 onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
                 onCompare={() => toggleCompare(city.cityId)}
-                onReport={() => setReportCityId(city.cityId)}
+                onReport={() => setReportCityKey(wishKey(city.cityId, city.purposeId))}
               />
             ))}
           </div>
@@ -306,11 +311,11 @@ export default function CountryRoadmapList({
       {reportCity && (
         <CityReportModal
           isOpen
-          onClose={() => setReportCityId(null)}
+          onClose={() => setReportCityKey(null)}
           data={buildCityReportData(reportCity)}
           onSearch={mockSearchResult}
           onAddToRoadmap={handleAddToRoadmap}
-          isAddDisabled={isCreatingRoadmap || addedCityIds.has(reportCity.cityId)}
+          isAddDisabled={isCreatingRoadmap || addedKeys.has(wishKey(reportCity.cityId, reportCity.purposeId))}
         />
       )}
 

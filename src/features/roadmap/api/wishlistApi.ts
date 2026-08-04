@@ -20,9 +20,11 @@ export const wishlistApi = {
     unwrap(data);
   },
 
-  /** 위시리스트에 없는 도시를 삭제해도 성공 처리됨 */
-  remove: async (cityId: number): Promise<void> => {
-    const { data } = await instance.delete<ApiResponse<null>>(`/api/v1/wishlist/${cityId}`);
+  /** 도시+목적 조합으로 저장되므로 삭제도 목적을 지정해야 함 (같은 도시의 다른 목적은 그대로 남음) */
+  remove: async (cityId: number, purposeId: number): Promise<void> => {
+    const { data } = await instance.delete<ApiResponse<null>>(`/api/v1/wishlist/${cityId}`, {
+      params: { purposeId },
+    });
     unwrap(data);
   },
 };

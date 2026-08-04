@@ -33,6 +33,14 @@ function toDifficultyLabel(score: number | null): string {
 /** 목적은 위시리스트 항목에만 붙어 있고, 도시 카탈로그(GET /api/v1/cities)에는 없음 */
 type CityInsightSource = CityInfo & { purposeId?: number; purposeName?: string };
 
+/**
+ * 위시리스트는 도시+목적 조합으로 저장돼서, 같은 도시라도 목적이 다르면 별개 항목이다.
+ * 하트가 켜졌는지 판단할 때 도시만 보면 안 되므로 조합을 키로 쓴다.
+ */
+export function wishKey(cityId: string | number, purposeId?: number): string {
+  return `${cityId}:${purposeId ?? ''}`;
+}
+
 /** 도시 정보를 CityInsightCard / AI 리포트가 쓰는 CityInsightData로 변환 */
 export function toCityInsightData(city: CityInsightSource): CityInsightData {
   // 도시명/국가명이 영문으로 내려와서, 시드 데이터 기반 한글 매핑으로 대신 채움
