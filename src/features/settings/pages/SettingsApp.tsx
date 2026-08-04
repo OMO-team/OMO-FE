@@ -4,18 +4,35 @@ import SettingPage from './SettingPage';
 import TermsAndPolicyPage from '../../../shared/pages/TermsAndPolicyPage';
 import PasswordChangeSuccessPage from '../../auth/pages/PasswordChangeSuccessPage';
 import { authApi } from '../../auth/api/authApi';
+import { memberApi } from '../api/memberApi';
+import { useAuthStore } from '../../auth/store/useAuthStore';
 
 type View = 'settings' | 'terms' | 'password-success';
 
 export default function SettingsApp() {
   const [view, setView] = useState<View>('settings');
   const navigate = useNavigate();
+  const signOut = useAuthStore((s) => s.signOut);
 
   const handleLogout = async () => {
     try {
       await authApi.logout();
     } catch {
       // 토큰 만료 등으로 실패해도 로컬 토큰은 이미 제거됨
+    } finally {
+      signOut();
+      navigate('/');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await memberApi.withdraw();
+    } catch {
+      // 탈퇴 실패해도 로컬 상태 초기화
+    } finally {
+      signOut();
+      navigate('/');
     }
   };
 
@@ -27,8 +44,7 @@ export default function SettingsApp() {
     return (
       <PasswordChangeSuccessPage
         onKeepLoggedIn={() => setView('settings')}
-        // TODO: 로그인 페이지 라우트가 생기면 그쪽으로 이동
-        onLoginAgain={() => navigate('/myhome/empty')}
+        onLoginAgain={() => navigate('/')}
       />
     );
   }
@@ -37,7 +53,7 @@ export default function SettingsApp() {
     <SettingPage
       onNavigateToTerms={() => setView('terms')}
       onLogout={handleLogout}
-      onDeleteAccount={() => {}}
+      onDeleteAccount={handleDeleteAccount}
       onPasswordChangeSuccess={() => setView('password-success')}
     />
   );

@@ -11,10 +11,13 @@ type ProfileEditModalProps = {
   name: string;
   email: string;
   avatarUrl?: string;
+  googleLinked?: boolean;
   onClose: () => void;
-  onSave: (data: { name: string; avatarFile: File | null }) => void;
+  onSave: (data: { name: string; avatarFile: File | null }) => Promise<void>;
+  onDeleteAvatar?: () => Promise<void>;
   onConnectKakao?: () => void;
   onConnectGoogle?: () => void;
+  onUnlinkGoogle?: () => Promise<void>;
   isGoogleConnecting?: boolean;
 };
 
@@ -22,16 +25,21 @@ export default function ProfileEditModal({
   name,
   email,
   avatarUrl,
+  googleLinked = false,
   onClose,
   onSave,
+  onDeleteAvatar,
   onConnectKakao,
   onConnectGoogle,
+  onUnlinkGoogle,
   isGoogleConnecting = false,
 }: ProfileEditModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [nameValue, setNameValue] = useState(name);
   const [avatarPreview, setAvatarPreview] = useState(avatarUrl);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,17 +49,35 @@ export default function ProfileEditModal({
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  const handleAvatarDelete = () => {
-    setAvatarFile(null);
-    setAvatarPreview(undefined);
+  const handleAvatarDelete = async () => {
+    if (avatarFile !== null) {
+      setAvatarFile(null);
+      setAvatarPreview(avatarUrl);
+      return;
+    }
+    try {
+      await onDeleteAvatar?.();
+      setAvatarPreview(undefined);
+    } catch {
+      setSaveError('프로필 이미지 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const hasAvatar = Boolean(avatarPreview);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    onSave({ name: nameValue.trim(), avatarFile });
-    onClose();
+    if (isSubmitting) return;
+    setSaveError('');
+    setIsSubmitting(true);
+    try {
+      await onSave({ name: nameValue.trim(), avatarFile });
+      onClose();
+    } catch {
+      setSaveError('저장에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -138,7 +164,7 @@ export default function ProfileEditModal({
                       : 'bg-gray-100 text-gray-400 cursor-default',
                   ].join(' ')}
                 >
-                  {hasAvatar ? '프로필 삭제' : '프로필 삭제'}
+                  프로필 삭제
                 </button>
               </div>
             </div>
@@ -184,28 +210,48 @@ export default function ProfileEditModal({
                 </span>
                 <img src={chevronRightIcon} alt="" className="h-3.5" />
               </button>
-              <button
-                type="button"
-                onClick={onConnectGoogle}
-                disabled={isGoogleConnecting}
-                className="flex h-[50px] w-full items-center justify-between disabled:opacity-50"
-              >
-                <span className="flex items-center gap-2">
-                  <img src={googleIcon} alt="" className="size-6" />
-                  <span className="body-03 text-gray-900">Google 계정 연결하기</span>
-                </span>
-                <img src={chevronRightIcon} alt="" className="h-3.5" />
-              </button>
+              {googleLinked ? (
+                <button
+                  type="button"
+                  onClick={onUnlinkGoogle}
+                  className="flex h-[50px] w-full items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <img src={googleIcon} alt="" className="size-6" />
+                    <span className="body-03 text-gray-900">Google 계정 연결 해제</span>
+                  </span>
+                  <img src={chevronRightIcon} alt="" className="h-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onConnectGoogle}
+                  disabled={isGoogleConnecting}
+                  className="flex h-[50px] w-full items-center justify-between disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2">
+                    <img src={googleIcon} alt="" className="size-6" />
+                    <span className="body-03 text-gray-900">Google 계정 연결하기</span>
+                  </span>
+                  <img src={chevronRightIcon} alt="" className="h-3.5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="title-02 w-[400px] rounded-2 bg-primary-500 py-[13px] text-center text-white"
-        >
-          저장하기
-        </button>
+        <div className="flex w-[400px] flex-col gap-3">
+          {saveError && (
+            <span className="body-04 text-center text-[#FF2A14]">{saveError}</span>
+          )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="title-02 w-full rounded-2 bg-primary-500 py-[13px] text-center text-white disabled:opacity-50"
+          >
+            저장하기
+          </button>
+        </div>
       </form>
     </ModalOverlay>
   );
