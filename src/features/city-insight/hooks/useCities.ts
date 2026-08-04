@@ -5,6 +5,7 @@ import type { CityQueryParams, CityItem, CitiesResponse } from '../types/cityIns
 export function useCities(params: CityQueryParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['cities', params],
+    staleTime: 1000 * 60 * 5,
     enabled: (options?.enabled ?? true) && (!!params.purposeType || !!params.keyword || !!params.countryCodes?.length),
     queryFn: async (): Promise<CityItem[]> => {
       const cleanParams = Object.fromEntries(
