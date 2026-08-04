@@ -3,6 +3,7 @@ import { useCompareStore, useCanOpenModal } from "../store/useCompareStore";
 import Chip from "../../../shared/components/Chip";
 import CompareActionButton from "./CompareActionButton";
 import CompareMaxWarning from "./CompareMaxWarning";
+import { useSyncCompareItems } from "../hooks/useSyncCompareItems";
 import type { CompareSelectableCity } from "../types/dto";
 
 interface CompareSelectionBarProps {
@@ -18,6 +19,8 @@ export default function CompareSelectionBar({
   const showMaxWarning = useCompareStore((s) => s.showMaxWarning);
   const hideMaxWarning = useCompareStore((s) => s.hideMaxWarning);
   const canOpenModal = useCanOpenModal();
+
+  useSyncCompareItems();
 
   useEffect(() => {
     if (!showMaxWarning) return;

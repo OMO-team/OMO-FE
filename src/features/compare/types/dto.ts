@@ -30,3 +30,8 @@ export interface CompareSelectableCity {
   cityId: number;
   cityName: string;
 }
+
+export interface CompareItem {
+  cityId: number;
+  createdAt: string;
+}

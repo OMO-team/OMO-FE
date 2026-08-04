@@ -9,6 +9,7 @@ interface CompareState {
   showMaxWarning: boolean;
   toggleCompare: (cityId: number) => void;
   removeFromCompare: (cityId: number) => void;
+  setCompareList: (cityIds: number[]) => void;
   clearCompare: () => void;
   openModal: () => void;
   closeModal: () => void;
@@ -43,6 +44,8 @@ export const useCompareStore = create<CompareState>((set, get) => ({
       isModalOpen: next.length === 0 ? false : get().isModalOpen,
     });
   },
+
+  setCompareList: (cityIds) => set({ compareList: cityIds }),
 
   clearCompare: () => set({ compareList: [], isModalOpen: false }),
 
