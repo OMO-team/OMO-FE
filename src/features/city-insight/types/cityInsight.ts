@@ -6,7 +6,7 @@ export type ContinentType = 'Asia' | 'Europe' | 'North America' | 'South America
 export interface CityQueryParams {
   keyword?: string;
   purposeType?: PurposeType;
-  countryCode?: string;
+  countryCodes?: string[];
   maxMonthlyCost?: number;
   minSafetyScore?: number;
   housingDifficulty?: DifficultyType;

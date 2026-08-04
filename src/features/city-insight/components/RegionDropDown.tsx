@@ -8,14 +8,14 @@ import type { Purpose } from "../../home/types/home"
 
 interface RegionDropDownProps {
   purposeType?: Purpose['type'];
-  onSelect: (countryCode: string, countryName: string) => void;
+  onSelect: (codes: string[], names: string[]) => void;
   onReset: () => void;
 }
 
 export default function RegionDropDown({ purposeType, onSelect, onReset }: RegionDropDownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [openContinents, setOpenContinents] = useState<string[]>([])
-  const [selectedCountry, setSelectedCountry] = useState<{ name: string; code: string } | null>(null)
+  const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   useOutsideClick(containerRef, () => setIsOpen(false))
@@ -42,16 +42,20 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
   }
 
   const toggleCountry = (name: string, code: string) => {
-    setSelectedCountry(prev => prev?.code === code ? null : { name, code })
+    setSelectedCountries(prev =>
+      prev.some(c => c.code === code)
+        ? prev.filter(c => c.code !== code)
+        : [...prev, { name, code }]
+    )
   }
 
   const handleApply = () => {
-    if (selectedCountry) onSelect(selectedCountry.code, selectedCountry.name)
+    onSelect(selectedCountries.map(c => c.code), selectedCountries.map(c => c.name))
     setIsOpen(false)
   }
 
   const handleReset = () => {
-    setSelectedCountry(null)
+    setSelectedCountries([])
     setSearchQuery('')
     onReset()
     setOpenContinents([])
@@ -96,7 +100,7 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
                   {isContinentOpen && (
                     <div className="mt-2 flex flex-col gap-2 pl-4">
                       {countryList.map(country => {
-                        const isSelected = selectedCountry?.code === country.code
+                        const isSelected = selectedCountries.some(c => c.code === country.code)
                         return (
                           <div key={country.countryId} className="flex gap-2 items-center cursor-pointer py-1" onClick={() => toggleCountry(country.name, country.code)}>
                             <input

@@ -63,7 +63,7 @@ export default function CategorySection() {
               name={country.name}
               imageUrl={country.imageUrl}
               recommendedCityCount={country.recommendedCityCount}
-              onClick={() => navigate(`/city-insight?purposeId=${activePurpose?.purposeId}&countryCode=${country.code}`)}
+              onClick={() => navigate(`/city-insight?purposeId=${activePurpose?.purposeId}&countryCodes=${country.code}`)}
             />
           ))}
         </div>

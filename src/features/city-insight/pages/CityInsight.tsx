@@ -75,10 +75,10 @@ export default function CityInsight() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlKeyword = searchParams.get('keyword') ?? '';
-  const urlCountryCode = searchParams.get('countryCode') ?? undefined;
+  const urlCountryCodes = searchParams.getAll('countryCodes');
 
   // 진입 경로 판단
-  const isFromCountry = !!urlCountryCode;
+  const isFromCountry = urlCountryCodes.length > 0;
   const isFromSearch = !!urlKeyword;
 
   const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
@@ -90,10 +90,10 @@ export default function CityInsight() {
   const handleCategoryChange = (index: number) => {
     const selected = purposes[index];
     if (!selected) return;
-    const params: Record<string, string> = { purposeId: String(selected.purposeId) };
-    if (urlCountryCode) params.countryCode = urlCountryCode;
-    setSearchParams(params);
-  };       
+    const sp = new URLSearchParams({ purposeId: String(selected.purposeId) });
+    urlCountryCodes.forEach(code => sp.append('countryCodes', code));
+    setSearchParams(sp);
+  };
 
   const [input, setInput] = useState(urlKeyword);
   const [keyword, setKeyword] = useState(urlKeyword);
@@ -103,8 +103,7 @@ export default function CityInsight() {
     setKeyword(urlKeyword);
   }, [urlKeyword]);
   const [page, setPage] = useState(1);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [selectedCountryCode, setSelectedCountryCode] = useState<string | undefined>(undefined);
+  const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
@@ -114,16 +113,19 @@ export default function CityInsight() {
 
   const activePurpose = purposes[activeIndex];
 
+  const selectedCodes = selectedCountries.map(c => c.code);
+  const activeCodes = selectedCodes.length > 0 ? selectedCodes : urlCountryCodes;
+
   const queryParams = useMemo<CityQueryParams>(() => ({
     keyword: keyword || undefined,
     purposeType: isFromSearch ? undefined : activePurpose?.type,
-    countryCode: selectedCountryCode ?? urlCountryCode,
+    countryCodes: activeCodes.length > 0 ? activeCodes : undefined,
     maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
     minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
     housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
     visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
     stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
-  }), [keyword, activePurpose, urlCountryCode, selectedCountryCode, selectedOptions]);
+  }), [keyword, activePurpose, activeCodes, selectedOptions]);
 
   const { data: cities = [] } = useCities(queryParams, {
     enabled: isFromSearch || !!activePurpose,
@@ -149,9 +151,8 @@ export default function CityInsight() {
     return () => clearTimeout(timer);
   }, [addedCityName]);
 
-  const handleSelect = (countryCode: string, countryName: string) => {
-    setSelectedFilters(prev => (prev.includes(countryName) ? prev : [...prev, countryName]));
-    setSelectedCountryCode(countryCode);
+  const handleSelect = (codes: string[], names: string[]) => {
+    setSelectedCountries(codes.map((code, i) => ({ code, name: names[i] })));
   };
 
   const handleSelectOption = (title: string, option: string) => {
@@ -170,8 +171,7 @@ export default function CityInsight() {
   const handleReset = () => {
     setInput('');
     setKeyword('');
-    setSelectedFilters([]);
-    setSelectedCountryCode(undefined);
+    setSelectedCountries([]);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
   };
@@ -245,7 +245,7 @@ export default function CityInsight() {
                 key={`region-${resetKey}`}
                 purposeType={activePurpose?.type}
                 onSelect={handleSelect}
-                onReset={() => { setSelectedFilters([]); setSelectedCountryCode(undefined); }}
+                onReset={() => setSelectedCountries([])}
               />
               <div className="w-px h-7 bg-gray-300"></div>
               {DETAIL_OPTIONS.map(({ title, options }) => (
@@ -265,14 +265,11 @@ export default function CityInsight() {
           </div>
         </div>
         <div className="mt-3 flex gap-2">
-          {selectedFilters.map(filter => (
+          {selectedCountries.map(({ name, code }) => (
             <FilterChip
-              key={filter}
-              label={filter}
-              onRemove={() => {
-                setSelectedFilters(prev => prev.filter(v => v !== filter));
-                setSelectedCountryCode(undefined);
-              }}
+              key={code}
+              label={name}
+              onRemove={() => setSelectedCountries(prev => prev.filter(c => c.code !== code))}
             />
           ))}
         </div>
