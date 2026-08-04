@@ -29,13 +29,9 @@ type RemovedRecord = {
 type RemovedWish = {
   cityId: string;
   cityName: string;
+  /** 실행 취소로 다시 담을 때 같은 목적으로 넣어야 해서 함께 보관 */
+  purposeId?: number;
 };
-
-/**
- * 위시리스트가 아직 도시 단위로만 저장돼서 목적을 못 받아옴.
- * 백엔드가 도시+목적 조합으로 바꿔주면 항목의 purposeId를 그대로 쓰고 이 상수는 지울 것.
- */
-const FALLBACK_PURPOSE_ID = 1;
 
 type CountryRoadmapListProps = {
   countryGroups: CountryGroupData[];
@@ -48,8 +44,8 @@ type CountryRoadmapListProps = {
   onViewRoadmap?: (city: CityRoadmapData) => void;
   /** 지정하면 도시가 하나도 선택 안 된 상태(F-501)의 "도시 탐색하러 가기" 버튼 클릭 시 호출 */
   onExploreCity?: () => void;
-  /** 하트 on = 위시리스트 등록, 하트 off = 위시리스트에서 제거 */
-  onToggleWish?: (cityId: string) => void;
+  /** 하트 on = 위시리스트 등록(목적 필요), 하트 off = 위시리스트에서 제거(목적 불필요) */
+  onToggleWish?: (cityId: string, purposeId?: number) => void;
   /** 로드맵 삭제 확정 시 호출 (아직 실 삭제 API는 호출하지 않음 — onCommitDeleteCity에서 처리). 한 도시에 목적이 다른 로드맵이 여러 개 있을 수 있어 cityId 대신 roadmapId로 식별 */
   onDeleteCity?: (roadmapId: number) => void;
   /** 삭제 토스트의 "실행 취소" 클릭 시 호출 */
@@ -146,11 +142,11 @@ export default function CountryRoadmapList({
   };
 
   /** 하트 클릭 시점의 위시 상태를 알고 있어야 "껐을 때만" 토스트를 띄울 수 있음 */
-  const handleToggleWish = (cityId: string, cityName: string) => {
+  const handleToggleWish = (cityId: string, cityName: string, purposeId?: number) => {
     if (wishedCityIds.has(cityId)) {
-      setRemovedWish({ cityId, cityName });
+      setRemovedWish({ cityId, cityName, purposeId });
     }
-    onToggleWish?.(cityId);
+    onToggleWish?.(cityId, purposeId);
   };
 
   const toggleCountryGroup = (countryName: string) => {
@@ -164,7 +160,7 @@ export default function CountryRoadmapList({
 
   const handleUndoWish = () => {
     if (!removedWish) return;
-    onToggleWish?.(removedWish.cityId);
+    onToggleWish?.(removedWish.cityId, removedWish.purposeId);
     setRemovedWish(null);
   };
 
@@ -180,12 +176,13 @@ export default function CountryRoadmapList({
    */
   const handleAddToRoadmap = async () => {
     if (!reportCity || !onAddRoadmap || isCreatingRoadmap) return;
+    if (reportCity.purposeId == null) {
+      console.error('위시리스트 항목에 목적이 없어 로드맵을 만들 수 없음', reportCity.cityId);
+      return;
+    }
     setIsCreatingRoadmap(true);
     try {
-      const result = await onAddRoadmap(
-        Number(reportCity.cityId),
-        reportCity.purposeId ?? FALLBACK_PURPOSE_ID,
-      );
+      const result = await onAddRoadmap(Number(reportCity.cityId), reportCity.purposeId);
       setAddedCityIds((prev) => new Set(prev).add(reportCity.cityId));
       setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: reportCity.cityName });
     } catch (error) {
@@ -249,7 +246,7 @@ export default function CountryRoadmapList({
                             key={city.roadmapId ?? city.cityId}
                             {...city}
                             isWished={wishedCityIds.has(city.cityId)}
-                            onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
+                            onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
                             onViewRoadmap={() => onViewRoadmap?.(city)}
                             onDelete={() => setDeleteTarget(city)}
                           />
@@ -273,7 +270,7 @@ export default function CountryRoadmapList({
                 key={city.cityId}
                 {...city}
                 isWished
-                onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
+                onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
                 onCompare={() => toggleCompare(city.cityId)}
                 onReport={() => setReportCityId(city.cityId)}
               />

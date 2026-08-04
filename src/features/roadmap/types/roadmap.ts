@@ -60,6 +60,7 @@ export interface CityRoadmapData {
   cityName: string;
   countryName: string;
   /** 같은 도시라도 목적별로 로드맵이 따로 존재하고 목적마다 필요 서류가 달라서, 카드에서 함께 표시 */
+  purposeId?: number;
   purposeName?: string;
   progressPercent: number;
   description: string;

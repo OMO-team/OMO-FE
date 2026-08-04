@@ -52,7 +52,8 @@ export default function RoadmapApp() {
   );
 
   const addWishMutation = useMutation({
-    mutationFn: (cityId: number) => wishlistApi.add(cityId),
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      wishlistApi.add(cityId, purposeId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.list }),
   });
 
@@ -73,14 +74,18 @@ export default function RoadmapApp() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.list }),
   });
 
-  /** 하트 on = 위시리스트 등록, 하트 off = 위시리스트에서 제거 */
-  const handleToggleWish = (cityId: string) => {
+  /** 하트 on = 위시리스트 등록(목적 필요), 하트 off = 위시리스트에서 제거 */
+  const handleToggleWish = (cityId: string, purposeId?: number) => {
     const numericCityId = Number(cityId);
     if (wishedCityIds.has(cityId)) {
       removeWishMutation.mutate(numericCityId);
-    } else {
-      addWishMutation.mutate(numericCityId);
+      return;
     }
+    if (purposeId == null) {
+      console.error('목적 없이는 위시리스트에 담을 수 없음', cityId);
+      return;
+    }
+    addWishMutation.mutate({ cityId: numericCityId, purposeId });
   };
 
   const removeRoadmapMutation = useMutation({

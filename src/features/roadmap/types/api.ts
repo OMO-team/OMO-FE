@@ -31,9 +31,9 @@ export interface CityInfo {
   cityId: number;
   name: string;
   country: CityCountryInfo;
-  /** 위시리스트를 도시+목적 조합으로 저장하도록 백엔드 수정 예정 — 반영 전까지는 안 내려옴 */
-  purposeId?: number;
-  purposeName?: string;
+  /** 위시리스트에 담을 때 함께 저장된 목적 */
+  purposeId: number;
+  purposeName: string;
   imageUrl: string | null;
   rating: number | null;
   description: string | null;
