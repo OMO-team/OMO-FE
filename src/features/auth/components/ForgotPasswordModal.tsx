@@ -22,7 +22,8 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const isVerified = verifiedEmail !== '' && verifiedEmail === email;
 
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
@@ -38,7 +39,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     try {
       await authApi.sendPasswordResetEmail({ email });
       setEmailSent(true);
-      setIsVerified(false);
+      setVerifiedEmail('');
       setCode('');
       setCodeError('');
     } catch {
@@ -55,7 +56,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     setIsVerifyingCode(true);
     try {
       await authApi.verifyPasswordResetCode({ email, code });
-      setIsVerified(true);
+      setVerifiedEmail(email);
     } catch {
       setCodeError('인증번호가 올바르지 않습니다. 다시 확인해주세요.');
     } finally {
