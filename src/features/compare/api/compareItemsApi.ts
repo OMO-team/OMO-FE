@@ -13,4 +13,9 @@ export const compareItemsApi = {
   add: async (cityId: number): Promise<void> => {
     await instance.post<ApiResponse<null>>('/api/v1/members/me/compare-items', { cityId });
   },
+
+  /** 비교함에서 도시 삭제 */
+  remove: async (cityId: number): Promise<void> => {
+    await instance.delete<ApiResponse<string>>(`/api/v1/members/me/compare-items/${cityId}`);
+  },
 };

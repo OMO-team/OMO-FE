@@ -10,7 +10,7 @@ interface CompareState {
   isModalOpen: boolean;
   showMaxWarning: boolean;
   toggleCompare: (cityId: number) => Promise<void>;
-  removeFromCompare: (cityId: number) => void;
+  removeFromCompare: (cityId: number) => Promise<void>;
   setCompareList: (cityIds: number[]) => void;
   clearCompare: () => void;
   openModal: () => void;
@@ -26,8 +26,7 @@ export const useCompareStore = create<CompareState>((set, get) => ({
   toggleCompare: async (cityId) => {
     const { compareList } = get();
     if (compareList.includes(cityId)) {
-      // TODO: DELETE 스펙 나오면 로그인 상태에서 서버에도 반영
-      set({ compareList: compareList.filter((id) => id !== cityId) });
+      await get().removeFromCompare(cityId);
       return;
     }
     if (compareList.length >= MAX_COMPARE_COUNT) {
@@ -46,9 +45,16 @@ export const useCompareStore = create<CompareState>((set, get) => ({
 
   hideMaxWarning: () => set({ showMaxWarning: false }),
 
-  removeFromCompare: (cityId) => {
+  removeFromCompare: async (cityId) => {
+    if (useAuthStore.getState().isLoggedIn) {
+      try {
+        await compareItemsApi.remove(cityId);
+      } catch {
+        return; // 삭제 실패 시 로컬 상태는 바꾸지 않음
+      }
+    }
     const next = get().compareList.filter((id) => id !== cityId);
-    // 모두 삭제되면 모달도 자동으로 닫힘
+    // 모두 삭제되면 모달도 자동으로 닫힘 (F-414)
     set({
       compareList: next,
       isModalOpen: next.length === 0 ? false : get().isModalOpen,
