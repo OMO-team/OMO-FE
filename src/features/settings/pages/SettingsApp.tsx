@@ -26,14 +26,9 @@ export default function SettingsApp() {
   };
 
   const handleDeleteAccount = async () => {
-    try {
-      await memberApi.withdraw();
-    } catch {
-      // 탈퇴 실패해도 로컬 상태 초기화
-    } finally {
-      signOut();
-      navigate('/');
-    }
+    await memberApi.withdraw();
+    signOut();
+    navigate('/');
   };
 
   if (view === 'terms') {

@@ -31,7 +31,7 @@ import exitIcon from "../../../assets/icons/exit.svg";
 interface SettingsPageProps {
   onNavigateToTerms?: () => void;
   onLogout?: () => void;
-  onDeleteAccount?: () => void;
+  onDeleteAccount?: () => Promise<void>;
   onPasswordChangeSuccess?: () => void;
 }
 
@@ -366,9 +366,13 @@ export default function SettingsPage({
             ]}
             cancelLabel="탈퇴하기"
             confirmLabel="취소"
-            onCancel={() => {
+            onCancel={async () => {
               setActiveModal(null);
-              onDeleteAccount?.();
+              try {
+                await onDeleteAccount?.();
+              } catch {
+                setErrorBanner('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
+              }
             }}
             onConfirm={() => setActiveModal(null)}
           />
