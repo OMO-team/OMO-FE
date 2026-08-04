@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ModalOverlay from '../components/ModalOverlay';
@@ -10,20 +11,36 @@ import LoginRequiredModal from '../../features/auth/components/LoginRequiredModa
 import SearchModal from '../../features/search/components/SearchModal';
 import AIChatPanel from '../../features/chat/components/AIChatPanel';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
+import { memberApi } from '../../features/settings/api/memberApi';
 import type { MainLayoutContext } from './useMainLayoutContext';
 import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
-type RouteHandle = { headerVariant?: 'default' | 'overlay' };
+type RouteHandle = { headerVariant?: 'default' | 'overlay' | 'transparent' };
 
 export default function MainLayout() {
-  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn } = useAuthStore();
+  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } = useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    if (token) signIn();
+    if (!token) return;
+    const controller = new AbortController();
+    memberApi.getMyInfo()
+      .then((info) => {
+        if (controller.signal.aborted) return;
+        if (localStorage.getItem('accessToken') !== token) return;
+        signIn(info.profileImageUrl ?? undefined);
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          localStorage.removeItem('accessToken');
+          signOut();
+        }
+      });
+    return () => { controller.abort(); };
   }, []);
   const matches = useMatches();
   const headerVariant =
