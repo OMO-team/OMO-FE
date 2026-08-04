@@ -8,7 +8,7 @@ import { roadmapQueryKeys, wishlistQueryKeys } from '../api/queryKeys';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { groupByCountry } from '../utils/roadmapAdapter';
 import { useAuthStore } from '../../auth/store/useAuthStore';
-import type { CityListResult, CreateRoadmapResult, RoadmapListItem } from '../types/api';
+import type { WishlistCityListResult, CreateRoadmapResult, RoadmapListItem } from '../types/api';
 
 const GROUPS_PER_PAGE = 2;
 
@@ -62,8 +62,8 @@ export default function RoadmapApp() {
     mutationFn: (cityId: number) => wishlistApi.remove(cityId),
     onMutate: async (cityId) => {
       await queryClient.cancelQueries({ queryKey: wishlistQueryKeys.list });
-      const previous = queryClient.getQueryData<CityListResult>(wishlistQueryKeys.list);
-      queryClient.setQueryData<CityListResult>(wishlistQueryKeys.list, (old) =>
+      const previous = queryClient.getQueryData<WishlistCityListResult>(wishlistQueryKeys.list);
+      queryClient.setQueryData<WishlistCityListResult>(wishlistQueryKeys.list, (old) =>
         old ? { ...old, cities: old.cities.filter((city) => city.cityId !== cityId) } : old,
       );
       return { previous };

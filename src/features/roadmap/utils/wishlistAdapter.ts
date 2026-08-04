@@ -9,19 +9,21 @@ function toPercent(score: number | null): number {
   return score != null ? Math.round(score * 20) : 0;
 }
 
+/** 목적은 위시리스트 항목에만 붙어 있고, 도시 카탈로그(GET /api/v1/cities)에는 없음 */
+type CityInsightSource = CityInfo & { purposeId?: number; purposeName?: string };
+
 /**
- * 실 API(GET /api/v1/my-home/wishlist)의 CityInfo를 CityInsightCard가 쓰는 CityInsightData로 변환.
+ * 도시 정보를 CityInsightCard / AI 리포트가 쓰는 CityInsightData로 변환.
  * accommodationLabel/visaLabel(쉬움/보통/어려움)은 API가 점수만 줄 뿐 등급 자체를 안 내려주므로
  * 임의로 판정하지 않고 항상 "준비중"으로 표시함.
  */
-export function toCityInsightData(city: CityInfo): CityInsightData {
-  // 위시리스트 API도 도시명/국가명이 영문으로 내려와서, 시드 데이터 기반 한글 매핑으로 대신 채움
+export function toCityInsightData(city: CityInsightSource): CityInsightData {
+  // 도시명/국가명이 영문으로 내려와서, 시드 데이터 기반 한글 매핑으로 대신 채움
   const cityInfo = CITY_INFO_KO[city.cityId];
   return {
     cityId: String(city.cityId),
     cityName: cityInfo?.cityName ?? city.name,
     countryName: cityInfo?.countryName ?? city.country.name,
-    // 위시리스트가 도시+목적 조합으로 바뀌면 값이 들어오기 시작함 (그전까지는 undefined)
     purposeId: city.purposeId,
     purposeName: city.purposeName,
     imageUrl: city.imageUrl ?? '',
@@ -35,6 +37,6 @@ export function toCityInsightData(city: CityInfo): CityInsightData {
     visaLabel: NOT_READY,
     securityScore: city.safetyScore ?? 0,
     languageScore: city.languageScore ?? 0,
-    infrastructureScore: city.infraScore ?? 0,
+    infrastructureScore: city.internetScore ?? 0,
   };
 }

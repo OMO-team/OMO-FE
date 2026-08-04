@@ -13,12 +13,17 @@ import BagIcon from '../components/icons/BagIcon';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { roadmapsApi } from '../api/roadmapsApi';
-import { roadmapQueryKeys } from '../api/queryKeys';
+import { citiesApi } from '../api/citiesApi';
+import { cityQueryKeys, roadmapQueryKeys } from '../api/queryKeys';
 import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
+import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import { CITY_INFO_KO } from '../mocks/cityCountryMap';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
+
+/** 도시 정보는 거의 바뀌지 않아서 한 번 받아두고 화면 간에 재사용 */
+const CITY_CATALOG_STALE_TIME = 1000 * 60 * 60;
 
 function parseDotDate(value?: string) {
   if (!value) return null;
@@ -50,6 +55,18 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
     queryKey: roadmapQueryKeys.detail(roadmapId),
     queryFn: () => roadmapsApi.get(roadmapId),
     enabled: isValidRoadmapId,
+  });
+
+  /**
+   * 로드맵 API에는 도시의 평점·요약·지표가 없어서 AI 리포트를 채울 수 없음.
+   * 단일 도시 조회 엔드포인트가 없어 카탈로그 전체를 받아 해당 도시를 찾아 쓰고,
+   * 리포트를 열 때만 요청한다.
+   */
+  const { data: cityCatalog } = useQuery({
+    queryKey: cityQueryKeys.list,
+    queryFn: citiesApi.list,
+    enabled: isReportOpen,
+    staleTime: CITY_CATALOG_STALE_TIME,
   });
 
   /** 체류 기간 변경은 즉시 화면에 반영(낙관적 업데이트)하고, 실패하면 이전 값으로 되돌림 */
@@ -113,24 +130,30 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const cityInfo = CITY_INFO_KO[detail.cityId];
   const cityNameKo = cityInfo?.cityName ?? detail.cityName;
 
-  /** AI 탐색 리포트는 city-ai-report 도메인 데이터라 로드맵 API에는 없음 — 준비된 값만 채우고 나머지는 준비중으로 표시 */
-  const reportCityData: CityInsightData = {
-    cityId: String(detail.cityId),
-    cityName: cityNameKo,
-    countryName: cityInfo?.countryName ?? '준비중',
-    imageUrl: detail.cityImageUrl,
-    description: '준비중',
-    rating: 0,
-    monthlyCost: '준비중',
-    costPercent: 0,
-    accommodationPercent: 0,
-    accommodationLabel: '준비중',
-    visaPercent: 0,
-    visaLabel: '준비중',
-    securityScore: 0,
-    languageScore: 0,
-    infrastructureScore: 0,
-  };
+  /**
+   * AI 탐색 리포트에 쓸 도시 정보는 로드맵 API에 없어서 도시 카탈로그에서 찾아 씀.
+   * 아직 못 받았거나 카탈로그에 없는 도시면 로드맵이 아는 값만으로 최소한을 채운다.
+   */
+  const catalogCity = cityCatalog?.cities.find((city) => city.cityId === detail.cityId);
+  const reportCityData: CityInsightData = catalogCity
+    ? { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl }
+    : {
+        cityId: String(detail.cityId),
+        cityName: cityNameKo,
+        countryName: cityInfo?.countryName ?? '준비중',
+        imageUrl: detail.cityImageUrl,
+        description: '준비중',
+        rating: 0,
+        monthlyCost: '준비중',
+        costPercent: 0,
+        accommodationPercent: 0,
+        accommodationLabel: '준비중',
+        visaPercent: 0,
+        visaLabel: '준비중',
+        securityScore: 0,
+        languageScore: 0,
+        infrastructureScore: 0,
+      };
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">

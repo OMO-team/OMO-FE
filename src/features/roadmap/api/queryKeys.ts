@@ -7,6 +7,10 @@ export const taskQueryKeys = {
   detail: (taskId: number) => ['tasks', taskId] as const,
 };
 
+export const cityQueryKeys = {
+  list: ['cities'] as const,
+};
+
 export const wishlistQueryKeys = {
   list: ['wishlist'] as const,
 };

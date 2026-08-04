@@ -1,11 +1,11 @@
 import { instance } from '../../../lib/axios';
 import { unwrap } from './apiUtils';
-import type { ApiResponse, CityListResult } from '../types/api';
+import type { ApiResponse, WishlistCityListResult } from '../types/api';
 
 export const wishlistApi = {
   /** 최근 추가 순으로 정렬된 내 위시리스트 */
-  list: async (): Promise<CityListResult> => {
-    const { data } = await instance.get<ApiResponse<CityListResult>>('/api/v1/my-home/wishlist');
+  list: async (): Promise<WishlistCityListResult> => {
+    const { data } = await instance.get<ApiResponse<WishlistCityListResult>>('/api/v1/my-home/wishlist');
     return unwrap(data);
   },
 
