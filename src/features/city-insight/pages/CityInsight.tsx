@@ -96,12 +96,13 @@ export default function CityInsight() {
   };
 
   const [input, setInput] = useState(urlKeyword);
+  const [keyword, setKeyword] = useState(urlKeyword);
   const [prevUrlKeyword, setPrevUrlKeyword] = useState(urlKeyword);
   if (prevUrlKeyword !== urlKeyword) {
     setPrevUrlKeyword(urlKeyword);
     setInput(urlKeyword);
+    setKeyword(urlKeyword);
   }
-  const keyword = urlKeyword;
   const [page, setPage] = useState(1);
   const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -127,7 +128,7 @@ export default function CityInsight() {
       visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
       stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
     };
-  }, [urlKeyword, isFromSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
+  }, [keyword, isFromSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
 
   const [prevQueryParams, setPrevQueryParams] = useState(queryParams);
   if (prevQueryParams !== queryParams) {
@@ -171,15 +172,13 @@ export default function CityInsight() {
   };
 
   const handleSearch = () => {
-    const next = new URLSearchParams(searchParams);
-    if (input) next.set('keyword', input);
-    else next.delete('keyword');
-    setSearchParams(next);
+    setKeyword(input);
   };
 
   // 필터 전체 초기화
   const handleReset = () => {
     setInput('');
+    setKeyword('');
     setSelectedCountries([]);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
