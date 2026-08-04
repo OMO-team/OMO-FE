@@ -16,7 +16,7 @@ export default function ThumbnailVideo({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="w-[218px] h-[137px] relative overflow-hidden rounded-4 bg-cover bg-center block"
+      className="w-[214px] h-[143px] relative overflow-hidden rounded-4 bg-cover bg-center block"
       style={
         thumbnailUrl
           ? { backgroundImage: `url(${thumbnailUrl})` }
@@ -42,7 +42,7 @@ export default function ThumbnailVideo({
         viewBox="0 0 30 30"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="absolute left-[94px] top-[54px]"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
         <rect width="30" height="30" rx="15" fill="white" />
         <path d="M22 15L11.5 21.0622L11.5 8.93782L22 15Z" fill="#B8BFCB" />
