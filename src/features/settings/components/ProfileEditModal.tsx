@@ -51,6 +51,7 @@ export default function ProfileEditModal({
 
   const handleAvatarDelete = async () => {
     if (avatarFile !== null) {
+      if (avatarPreview?.startsWith('blob:')) URL.revokeObjectURL(avatarPreview);
       setAvatarFile(null);
       setAvatarPreview(avatarUrl);
       return;
@@ -213,7 +214,13 @@ export default function ProfileEditModal({
               {googleLinked ? (
                 <button
                   type="button"
-                  onClick={onUnlinkGoogle}
+                  onClick={async () => {
+                    try {
+                      await onUnlinkGoogle?.();
+                    } catch {
+                      setSaveError('Google 계정 연결 해제에 실패했습니다. 다시 시도해주세요.');
+                    }
+                  }}
                   className="flex h-[50px] w-full items-center justify-between"
                 >
                   <span className="flex items-center gap-2">
