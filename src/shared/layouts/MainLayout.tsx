@@ -35,6 +35,7 @@ export default function MainLayout() {
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
+        if (localStorage.getItem('accessToken') !== token) return;
         if (axios.isAxiosError(error) && error.response?.status === 401) {
           localStorage.removeItem('accessToken');
           signOut();
