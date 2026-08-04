@@ -5,11 +5,14 @@ import type { CityInsightData } from '../types/cityInsight';
 const NOT_READY = '준비중';
 
 /**
- * 생활비 게이지와 난이도 라벨은 API가 점수/금액만 주고 비율·등급은 안 내려줘서 프론트에서 환산한다.
- * 도시 탐색 페이지(city-insight/utils/cityAdapter.ts)와 같은 기준을 써야 같은 도시가 두 화면에서
- * 같게 보이므로 값을 맞춰둠 — #84 머지 후 공용 유틸로 합칠 것.
+ * 생활비 게이지와 난이도 라벨은 목록 API가 금액·점수만 주고 비율·등급은 안 내려줘서 프론트에서 환산한다.
+ *
+ * 상한값은 GET /api/v1/cities/{cityId}/stats 의 COST maxValue(450)와 맞춘 값 —
+ * 목록 API에는 maxValue가 없어서 카드에서는 상수로 둔다. 백엔드가 이 값을 바꾸면 여기도 같이 바꿀 것.
+ * 도시 탐색 페이지(city-insight/utils/cityAdapter.ts)도 같은 기준을 써야 같은 도시가 두 화면에서
+ * 같게 보이므로, #84 머지 후 공용 유틸로 합칠 것.
  */
-const MAX_MONTHLY_COST = 400;
+const MAX_MONTHLY_COST = 450;
 const EASY_SCORE = 3.5;
 const NORMAL_SCORE = 2;
 
