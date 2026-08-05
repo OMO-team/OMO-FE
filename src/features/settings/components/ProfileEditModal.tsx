@@ -1,4 +1,5 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import axios from 'axios';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import profileImage from '../../../assets/icons/profile-image.svg';
@@ -73,8 +74,12 @@ export default function ProfileEditModal({
     try {
       await onSave({ name: nameValue.trim(), avatarFile });
       onClose();
-    } catch {
-      setSaveError('저장에 실패했습니다. 다시 시도해주세요.');
+    } catch (error) {
+      if (axios.isAxiosError<{ code?: string; message?: string }>(error) && error.response?.data?.code === 'COMMON400') {
+        setSaveError(error.response.data.message ?? '입력값이 올바르지 않습니다.');
+      } else {
+        setSaveError('저장에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsSubmitting(false);
     }
