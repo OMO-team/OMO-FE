@@ -28,12 +28,19 @@ export type SettingsResult = {
   pushNotification: boolean;
   emailNotification: boolean;
   autoSave: boolean;
+  twoFactorEnabled: boolean;
 };
 
 export type UpdateSettingsRequest = {
   pushNotification?: boolean;
   emailNotification?: boolean;
   autoSave?: boolean;
+};
+
+export type UpdateSettingsResult = {
+  pushNotification: boolean;
+  emailNotification: boolean;
+  autoSave: boolean;
 };
 
 export type ProfileImageUploadUrlRequest = {

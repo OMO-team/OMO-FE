@@ -10,13 +10,18 @@ export default function GoogleLinkCallbackRoute() {
     if (called.current) return;
     called.current = true;
 
-    const error = searchParams.get('error');
+    const linked = searchParams.get('linked');
+    const errorCode = searchParams.get('errorCode');
 
-    // 성공·실패 모두 설정 페이지로 이동, state로 결과 전달
-    navigate('/setting', {
-      replace: true,
-      state: { googleLinkResult: error ? 'error' : 'success' },
-    });
+    if (linked === 'true') {
+      navigate('/setting', { replace: true, state: { googleLinkResult: 'success' } });
+    } else if (errorCode === 'AUTH409_3') {
+      navigate('/setting', { replace: true, state: { googleLinkResult: 'error', googleLinkError: '이미 Google 계정이 연결되어 있습니다.' } });
+    } else if (errorCode === 'AUTH409_4') {
+      navigate('/setting', { replace: true, state: { googleLinkResult: 'error', googleLinkError: '이미 다른 계정에 연결된 Google 계정입니다.' } });
+    } else {
+      navigate('/setting', { replace: true, state: { googleLinkResult: 'error' } });
+    }
   }, [searchParams, navigate]);
 
   return null;

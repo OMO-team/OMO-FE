@@ -1,4 +1,7 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+
+const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'] as const;
+const maxImageSize = 5 * 1024 * 1024;
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import profileImage from '../../../assets/icons/profile-image.svg';
@@ -45,6 +48,15 @@ export default function ProfileEditModal({
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    if (!(allowedImageTypes as readonly string[]).includes(file.type)) {
+      setSaveError('jpg, png, webp 형식의 이미지만 업로드할 수 있습니다.');
+      return;
+    }
+    if (file.size > maxImageSize) {
+      setSaveError('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+    setSaveError('');
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
@@ -70,9 +82,20 @@ export default function ProfileEditModal({
     e.preventDefault();
     if (isSubmitting) return;
     setSaveError('');
+
+    const trimmedName = nameValue.trim();
+    if (trimmedName.length === 0) {
+      setSaveError('이름은 필수 입력값입니다.');
+      return;
+    }
+    if (trimmedName.length > 20) {
+      setSaveError('이름은 20자 이하로 입력해 주세요.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await onSave({ name: nameValue.trim(), avatarFile });
+      await onSave({ name: trimmedName, avatarFile });
       onClose();
     } catch {
       setSaveError('저장에 실패했습니다. 다시 시도해주세요.');
@@ -135,7 +158,7 @@ export default function ProfileEditModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png"
+                accept={allowedImageTypes.join(',')}
                 className="hidden"
                 onChange={handleAvatarChange}
               />

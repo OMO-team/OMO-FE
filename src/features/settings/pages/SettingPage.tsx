@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import { useAuthStore } from "../../auth/store/useAuthStore";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authApi } from "../../auth/api/authApi";
@@ -50,6 +51,10 @@ export default function SettingsPage({
     rawGoogleLinkResult === 'success' || rawGoogleLinkResult === 'error'
       ? rawGoogleLinkResult
       : null;
+  const googleLinkError =
+    typeof locationState?.googleLinkError === 'string'
+      ? locationState.googleLinkError
+      : null;
 
   const [activeModal, setActiveModal] = useState<
     "logout" | "delete" | "profile" | "password-change" | "password-find" | null
@@ -73,6 +78,7 @@ export default function SettingsPage({
 
   // 구글 연결 배너
   const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(googleLinkResult);
+  const [googleLinkErrorMessage, setGoogleLinkErrorMessage] = useState<string | null>(googleLinkError);
   const [isGoogleLinking, setIsGoogleLinking] = useState(false);
 
   useEffect(() => {
@@ -177,19 +183,42 @@ export default function SettingsPage({
   }, [signIn]);
 
   const handleUnlinkGoogle = useCallback(async () => {
-    await memberApi.unlinkGoogle();
-    setGoogleLinked(false);
+    try {
+      await memberApi.unlinkGoogle();
+      setGoogleLinked(false);
+    } catch (error) {
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'AUTH409_5') {
+          setErrorBanner('Google 계정이 유일한 로그인 수단이므로 연결을 해제할 수 없습니다.');
+        } else if (code === 'AUTH404_2') {
+          setGoogleLinked(false);
+          setErrorBanner('이미 연결 해제된 Google 계정입니다.');
+        } else {
+          setErrorBanner('Google 계정 연결 해제에 실패했습니다. 다시 시도해주세요.');
+        }
+      } else {
+        setErrorBanner('Google 계정 연결 해제에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
   }, []);
 
   const handleConnectGoogle = async () => {
     if (isGoogleLinking) return;
+    setGoogleLinkBanner(null);
+    setGoogleLinkErrorMessage(null);
     setIsGoogleLinking(true);
     try {
       const { authorizationUrl } = await authApi.getGoogleLinkUrl();
       window.location.href = authorizationUrl;
-    } catch {
+    } catch (error) {
       setIsGoogleLinking(false);
-      setGoogleLinkBanner('error');
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AUTH409_3') {
+        setGoogleLinked(true);
+        setErrorBanner('이미 Google 계정이 연결되어 있습니다.');
+      } else {
+        setGoogleLinkBanner('error');
+      }
     }
   };
 
@@ -217,8 +246,8 @@ export default function SettingsPage({
         {googleLinkBanner === 'error' && (
           <TopAlertBanner
             variant="red"
-            message="Google 계정 연결에 실패했습니다. 다시 시도해 주세요."
-            onClose={() => setGoogleLinkBanner(null)}
+            message={googleLinkErrorMessage ?? 'Google 계정 연결에 실패했습니다. 다시 시도해 주세요.'}
+            onClose={() => { setGoogleLinkBanner(null); setGoogleLinkErrorMessage(null); }}
           />
         )}
 

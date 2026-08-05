@@ -6,7 +6,7 @@ export type ChipInfo = {
 export type BriefingRequest = {
   searchQuery: string;
   isRefine: boolean;
-  sessionId?: number;
+  sessionId: number | null;
 };
 
 export type BriefingInitResult = {
@@ -52,7 +52,7 @@ export type SuggestedRelaxation = {
 
 export type BriefingStatusResult = {
   status: 'PROCESSING' | 'COMPLETED' | 'FAILED';
-  isRefine: boolean;
+  isRefine: boolean | null;
   activePurpose: string | null;
   selectedCountry: string | null;
   briefingData: BriefingData | null;

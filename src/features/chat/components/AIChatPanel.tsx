@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
@@ -21,7 +22,7 @@ type ChatEntry = {
   userMessage: string;
   thinkingTime: number;
   briefingData: BriefingData | null;
-  status: 'loading' | 'completed' | 'empty' | 'cancelled';
+  status: 'loading' | 'completed' | 'empty' | 'cancelled' | 'error';
 };
 
 const MOCK_IMAGES = [
@@ -169,10 +170,19 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
         } else {
           pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
         }
-      } catch {
+      } catch (error) {
         if (!pollTimerRef.current) return;
         stopPolling();
         setIsStreaming(false);
+        if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI-005') {
+          setSessionId(null);
+        }
+        const entryId = currentEntryIdRef.current;
+        if (entryId) {
+          setChatHistory(prev => prev.map(e =>
+            e.id === entryId && e.status === 'loading' ? { ...e, status: 'error' } : e
+          ));
+        }
         setNoticeType('briefing-error');
       }
     };
@@ -190,12 +200,21 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
       const { sessionId: newSessionId, taskId } = await chatApi.startBriefing({
         searchQuery: query,
         isRefine: currentSessionId !== null,
-        sessionId: currentSessionId ?? undefined,
+        sessionId: currentSessionId,
       });
       setSessionId(newSessionId);
       startPolling(taskId);
-    } catch {
+    } catch (error) {
       setIsStreaming(false);
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'AI400_2' || code === 'VALID400_1') {
+          setSessionId(null);
+        }
+      }
+      setChatHistory(prev => prev.map(e =>
+        e.id === entryId && e.status === 'loading' ? { ...e, status: 'error' } : e
+      ));
       setNoticeType('briefing-error');
     }
   }, [startPolling]);
@@ -241,7 +260,12 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
     setChatHistory([]);
     setNoticeType(null);
     if (sessionId !== null) {
-      chatApi.deleteSession(sessionId).catch(() => {});
+      chatApi.deleteSession(sessionId).catch((error: unknown) => {
+        if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI-002') {
+          return;
+        }
+        setNoticeType('briefing-error');
+      });
       setSessionId(null);
     }
     onNewChat?.();
@@ -520,6 +544,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
                     {entry.status === 'loading' && <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>}
                     {entry.status === 'empty' && <span className="body-04 text-gray-400">조건에 맞는 결과를 찾지 못했어요.</span>}
                     {entry.status === 'cancelled' && <span className="body-04 text-gray-400">응답이 중단되었어요.</span>}
+                    {entry.status === 'error' && <span className="body-04 text-gray-400">브리핑에 실패했어요.</span>}
                   </div>
                 </div>
               )

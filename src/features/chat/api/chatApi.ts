@@ -30,7 +30,6 @@ export const chatApi = {
     return data.result;
   },
 
-  deleteSession: async (sessionId: number) => {
-    await instance.delete(`/api/v1/ai-search/sessions/${sessionId}`);
-  },
+  deleteSession: (sessionId: number) =>
+    instance.delete<ApiResponse<string>>(`/api/v1/ai-search/sessions/${sessionId}`),
 };

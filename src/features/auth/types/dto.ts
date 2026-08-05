@@ -7,6 +7,12 @@ export type SignupRequest = {
   agreedTermsIds: number[];
 };
 
+export type SignupResult = {
+  memberId: number;
+  name: string;
+  createdAt: string;
+};
+
 // 로그인
 export type LoginRequest = {
   email: string;
@@ -14,6 +20,7 @@ export type LoginRequest = {
 };
 
 export type LoginResult = {
+  memberId: number;
   accessToken: string;
   refreshToken: string;
 };
@@ -23,9 +30,19 @@ export type EmailSendRequest = {
   email: string;
 };
 
+export type EmailSendResult = {
+  email: string;
+  expiresInSeconds: number;
+};
+
 export type EmailVerifyRequest = {
   email: string;
   code: string;
+};
+
+export type EmailVerifyResult = {
+  email: string;
+  verified: boolean;
 };
 
 // 비밀번호 재설정
@@ -51,6 +68,7 @@ export type ReissueRequest = {
 
 export type ReissueResult = {
   accessToken: string;
+  refreshToken: string;
 };
 
 // 구글 OAuth

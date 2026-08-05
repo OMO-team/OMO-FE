@@ -2,10 +2,13 @@ import { instance } from '../../../lib/axios';
 import type { ApiResponse } from '../../../shared/types/api';
 import type {
   SignupRequest,
+  SignupResult,
   LoginRequest,
   LoginResult,
   EmailSendRequest,
+  EmailSendResult,
   EmailVerifyRequest,
+  EmailVerifyResult,
   PasswordResetEmailRequest,
   PasswordResetVerifyRequest,
   PasswordResetRequest,
@@ -16,7 +19,7 @@ import type {
 } from '../types/dto';
 
 export const authApi = {
-  signup: (body: SignupRequest) => instance.post<ApiResponse<null>>('/api/v1/members/signup', body),
+  signup: (body: SignupRequest) => instance.post<ApiResponse<SignupResult>>('/api/v1/members/signup', body),
 
   login: async (body: LoginRequest) => {
     const { data } = await instance.post<ApiResponse<LoginResult>>('/auth/v1/login/local', body);
@@ -34,11 +37,15 @@ export const authApi = {
     }
   },
 
-  sendEmailCode: (body: EmailSendRequest) =>
-    instance.post<ApiResponse<null>>('/auth/v1/email/send', body),
+  sendEmailCode: async (body: EmailSendRequest) => {
+    const { data } = await instance.post<ApiResponse<EmailSendResult>>('/auth/v1/email/send', body);
+    return data.result;
+  },
 
-  verifyEmailCode: (body: EmailVerifyRequest) =>
-    instance.post<ApiResponse<null>>('/auth/v1/email/verify', body),
+  verifyEmailCode: async (body: EmailVerifyRequest) => {
+    const { data } = await instance.post<ApiResponse<EmailVerifyResult>>('/auth/v1/email/verify', body);
+    return data.result;
+  },
 
   sendPasswordResetEmail: (body: PasswordResetEmailRequest) =>
     instance.post<ApiResponse<null>>('/auth/v1/password/reset/email', body),
