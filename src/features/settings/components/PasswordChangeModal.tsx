@@ -55,7 +55,7 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
       onSuccess?.();
       onClose();
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'MEMBER400_4') {
         setCurrentPasswordError('현재 비밀번호가 일치하지 않습니다.');
       } else {
         setCurrentPasswordError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
