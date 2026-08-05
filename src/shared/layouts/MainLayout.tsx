@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Outlet, ScrollRestoration, useLocation, useMatches } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -12,6 +12,7 @@ import SearchModal from '../../features/search/components/SearchModal';
 import AIChatPanel from '../../features/chat/components/AIChatPanel';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { memberApi } from '../../features/settings/api/memberApi';
+import type { TermsAndPolicyLocationState } from '../pages/TermsAndPolicyRoute';
 import type { MainLayoutContext } from './useMainLayoutContext';
 import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
@@ -43,6 +44,23 @@ export default function MainLayout() {
       });
     return () => { controller.abort(); };
   }, []);
+
+  /**
+   * 회원가입 모달에서 약관 확인을 위해 /support/terms로 이동했다가(fromSignup) 그 화면을 벗어나면
+   * 회원가입 모달을 다시 연다. MainLayout은 인앱 네비게이션 중 언마운트되지 않으므로,
+   * 화면 내 뒤로가기 버튼/브라우저 뒤로가기/제스처 등 이동 방식과 무관하게 항상 동작함.
+   */
+  const location = useLocation();
+  const prevLocationRef = useRef(location);
+  useEffect(() => {
+    const prev = prevLocationRef.current;
+    const prevState = prev.state as TermsAndPolicyLocationState | null;
+    if (prev.pathname === '/support/terms' && prevState?.fromSignup && location.pathname !== '/support/terms') {
+      openModal('signup');
+    }
+    prevLocationRef.current = location;
+  }, [location, openModal]);
+
   const matches = useMatches();
   const headerVariant =
     matches.map((m) => (m.handle as RouteHandle | undefined)?.headerVariant).filter(Boolean).at(-1) ?? 'default';

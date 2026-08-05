@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
@@ -11,6 +11,7 @@ import { authApi } from '../api/authApi';
 import { passwordRegex } from '../constants/passwordRegex';
 import { EMAIL_REGEX } from '../constants/emailRegex';
 import { useAuthStore } from '../store/useAuthStore';
+import type { TermType } from '../types/dto';
 
 type SignupModalProps = {
   onClose: () => void;
@@ -63,6 +64,17 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const [agreeTerms, setAgreeTerms] = useState(signupDraft?.agreeTerms ?? false);
   const [agreePrivacy, setAgreePrivacy] = useState(signupDraft?.agreePrivacy ?? false);
 
+  /** 이메일 인증/약관 확인처럼 잠시 화면을 벗어났다가 되돌아오는 흐름에서만 true로 설정 — 그 외(X 닫기, 바깥 클릭 등 실제 닫기)에는 언마운트 시 draft를 비움 */
+  const keepDraftOnUnmountRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (!keepDraftOnUnmountRef.current) {
+        clearSignupDraft();
+      }
+    };
+  }, [clearSignupDraft]);
+
   const handleAgreeAll = () => {
     const next = !agreeAll;
     setAgreeAll(next);
@@ -101,6 +113,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
         agreePrivacy,
         isEmailVerified: false,
       });
+      keepDraftOnUnmountRef.current = true;
       onClose();
       navigate('/auth/email-verify', { state: { email } });
     } catch {
@@ -108,6 +121,23 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     } finally {
       setIsSendingCode(false);
     }
+  };
+
+  const handleViewTerms = (type: TermType) => {
+    setSignupDraft({
+      name,
+      email,
+      password,
+      confirmPassword,
+      agreeTerms,
+      agreePrivacy,
+      isEmailVerified,
+    });
+    keepDraftOnUnmountRef.current = true;
+    onClose();
+    navigate('/support/terms', {
+      state: { fromSignup: true, initialTab: type === 'TERMS_OF_SERVICE' ? 0 : 1 },
+    });
   };
 
   const handleGoogleSignup = async () => {
@@ -297,7 +327,12 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                         <span className="body-04 text-gray-800">이용약관 동의</span>
                         <span className="body-04 text-primary-500">(필수)</span>
                       </div>
-                      <button type="button" className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleViewTerms('TERMS_OF_SERVICE')}
+                        className="flex justify-center items-center flex-shrink-0"
+                        style={{ width: '20px', height: '20px' }}
+                      >
                         <ArrowIcon />
                       </button>
                     </div>
@@ -313,7 +348,12 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                         <span className="body-04 text-black">개인정보 처리방침 동의</span>
                         <span className="body-04 text-primary-500">(필수)</span>
                       </div>
-                      <button type="button" className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleViewTerms('PRIVACY_POLICY')}
+                        className="flex justify-center items-center flex-shrink-0"
+                        style={{ width: '20px', height: '20px' }}
+                      >
                         <ArrowIcon />
                       </button>
                     </div>
