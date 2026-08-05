@@ -155,8 +155,24 @@ export default function SettingsPage({
   }, []);
 
   const handleUnlinkGoogle = useCallback(async () => {
-    await memberApi.unlinkGoogle();
-    setGoogleLinked(false);
+    try {
+      await memberApi.unlinkGoogle();
+      setGoogleLinked(false);
+    } catch (error) {
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'AUTH409_5') {
+          setErrorBanner('Google 계정이 유일한 로그인 수단이므로 연결을 해제할 수 없습니다.');
+        } else if (code === 'AUTH404_2') {
+          setGoogleLinked(false);
+          setErrorBanner('이미 연결 해제된 Google 계정입니다.');
+        } else {
+          setErrorBanner('Google 계정 연결 해제에 실패했습니다. 다시 시도해주세요.');
+        }
+      } else {
+        setErrorBanner('Google 계정 연결 해제에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
   }, []);
 
   const handleConnectGoogle = async () => {
