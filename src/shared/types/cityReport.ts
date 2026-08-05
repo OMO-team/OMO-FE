@@ -7,8 +7,10 @@ export interface KeySummaryItem {
 export interface KeyMetricItem {
   id: string;
   label: string;
-  percentage: number;
+  /** null이면 기준치(maxValue)가 없는 지표라 막대 없이 displayValue만 표시 */
+  percentage: number | null;
   barColor: "gray" | "gradient";
+  displayValue: string;
 }
 
 export interface VlogItem {
@@ -26,28 +28,28 @@ export interface ReviewItem {
   content: string;
 }
 
-export interface RelatedDocument {
-  id: string;
-  category: string;
+export interface AiReportResource {
+  topic: string;
+  resourceType: string;
   title: string;
+  source: string;
+  url: string;
 }
 
 export interface AISearchResultData {
-  answer: string;
-  documents: RelatedDocument[];
+  summary: string;
+  resources: AiReportResource[];
 }
 
 export interface CityReportData {
+  /** AI 맞춤 검색(POST /api/v1/cities/{cityId}/ai-report) 호출에 쓰는 식별자 */
+  cityId: number;
   cityName: string;
   heroImageUrl: string;
   ratingBadge: number;
   totalScore: number;
   oneLineSummary: string;
   searchKeywords: string[];
-  keySummary: KeySummaryItem[];
-  keyMetrics: KeyMetricItem[];
-  pros: string[];
-  cons: string[];
   vlogs: VlogItem[];
   reviews: ReviewItem[];
 }

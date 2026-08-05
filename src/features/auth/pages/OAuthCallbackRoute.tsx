@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../api/authApi';
+import { memberApi } from '../../settings/api/memberApi';
 import { useAuthStore } from '../store/useAuthStore';
 
 export default function OAuthCallbackRoute() {
@@ -22,8 +23,9 @@ export default function OAuthCallbackRoute() {
     }
 
     authApi.exchangeGoogleTicket({ ticket })
-      .then(() => {
-        signIn();
+      .then(() => memberApi.getMyInfo().catch(() => null))
+      .then((info) => {
+        signIn(info?.profileImageUrl ?? undefined);
         navigate('/', { replace: true });
       })
       .catch(() => {

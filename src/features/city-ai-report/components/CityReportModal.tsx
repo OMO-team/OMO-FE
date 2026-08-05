@@ -6,16 +6,20 @@ import KeySummary from './KeySummary';
 import KeyMetrics from './KeyMetrics';
 import ProsCons from './ProsCons';
 import VlogReviews from './VlogReviews';
-import RealReviews from './RealReviews';
 import CityReportFooter from './CityReportFooter';
 import CloseButton from '../../../shared/components/CloseButton';
-import type { AISearchResultData, CityReportData } from '../../../shared/types/cityReport';
+import { useCityStats } from '../hooks/useCityStats';
+import { useCityCoreSummaries } from '../hooks/useCityCoreSummaries';
+import { useCityProsCons } from '../hooks/useCityProsCons';
+import { useCityResources } from '../hooks/useCityResources';
+import { toKeyMetrics } from '../utils/statsAdapter';
+import type { AISearchResultData, CityReportData, KeySummaryItem } from '../../../shared/types/cityReport';
 
 interface CityReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   data: CityReportData;
-  onSearch: (query: string) => AISearchResultData;
+  onSearch: (query: string) => Promise<AISearchResultData>;
   onAddToRoadmap?: () => void;
   /** 추가가 끝났거나 진행 중이면 "로드맵에 추가하기" 버튼을 비활성화 */
   isAddDisabled?: boolean;
@@ -29,6 +33,22 @@ export default function CityReportModal({
   onAddToRoadmap,
   isAddDisabled,
 }: CityReportModalProps) {
+  const { data: stats } = useCityStats(data.cityId);
+  const keyMetrics = stats ? toKeyMetrics(stats) : [];
+
+  const { data: coreSummaries } = useCityCoreSummaries(data.cityId);
+  const keySummary: KeySummaryItem[] =
+    coreSummaries?.map((item) => ({
+      id: item.category,
+      title: item.title,
+      description: item.content,
+    })) ?? [];
+
+  const { data: prosCons } = useCityProsCons(data.cityId);
+  const showProsCons = !!prosCons && !(prosCons.prosEmpty && prosCons.consEmpty);
+
+  const { data: vlogs } = useCityResources(data.cityId, { resourceType: 'VIDEO' });
+
   useEffect(() => {
     if (!isOpen) return;
     const originalOverflow = document.body.style.overflow;
@@ -65,16 +85,22 @@ export default function CityReportModal({
                   cityName={data.cityName}
                   oneLineSummary={data.oneLineSummary}
                 />
-                <KeySummary items={data.keySummary} />
+                <KeySummary items={keySummary} />
               </div>
-              <div className="flex justify-start items-center self-stretch gap-4">
+              <div className="flex justify-start items-start self-stretch gap-4">
                 <div className="flex flex-col justify-start items-start w-[432px] gap-[60px]">
-                  <KeyMetrics metrics={data.keyMetrics} />
-                  <ProsCons pros={data.pros} cons={data.cons} />
+                  <KeyMetrics metrics={keyMetrics} />
+                  {showProsCons && (
+                    <ProsCons
+                      pros={prosCons!.pros}
+                      cons={prosCons!.cons}
+                      prosEmpty={prosCons!.prosEmpty}
+                      consEmpty={prosCons!.consEmpty}
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col justify-start items-start w-[448px] gap-5">
-                  <VlogReviews vlogs={data.vlogs} />
-                  <RealReviews reviews={data.reviews} />
+                  <VlogReviews vlogs={vlogs ?? []} />
                 </div>
               </div>
             </div>
