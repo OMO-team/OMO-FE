@@ -63,13 +63,13 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   /**
    * 로드맵 API에는 도시의 평점·요약·지표가 없어서 AI 리포트를 채울 수 없음.
-   * 단일 도시 조회 엔드포인트가 없어 카탈로그 전체를 받아 해당 도시를 찾아 쓰고,
-   * 리포트를 열 때만 요청한다.
+   * 단일 도시 조회 엔드포인트가 없어 카탈로그 전체를 받아 해당 도시를 찾아 쓴다.
+   * 리포트 모달뿐 아니라 화면에 항상 보이는 AI 리포트 카드의 총점·요약도 여기서 나오므로
+   * 모달을 열 때까지 미루지 않고 처음부터 받아온다(캐시는 다른 화면과 공유).
    */
   const { data: cityCatalog } = useQuery({
     queryKey: cityQueryKeys.list,
     queryFn: citiesApi.list,
-    enabled: isReportOpen,
     staleTime: CITY_CATALOG_STALE_TIME,
   });
 
@@ -284,9 +284,9 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             totalBudget={totalBudget}
           />
           <AiReportCard
-            score={0}
+            score={catalogCity?.rating ?? 0}
             cityName={cityNameKo}
-            summary="준비중"
+            summary={catalogCity?.description ?? '준비중'}
             onViewReport={() => setIsReportOpen(true)}
           />
         </div>
