@@ -68,8 +68,8 @@ export default function CityInsight() {
   const urlCountryCodes = searchParams.getAll('countryCodes');
 
   // 진입 경로 판단
-  const isFromCountry = urlCountryCodes.length > 0;
   const isFromSearch = !!urlKeyword;
+  const isFromCountry = urlCountryCodes.length > 0 || !isFromSearch;
 
   const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
 
