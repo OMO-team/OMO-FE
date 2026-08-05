@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import ChevronDownIcon from './ChevronDownIcon';
 import { twMerge } from 'tailwind-merge';
+import { useOutsideClick } from '../hooks/useOutsideClick';
 
 interface DropDownProps<T extends string = string> {
     title: string;
@@ -14,6 +15,8 @@ interface DropDownProps<T extends string = string> {
 
 export default function DropDown<T extends string>({ title, options, selectedOption, onSelect, className, triggerClassName }: DropDownProps<T>) {
     const [isOpen, setIsOpen] = useState(false)
+    const containerRef = useRef<HTMLDivElement>(null)
+    useOutsideClick(containerRef, () => setIsOpen(false))
 
     const handleOpen = () => {
         setIsOpen(!isOpen)
@@ -21,7 +24,7 @@ export default function DropDown<T extends string>({ title, options, selectedOpt
 
   return (
     <>
-    <div className='relative'>
+    <div ref={containerRef} className='relative'>
         <div className={twMerge('bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2', triggerClassName)} onClick={handleOpen}>
             <p className='text-gray-600 body-03 cursor-pointer'>{title}</p>
             <ChevronDownIcon className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />

@@ -1,21 +1,17 @@
-import countryCard1 from '../../../assets/images/country_card_1.png';
-import countryCard2 from '../../../assets/images/country_card_2.png';
-import countryCard3 from '../../../assets/images/country_card_3.png';
 import arrowDiagonalIcon from '../../../assets/icons/icon-arrow-diagonal.svg';
-
-export const CITY_IMAGES = [countryCard1, countryCard2, countryCard3];
 
 type CityCardProps = {
   name: string;
-  cityCount: number;
-  imagePath: string;
+  imageUrl: string;
+  recommendedCityCount: number;
+  onClick?: () => void;
 };
 
-export default function CityCard({ name, cityCount, imagePath }: CityCardProps) {
+export default function CityCard({ name, imageUrl, recommendedCityCount, onClick }: CityCardProps) {
   return (
-    <div className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0">
+    <button type="button" className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0 cursor-pointer" onClick={onClick}>
       <img
-        src={imagePath}
+        src={imageUrl}
         alt={name}
         className="absolute inset-0 w-full h-full object-cover"
       />
@@ -26,16 +22,12 @@ export default function CityCard({ name, cityCount, imagePath }: CityCardProps) 
       <div className="absolute bottom-0 left-0 right-0 flex flex-col items-start px-[22px] py-[20px] gap-2">
         <p className="heading-05 text-white">{name}</p>
         <div className="flex items-center gap-1 self-stretch">
-          <span className="title-01 text-primary-100">추천도시 {cityCount}개 보기</span>
+          <span className="title-01 text-primary-100">추천도시 {recommendedCityCount}개 보기</span>
           <div className="flex justify-center items-center w-6 h-6">
-            <img
-              src={arrowDiagonalIcon}
-              alt="이동"
-              className="w-[14px] h-[14px]"
-            />
+            <img src={arrowDiagonalIcon} alt="이동" className="w-[14px] h-[14px]" />
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
