@@ -1,5 +1,6 @@
 // react
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 // shared components
 import CategoryTab from '../../../shared/components/CategoryTab';
@@ -19,6 +20,16 @@ import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
 
+// hooks
+import { usePurposes } from '../../home/hooks/usePurposes';
+import { useCities } from '../hooks/useCities';
+
+// utils
+import { adaptCityToCardProps } from '../utils/cityAdapter';
+
+// types
+import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
+
 // stores
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
 import { useCompareStore } from '../../compare/store/useCompareStore';
@@ -34,15 +45,61 @@ import { berlinReportData } from '../../city-ai-report/mocks/mockData';
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
-import searchInputIcon from '../../../assets/icons/search-input-list.svg'
+import searchInputIcon from '../../../assets/icons/search-input-list.svg';
+
+// API 파라미터 값 변환
+const MONTHLY_COST_MAP: Record<string, number> = {
+  '150 만원': 150, '200 만원': 200, '300 만원': 300,
+};
+const SAFETY_SCORE_MAP: Record<string, number> = {
+  '5점': 5, '4점': 4, '3점': 3,
+};
+const DIFFICULTY_MAP: Record<string, DifficultyType> = {
+  '쉬움': 'EASY', '보통': 'NORMAL', '어려움': 'HARD',
+};
+const STAY_DURATION_MAP: Record<string, StayDurationType> = {
+  '3개월 이하': 'SHORT', '3 - 6개월': 'MEDIUM', '6개월 - 1년': 'LONG', '1년 이상': 'VERY_LONG',
+};
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
 };
 
 export default function CityInsight() {
-  const [input, setInput] = useState('')
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const urlKeyword = searchParams.get('keyword') ?? '';
+  const urlCountryCodes = searchParams.getAll('countryCodes');
+
+  // 진입 경로 판단
+  const isFromCountry = urlCountryCodes.length > 0;
+  const isFromSearch = !!urlKeyword;
+
+  const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
+
+  const purposeIdParam = Number(searchParams.get('purposeId'));
+  const activeIndex = Math.max(0, purposes.findIndex(p => p.purposeId === purposeIdParam));
+  const categoryNames = purposes.map(p => p.name);
+
+  const handleCategoryChange = (index: number) => {
+    const selected = purposes[index];
+    if (!selected) return;
+    const sp = new URLSearchParams({ purposeId: String(selected.purposeId) });
+    urlCountryCodes.forEach(code => sp.append('countryCodes', code));
+    setSearchParams(sp);
+  };
+
+  const [input, setInput] = useState(urlKeyword);
+  const [keyword, setKeyword] = useState(urlKeyword);
+  const [prevUrlKeyword, setPrevUrlKeyword] = useState(urlKeyword);
+  if (prevUrlKeyword !== urlKeyword) {
+    setPrevUrlKeyword(urlKeyword);
+    setInput(urlKeyword);
+    setKeyword(urlKeyword);
+  }
+  const [page, setPage] = useState(1);
+  const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
@@ -50,14 +107,47 @@ export default function CityInsight() {
   const addCity = useRoadmapStore(s => s.addCity);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
 
+  const activePurpose = purposes[activeIndex];
+
+  const queryParams = useMemo<CityQueryParams>(() => {
+    const currentCountryCodes = searchParams.getAll('countryCodes');
+    const selectedCodes = selectedCountries.map(c => c.code);
+    const activeCodes = selectedCodes.length > 0 ? selectedCodes : currentCountryCodes;
+    return {
+      keyword: keyword || undefined,
+      purposeType: isFromSearch ? undefined : activePurpose?.type,
+      countryCodes: activeCodes.length > 0 ? activeCodes : undefined,
+      maxMonthlyCost: MONTHLY_COST_MAP[selectedOptions['월 생활비']],
+      minSafetyScore: SAFETY_SCORE_MAP[selectedOptions['치안']],
+      housingDifficulty: DIFFICULTY_MAP[selectedOptions['숙소 난이도']],
+      visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
+      stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
+    };
+  }, [keyword, isFromSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
+
+  const [prevQueryParams, setPrevQueryParams] = useState(queryParams);
+  if (prevQueryParams !== queryParams) {
+    setPrevQueryParams(queryParams);
+    setPage(1);
+  }
+
+  const { data: cities = [] } = useCities(queryParams, {
+    enabled: isFromSearch || !!activePurpose,
+  });
+
+  const PAGE_SIZE = 6;
+  const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
+  const effectivePage = Math.min(page, totalPages);
+  const pagedCities = cities.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
+
   useEffect(() => {
     if (!addedCityName) return;
     const timer = setTimeout(() => setAddedCityName(null), 5000);
     return () => clearTimeout(timer);
   }, [addedCityName]);
 
-  const handleSelect = (country: string) => {
-    setSelectedFilters(prev => (prev.includes(country) ? prev : [...prev, country]));
+  const handleSelect = (codes: string[], names: string[]) => {
+    setSelectedCountries(codes.map((code, i) => ({ code, name: names[i] })));
   };
 
   const handleSelectOption = (title: string, option: string) => {
@@ -70,8 +160,15 @@ export default function CityInsight() {
     });
   };
 
+  const handleSearch = () => {
+    setKeyword(input);
+  };
+
+  // 필터 전체 초기화
   const handleReset = () => {
-    setSelectedFilters([]);
+    setInput('');
+    setKeyword('');
+    setSelectedCountries([]);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
   };
@@ -82,15 +179,15 @@ export default function CityInsight() {
     : null;
 
   const handleAddToRoadmap = () => {
-    const card = CITY_INSIGHT_CARDS.find(c => c.cityName === reportCityName);
-    if (!card) return;
+    const city = cities.find(c => c.name === reportCityName);
+    if (!city) return;
     addCity({
-      cityId: String(card.cityId),
-      cityName: card.cityName,
-      countryName: card.countryName,
-      description: card.description,
-      rating: card.rating,
-      imageUrl: card.imageUrl,
+      cityId: String(city.cityId),
+      cityName: city.name,
+      countryName: city.country.name,
+      description: city.description,
+      rating: city.rating,
+      imageUrl: city.imageUrl,
       progressPercent: 0,
       costProgressPercent: 0,
       completedSteps: 0,
@@ -98,37 +195,57 @@ export default function CityInsight() {
       nextSchedule: '아직 일정이 없어요',
     });
     setReportCityName(null);
-    setAddedCityName(card.cityName);
+    setAddedCityName(city.name);
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div>
-        <div className="mt-[50px] flex gap-5 mb-6">
-          <img src={backArrow} alt="" />
-          <h1 className="heading-05">추천 도시</h1>
-        </div>
+    <div className="w-full flex flex-col items-center justify-center mt-[30px]">
+      <div className="w-[1064px]">
+        {!isFromCountry && (
+          <div className={`mb-6 ${isFromSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
+            {isFromSearch ? (
+              <h1 className="heading-05">
+                <span className="text-blue-500">'{urlKeyword}'</span>에 대한 검색 결과
+              </h1>
+            ) : (
+              <div className="flex items-center gap-5">
+                <button type="button" onClick={() => navigate('/')}>
+                  <img src={backArrow} alt="뒤로가기" />
+                </button>
+                <h1 className="heading-05">추천 도시</h1>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex flex-col gap-4">
-          <CategoryTab
-            categories={['워킹홀리데이', '교환학생', '인턴십']}
-            activeIndex={0}
-            onChange={() => {}}
-          />
-          <SearchInputBar
-            placeholder="원하는 도시 조건을 입력해 보세요"
-            width="w-[974px]"
-            value={input}
-            onChange={setInput}
-            onSearch={() => {}}
-            icon={searchInputIcon}
-          />
+          {!isFromSearch && (
+            <>
+              <CategoryTab
+                categories={categoryNames}
+                activeIndex={activeIndex}
+                onChange={handleCategoryChange}
+              />
+              <SearchInputBar
+                placeholder="원하는 도시 조건을 입력해 보세요"
+                width="w-[974px]"
+                value={input}
+                onChange={setInput}
+                onSearch={handleSearch}
+                icon={searchInputIcon}
+              />
+            </>
+          )}
+           {isFromSearch && (
+              <p className="body-03 text-gray-500">총 {cities.length}개의 검색결과가 나왔어요</p>
+            )}
           <div className="flex justify-between">
             <div className="flex gap-2">
               <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
               <RegionDropDown
                 key={`region-${resetKey}`}
+                purposeType={activePurpose?.type}
                 onSelect={handleSelect}
-                onReset={() => setSelectedFilters([])}
+                onReset={() => setSelectedCountries([])}
               />
               <div className="w-px h-7 bg-gray-300"></div>
               {DETAIL_OPTIONS.map(({ title, options }) => (
@@ -148,28 +265,42 @@ export default function CityInsight() {
           </div>
         </div>
         <div className="mt-3 flex gap-2">
-          {selectedFilters.map(filter => (
+          {selectedCountries.map(({ name, code }) => (
             <FilterChip
-              key={filter}
-              label={filter}
-              onRemove={() => setSelectedFilters(prev => prev.filter(v => v !== filter))}
+              key={code}
+              label={name}
+              onRemove={() => setSelectedCountries(prev => prev.filter(c => c.code !== code))}
             />
           ))}
         </div>
-        {CITY_INSIGHT_CARDS.length !== 0 ? (
+        {cities.length !== 0 ? (
           <>
             <div className="mt-11 grid grid-cols-2 gap-5">
-              {CITY_INSIGHT_CARDS.map(card => (
+              {pagedCities.map(city => (
                 <CityInsightCard
-                  key={card.cityName}
-                  {...card}
-                  onCompare={() => toggleCompare(card.cityId)}
-                  onReport={() => setReportCityName(card.cityName)}
+                  key={city.cityId}
+                  imageUrl={city.imageUrl}
+                  rating={city.rating}
+                  isWishlisted={city.isWishlisted}
+                  name={city.name}
+                  countryName={city.country.name}
+                  description={city.description}
+                  monthlyCost={city.monthlyCost}
+                  safetyScore={city.safetyScore}
+                  languageScore={city.languageScore}
+                  internetScore={city.internetScore}
+                  {...adaptCityToCardProps(city)}
+                  onCompare={() => toggleCompare(city.cityId)}
+                  onReport={() => setReportCityName(city.name)}
                 />
               ))}
             </div>
             <div className="mt-25 mb-[304px]">
-              <PageNavigation currentPage={1} totalPages={3} />
+              <PageNavigation
+                currentPage={effectivePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             </div>
           </>
         ) : (

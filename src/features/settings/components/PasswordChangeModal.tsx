@@ -5,7 +5,7 @@ import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 import { memberApi } from '../api/memberApi';
-import { passwordRegex } from '../../auth/constants/passwordRegex';
+import { passwordRegex } from '../../../shared/constants/passwordRegex';
 
 type PasswordChangeModalProps = {
   onClose: () => void;
@@ -55,8 +55,13 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
       onSuccess?.();
       onClose();
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        setCurrentPasswordError('현재 비밀번호가 일치하지 않습니다.');
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.status === 401) {
+        const code = error.response.data?.code ?? '';
+        if (code.startsWith('AUTH')) {
+          setCurrentPasswordError('로그인이 만료되었습니다. 다시 로그인해 주세요.');
+        } else {
+          setCurrentPasswordError('현재 비밀번호가 일치하지 않습니다.');
+        }
       } else {
         setCurrentPasswordError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
       }

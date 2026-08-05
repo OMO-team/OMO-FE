@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import FilterIcon from "../../../shared/components/FilterIcon"
 import { DETAIL_OPTIONS } from "../constants/filterOptions"
+import { useOutsideClick } from "../../../shared/hooks/useOutsideClick"
 
 interface DetailDropDownProps {
     selectedOptions: Record<string, string>;
@@ -9,6 +10,8 @@ interface DetailDropDownProps {
 
 export default function DetailDropDown({ selectedOptions, onSelect }: DetailDropDownProps) {
     const [isOpen, setIsOpen] = useState(false)
+    const containerRef = useRef<HTMLDivElement>(null)
+    useOutsideClick(containerRef, () => setIsOpen(false))
 
     const handleOpen = () => {
         setIsOpen(!isOpen)
@@ -21,7 +24,7 @@ export default function DetailDropDown({ selectedOptions, onSelect }: DetailDrop
     }, [selectedOptions])
 
   return (
-    <div className="relative cursor-pointer">
+    <div ref={containerRef} className="relative cursor-pointer">
         <div className={`inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer ${isOpen ? 'bg-primary-500' : 'bg-gray-50 hover:bg-gray-100'}`} onClick={handleOpen}>
             <FilterIcon color={isOpen ? '#ffffff' : undefined}/>
             <p className={`body-03 ${isOpen ? 'text-white' : 'text-gray-600'}`}>상세필터</p>

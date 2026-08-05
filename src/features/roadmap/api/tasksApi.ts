@@ -4,8 +4,8 @@ import type {
   ApiResponse,
   CompleteTaskResult,
   TaskDetailResult,
-  UpdateRoadmapScheduleResult,
   UpdateTaskScheduleRequest,
+  UpdateTaskScheduleResult,
 } from '../types/api';
 
 export const tasksApi = {
@@ -24,8 +24,8 @@ export const tasksApi = {
   updateSchedule: async (
     taskId: number,
     payload: UpdateTaskScheduleRequest,
-  ): Promise<UpdateRoadmapScheduleResult> => {
-    const { data } = await instance.patch<ApiResponse<UpdateRoadmapScheduleResult>>(
+  ): Promise<UpdateTaskScheduleResult> => {
+    const { data } = await instance.patch<ApiResponse<UpdateTaskScheduleResult>>(
       `/api/v1/tasks/${taskId}/schedule`,
       payload,
     );

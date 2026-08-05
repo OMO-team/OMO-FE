@@ -3,14 +3,15 @@ import type { CityStatItem, CityStatType } from '../types/dto';
 
 const STAT_LABEL: Record<CityStatType, string> = {
   COST: '생활비',
+  INTERNET: '인터넷',
   SAFETY: '치안',
   HOUSING: '주거',
   VISA: '비자',
   INFRA: '인프라',
 };
 
-/** 지표 표시 순서(생활비 → 치안 → 주거 → 비자 → 인프라) */
-const STAT_ORDER: CityStatType[] = ['COST', 'SAFETY', 'HOUSING', 'VISA', 'INFRA'];
+/** 지표 표시 순서(생활비 → 인터넷 → 치안 → 주거 → 비자 → 인프라) */
+const STAT_ORDER: CityStatType[] = ['COST', 'INTERNET', 'SAFETY', 'HOUSING', 'VISA', 'INFRA'];
 
 /** 도시 스탯 API(GET /api/v1/cities/{cityId}/stats)를 KeyMetrics가 쓰는 형태로 변환 */
 export function toKeyMetrics(stats: CityStatItem[]): KeyMetricItem[] {

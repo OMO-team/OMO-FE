@@ -2,7 +2,7 @@ export interface AiReportQuestionRequest {
   question: string;
 }
 
-export type CityStatType = 'SAFETY' | 'COST' | 'HOUSING' | 'VISA' | 'INFRA';
+export type CityStatType = 'SAFETY' | 'COST' | 'HOUSING' | 'VISA' | 'INFRA' | 'INTERNET';
 
 export interface CityStatItem {
   statType: CityStatType;

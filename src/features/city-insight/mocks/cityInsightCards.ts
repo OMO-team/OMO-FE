@@ -54,7 +54,7 @@ export const CITY_INSIGHT_CARDS = [
     infrastructureScore: 4.4,
   },
   {
-    cityId: 4,
+    cityId: 27,
     imageUrl: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800',
     rating: 4.3,
     isWished: true,
