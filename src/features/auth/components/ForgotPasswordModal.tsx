@@ -111,10 +111,17 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       onClose();
       onSuccess?.();
     } catch (error) {
-      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 404) {
-        setEmailError('가입되지 않은 이메일입니다.');
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const errorCode = error.response?.data?.code;
+        if (errorCode === 'MEMBER404_1') {
+          setEmailError('가입되지 않은 이메일입니다.');
+        } else if (errorCode === 'AUTH400_3') {
+          setEmailError('이메일 인증을 다시 완료해주세요.');
+        } else {
+          setNewPasswordError('비밀번호 재설정에 실패했습니다. 다시 시도해주세요.');
+        }
       } else {
-        setNewPasswordError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+        setNewPasswordError('비밀번호 재설정에 실패했습니다. 다시 시도해주세요.');
       }
     } finally {
       setIsSubmitting(false);
