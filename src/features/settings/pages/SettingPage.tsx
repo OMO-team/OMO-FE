@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useAuthStore } from "../../auth/store/useAuthStore";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authApi } from "../../auth/api/authApi";
+import { memberApi } from "../api/memberApi";
 import TopAlertBanner from "../../../shared/components/TopAlertBanner";
 import Header from "../../../shared/components/Header";
 import Footer from "../../../shared/components/Footer";
@@ -29,7 +31,7 @@ import exitIcon from "../../../assets/icons/exit.svg";
 interface SettingsPageProps {
   onNavigateToTerms?: () => void;
   onLogout?: () => void;
-  onDeleteAccount?: () => void;
+  onDeleteAccount?: () => Promise<void>;
   onPasswordChangeSuccess?: () => void;
 }
 
@@ -39,30 +41,145 @@ export default function SettingsPage({
   onDeleteAccount,
   onPasswordChangeSuccess,
 }: SettingsPageProps) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const location = useLocation();
+  const { signIn } = useAuthStore();
   const locationState = location.state as Record<string, unknown> | null;
+  const rawGoogleLinkResult = locationState?.googleLinkResult;
   const googleLinkResult =
-    typeof locationState?.googleLinkResult === 'string'
-      ? (locationState.googleLinkResult as 'success' | 'error')
+    rawGoogleLinkResult === 'success' || rawGoogleLinkResult === 'error'
+      ? rawGoogleLinkResult
       : null;
 
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   const [activeModal, setActiveModal] = useState<
     "logout" | "delete" | "profile" | "password-change" | "password-find" | null
   >(null);
-  const [profileName, setProfileName] = useState("OMO");
-  const [profileEmail] = useState("omo@naver.com");
+
+  // 프로필 데이터
+  const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
-  const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(() => {
-    if (googleLinkResult) {
-      // state 소비 후 히스토리 엔트리에서 제거 (새로고침 시 배너 재표시 방지)
-      navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
-    }
-    return googleLinkResult;
-  });
+
+  // 설정 데이터
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(false);
+
+  // 소셜 연결 여부
+  const [googleLinked, setGoogleLinked] = useState(false);
+
+  // 일반 에러 배너
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  // 구글 연결 배너
+  const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(googleLinkResult);
   const [isGoogleLinking, setIsGoogleLinking] = useState(false);
+
+  useEffect(() => {
+    if (!googleLinkResult) return;
+    navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
+    // 마운트 시 1회만 실행한다. googleLinkResult는 초기 렌더의 값만 사용한다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    let ignore = false;
+
+    Promise.allSettled([
+      memberApi.getMyInfo(),
+      memberApi.getSettings(),
+      memberApi.getSocialAccountStatus(),
+    ]).then(([infoRes, settingsRes, socialRes]) => {
+      if (ignore) return;
+      if ([infoRes, settingsRes, socialRes].some((r) => r.status === 'rejected')) {
+        setErrorBanner('일부 정보를 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
+      }
+      if (infoRes.status === 'fulfilled') {
+        setProfileName(infoRes.value.name);
+        setProfileEmail(infoRes.value.email);
+        setAvatarUrl(infoRes.value.profileImageUrl ?? undefined);
+      }
+      if (settingsRes.status === 'fulfilled') {
+        setPushEnabled(settingsRes.value.pushNotification);
+        setAutoSyncEnabled(settingsRes.value.autoSave);
+      }
+      if (socialRes.status === 'fulfilled') {
+        setGoogleLinked(socialRes.value.googleLinked);
+      }
+    });
+
+    return () => { ignore = true; };
+  }, []);
+
+  const handleTogglePush = async (next: boolean) => {
+    if (isSavingSettings) return;
+    const prev = pushEnabled;
+    setPushEnabled(next);
+    setIsSavingSettings(true);
+    try {
+      await memberApi.updateSettings({ pushNotification: next });
+    } catch {
+      setPushEnabled(prev);
+      setErrorBanner('푸시 알림 설정 변경에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const handleToggleAutoSync = async (next: boolean) => {
+    if (isSavingSettings) return;
+    const prev = autoSyncEnabled;
+    setAutoSyncEnabled(next);
+    setIsSavingSettings(true);
+    try {
+      await memberApi.updateSettings({ autoSave: next });
+    } catch {
+      setAutoSyncEnabled(prev);
+      setErrorBanner('자동 동기화 설정 변경에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const handleProfileSave = useCallback(async ({ name, avatarFile }: { name: string; avatarFile: File | null }) => {
+    if (name !== profileName) {
+      const result = await memberApi.updateProfile({ name });
+      setProfileName(result.name);
+    }
+
+    if (avatarFile !== null) {
+      const { uploadUrl, objectKey, contentType } = await memberApi.getProfileImageUploadUrl({
+        fileName: avatarFile.name,
+        contentType: avatarFile.type,
+        fileSize: avatarFile.size,
+      });
+      const s3Res = await memberApi.uploadProfileImageToS3(uploadUrl, avatarFile, contentType);
+      if (!s3Res.ok) throw new Error('S3 업로드 실패');
+      await memberApi.updateProfileImage({ objectKey });
+      const info = await memberApi.getMyInfo();
+      const newUrl = info.profileImageUrl ?? undefined;
+      signIn(newUrl);
+      setAvatarUrl((prev) => {
+        if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+        return newUrl ?? URL.createObjectURL(avatarFile);
+      });
+    }
+  }, [profileName]);
+
+  const handleDeleteAvatar = useCallback(async () => {
+    await memberApi.deleteProfileImage();
+    signIn(undefined);
+    setAvatarUrl((prev) => {
+      if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return undefined;
+    });
+  }, [signIn]);
+
+  const handleUnlinkGoogle = useCallback(async () => {
+    await memberApi.unlinkGoogle();
+    setGoogleLinked(false);
+  }, []);
 
   const handleConnectGoogle = async () => {
     if (isGoogleLinking) return;
@@ -70,21 +187,26 @@ export default function SettingsPage({
     try {
       const { authorizationUrl } = await authApi.getGoogleLinkUrl();
       window.location.href = authorizationUrl;
-    } catch (error) {
-      console.error('Google 계정 연결 URL 조회 실패:', error);
+    } catch {
       setIsGoogleLinking(false);
       setGoogleLinkBanner('error');
     }
   };
 
   return (
-
     <div className="flex min-h-screen flex-col bg-gray-20">
       <Header />
 
       <main className="mx-auto flex w-full max-w-content flex-col gap-[50px] px-[188px] pt-8">
         <BackHeader title="설정" onBack={() => window.history.back()} />
 
+        {errorBanner && (
+          <TopAlertBanner
+            variant="red"
+            message={errorBanner}
+            onClose={() => setErrorBanner(null)}
+          />
+        )}
         {googleLinkBanner === 'success' && (
           <TopAlertBanner
             variant="teal"
@@ -101,7 +223,7 @@ export default function SettingsPage({
         )}
 
         <ProfileCard
-          name={`${profileName} 님`}
+          name={profileName ? `${profileName} 님` : ''}
           email={profileEmail}
           avatarUrl={avatarUrl}
           onEditProfile={() => setActiveModal("profile")}
@@ -116,21 +238,13 @@ export default function SettingsPage({
                 iconBgClassName="bg-primary-50"
                 title="푸쉬 알림"
                 description="로드맵 일정과 주요 업데이트를 알림으로 받아볼 수 있어요."
-                right={
-                  <ToggleSwitch
-                    checked={pushEnabled}
-                    onChange={setPushEnabled}
-                  />
-                }
+                right={<ToggleSwitch checked={pushEnabled} onChange={handleTogglePush} disabled={isSavingSettings} />}
               />
             </div>
           </section>
 
           <section className="flex flex-col gap-4 rounded-4 bg-white pb-[30px]">
-            <SettingsSectionHeader
-              iconSrc={shieldUserIcon}
-              title="계정 및 보안"
-            />
+            <SettingsSectionHeader iconSrc={shieldUserIcon} title="계정 및 보안" />
             <div className="flex w-full flex-col gap-6">
               <SettingActionItem
                 iconSrc={keyIcon}
@@ -144,12 +258,7 @@ export default function SettingsPage({
                 iconBgClassName="bg-secondary-50"
                 title="자동 동기화 (백업)"
                 description="저장한 정보를 자동으로 백업해 안전하게 보관해요."
-                right={
-                  <ToggleSwitch
-                    checked={autoSyncEnabled}
-                    onChange={setAutoSyncEnabled}
-                  />
-                }
+                right={<ToggleSwitch checked={autoSyncEnabled} onChange={handleToggleAutoSync} disabled={isSavingSettings} />}
               />
             </div>
           </section>
@@ -172,11 +281,7 @@ export default function SettingsPage({
                 right={
                   <span className="title-03 flex items-center gap-1 rounded-2 bg-primary-50 py-2 pl-[18px] pr-3 text-primary-700">
                     v1.0.0 (최신버전)
-                    <img
-                      src={chevronDownIcon}
-                      alt=""
-                      className="size-icon-xs"
-                    />
+                    <img src={chevronDownIcon} alt="" className="size-icon-xs" />
                   </span>
                 }
               />
@@ -203,12 +308,12 @@ export default function SettingsPage({
           name={profileName}
           email={profileEmail}
           avatarUrl={avatarUrl}
+          googleLinked={googleLinked}
           onClose={() => setActiveModal(null)}
-          onSave={({ name, avatarFile }) => {
-            setProfileName(name);
-            if (avatarFile) setAvatarUrl(URL.createObjectURL(avatarFile));
-          }}
+          onSave={handleProfileSave}
+          onDeleteAvatar={handleDeleteAvatar}
           onConnectGoogle={handleConnectGoogle}
+          onUnlinkGoogle={handleUnlinkGoogle}
           isGoogleConnecting={isGoogleLinking}
         />
       )}
@@ -217,7 +322,7 @@ export default function SettingsPage({
         <PasswordChangeModal
           onClose={() => setActiveModal(null)}
           onForgotPassword={() => setActiveModal("password-find")}
-          onSubmit={() => onPasswordChangeSuccess?.()}
+          onSuccess={onPasswordChangeSuccess}
         />
       )}
 
@@ -251,7 +356,6 @@ export default function SettingsPage({
 
       {activeModal === "delete" && (
         <ModalOverlay onClose={() => setActiveModal(null)}>
-          {/* Figma 원본 그대로: 회색(왼쪽) 버튼이 "탈퇴하기", 빨간(오른쪽) 버튼이 "취소" */}
           <ConfirmActionModal
             title="정말 탈퇴하시겠어요?"
             description={["탈퇴하면 계정 정보와 저장된 데이터가 삭제됩니다.", "삭제된 정보는 복구할 수 없어요."]}
@@ -262,9 +366,13 @@ export default function SettingsPage({
             ]}
             cancelLabel="탈퇴하기"
             confirmLabel="취소"
-            onCancel={() => {
+            onCancel={async () => {
               setActiveModal(null);
-              onDeleteAccount?.();
+              try {
+                await onDeleteAccount?.();
+              } catch {
+                setErrorBanner('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
+              }
             }}
             onConfirm={() => setActiveModal(null)}
           />
