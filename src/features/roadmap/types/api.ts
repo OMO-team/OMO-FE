@@ -31,6 +31,9 @@ export interface CityInfo {
   cityId: number;
   name: string;
   country: CityCountryInfo;
+  /** 위시리스트를 도시+목적 조합으로 저장하도록 백엔드 수정 예정 — 반영 전까지는 안 내려옴 */
+  purposeId?: number;
+  purposeName?: string;
   imageUrl: string | null;
   rating: number | null;
   description: string | null;
@@ -52,8 +55,6 @@ export interface RoadmapListItem {
   title: string;
   cityId: number;
   cityName: string;
-  /** 국가별 그룹화를 프론트에서 처리하기로 하고 백엔드에 추가 요청한 필드 */
-  countryName: string;
   cityImageUrl: string;
   purposeId: number;
   purposeName: string;
@@ -164,6 +165,14 @@ export interface UpdateRoadmapScheduleResult {
 
 export interface UpdateTaskScheduleRequest {
   dueDate: string;
+}
+
+/** 실 응답으로 확인됨(2026-08-03) — 로드맵 전체가 아니라 변경된 태스크 자체 필드만 내려옴 */
+export interface UpdateTaskScheduleResult {
+  taskId: number;
+  dueDate: string;
+  scheduleDDay: number;
+  isOverdue: boolean;
 }
 
 export interface CompleteTaskResult {

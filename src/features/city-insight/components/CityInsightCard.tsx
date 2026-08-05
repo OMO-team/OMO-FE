@@ -10,6 +10,8 @@ interface CityInsightCardProps {
   isWishlisted: boolean;
   name: string;
   countryName: string;
+  /** 위시리스트 API에 목적 데이터가 아직 없어 optional — 내려오기 시작하면 항상 표시됨 */
+  purposeName?: string;
   description: string;
   monthlyCost: number;
   costPercent: number;
@@ -26,7 +28,7 @@ interface CityInsightCardProps {
 }
 
 export default function CityInsightCard({
-  imageUrl, rating, isWishlisted, name, countryName, description,
+  imageUrl, rating, isWishlisted, name, countryName, purposeName, description,
   monthlyCost, costPercent,
   accommodationPercent, accommodationLabel,
   visaPercent, visaLabel,
@@ -64,8 +66,9 @@ export default function CityInsightCard({
         {/* 도시 정보 */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="title-01 text-black">{name}</span>
             <Chip label={countryName} className="body-05 bg-gray-100 px-2.5 py-1 text-gray-500" />
+            <span className="title-01 text-black">{name}</span>
+            {purposeName && <span className="label-02 text-gray-500">{purposeName}</span>}
           </div>
           <p className="label-01 text-gray-500">{description}</p>
         </div>
