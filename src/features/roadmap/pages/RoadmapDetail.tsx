@@ -301,7 +301,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           data={buildCityReportData(reportCityData)}
           onSearch={mockSearchResult}
           // 이 화면은 이미 만들어진 로드맵의 상세라 그 도시는 이미 담긴 상태
-          isAdded
+          isAddDisabled
         />
       )}
     </div>

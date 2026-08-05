@@ -19,8 +19,6 @@ interface CityReportModalProps {
   onAddToRoadmap?: () => void;
   /** 추가가 끝났거나 진행 중이면 "로드맵에 추가하기" 버튼을 비활성화 */
   isAddDisabled?: boolean;
-  /** 이미 로드맵에 담긴 도시면 버튼이 "로드맵에 추가됨" 상태로 표시됨 */
-  isAdded?: boolean;
   /** 추가 실패 시 푸터에 표시할 문구 */
   addErrorMessage?: string | null;
 }
@@ -32,7 +30,6 @@ export default function CityReportModal({
   onSearch,
   onAddToRoadmap,
   isAddDisabled,
-  isAdded,
   addErrorMessage,
 }: CityReportModalProps) {
   useEffect(() => {
@@ -90,7 +87,6 @@ export default function CityReportModal({
           cityName={data.cityName}
           onAddToRoadmap={onAddToRoadmap}
           isAddDisabled={isAddDisabled}
-          isAdded={isAdded}
           errorMessage={addErrorMessage}
         />
       </div>
