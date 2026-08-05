@@ -22,7 +22,7 @@ type ChatEntry = {
   userMessage: string;
   thinkingTime: number;
   briefingData: BriefingData | null;
-  status: 'loading' | 'completed' | 'empty' | 'cancelled';
+  status: 'loading' | 'completed' | 'empty' | 'cancelled' | 'error';
 };
 
 const MOCK_IMAGES = [
@@ -177,6 +177,12 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
         if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI-005') {
           setSessionId(null);
         }
+        const entryId = currentEntryIdRef.current;
+        if (entryId) {
+          setChatHistory(prev => prev.map(e =>
+            e.id === entryId && e.status === 'loading' ? { ...e, status: 'error' } : e
+          ));
+        }
         setNoticeType('briefing-error');
       }
     };
@@ -206,6 +212,9 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
           setSessionId(null);
         }
       }
+      setChatHistory(prev => prev.map(e =>
+        e.id === entryId && e.status === 'loading' ? { ...e, status: 'error' } : e
+      ));
       setNoticeType('briefing-error');
     }
   }, [startPolling]);
@@ -535,6 +544,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
                     {entry.status === 'loading' && <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>}
                     {entry.status === 'empty' && <span className="body-04 text-gray-400">조건에 맞는 결과를 찾지 못했어요.</span>}
                     {entry.status === 'cancelled' && <span className="body-04 text-gray-400">응답이 중단되었어요.</span>}
+                    {entry.status === 'error' && <span className="body-04 text-gray-400">브리핑에 실패했어요.</span>}
                   </div>
                 </div>
               )
