@@ -68,9 +68,13 @@ export default function LoginModal({
     try {
       const { authorizationUrl } = await authApi.getGoogleLoginUrl();
       window.location.href = authorizationUrl;
-    } catch {
+    } catch (error) {
       setIsGoogleLoading(false);
-      setFormError('Google 로그인에 실패했습니다. 다시 시도해주세요.');
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AUTH400_4') {
+        setFormError('Google 로그인 요청이 만료되었습니다. 다시 시도해주세요.');
+      } else {
+        setFormError('Google 로그인에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
