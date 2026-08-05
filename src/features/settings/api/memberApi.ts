@@ -7,6 +7,7 @@ import type {
   ChangePasswordRequest,
   SettingsResult,
   UpdateSettingsRequest,
+  UpdateSettingsResult,
   ProfileImageUploadUrlRequest,
   ProfileImageUploadUrlResult,
   ProfileImageUpdateRequest,
@@ -37,7 +38,7 @@ export const memberApi = {
   },
 
   updateSettings: async (body: UpdateSettingsRequest) => {
-    const { data } = await instance.patch<ApiResponse<SettingsResult>>(
+    const { data } = await instance.patch<ApiResponse<UpdateSettingsResult>>(
       '/api/v1/members/me/settings',
       body,
     );

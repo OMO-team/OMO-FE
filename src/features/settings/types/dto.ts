@@ -37,6 +37,12 @@ export type UpdateSettingsRequest = {
   autoSave?: boolean;
 };
 
+export type UpdateSettingsResult = {
+  pushNotification: boolean;
+  emailNotification: boolean;
+  autoSave: boolean;
+};
+
 export type ProfileImageUploadUrlRequest = {
   fileName: string;
   contentType: string;
