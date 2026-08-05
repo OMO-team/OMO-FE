@@ -6,7 +6,7 @@ export type ChipInfo = {
 export type BriefingRequest = {
   searchQuery: string;
   isRefine: boolean;
-  sessionId?: number;
+  sessionId: number | null;
 };
 
 export type BriefingInitResult = {

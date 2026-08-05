@@ -190,7 +190,7 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
       const { sessionId: newSessionId, taskId } = await chatApi.startBriefing({
         searchQuery: query,
         isRefine: currentSessionId !== null,
-        sessionId: currentSessionId ?? undefined,
+        sessionId: currentSessionId,
       });
       setSessionId(newSessionId);
       startPolling(taskId);
