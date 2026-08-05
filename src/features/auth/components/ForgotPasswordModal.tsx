@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import axios from 'axios';
+import { EMAIL_REGEX } from '../constants/emailRegex';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import Input from '../../../shared/components/Input';
@@ -32,6 +33,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
   const handleSendPasswordResetEmail = async () => {
     if (!email) { setEmailError('가입하신 이메일 주소를 입력해주세요.'); return; }
+    if (!EMAIL_REGEX.test(email)) { setEmailError('올바른 이메일 형식을 입력해주세요.'); return; }
     if (isSendingCode) return;
     setEmailError('');
     setIsSendingCode(true);
@@ -41,8 +43,12 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       setIsVerified(false);
       setCode('');
       setCodeError('');
-    } catch {
-      setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+    } catch (error) {
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'MEMBER404_1') {
+        setEmailError('가입되지 않은 이메일입니다.');
+      } else {
+        setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsSendingCode(false);
     }
