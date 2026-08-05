@@ -41,7 +41,6 @@ import type { CityReportData } from '../../../shared/types/cityReport';
 import { DETAIL_OPTIONS } from '../constants/filterOptions';
 import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
 import { berlinReportData } from '../../city-ai-report/mocks/mockData';
-import { mockCities } from '../../../shared/mocks/cities';
 
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
@@ -64,12 +63,6 @@ const STAY_DURATION_MAP: Record<string, StayDurationType> = {
 
 const CITY_REPORT_DATA: Record<string, CityReportData> = {
   베를린: berlinReportData,
-};
-
-const CITY_COMPARE_ID: Record<string, string> = {
-  베를린: 'berlin',
-  도쿄: 'tokyo',
-  시드니: 'sydney',
 };
 
 export default function CityInsight() {
@@ -146,12 +139,6 @@ export default function CityInsight() {
   const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
   const effectivePage = Math.min(page, totalPages);
   const pagedCities = cities.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
-
-  const handleCompare = (cityName: string) => {
-    const id = CITY_COMPARE_ID[cityName];
-    if (!id) return;
-    toggleCompare(id);
-  };
 
   useEffect(() => {
     if (!addedCityName) return;
@@ -303,7 +290,7 @@ export default function CityInsight() {
                   languageScore={city.languageScore}
                   internetScore={city.internetScore}
                   {...adaptCityToCardProps(city)}
-                  onCompare={() => handleCompare(city.name)}
+                  onCompare={() => toggleCompare(city.cityId)}
                   onReport={() => setReportCityName(city.name)}
                 />
               ))}
@@ -346,8 +333,8 @@ export default function CityInsight() {
       {addedCityName && (
         <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
       )}
-      <CompareSelectionBar cities={mockCities} />
-      <CompareModal cities={mockCities} />
+      <CompareSelectionBar cities={CITY_INSIGHT_CARDS} />
+      <CompareModal />
     </div>
   );
 }

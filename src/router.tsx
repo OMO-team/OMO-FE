@@ -24,7 +24,7 @@ import GoogleLinkCallbackRoute from './features/auth/pages/GoogleLinkCallbackRou
 import TermsAndPolicyRoute from './shared/pages/TermsAndPolicyRoute';
 import SettingsApp from './features/settings/pages/SettingsApp';
 
-// contact 
+// contact
 import Contact from './features/contact/pages/Contact';
 
 export const router = createBrowserRouter([
