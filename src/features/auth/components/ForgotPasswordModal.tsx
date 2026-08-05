@@ -7,7 +7,7 @@ import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 import { authApi } from '../api/authApi';
-import { passwordRegex } from '../constants/passwordRegex';
+import { passwordRegex } from '../../../shared/constants/passwordRegex';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
@@ -23,7 +23,8 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const isVerified = verifiedEmail !== '' && verifiedEmail === email;
 
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
@@ -40,7 +41,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     try {
       await authApi.sendPasswordResetEmail({ email });
       setEmailSent(true);
-      setIsVerified(false);
+      setVerifiedEmail('');
       setCode('');
       setCodeError('');
     } catch (error) {
@@ -61,7 +62,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     setIsVerifyingCode(true);
     try {
       await authApi.verifyPasswordResetCode({ email, code });
-      setIsVerified(true);
+      setVerifiedEmail(email);
     } catch (error) {
       if (axios.isAxiosError<{ code?: string }>(error)) {
         const errorCode = error.response?.data?.code;
@@ -91,7 +92,10 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
     let hasError = false;
 
-    if (!isVerified) {
+    if (!emailSent) {
+      setEmailError('인증코드를 먼저 발송해주세요.');
+      hasError = true;
+    } else if (!isVerified) {
       setCodeError('이메일 인증을 완료해주세요.');
       hasError = true;
     }
