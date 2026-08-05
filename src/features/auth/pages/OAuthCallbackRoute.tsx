@@ -17,9 +17,18 @@ export default function OAuthCallbackRoute() {
 
     const ticket = searchParams.get('ticket');
     const error = searchParams.get('error');
+    const errorCode = searchParams.get('errorCode');
 
-    if (error || !ticket) {
-      navigate('/', { replace: true });
+    if (error || errorCode || !ticket) {
+      if (errorCode === 'AUTH404_1') {
+        navigate('/', { replace: true, state: { oauthError: '가입되지 않은 계정입니다. 회원가입을 먼저 진행해주세요.' } });
+      } else if (errorCode === 'AUTH409_1') {
+        navigate('/', { replace: true, state: { oauthError: '이미 이메일로 가입된 계정입니다. 이메일 로그인을 이용해주세요.' } });
+      } else if (errorCode === 'AUTH409_2') {
+        navigate('/', { replace: true, state: { oauthError: '이미 Google로 가입된 계정입니다. Google 로그인을 이용해주세요.' } });
+      } else {
+        navigate('/', { replace: true });
+      }
       return;
     }
 

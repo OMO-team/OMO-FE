@@ -48,6 +48,10 @@ export default function SettingsPage({
     typeof locationState?.googleLinkResult === 'string'
       ? (locationState.googleLinkResult as 'success' | 'error')
       : null;
+  const googleLinkError =
+    typeof locationState?.googleLinkError === 'string'
+      ? locationState.googleLinkError
+      : null;
 
   const [activeModal, setActiveModal] = useState<
     "logout" | "delete" | "profile" | "password-change" | "password-find" | null
@@ -70,6 +74,7 @@ export default function SettingsPage({
 
   // 구글 연결 배너
   const [googleLinkBanner, setGoogleLinkBanner] = useState<'success' | 'error' | null>(googleLinkResult);
+  const [googleLinkErrorMessage, setGoogleLinkErrorMessage] = useState<string | null>(googleLinkError);
   const [isGoogleLinking, setIsGoogleLinking] = useState(false);
 
   useEffect(() => {
@@ -216,8 +221,8 @@ export default function SettingsPage({
         {googleLinkBanner === 'error' && (
           <TopAlertBanner
             variant="red"
-            message="Google 계정 연결에 실패했습니다. 다시 시도해 주세요."
-            onClose={() => setGoogleLinkBanner(null)}
+            message={googleLinkErrorMessage ?? 'Google 계정 연결에 실패했습니다. 다시 시도해 주세요.'}
+            onClose={() => { setGoogleLinkBanner(null); setGoogleLinkErrorMessage(null); }}
           />
         )}
 
