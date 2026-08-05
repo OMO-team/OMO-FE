@@ -4,13 +4,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CountryRoadmapList from './CountryRoadmapList';
 import { roadmapsApi } from '../api/roadmapsApi';
 import { wishlistApi } from '../api/wishlistApi';
-import { roadmapQueryKeys, wishlistQueryKeys } from '../api/queryKeys';
+import { citiesApi } from '../api/citiesApi';
+import { cityQueryKeys, roadmapQueryKeys, wishlistQueryKeys } from '../api/queryKeys';
 import { toCityInsightData, wishKey } from '../utils/wishlistAdapter';
-import { groupByCountry } from '../utils/roadmapAdapter';
+import { groupByCountry, type CityCatalogMap } from '../utils/roadmapAdapter';
 import { useAuthStore } from '../../auth/store/useAuthStore';
 import type { WishlistCityListResult, CreateRoadmapResult, RoadmapListItem } from '../types/api';
 
 const GROUPS_PER_PAGE = 2;
+/** 도시 정보는 거의 바뀌지 않으므로 길게 캐시해서 화면 간에 공유한다 */
+const CITY_CATALOG_STALE_TIME = 1000 * 60 * 60;
 
 export default function RoadmapApp() {
   const navigate = useNavigate();
@@ -42,7 +45,21 @@ export default function RoadmapApp() {
   });
   const wishlistCities = useMemo(() => (wishlistResult?.cities ?? []).map(toCityInsightData), [wishlistResult]);
 
-  const countryGroups = useMemo(() => groupByCountry(visibleRoadmapItems), [visibleRoadmapItems]);
+  /** 로드맵 목록 API에 없는 도시 소개·평점을 채우기 위해 도시 카탈로그를 함께 조회 */
+  const { data: cityCatalog } = useQuery({
+    queryKey: cityQueryKeys.list,
+    queryFn: citiesApi.list,
+    staleTime: CITY_CATALOG_STALE_TIME,
+  });
+  const cityCatalogMap = useMemo<CityCatalogMap>(
+    () => new Map((cityCatalog?.cities ?? []).map((city) => [city.cityId, city])),
+    [cityCatalog],
+  );
+
+  const countryGroups = useMemo(
+    () => groupByCountry(visibleRoadmapItems, cityCatalogMap),
+    [visibleRoadmapItems, cityCatalogMap],
+  );
   /** 같은 도시라도 목적이 다르면 별개 항목이라 조합을 키로 씀 */
   const wishedKeys = useMemo(
     () => new Set(wishlistCities.map((city) => wishKey(city.cityId, city.purposeId))),
