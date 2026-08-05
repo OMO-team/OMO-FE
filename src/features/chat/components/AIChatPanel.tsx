@@ -170,10 +170,13 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
         } else {
           pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
         }
-      } catch {
+      } catch (error) {
         if (!pollTimerRef.current) return;
         stopPolling();
         setIsStreaming(false);
+        if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI-005') {
+          setSessionId(null);
+        }
         setNoticeType('briefing-error');
       }
     };
