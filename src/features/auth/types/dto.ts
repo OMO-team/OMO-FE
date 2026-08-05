@@ -14,6 +14,7 @@ export type LoginRequest = {
 };
 
 export type LoginResult = {
+  memberId: number;
   accessToken: string;
   refreshToken: string;
 };
