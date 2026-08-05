@@ -63,6 +63,7 @@ export default function EmailVerificationPage({
   const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
   const [resendCount, setResendCount] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
+  const [resendError, setResendError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -122,9 +123,15 @@ export default function EmailVerificationPage({
     setResendCount((c) => c + 1);
     setCode(Array(CODE_LENGTH).fill(''));
     setErrorCount(0);
+    setResendError('');
     setStep('inputCode');
-    const seconds = await onResend?.();
-    startTimer(typeof seconds === 'number' ? seconds : undefined);
+    try {
+      const seconds = await onResend?.();
+      startTimer(typeof seconds === 'number' ? seconds : undefined);
+    } catch {
+      setResendCount((c) => c - 1);
+      setResendError('이메일 발송에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const handleVerify = async () => {
@@ -274,9 +281,14 @@ export default function EmailVerificationPage({
               </InfoBox>
             </div>
           </div>
-          <div className="flex items-center self-stretch gap-[12px]">
-            <LargeFillButton label="인증번호 다시 받기" variant="outline" onClick={handleResend} />
-            <LargeFillButton label="인증하기" onClick={handleVerify} disabled={isVerifying || code.join('').length < CODE_LENGTH} className="flex-1 title-05" />
+          <div className="flex flex-col items-center self-stretch gap-[8px]">
+            {resendError && (
+              <span className="body-04 text-red-500 self-stretch text-center">{resendError}</span>
+            )}
+            <div className="flex items-center self-stretch gap-[12px]">
+              <LargeFillButton label="인증번호 다시 받기" variant="outline" onClick={handleResend} />
+              <LargeFillButton label="인증하기" onClick={handleVerify} disabled={isVerifying || code.join('').length < CODE_LENGTH} className="flex-1 title-05" />
+            </div>
           </div>
         </div>
       )}
