@@ -7,6 +7,12 @@ export type SignupRequest = {
   agreedTermsIds: number[];
 };
 
+export type SignupResult = {
+  memberId: number;
+  name: string;
+  createdAt: string;
+};
+
 // 로그인
 export type LoginRequest = {
   email: string;

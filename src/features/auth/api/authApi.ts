@@ -2,6 +2,7 @@ import { instance } from '../../../lib/axios';
 import type { ApiResponse } from '../../../shared/types/api';
 import type {
   SignupRequest,
+  SignupResult,
   LoginRequest,
   LoginResult,
   EmailSendRequest,
@@ -18,7 +19,7 @@ import type {
 } from '../types/dto';
 
 export const authApi = {
-  signup: (body: SignupRequest) => instance.post<ApiResponse<null>>('/api/v1/members/signup', body),
+  signup: (body: SignupRequest) => instance.post<ApiResponse<SignupResult>>('/api/v1/members/signup', body),
 
   login: async (body: LoginRequest) => {
     const { data } = await instance.post<ApiResponse<LoginResult>>('/auth/v1/login/local', body);
