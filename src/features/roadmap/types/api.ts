@@ -31,9 +31,6 @@ export interface CityInfo {
   cityId: number;
   name: string;
   country: CityCountryInfo;
-  /** 위시리스트를 도시+목적 조합으로 저장하도록 백엔드 수정 예정 — 반영 전까지는 안 내려옴 */
-  purposeId?: number;
-  purposeName?: string;
   imageUrl: string | null;
   rating: number | null;
   description: string | null;
@@ -42,7 +39,19 @@ export interface CityInfo {
   housingScore: number | null;
   visaScore: number | null;
   languageScore: number | null;
-  infraScore: number | null;
+  /** 카드에는 "인프라"로 표시되는 값 — 응답 필드명은 internetScore */
+  internetScore: number | null;
+}
+
+/** 위시리스트 항목 = 도시 정보 + 담을 때 함께 저장한 목적 */
+export interface WishlistCityInfo extends CityInfo {
+  purposeId: number;
+  purposeName: string;
+}
+
+export interface WishlistCityListResult {
+  totalCount: number;
+  cities: WishlistCityInfo[];
 }
 
 export interface CityListResult {
@@ -56,6 +65,7 @@ export interface RoadmapListItem {
   cityId: number;
   cityName: string;
   cityImageUrl: string;
+  country: CityCountryInfo;
   purposeId: number;
   purposeName: string;
   departureDate: string | null;

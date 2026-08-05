@@ -265,7 +265,7 @@ export const CITY_INFO_KO: Record<number, { cityName: string; countryName: strin
   257: { cityName: '빈', countryName: '오스트리아' },
   258: { cityName: '빌뉴스', countryName: '리투아니아' },
   259: { cityName: '바르샤바', countryName: '폴란드' },
-  260: { cityName: '워싱턴 D.C.', countryName: '워싱턴 D.C.' },
+  260: { cityName: '워싱턴 D.C.', countryName: '미국' },
   261: { cityName: '웰링턴', countryName: '뉴질랜드' },
   262: { cityName: '위니펙', countryName: '캐나다' },
   263: { cityName: '브로츠와프', countryName: '폴란드' },

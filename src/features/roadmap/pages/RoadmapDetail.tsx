@@ -13,12 +13,17 @@ import BagIcon from '../components/icons/BagIcon';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../api/roadmapsApi';
-import { roadmapQueryKeys } from '../api/queryKeys';
+import { citiesApi } from '../api/citiesApi';
+import { cityQueryKeys, roadmapQueryKeys } from '../api/queryKeys';
 import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
+import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import { CITY_INFO_KO } from '../mocks/cityCountryMap';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
+
+/** 도시 정보는 거의 바뀌지 않아서 한 번 받아두고 화면 간에 재사용 */
+const CITY_CATALOG_STALE_TIME = 1000 * 60 * 60;
 
 function parseDotDate(value?: string) {
   if (!value) return null;
@@ -46,10 +51,26 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   const isValidRoadmapId = Number.isFinite(roadmapId);
 
-  const { data: detail } = useQuery({
+  const {
+    data: detail,
+    isPending,
+    isError,
+  } = useQuery({
     queryKey: roadmapQueryKeys.detail(roadmapId),
     queryFn: () => roadmapsApi.get(roadmapId),
     enabled: isValidRoadmapId,
+  });
+
+  /**
+   * 로드맵 API에는 도시의 평점·요약·지표가 없어서 AI 리포트를 채울 수 없음.
+   * 단일 도시 조회 엔드포인트가 없어 카탈로그 전체를 받아 해당 도시를 찾아 쓴다.
+   * 리포트 모달뿐 아니라 화면에 항상 보이는 AI 리포트 카드의 총점·요약도 여기서 나오므로
+   * 모달을 열 때까지 미루지 않고 처음부터 받아온다(캐시는 다른 화면과 공유).
+   */
+  const { data: cityCatalog } = useQuery({
+    queryKey: cityQueryKeys.list,
+    queryFn: citiesApi.list,
+    staleTime: CITY_CATALOG_STALE_TIME,
   });
 
   /** 체류 기간 변경은 즉시 화면에 반영(낙관적 업데이트)하고, 실패하면 이전 값으로 되돌림 */
@@ -76,7 +97,8 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
     onError: () => console.error('출국일 변경 실패'),
   });
 
-  if (isValidRoadmapId && detail === undefined) {
+  // isPending으로 판단해야 조회가 에러로 끝났을 때 스켈레톤에 갇히지 않고 안내 문구로 넘어간다
+  if (isValidRoadmapId && isPending && !isError) {
     return <RoadmapDetailSkeleton />;
   }
 
@@ -113,24 +135,30 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const cityInfo = CITY_INFO_KO[detail.cityId];
   const cityNameKo = cityInfo?.cityName ?? detail.cityName;
 
-  /** AI 탐색 리포트는 city-ai-report 도메인 데이터라 로드맵 API에는 없음 — 준비된 값만 채우고 나머지는 준비중으로 표시 */
-  const reportCityData: CityInsightData = {
-    cityId: String(detail.cityId),
-    cityName: cityNameKo,
-    countryName: cityInfo?.countryName ?? '준비중',
-    imageUrl: detail.cityImageUrl,
-    description: '준비중',
-    rating: 0,
-    monthlyCost: '준비중',
-    costPercent: 0,
-    accommodationPercent: 0,
-    accommodationLabel: '준비중',
-    visaPercent: 0,
-    visaLabel: '준비중',
-    securityScore: 0,
-    languageScore: 0,
-    infrastructureScore: 0,
-  };
+  /**
+   * AI 탐색 리포트에 쓸 도시 정보는 로드맵 API에 없어서 도시 카탈로그에서 찾아 씀.
+   * 아직 못 받았거나 카탈로그에 없는 도시면 로드맵이 아는 값만으로 최소한을 채운다.
+   */
+  const catalogCity = cityCatalog?.cities.find((city) => city.cityId === detail.cityId);
+  const reportCityData: CityInsightData = catalogCity
+    ? { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl }
+    : {
+        cityId: String(detail.cityId),
+        cityName: cityNameKo,
+        countryName: cityInfo?.countryName ?? '준비중',
+        imageUrl: detail.cityImageUrl,
+        description: '준비중',
+        rating: 0,
+        monthlyCost: '준비중',
+        costPercent: 0,
+        accommodationPercent: 0,
+        accommodationLabel: '준비중',
+        visaPercent: 0,
+        visaLabel: '준비중',
+        securityScore: 0,
+        languageScore: 0,
+        infrastructureScore: 0,
+      };
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
@@ -256,9 +284,9 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             totalBudget={totalBudget}
           />
           <AiReportCard
-            score={0}
+            score={catalogCity?.rating ?? 0}
             cityName={cityNameKo}
-            summary="준비중"
+            summary={catalogCity?.description ?? '준비중'}
             onViewReport={() => setIsReportOpen(true)}
           />
         </div>
