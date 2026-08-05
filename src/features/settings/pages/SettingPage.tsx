@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authApi } from "../../auth/api/authApi";
 import { memberApi } from "../api/memberApi";
@@ -164,9 +165,14 @@ export default function SettingsPage({
     try {
       const { authorizationUrl } = await authApi.getGoogleLinkUrl();
       window.location.href = authorizationUrl;
-    } catch {
+    } catch (error) {
       setIsGoogleLinking(false);
-      setGoogleLinkBanner('error');
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AUTH409_3') {
+        setGoogleLinked(true);
+        setErrorBanner('이미 Google 계정이 연결되어 있습니다.');
+      } else {
+        setGoogleLinkBanner('error');
+      }
     }
   };
 
