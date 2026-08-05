@@ -25,10 +25,10 @@ export default function DetailDropDown({ selectedOptions, onSelect }: DetailDrop
 
   return (
     <div ref={containerRef} className="relative cursor-pointer">
-        <div className={`inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer ${isOpen ? 'bg-primary-500' : 'bg-gray-50 hover:bg-gray-100'}`} onClick={handleOpen}>
+        <button type="button" className={`inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer ${isOpen ? 'bg-primary-500' : 'bg-gray-50 hover:bg-gray-100'}`} onClick={handleOpen}>
             <FilterIcon color={isOpen ? '#ffffff' : undefined}/>
             <p className={`body-03 ${isOpen ? 'text-white' : 'text-gray-600'}`}>상세필터</p>
-        </div>
+        </button>
         {isOpen && (
         <div className='absolute top-10 z-1 bg-white w-[624px] h-[242px] flex flex-col justify-center items-center border border-gray-100 rounded-2 px-6 py-5 shadow-01'>
             {DETAIL_OPTIONS.map((item, index) => (

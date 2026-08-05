@@ -63,14 +63,15 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
 
   return (
     <div ref={containerRef} className="relative cursor-pointer">
-      <div
+      <button
+        type="button"
         className={`inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer ${isOpen ? 'bg-primary-500' : 'bg-gray-50 hover:bg-gray-100'}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <RegionFilterIcon color={isOpen ? '#ffffff' : undefined} />
         <p className={`body-03 ${isOpen ? 'text-white' : 'text-gray-600'}`}>지역</p>
         <ChevronDownIcon color={isOpen ? '#ffffff' : undefined} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </div>
+      </button>
       {isOpen && (
         <div className='absolute top-10 z-1 bg-white w-[340px] h-[340px] flex flex-col justify-start items-center border border-gray-100 rounded-2 pt-6 pb-4 shadow-01'>
           <div className="relative">

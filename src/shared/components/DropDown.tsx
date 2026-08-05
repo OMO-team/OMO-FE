@@ -25,10 +25,10 @@ export default function DropDown<T extends string>({ title, options, selectedOpt
   return (
     <>
     <div ref={containerRef} className='relative'>
-        <div className={twMerge('bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2', triggerClassName)} onClick={handleOpen}>
-            <p className='text-gray-600 body-03 cursor-pointer'>{title}</p>
+        <button type="button" className={twMerge('bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer', triggerClassName)} onClick={handleOpen}>
+            <p className='text-gray-600 body-03'>{title}</p>
             <ChevronDownIcon className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-        </div>
+        </button>
         {isOpen && (
             <div className={twMerge('absolute top-10 z-1 bg-white w-32.5 flex flex-col justify-center items-center border border-gray-100 rounded-2 px-2 py-3 shadow-01', className)}>
                 {options.map((option, index) => {
