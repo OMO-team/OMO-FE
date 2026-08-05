@@ -114,7 +114,7 @@ export default function EmailVerificationPage({
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (resendCount >= MAX_RESEND) {
       setStep('limitExceeded');
       return;
