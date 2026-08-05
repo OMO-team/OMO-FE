@@ -11,7 +11,7 @@ import RoadmapAlertCard from '../components/RoadmapAlertCard';
 import RoadmapDetailSkeleton from './RoadmapDetailSkeleton';
 import BagIcon from '../components/icons/BagIcon';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
-import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
+import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../api/roadmapsApi';
 import { citiesApi } from '../api/citiesApi';
 import { cityQueryKeys, roadmapQueryKeys } from '../api/queryKeys';
@@ -299,8 +299,8 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           isOpen
           onClose={() => setIsReportOpen(false)}
           data={buildCityReportData(reportCityData)}
-          onSearch={mockSearchResult}
-          // 이 화면은 이미 만들어진 로드맵의 상세라 그 도시는 이미 담긴 상태
+          onSearch={(question) => cityAiReportApi.askQuestion(Number(reportCityData.cityId), { question })}
+          // 이 화면은 이미 만들어진 로드맵의 상세라, 같은 도시를 또 추가할 일이 없음
           isAddDisabled
         />
       )}

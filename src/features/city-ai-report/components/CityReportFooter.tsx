@@ -16,7 +16,7 @@ export default function CityReportFooter({
   // 콜백이 없으면 눌러도 아무 일이 없으므로 비활성 상태로 취급
   const isAdded = isAddDisabled || !onAddToRoadmap;
   return (
-    <div className="flex w-full shrink-0 items-center justify-between border-t border-gray-200 bg-white px-9 py-5">
+    <div className="flex w-full shrink-0 items-center justify-between border-t border-gray-200 bg-white px-[72px] pt-[30px] pb-10 shadow-[4px_-2px_16px_0px_rgba(6,49,88,0.1)]">
       <div className="flex flex-col gap-1">
         <p className="title-02 text-gray-900">
           <span className="text-primary-500">{cityName}</span>으로 시작해 볼까요?
@@ -31,9 +31,7 @@ export default function CityReportFooter({
         type="button"
         onClick={onAddToRoadmap}
         disabled={isAdded}
-        className={`title-02 rounded-3 px-6 py-3 text-white disabled:cursor-not-allowed ${
-          isAdded ? 'bg-gray-300' : 'bg-primary-500'
-        }`}
+        className="flex h-12 w-[282px] items-center justify-center rounded-2 bg-primary-500 title-02 text-white disabled:cursor-not-allowed disabled:bg-gray-400"
       >
         {isAdded ? '로드맵에 추가됨' : '로드맵에 추가하기'}
       </button>

@@ -9,6 +9,7 @@ import type { CityInsightData } from '../types/cityInsight';
 export function buildCityReportData(city: CityInsightData): CityReportData {
   return {
     ...berlinReportData,
+    cityId: Number(city.cityId),
     cityName: city.cityName,
     heroImageUrl: city.imageUrl,
     ratingBadge: city.rating,

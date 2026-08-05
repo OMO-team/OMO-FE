@@ -14,7 +14,7 @@ import { useCompareStore } from '../../compare/store/useCompareStore';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
-import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
+import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import { wishKey } from '../utils/wishlistAdapter';
@@ -322,7 +322,7 @@ export default function CountryRoadmapList({
           isOpen
           onClose={() => { setReportCityKey(null); setAddErrorMessage(null); }}
           data={buildCityReportData(reportCity)}
-          onSearch={mockSearchResult}
+          onSearch={(question) => cityAiReportApi.askQuestion(Number(reportCity.cityId), { question })}
           onAddToRoadmap={handleAddToRoadmap}
           isAddDisabled={
             isCreatingRoadmap ||
