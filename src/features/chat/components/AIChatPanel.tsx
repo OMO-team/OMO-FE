@@ -197,8 +197,11 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
       startPolling(taskId);
     } catch (error) {
       setIsStreaming(false);
-      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI400_2') {
-        setSessionId(null);
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'AI400_2' || code === 'VALID400_1') {
+          setSessionId(null);
+        }
       }
       setNoticeType('briefing-error');
     }
