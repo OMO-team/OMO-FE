@@ -91,7 +91,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     setEmailError('');
     setIsSendingCode(true);
     try {
-      await authApi.sendEmailCode({ email });
+      const { expiresInSeconds } = await authApi.sendEmailCode({ email });
       setSignupDraft({
         name,
         email,
@@ -102,7 +102,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
         isEmailVerified: false,
       });
       onClose();
-      navigate('/auth/email-verify', { state: { email } });
+      navigate('/auth/email-verify', { state: { email, expiresInSeconds } });
     } catch {
       setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
     } finally {

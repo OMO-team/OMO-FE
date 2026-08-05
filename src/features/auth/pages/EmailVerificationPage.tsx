@@ -6,7 +6,8 @@ type Step = 'sent' | 'inputCode' | 'success' | 'expired' | 'limitExceeded' | 'fa
 
 type EmailVerificationPageProps = {
   email?: string;
-  onResend?: () => void;
+  initialSeconds?: number;
+  onResend?: () => Promise<number | undefined> | void;
   onVerify?: (code: string) => Promise<void>;
   onServiceStart?: () => void;
 };
@@ -51,22 +52,25 @@ const descStyle: React.CSSProperties = {
 
 export default function EmailVerificationPage({
   email = 'example@email.com',
+  initialSeconds = TOTAL_SECONDS,
   onResend,
   onVerify,
   onServiceStart,
 }: EmailVerificationPageProps) {
   const [step, setStep] = useState<Step>('sent');
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
-  const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
+  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
   const [resendCount, setResendCount] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
   const [isVerifying, setIsVerifying] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialSecondsRef = useRef(initialSeconds);
 
-  const startTimer = useCallback(() => {
+  const startTimer = useCallback((seconds?: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setSecondsLeft(TOTAL_SECONDS);
+    const duration = seconds ?? initialSecondsRef.current;
+    setSecondsLeft(duration);
     timerRef.current = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
@@ -118,7 +122,8 @@ export default function EmailVerificationPage({
     setCode(Array(CODE_LENGTH).fill(''));
     setErrorCount(0);
     setStep('inputCode');
-    onResend?.();
+    const seconds = await onResend?.();
+    startTimer(typeof seconds === 'number' ? seconds : undefined);
   };
 
   const handleVerify = async () => {
