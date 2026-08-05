@@ -28,10 +28,15 @@ type DocumentTaskDetailModalProps = {
   onOpenUpload?: (taskDocumentId: number) => void;
   /** 촬영 자동 체크 성공 또는 수동 체크 시 호출 — PATCH /api/v1/task-documents/{taskDocumentId}/check */
   onCheck?: (taskDocumentId: number) => void;
-  /** true면 이미 완료 처리된 태스크 — 서류 없는 태스크의 완료 버튼 대신 완료 상태 표시 */
+  /** true면 이미 완료된 행동형 태스크 — "완료로 표시" 버튼 대신 완료 상태를 보여줌 */
   isCompleted?: boolean;
-  /** 지정하면 필요 서류가 없는 태스크에 "완료 처리" 버튼 표시 — PATCH /api/v1/tasks/{taskId}/complete */
+  /**
+   * 서류가 없는 행동형 태스크의 "완료로 표시" 핸들러 — PATCH /api/v1/tasks/{taskId}/complete.
+   * 태스크 완료는 되돌릴 수 없는 설계라 취소 동작은 없다(서류 체크와 달리 토글이 아님).
+   */
   onComplete?: () => void;
+  /** 완료 요청 진행 중이면 버튼을 막아 중복 호출을 방지 */
+  isCompleting?: boolean;
 };
 
 export default function DocumentTaskDetailModal({
@@ -51,6 +56,7 @@ export default function DocumentTaskDetailModal({
   onCheck,
   isCompleted = false,
   onComplete,
+  isCompleting = false,
 }: DocumentTaskDetailModalProps) {
   const completedCount = documents.filter((d) => d.isChecked).length;
   const totalCount = documents.length;
@@ -117,12 +123,17 @@ export default function DocumentTaskDetailModal({
         </p>
       ) : totalCount === 0 ? (
         <div className="flex w-full flex-col items-center gap-5 py-10">
-          <p className="body-02 text-gray-500">필요한 서류가 없는 작업이에요</p>
+          <p className="body-02 text-gray-500">제출 서류 없는 단계</p>
           {isCompleted ? (
             <span className="title-03 text-primary-500">완료된 작업이에요</span>
           ) : (
             <div className="w-60">
-              <LargeFillButton label="완료 처리" onClick={onComplete} />
+              <LargeFillButton
+                label="완료로 표시"
+                onClick={onComplete}
+                // 핸들러가 없으면 눌러도 아무 일이 없고, 요청 중이면 중복 호출되므로 둘 다 막는다
+                disabled={!onComplete || isCompleting}
+              />
             </div>
           )}
         </div>

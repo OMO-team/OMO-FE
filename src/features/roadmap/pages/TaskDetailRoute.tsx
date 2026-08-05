@@ -161,6 +161,7 @@ export default function TaskDetailRoute() {
           onCheck={(taskDocumentId) => checkDocumentMutation.mutate(taskDocumentId)}
           isCompleted={taskDetail.isCompleted}
           onComplete={() => completeTaskMutation.mutate()}
+          isCompleting={completeTaskMutation.isPending}
         />
       </ModalOverlay>
 
