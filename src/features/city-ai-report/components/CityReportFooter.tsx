@@ -3,6 +3,8 @@ interface CityReportFooterProps {
   onAddToRoadmap?: () => void;
   /** 추가가 끝났거나 진행 중이면 버튼을 눌러도 중복 생성되지 않도록 비활성화 */
   isAddDisabled?: boolean;
+  /** 이미 로드맵에 담긴 도시 — 문구와 색이 "추가됨" 상태로 바뀜 */
+  isAdded?: boolean;
   /** 추가에 실패했을 때 사용자에게 보여줄 문구 */
   errorMessage?: string | null;
 }
@@ -11,6 +13,7 @@ export default function CityReportFooter({
   cityName,
   onAddToRoadmap,
   isAddDisabled = false,
+  isAdded = false,
   errorMessage,
 }: CityReportFooterProps) {
   return (
@@ -29,10 +32,12 @@ export default function CityReportFooter({
         type="button"
         onClick={onAddToRoadmap}
         // 콜백이 없으면 눌러도 아무 일이 없으므로 아예 못 누르게 막는다
-        disabled={isAddDisabled || !onAddToRoadmap}
-        className="rounded-3 bg-primary-500 px-6 py-3 title-02 text-white disabled:cursor-not-allowed disabled:bg-gray-400"
+        disabled={isAddDisabled || isAdded || !onAddToRoadmap}
+        className={`title-02 rounded-3 px-6 py-3 text-white disabled:cursor-not-allowed ${
+          isAdded ? 'bg-gray-300' : 'bg-primary-500 disabled:bg-gray-400'
+        }`}
       >
-        로드맵에 추가하기
+        {isAdded ? '로드맵에 추가됨' : '로드맵에 추가하기'}
       </button>
     </div>
   );

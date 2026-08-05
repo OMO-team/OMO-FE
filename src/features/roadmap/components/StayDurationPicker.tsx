@@ -22,7 +22,7 @@ export default function StayDurationPicker({ months, onChange, min = 1, max = 24
             type="button"
             onClick={() => onChange?.(preset)}
             className={`body-02 rounded-2 px-5.5 py-2 ${
-              preset === months ? 'bg-primary-500 text-white' : 'bg-gray-20 text-gray-400'
+              preset === months ? 'bg-primary-500 text-white' : 'bg-gray-50 text-gray-800'
             }`}
           >
             {preset}개월

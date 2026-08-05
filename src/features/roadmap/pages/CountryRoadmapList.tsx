@@ -321,7 +321,8 @@ export default function CountryRoadmapList({
           data={buildCityReportData(reportCity)}
           onSearch={mockSearchResult}
           onAddToRoadmap={handleAddToRoadmap}
-          isAddDisabled={isCreatingRoadmap || addedKeys.has(wishKey(reportCity.cityId, reportCity.purposeId))}
+          isAddDisabled={isCreatingRoadmap}
+          isAdded={addedKeys.has(wishKey(reportCity.cityId, reportCity.purposeId))}
           addErrorMessage={addErrorMessage}
         />
       )}

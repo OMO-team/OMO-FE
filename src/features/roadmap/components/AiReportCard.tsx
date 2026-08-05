@@ -1,4 +1,5 @@
 import StarIcon from '../../../shared/components/StarIcon';
+import chevronRight from '../../../assets/icons/icon-chevron-right-blue.svg';
 
 type AiReportCardProps = {
   score: number;
@@ -21,10 +22,14 @@ export default function AiReportCard({ score, cityName, summary, onViewReport }:
       </div>
       <button
         type="button"
-        className="title-03 flex h-10 items-center justify-center gap-1 rounded-2 bg-primary-100 text-primary-500"
+        // hover 배경(#a6d5ff)은 primary-100과 200 사이 값이라 대응하는 프로젝트 토큰이 없어 그대로 씀
+        className="title-03 flex h-10 items-center justify-center gap-1 rounded-2 bg-primary-100 px-3 py-1.5 text-primary-500 transition-colors hover:bg-[#a6d5ff]"
         onClick={onViewReport}
       >
-        AI 리포트 보러가기 〉
+        AI 리포트 보러가기
+        <span className="flex size-4 items-center justify-center">
+          <img src={chevronRight} alt="" className="h-2.5 w-1.25" />
+        </span>
       </button>
     </div>
   );

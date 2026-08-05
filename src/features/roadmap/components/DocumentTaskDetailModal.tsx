@@ -32,7 +32,7 @@ type DocumentTaskDetailModalProps = {
   isCompleted?: boolean;
   /**
    * 서류가 없는 행동형 태스크의 "완료로 표시" 핸들러 — PATCH /api/v1/tasks/{taskId}/complete.
-   * 명세(F-707)상 다시 눌러 취소할 수 있어야 하지만, 현재 API가 완료 단방향이라 취소는 미지원.
+   * 태스크 완료는 되돌릴 수 없는 설계라 취소 동작은 없다(서류 체크와 달리 토글이 아님).
    */
   onComplete?: () => void;
   /** 완료 요청 진행 중이면 버튼을 막아 중복 호출을 방지 */
