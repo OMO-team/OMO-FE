@@ -1,4 +1,7 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import profileImage from '../../../assets/icons/profile-image.svg';
@@ -45,6 +48,15 @@ export default function ProfileEditModal({
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type)) {
+      setSaveError('jpg, png, webp 형식의 이미지만 업로드할 수 있습니다.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setSaveError('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+    setSaveError('');
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
@@ -145,7 +157,7 @@ export default function ProfileEditModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png"
+                accept={ALLOWED_IMAGE_TYPES.join(',')}
                 className="hidden"
                 onChange={handleAvatarChange}
               />
