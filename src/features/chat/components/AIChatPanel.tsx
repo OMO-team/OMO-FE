@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
@@ -194,8 +195,11 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
       });
       setSessionId(newSessionId);
       startPolling(taskId);
-    } catch {
+    } catch (error) {
       setIsStreaming(false);
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI400_2') {
+        setSessionId(null);
+      }
       setNoticeType('briefing-error');
     }
   }, [startPolling]);
