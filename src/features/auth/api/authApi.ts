@@ -7,6 +7,7 @@ import type {
   EmailSendRequest,
   EmailSendResult,
   EmailVerifyRequest,
+  EmailVerifyResult,
   PasswordResetEmailRequest,
   PasswordResetVerifyRequest,
   PasswordResetRequest,
@@ -40,8 +41,10 @@ export const authApi = {
     return data.result;
   },
 
-  verifyEmailCode: (body: EmailVerifyRequest) =>
-    instance.post<ApiResponse<null>>('/auth/v1/email/verify', body),
+  verifyEmailCode: async (body: EmailVerifyRequest) => {
+    const { data } = await instance.post<ApiResponse<EmailVerifyResult>>('/auth/v1/email/verify', body);
+    return data.result;
+  },
 
   sendPasswordResetEmail: (body: PasswordResetEmailRequest) =>
     instance.post<ApiResponse<null>>('/auth/v1/password/reset/email', body),

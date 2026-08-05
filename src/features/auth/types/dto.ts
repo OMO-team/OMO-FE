@@ -33,6 +33,11 @@ export type EmailVerifyRequest = {
   code: string;
 };
 
+export type EmailVerifyResult = {
+  email: string;
+  verified: boolean;
+};
+
 // 비밀번호 재설정
 export type PasswordResetEmailRequest = {
   email: string;
