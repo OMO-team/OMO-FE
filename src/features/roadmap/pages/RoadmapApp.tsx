@@ -4,13 +4,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CountryRoadmapList from './CountryRoadmapList';
 import { roadmapsApi } from '../api/roadmapsApi';
 import { wishlistApi } from '../api/wishlistApi';
-import { roadmapQueryKeys, wishlistQueryKeys } from '../api/queryKeys';
-import { toCityInsightData } from '../utils/wishlistAdapter';
-import { groupByCountry } from '../utils/roadmapAdapter';
+import { citiesApi } from '../api/citiesApi';
+import { cityQueryKeys, roadmapQueryKeys, wishlistQueryKeys } from '../api/queryKeys';
+import { toCityInsightData, wishKey } from '../utils/wishlistAdapter';
+import { groupByCountry, type CityCatalogMap } from '../utils/roadmapAdapter';
 import { useAuthStore } from '../../auth/store/useAuthStore';
-import type { CityListResult, CreateRoadmapResult, RoadmapListItem } from '../types/api';
+import type { WishlistCityListResult, CreateRoadmapResult, RoadmapListItem } from '../types/api';
 
 const GROUPS_PER_PAGE = 2;
+/** 도시 정보는 거의 바뀌지 않으므로 길게 캐시해서 화면 간에 공유한다 */
+const CITY_CATALOG_STALE_TIME = 1000 * 60 * 60;
 
 export default function RoadmapApp() {
   const navigate = useNavigate();
@@ -28,7 +31,7 @@ export default function RoadmapApp() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   const { data: roadmapItems = [] } = useQuery({
-    queryKey: [...roadmapQueryKeys.list, isLoggedIn],
+    queryKey: roadmapQueryKeys.list(isLoggedIn),
     queryFn: roadmapsApi.list,
   });
   const visibleRoadmapItems = useMemo(
@@ -37,13 +40,39 @@ export default function RoadmapApp() {
   );
 
   const { data: wishlistResult } = useQuery({
-    queryKey: [...wishlistQueryKeys.list, isLoggedIn],
+    queryKey: wishlistQueryKeys.list(isLoggedIn),
     queryFn: wishlistApi.list,
   });
   const wishlistCities = useMemo(() => (wishlistResult?.cities ?? []).map(toCityInsightData), [wishlistResult]);
 
-  const countryGroups = useMemo(() => groupByCountry(visibleRoadmapItems), [visibleRoadmapItems]);
-  const wishedCityIds = useMemo(() => new Set(wishlistCities.map((city) => city.cityId)), [wishlistCities]);
+  /** 로드맵 목록 API에 없는 도시 소개·평점을 채우기 위해 도시 카탈로그를 함께 조회 */
+  const { data: cityCatalog } = useQuery({
+    queryKey: cityQueryKeys.list,
+    queryFn: citiesApi.list,
+    staleTime: CITY_CATALOG_STALE_TIME,
+  });
+  const cityCatalogMap = useMemo<CityCatalogMap>(
+    () => new Map((cityCatalog?.cities ?? []).map((city) => [city.cityId, city])),
+    [cityCatalog],
+  );
+
+  const countryGroups = useMemo(
+    () => groupByCountry(visibleRoadmapItems, cityCatalogMap),
+    [visibleRoadmapItems, cityCatalogMap],
+  );
+  /**
+   * 이미 로드맵이 있는 도시+목적 조합 — 같은 조합을 또 담지 못하게 막는 데 쓴다.
+   * 현재 페이지의 그룹이 아니라 목록 전체로 만들어야 다른 페이지에 있는 로드맵도 걸린다.
+   */
+  const roadmapKeys = useMemo(
+    () => new Set(visibleRoadmapItems.map((item) => wishKey(item.cityId, item.purposeId))),
+    [visibleRoadmapItems],
+  );
+  /** 같은 도시라도 목적이 다르면 별개 항목이라 조합을 키로 씀 */
+  const wishedKeys = useMemo(
+    () => new Set(wishlistCities.map((city) => wishKey(city.cityId, city.purposeId))),
+    [wishlistCities],
+  );
 
   const totalPages = Math.max(1, Math.ceil(countryGroups.length / GROUPS_PER_PAGE));
   const pagedGroups = useMemo(
@@ -52,35 +81,49 @@ export default function RoadmapApp() {
   );
 
   const addWishMutation = useMutation({
-    mutationFn: (cityId: number) => wishlistApi.add(cityId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.list }),
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      wishlistApi.add(cityId, purposeId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.all }),
   });
 
   /** 제거는 실패할 일이 거의 없어 낙관적으로 먼저 반영하고, 실패하면 되돌림 */
   const removeWishMutation = useMutation({
-    mutationFn: (cityId: number) => wishlistApi.remove(cityId),
-    onMutate: async (cityId) => {
-      await queryClient.cancelQueries({ queryKey: wishlistQueryKeys.list });
-      const previous = queryClient.getQueryData<CityListResult>(wishlistQueryKeys.list);
-      queryClient.setQueryData<CityListResult>(wishlistQueryKeys.list, (old) =>
-        old ? { ...old, cities: old.cities.filter((city) => city.cityId !== cityId) } : old,
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      wishlistApi.remove(cityId, purposeId),
+    onMutate: async ({ cityId, purposeId }) => {
+      await queryClient.cancelQueries({ queryKey: wishlistQueryKeys.list(isLoggedIn) });
+      const previous = queryClient.getQueryData<WishlistCityListResult>(wishlistQueryKeys.list(isLoggedIn));
+      queryClient.setQueryData<WishlistCityListResult>(wishlistQueryKeys.list(isLoggedIn), (old) =>
+        old
+          ? {
+              ...old,
+              // 같은 도시의 다른 목적 항목은 남겨야 하므로 조합으로 걸러냄
+              cities: old.cities.filter(
+                (city) => !(city.cityId === cityId && city.purposeId === purposeId),
+              ),
+            }
+          : old,
       );
       return { previous };
     },
-    onError: (_error, _cityId, context) => {
-      if (context?.previous) queryClient.setQueryData(wishlistQueryKeys.list, context.previous);
+    onError: (_error, _variables, context) => {
+      if (context?.previous) queryClient.setQueryData(wishlistQueryKeys.list(isLoggedIn), context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.list }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.all }),
   });
 
-  /** 하트 on = 위시리스트 등록, 하트 off = 위시리스트에서 제거 */
-  const handleToggleWish = (cityId: string) => {
-    const numericCityId = Number(cityId);
-    if (wishedCityIds.has(cityId)) {
-      removeWishMutation.mutate(numericCityId);
-    } else {
-      addWishMutation.mutate(numericCityId);
+  /** 하트 on = 위시리스트 등록, 하트 off = 제거 — 둘 다 도시+목적 조합으로 식별 */
+  const handleToggleWish = (cityId: string, purposeId?: number) => {
+    if (purposeId == null) {
+      console.error('목적 없이는 위시리스트를 바꿀 수 없음', cityId);
+      return;
     }
+    const numericCityId = Number(cityId);
+    if (wishedKeys.has(wishKey(cityId, purposeId))) {
+      removeWishMutation.mutate({ cityId: numericCityId, purposeId });
+      return;
+    }
+    addWishMutation.mutate({ cityId: numericCityId, purposeId });
   };
 
   const removeRoadmapMutation = useMutation({
@@ -90,7 +133,7 @@ export default function RoadmapApp() {
   /** 목적 선택 모달이 로딩/에러 상태를 직접 다룰 수 있도록 Promise를 그대로 반환 */
   const handleCreateRoadmap = async (cityId: number, purposeId: number): Promise<CreateRoadmapResult> => {
     const result = await roadmapsApi.create({ cityId, purposeId });
-    await queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.list });
+    await queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all });
     return result;
   };
 
@@ -123,7 +166,7 @@ export default function RoadmapApp() {
     lastRemovedRoadmapItem.current = null;
 
     removeRoadmapMutation.mutate(item.roadmapId, {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.list }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all }),
       onError: (error) => {
         console.error('로드맵 삭제 실패', error);
         setPendingDeleteRoadmapIds((prev) => {
@@ -140,7 +183,8 @@ export default function RoadmapApp() {
     <CountryRoadmapList
       countryGroups={pagedGroups}
       wishlistCities={wishlistCities}
-      wishedCityIds={wishedCityIds}
+      wishedKeys={wishedKeys}
+      roadmapKeys={roadmapKeys}
       currentPage={currentPage}
       totalPages={totalPages}
       onPageChange={setCurrentPage}

@@ -58,14 +58,14 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
     <header className={`flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center justify-center self-stretch">
+        <button type="button" onClick={() => navigate('/')} className="flex items-center justify-center self-stretch">
           <img
             src={omoLogo}
             alt="OMO 로고"
             style={{ width: '62px', height: '18.888px' }}
             className={isOverlay ? "brightness-0 invert" : ""}
           />
-        </div>
+        </button>
 
         <div
           className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]"

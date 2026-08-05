@@ -23,6 +23,8 @@ interface CityReportModalProps {
   onAddToRoadmap?: () => void;
   /** 추가가 끝났거나 진행 중이면 "로드맵에 추가하기" 버튼을 비활성화 */
   isAddDisabled?: boolean;
+  /** 추가 실패 시 푸터에 표시할 문구 */
+  addErrorMessage?: string | null;
 }
 
 export default function CityReportModal({
@@ -32,6 +34,7 @@ export default function CityReportModal({
   onSearch,
   onAddToRoadmap,
   isAddDisabled,
+  addErrorMessage,
 }: CityReportModalProps) {
   const { data: stats } = useCityStats(data.cityId);
   const keyMetrics = stats ? toKeyMetrics(stats) : [];
@@ -110,6 +113,7 @@ export default function CityReportModal({
           cityName={data.cityName}
           onAddToRoadmap={onAddToRoadmap}
           isAddDisabled={isAddDisabled}
+          errorMessage={addErrorMessage}
         />
       </div>
     </div>
