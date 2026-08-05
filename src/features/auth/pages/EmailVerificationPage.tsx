@@ -86,9 +86,9 @@ export default function EmailVerificationPage({
   }, []);
 
   useEffect(() => {
-    if (step === 'inputCode') startTimer();
+    startTimer();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [step, startTimer]);
+  }, [startTimer]);
 
   const minutes = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
   const seconds = String(secondsLeft % 60).padStart(2, '0');
@@ -120,6 +120,7 @@ export default function EmailVerificationPage({
       setStep('limitExceeded');
       return;
     }
+    const prevStep = step;
     setResendCount((c) => c + 1);
     setCode(Array(CODE_LENGTH).fill(''));
     setErrorCount(0);
@@ -130,6 +131,7 @@ export default function EmailVerificationPage({
       startTimer(typeof seconds === 'number' ? seconds : undefined);
     } catch {
       setResendCount((c) => c - 1);
+      setStep(prevStep);
       setResendError('이메일 발송에 실패했습니다. 다시 시도해주세요.');
     }
   };
