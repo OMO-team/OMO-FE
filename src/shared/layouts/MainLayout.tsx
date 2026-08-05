@@ -15,7 +15,7 @@ import { memberApi } from '../../features/settings/api/memberApi';
 import type { MainLayoutContext } from './useMainLayoutContext';
 import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
-type RouteHandle = { headerVariant?: 'default' | 'overlay' };
+type RouteHandle = { headerVariant?: 'default' | 'overlay' | 'transparent' };
 
 export default function MainLayout() {
   const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } = useAuthStore();
