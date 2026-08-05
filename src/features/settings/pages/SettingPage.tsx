@@ -182,6 +182,8 @@ export default function SettingsPage({
 
   const handleConnectGoogle = async () => {
     if (isGoogleLinking) return;
+    setGoogleLinkBanner(null);
+    setGoogleLinkErrorMessage(null);
     setIsGoogleLinking(true);
     try {
       const { authorizationUrl } = await authApi.getGoogleLinkUrl();
