@@ -1,20 +1,19 @@
 import ThumbnailVideo from "./ThumbnailVideo";
-import { getYoutubeThumbnailUrl, stripYoutubeSuffix } from "../utils/youtube";
-import type { AiReportResource } from "../../../shared/types/cityReport";
+import type { VlogItem } from "../../../shared/types/cityReport";
 
 interface VlogReviewsProps {
-  vlogs: AiReportResource[];
+  vlogs: VlogItem[];
 }
 
 export default function VlogReviews({ vlogs }: VlogReviewsProps) {
-  const rows: AiReportResource[][] = [];
+  const rows: VlogItem[][] = [];
   for (let i = 0; i < vlogs.length; i += 2) {
     rows.push(vlogs.slice(i, i + 2));
   }
 
   return (
     <div className="flex flex-col justify-start items-start self-stretch relative gap-4">
-      <p className="heading-06 text-black self-stretch">VLOG</p>
+      <p className="heading-06 text-black self-stretch">VLOG &amp; 후기</p>
       <div className="flex flex-col justify-start items-start self-stretch gap-3">
         {rows.map((row, rowIndex) => (
           <div
@@ -23,11 +22,10 @@ export default function VlogReviews({ vlogs }: VlogReviewsProps) {
           >
             {row.map((vlog) => (
               <ThumbnailVideo
-                key={`${vlog.topic}-${vlog.url}`}
-                tag={stripYoutubeSuffix(vlog.source)}
+                key={vlog.id}
+                tag={vlog.tag}
                 title={vlog.title}
-                thumbnailUrl={getYoutubeThumbnailUrl(vlog.url)}
-                url={vlog.url}
+                thumbnailUrl={vlog.thumbnailUrl}
               />
             ))}
           </div>

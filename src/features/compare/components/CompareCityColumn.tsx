@@ -46,8 +46,8 @@ export default function CompareCityColumn({
           {city.keyMetrics.map((metric) => (
             <CompareMetricValue
               key={metric.id}
-              value={metric.displayValue}
-              percent={metric.percentage ?? 0}
+              value={`${metric.percentage}%`}
+              percent={metric.percentage}
               color={metric.barColor}
             />
           ))}

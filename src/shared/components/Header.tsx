@@ -20,7 +20,6 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
   const { isLoggedIn, userAvatarUrl, openModal, openSearch } = useAuthStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isTransparent = variant === "overlay" || variant === "overlay-light";
   const isOverlay = variant === "overlay";
   const isTransparent = variant === "transparent";
 
