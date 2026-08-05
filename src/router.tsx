@@ -24,14 +24,14 @@ import GoogleLinkCallbackRoute from './features/auth/pages/GoogleLinkCallbackRou
 import TermsAndPolicyRoute from './shared/pages/TermsAndPolicyRoute';
 import SettingsApp from './features/settings/pages/SettingsApp';
 
-// contact 
+// contact
 import Contact from './features/contact/pages/Contact';
 
 export const router = createBrowserRouter([
   {
     element: <MainLayout />,
     children: [
-      { path: '/', element: <HomePage />, handle: { headerVariant: 'overlay-light' } },
+      { path: '/', element: <HomePage />, handle: { headerVariant: 'transparent' } },
       { path: '/city-insight', element: <CityInsight /> },
       { path: '/myhome/empty', element: <RoadmapApp /> },
       { path: '/auth/email-verify', element: <EmailVerifyRoute /> },

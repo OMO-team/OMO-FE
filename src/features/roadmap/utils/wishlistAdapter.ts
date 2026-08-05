@@ -1,3 +1,4 @@
+import { CITY_INFO_KO } from '../mocks/cityCountryMap';
 import type { CityInfo } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -14,10 +15,15 @@ function toPercent(score: number | null): number {
  * 임의로 판정하지 않고 항상 "준비중"으로 표시함.
  */
 export function toCityInsightData(city: CityInfo): CityInsightData {
+  // 위시리스트 API도 도시명/국가명이 영문으로 내려와서, 시드 데이터 기반 한글 매핑으로 대신 채움
+  const cityInfo = CITY_INFO_KO[city.cityId];
   return {
     cityId: String(city.cityId),
-    cityName: city.name,
-    countryName: city.country.name,
+    cityName: cityInfo?.cityName ?? city.name,
+    countryName: cityInfo?.countryName ?? city.country.name,
+    // 위시리스트가 도시+목적 조합으로 바뀌면 값이 들어오기 시작함 (그전까지는 undefined)
+    purposeId: city.purposeId,
+    purposeName: city.purposeName,
     imageUrl: city.imageUrl ?? '',
     description: city.description ?? NOT_READY,
     rating: city.rating ?? 0,

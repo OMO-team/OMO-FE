@@ -1,28 +1,22 @@
 import { useCompareStore } from "../store/useCompareStore";
+import { useCompareCities } from "../hooks/useCompareCities";
 import CompareMetricLabelColumn from "./CompareMetricLabelColumn";
 import CompareCityColumn from "./CompareCityColumn";
 import CloseButton from "../../../shared/components/CloseButton";
-import type { CompareCity } from "../../../shared/types/compare";
 
 interface CompareModalProps {
-  cities: CompareCity[];
-  onSelectCity?: (cityId: string) => void;
+  onSelectCity?: (cityId: number) => void;
 }
 
-export default function CompareModal({
-  cities,
-  onSelectCity,
-}: CompareModalProps) {
+export default function CompareModal({ onSelectCity }: CompareModalProps) {
   const compareList = useCompareStore((s) => s.compareList);
   const isModalOpen = useCompareStore((s) => s.isModalOpen);
   const closeModal = useCompareStore((s) => s.closeModal);
+  const { data, isLoading, isError } = useCompareCities(compareList);
 
   if (!isModalOpen) return null;
 
-  const selectedCities = compareList
-    .map((id) => cities.find((city) => city.id === id))
-    .filter((city): city is CompareCity => Boolean(city))
-    .sort((a, b) => b.rating - a.rating);
+  const sortedCities = data ? [...data.cities].sort((a, b) => b.rating - a.rating) : [];
 
   return (
     <div
@@ -38,17 +32,23 @@ export default function CompareModal({
           <CloseButton onClick={closeModal} hasBackground={false} />
         </div>
 
-        <div className="flex items-start gap-5">
-          <CompareMetricLabelColumn />
-          {selectedCities.map((city, index) => (
-            <CompareCityColumn
-              key={city.id}
-              city={city}
-              order={index + 1}
-              onSelect={() => onSelectCity?.(city.id)}
-            />
-          ))}
-        </div>
+        {isLoading && <p className="body-02 text-gray-500">불러오는 중...</p>}
+        {isError && <p className="body-02 text-red-500">비교 정보를 가져오지 못했어요.</p>}
+
+        {data && (
+          <div className="flex items-start gap-5">
+            <CompareMetricLabelColumn />
+            {sortedCities.map((city, index) => (
+              <CompareCityColumn
+                key={city.cityId}
+                city={city}
+                stats={data.stats}
+                order={index + 1}
+                onSelect={() => onSelectCity?.(city.cityId)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

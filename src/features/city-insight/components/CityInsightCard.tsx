@@ -7,40 +7,42 @@ import Chip from '../../../shared/components/Chip';
 interface CityInsightCardProps {
   imageUrl: string;
   rating: number;
-  isWished: boolean;
-  cityName: string;
+  isWishlisted: boolean;
+  name: string;
   countryName: string;
+  /** 위시리스트 API에 목적 데이터가 아직 없어 optional — 내려오기 시작하면 항상 표시됨 */
+  purposeName?: string;
   description: string;
-  monthlyCost: string;
+  monthlyCost: number;
   costPercent: number;
   accommodationPercent: number;
   accommodationLabel: string;
   visaPercent: number;
   visaLabel: string;
-  securityScore: number;
+  safetyScore: number;
   languageScore: number;
-  infrastructureScore: number;
+  internetScore: number;
   onToggleWish?: () => void;
   onCompare: () => void;
   onReport: () => void;
 }
 
 export default function CityInsightCard({
-  imageUrl, rating, isWished, cityName, countryName, description,
+  imageUrl, rating, isWishlisted, name, countryName, purposeName, description,
   monthlyCost, costPercent,
   accommodationPercent, accommodationLabel,
   visaPercent, visaLabel,
-  securityScore, languageScore, infrastructureScore,
+  safetyScore, languageScore, internetScore,
   onToggleWish, onCompare, onReport,
 }: CityInsightCardProps) {
   const cityInfo = [
-    { label: '치안', value: securityScore },
+    { label: '치안', value: safetyScore },
     { label: '어학', value: languageScore },
-    { label: '인프라', value: infrastructureScore },
+    { label: '인프라', value: internetScore },
   ]
 
   return (
-    <div className='w-[522px] h-[596px] bg-white rounded-4 shadow-02 hover:border border-primary-500 overflow-hidden'>
+    <div className='w-[522px] h-[596px] flex flex-col bg-white rounded-4 shadow-02 hover:border border-primary-500 overflow-hidden'>
 
       {/* 카드 배경 */}
       <div
@@ -54,18 +56,19 @@ export default function CityInsightCard({
             {rating}
           </span>
           <button type="button" onClick={onToggleWish} aria-label="찜하기">
-            <HeartIcon isWished={isWished} />
+            <HeartIcon isWishlisted={isWishlisted} />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col px-[36px] py-[20px]">
+      <div className="flex flex-1 flex-col px-[36px] py-[20px]">
 
         {/* 도시 정보 */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="title-01 text-black">{cityName}</span>
             <Chip label={countryName} className="body-05 bg-gray-100 px-2.5 py-1 text-gray-500" />
+            <span className="title-01 text-black">{name}</span>
+            {purposeName && <span className="label-02 text-gray-500">{purposeName}</span>}
           </div>
           <p className="label-01 text-gray-500">{description}</p>
         </div>
@@ -74,7 +77,7 @@ export default function CityInsightCard({
         <div className='mt-[20px]'>
           <div className='flex items-center justify-between mb-[7px]'>
             <p className='body-02'>월 평균 생활비</p>
-            <p className='body-02'>{monthlyCost}</p>
+            <p className='body-02'>{monthlyCost} 만원</p>
           </div>
           <ProgressBar percent={costPercent} leftLabel='낮음' rightLabel='높음' />
         </div>
@@ -90,7 +93,7 @@ export default function CityInsightCard({
         </div>
 
         {/* 치안 & 어학 & 인프라 평점 */}
-        <div className='flex justify-around items-center mt-4 mb-6 divide-x divide-gray-200'>
+        <div className='flex justify-around items-center mt-4 divide-x divide-gray-200'>
           {cityInfo.map((info, index) => (
             <div key={index} className='flex flex-col items-center gap-1.5 flex-1'>
               <p className='label-01'>{info.label}</p>
@@ -99,7 +102,9 @@ export default function CityInsightCard({
           ))}
         </div>
 
-        <CardButtonGroup onCompare={onCompare} onReport={onReport} />
+        <div className="mt-auto mb-[10px]">
+          <CardButtonGroup onCompare={onCompare} onReport={onReport} />
+        </div>
       </div>
     </div>
   )

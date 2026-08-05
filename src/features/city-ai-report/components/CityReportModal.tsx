@@ -11,6 +11,7 @@ import CloseButton from '../../../shared/components/CloseButton';
 import { useCityStats } from '../hooks/useCityStats';
 import { useCityCoreSummaries } from '../hooks/useCityCoreSummaries';
 import { useCityProsCons } from '../hooks/useCityProsCons';
+import { useCityResources } from '../hooks/useCityResources';
 import { toKeyMetrics } from '../utils/statsAdapter';
 import type { AISearchResultData, CityReportData, KeySummaryItem } from '../../../shared/types/cityReport';
 
@@ -20,6 +21,8 @@ interface CityReportModalProps {
   data: CityReportData;
   onSearch: (query: string) => Promise<AISearchResultData>;
   onAddToRoadmap?: () => void;
+  /** 추가가 끝났거나 진행 중이면 "로드맵에 추가하기" 버튼을 비활성화 */
+  isAddDisabled?: boolean;
 }
 
 export default function CityReportModal({
@@ -28,6 +31,7 @@ export default function CityReportModal({
   data,
   onSearch,
   onAddToRoadmap,
+  isAddDisabled,
 }: CityReportModalProps) {
   const { data: stats } = useCityStats(data.cityId);
   const keyMetrics = stats ? toKeyMetrics(stats) : [];
@@ -42,6 +46,8 @@ export default function CityReportModal({
 
   const { data: prosCons } = useCityProsCons(data.cityId);
   const showProsCons = !!prosCons && !(prosCons.prosEmpty && prosCons.consEmpty);
+
+  const { data: vlogs } = useCityResources(data.cityId, { resourceType: 'VIDEO' });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -94,13 +100,17 @@ export default function CityReportModal({
                   )}
                 </div>
                 <div className="flex flex-col justify-start items-start w-[448px] gap-5">
-                  <VlogReviews vlogs={data.vlogs} />
+                  <VlogReviews vlogs={vlogs ?? []} />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <CityReportFooter cityName={data.cityName} onAddToRoadmap={onAddToRoadmap} />
+        <CityReportFooter
+          cityName={data.cityName}
+          onAddToRoadmap={onAddToRoadmap}
+          isAddDisabled={isAddDisabled}
+        />
       </div>
     </div>
   );
