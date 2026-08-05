@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import { authApi } from '../api/authApi';
 import { memberApi } from '../../settings/api/memberApi';
 import { useAuthStore } from '../store/useAuthStore';
@@ -28,7 +29,18 @@ export default function OAuthCallbackRoute() {
         signIn(info?.profileImageUrl ?? undefined);
         navigate('/', { replace: true });
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        if (axios.isAxiosError<{ code?: string }>(error)) {
+          const code = error.response?.data?.code;
+          if (code === 'AUTH400_6') {
+            navigate('/', { replace: true, state: { oauthError: 'Google 로그인 세션이 만료되었습니다. 다시 시도해주세요.' } });
+            return;
+          }
+          if (code === 'MEMBER404_1') {
+            navigate('/', { replace: true, state: { oauthError: '회원 정보를 찾을 수 없습니다. 다시 시도해주세요.' } });
+            return;
+          }
+        }
         navigate('/', { replace: true });
       });
   }, [searchParams, navigate, signIn]);
