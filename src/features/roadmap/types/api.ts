@@ -65,6 +65,7 @@ export interface RoadmapListItem {
   cityId: number;
   cityName: string;
   cityImageUrl: string;
+  country: CityCountryInfo;
   purposeId: number;
   purposeName: string;
   departureDate: string | null;
