@@ -291,7 +291,8 @@ export default function CountryRoadmapList({
                 countryName={city.countryName}
                 purposeName={city.purposeName}
                 description={city.description}
-                monthlyCost={Number(city.monthlyCost)}
+                // city.monthlyCost는 "400만원"처럼 단위가 붙은 표시용 문자열이라 숫자만 뽑아서 넘김
+                monthlyCost={Number(city.monthlyCost.replace(/[^0-9.]/g, '')) || 0}
                 costPercent={city.costPercent}
                 accommodationPercent={city.accommodationPercent}
                 accommodationLabel={city.accommodationLabel}
