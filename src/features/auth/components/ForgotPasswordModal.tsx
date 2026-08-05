@@ -62,8 +62,21 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     try {
       await authApi.verifyPasswordResetCode({ email, code });
       setIsVerified(true);
-    } catch {
-      setCodeError('인증번호가 올바르지 않습니다. 다시 확인해주세요.');
+    } catch (error) {
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const errorCode = error.response?.data?.code;
+        if (errorCode === 'AUTH400_1') {
+          setCodeError('인증번호가 만료되었습니다. 인증번호를 다시 요청해주세요.');
+        } else if (errorCode === 'AUTH400_2') {
+          setCodeError('인증번호가 일치하지 않습니다.');
+        } else if (errorCode === 'AUTH429_1') {
+          setCodeError('입력 가능 횟수를 초과했습니다. 인증번호를 다시 요청해주세요.');
+        } else {
+          setCodeError('인증번호 확인에 실패했습니다. 다시 시도해주세요.');
+        }
+      } else {
+        setCodeError('인증번호 확인에 실패했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsVerifyingCode(false);
     }
