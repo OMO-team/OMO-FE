@@ -9,6 +9,7 @@ import LargeFillButton from '../../../shared/components/LargeFillButton';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import DeleteRoadmapModal from '../components/DeleteRoadmapModal';
 import RoadmapRemovedToast from '../components/RoadmapRemovedToast';
+import RoadmapAddedToast from '../components/RoadmapAddedToast';
 import { useCompareStore } from '../../compare/store/useCompareStore';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
@@ -18,6 +19,7 @@ import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
+import type { CreateRoadmapResult } from '../types/api';
 
 type RemovedRecord = {
   city: CityRoadmapData;
@@ -28,6 +30,12 @@ type RemovedWish = {
   cityId: string;
   cityName: string;
 };
+
+/**
+ * 위시리스트가 아직 도시 단위로만 저장돼서 목적을 못 받아옴.
+ * 백엔드가 도시+목적 조합으로 바꿔주면 항목의 purposeId를 그대로 쓰고 이 상수는 지울 것.
+ */
+const FALLBACK_PURPOSE_ID = 1;
 
 type CountryRoadmapListProps = {
   countryGroups: CountryGroupData[];
@@ -42,12 +50,16 @@ type CountryRoadmapListProps = {
   onExploreCity?: () => void;
   /** 하트 on = 위시리스트 등록, 하트 off = 위시리스트에서 제거 */
   onToggleWish?: (cityId: string) => void;
-  /** 로드맵 삭제 확정 시 호출 (아직 실 삭제 API는 호출하지 않음 — onCommitDeleteCity에서 처리) */
-  onDeleteCity?: (cityId: string) => void;
+  /** 로드맵 삭제 확정 시 호출 (아직 실 삭제 API는 호출하지 않음 — onCommitDeleteCity에서 처리). 한 도시에 목적이 다른 로드맵이 여러 개 있을 수 있어 cityId 대신 roadmapId로 식별 */
+  onDeleteCity?: (roadmapId: number) => void;
   /** 삭제 토스트의 "실행 취소" 클릭 시 호출 */
   onRestoreCity?: () => void;
   /** 삭제 토스트가 실행 취소 없이 사라질 때(타임아웃/닫기) 호출 — 이 시점에 실 삭제 API 호출 */
   onCommitDeleteCity?: () => void;
+  /** 목적 선택 모달에서 목적을 고르면 호출 — 실패 시(지원 안 하는 목적 등) 에러 메시지를 그대로 보여주기 위해 throw를 그대로 전달받음 */
+  onAddRoadmap?: (cityId: number, purposeId: number) => Promise<CreateRoadmapResult>;
+  /** 로드맵 생성 완료 토스트의 "보러가기" 클릭 시 호출 */
+  onViewCreatedRoadmap?: (roadmapId: number) => void;
 };
 
 export default function CountryRoadmapList({
@@ -63,6 +75,8 @@ export default function CountryRoadmapList({
   onDeleteCity,
   onRestoreCity,
   onCommitDeleteCity,
+  onAddRoadmap,
+  onViewCreatedRoadmap,
 }: CountryRoadmapListProps) {
   const groups = countryGroups;
   const [activeTab, setActiveTab] = useState(0);
@@ -70,6 +84,10 @@ export default function CountryRoadmapList({
   const [removedRecord, setRemovedRecord] = useState<RemovedRecord | null>(null);
   const [removedWish, setRemovedWish] = useState<RemovedWish | null>(null);
   const [reportCityId, setReportCityId] = useState<string | null>(null);
+  const [isCreatingRoadmap, setIsCreatingRoadmap] = useState(false);
+  const [createdRoadmap, setCreatedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
+  /** 이미 추가한 도시는 리포트를 다시 열어도 버튼이 비활성 상태로 유지되도록 기억 */
+  const [addedCityIds, setAddedCityIds] = useState<Set<string>>(new Set());
   /** 기본은 전부 펼친 상태 — 여기 담긴 국가만 접힌 상태로 표시 */
   const [collapsedCountries, setCollapsedCountries] = useState<Set<string>>(new Set());
 
@@ -102,9 +120,15 @@ export default function CountryRoadmapList({
     return () => clearTimeout(timer);
   }, [removedWish]);
 
+  useEffect(() => {
+    if (!createdRoadmap) return;
+    const timer = setTimeout(() => setCreatedRoadmap(null), 5000);
+    return () => clearTimeout(timer);
+  }, [createdRoadmap]);
+
   const handleConfirmDelete = () => {
-    if (!deleteTarget) return;
-    onDeleteCity?.(deleteTarget.cityId);
+    if (!deleteTarget || deleteTarget.roadmapId == null) return;
+    onDeleteCity?.(deleteTarget.roadmapId);
     setRemovedRecord({ city: deleteTarget, countryName: deleteTarget.countryName });
     setDeleteTarget(null);
   };
@@ -148,6 +172,27 @@ export default function CountryRoadmapList({
   const handleSelectCompareCity = (cityId: string) => {
     closeCompareModal();
     setReportCityId(cityId);
+  };
+
+  /**
+   * AI 리포트의 "로드맵에 추가하기" — 목적은 위시리스트 항목이 들고 있으므로 따로 묻지 않고 바로 생성.
+   * 성공하면 로드맵 목록 쿼리가 무효화되어 "나라별 로드맵" 탭에 새 카드가 자동 반영됨(탭은 직접 전환하지 않음).
+   */
+  const handleAddToRoadmap = async () => {
+    if (!reportCity || !onAddRoadmap || isCreatingRoadmap) return;
+    setIsCreatingRoadmap(true);
+    try {
+      const result = await onAddRoadmap(
+        Number(reportCity.cityId),
+        reportCity.purposeId ?? FALLBACK_PURPOSE_ID,
+      );
+      setAddedCityIds((prev) => new Set(prev).add(reportCity.cityId));
+      setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: reportCity.cityName });
+    } catch (error) {
+      console.error('로드맵 생성 실패', error);
+    } finally {
+      setIsCreatingRoadmap(false);
+    }
   };
 
   const hasRoadmaps = groups.length > 0;
@@ -201,7 +246,7 @@ export default function CountryRoadmapList({
                       <div className="flex w-full flex-wrap items-center gap-5">
                         {group.cities.map((city) => (
                           <CityRoadmapCard
-                            key={city.cityId}
+                            key={city.roadmapId ?? city.cityId}
                             {...city}
                             isWished={wishedCityIds.has(city.cityId)}
                             onToggleWish={() => handleToggleWish(city.cityId, city.cityName)}
@@ -266,9 +311,20 @@ export default function CountryRoadmapList({
           isOpen
           onClose={() => setReportCityId(null)}
           data={buildCityReportData(reportCity)}
-          onSearch={question =>
-            cityAiReportApi.askQuestion(Number(reportCity.cityId), { question })
-          }
+          onSearch={(question) => cityAiReportApi.askQuestion(Number(reportCity.cityId), { question })}
+          onAddToRoadmap={handleAddToRoadmap}
+          isAddDisabled={isCreatingRoadmap || addedCityIds.has(reportCity.cityId)}
+        />
+      )}
+
+      {createdRoadmap && (
+        <RoadmapAddedToast
+          cityName={createdRoadmap.cityName}
+          onViewRoadmap={() => {
+            onViewCreatedRoadmap?.(createdRoadmap.roadmapId);
+            setCreatedRoadmap(null);
+          }}
+          onClose={() => setCreatedRoadmap(null)}
         />
       )}
     </div>

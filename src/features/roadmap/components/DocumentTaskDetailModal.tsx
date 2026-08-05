@@ -3,6 +3,7 @@ import EditIcon from './icons/EditIcon';
 import PlusScheduleIcon from './icons/PlusScheduleIcon';
 import WarningIcon from './icons/WarningIcon';
 import RequiredDocumentCard from './RequiredDocumentCard';
+import LargeFillButton from '../../../shared/components/LargeFillButton';
 import type { RequiredDocumentData } from '../types/roadmap';
 
 type DocumentTaskDetailModalProps = {
@@ -27,6 +28,10 @@ type DocumentTaskDetailModalProps = {
   onOpenUpload?: (taskDocumentId: number) => void;
   /** 촬영 자동 체크 성공 또는 수동 체크 시 호출 — PATCH /api/v1/task-documents/{taskDocumentId}/check */
   onCheck?: (taskDocumentId: number) => void;
+  /** true면 이미 완료 처리된 태스크 — 서류 없는 태스크의 완료 버튼 대신 완료 상태 표시 */
+  isCompleted?: boolean;
+  /** 지정하면 필요 서류가 없는 태스크에 "완료 처리" 버튼 표시 — PATCH /api/v1/tasks/{taskId}/complete */
+  onComplete?: () => void;
 };
 
 export default function DocumentTaskDetailModal({
@@ -44,6 +49,8 @@ export default function DocumentTaskDetailModal({
   locked = false,
   onOpenUpload,
   onCheck,
+  isCompleted = false,
+  onComplete,
 }: DocumentTaskDetailModalProps) {
   const completedCount = documents.filter((d) => d.isChecked).length;
   const totalCount = documents.length;
@@ -108,6 +115,17 @@ export default function DocumentTaskDetailModal({
           <WarningIcon className="size-icon-sm" />
           선행 작업을 먼저 완료해주세요
         </p>
+      ) : totalCount === 0 ? (
+        <div className="flex w-full flex-col items-center gap-5 py-10">
+          <p className="body-02 text-gray-500">필요한 서류가 없는 작업이에요</p>
+          {isCompleted ? (
+            <span className="title-03 text-primary-500">완료된 작업이에요</span>
+          ) : (
+            <div className="w-60">
+              <LargeFillButton label="완료 처리" onClick={onComplete} />
+            </div>
+          )}
+        </div>
       ) : (
         <div className="flex w-full flex-col items-end gap-5">
           <div className="flex w-full flex-col gap-6">

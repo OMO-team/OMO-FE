@@ -8,6 +8,8 @@ import InfoCircleIcon from './icons/InfoCircleIcon';
 type CityRoadmapCardProps = {
   cityName: string;
   countryName: string;
+  /** 실 API 연동 전 mock 데이터에는 없을 수 있어 optional */
+  purposeName?: string;
   /** RoadmapDetail의 CityHeroBanner 등 다른 화면에서 사용, 이 카드 자체에는 표시하지 않음 */
   progressPercent: number;
   description: string;
@@ -26,6 +28,7 @@ type CityRoadmapCardProps = {
 export default function CityRoadmapCard({
   cityName,
   countryName,
+  purposeName,
   description,
   rating,
   isWished = false,
@@ -74,8 +77,9 @@ export default function CityRoadmapCard({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <span className="title-01 text-black">{cityName}</span>
               <span className="body-05 rounded-2 bg-gray-100 px-2.5 py-1 text-gray-500">{countryName}</span>
+              <span className="title-01 text-black">{cityName}</span>
+              {purposeName && <span className="label-02 text-gray-500">{purposeName}</span>}
             </div>
             <p className="label-01 text-gray-500">{description}</p>
           </div>
