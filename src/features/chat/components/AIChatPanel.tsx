@@ -251,7 +251,12 @@ export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, 
     setChatHistory([]);
     setNoticeType(null);
     if (sessionId !== null) {
-      chatApi.deleteSession(sessionId).catch(() => {});
+      chatApi.deleteSession(sessionId).catch((error: unknown) => {
+        if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI-002') {
+          return;
+        }
+        setNoticeType('briefing-error');
+      });
       setSessionId(null);
     }
     onNewChat?.();
