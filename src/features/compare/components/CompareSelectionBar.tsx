@@ -3,10 +3,11 @@ import { useCompareStore, useCanOpenModal } from "../store/useCompareStore";
 import Chip from "../../../shared/components/Chip";
 import CompareActionButton from "./CompareActionButton";
 import CompareMaxWarning from "./CompareMaxWarning";
-import type { CompareCity } from "../../../shared/types/compare";
+import { useSyncCompareItems } from "../hooks/useSyncCompareItems";
+import type { CompareSelectableCity } from "../types/dto";
 
 interface CompareSelectionBarProps {
-  cities: CompareCity[];
+  cities: CompareSelectableCity[];
 }
 
 export default function CompareSelectionBar({
@@ -19,6 +20,8 @@ export default function CompareSelectionBar({
   const hideMaxWarning = useCompareStore((s) => s.hideMaxWarning);
   const canOpenModal = useCanOpenModal();
 
+  useSyncCompareItems();
+
   useEffect(() => {
     if (!showMaxWarning) return;
     const timer = setTimeout(hideMaxWarning, 3000);
@@ -28,8 +31,8 @@ export default function CompareSelectionBar({
   if (compareList.length === 0) return null; // 0개면 바 자체가 안 보임
 
   const selectedCities = compareList
-    .map((id) => cities.find((city) => city.id === id))
-    .filter((city): city is CompareCity => Boolean(city));
+    .map((id) => cities.find((city) => city.cityId === id))
+    .filter((city): city is CompareSelectableCity => Boolean(city));
 
   return (
     <div className="fixed inset-x-0 bottom-6 z-40 flex flex-col items-center gap-2 px-4">
@@ -43,10 +46,10 @@ export default function CompareSelectionBar({
           <div className="flex items-center gap-2">
             {selectedCities.map((city) => (
               <Chip
-                key={city.id}
-                label={city.name}
+                key={city.cityId}
+                label={city.cityName}
                 variant="dark"
-                onRemove={() => removeFromCompare(city.id)}
+                onRemove={() => removeFromCompare(city.cityId)}
               />
             ))}
           </div>

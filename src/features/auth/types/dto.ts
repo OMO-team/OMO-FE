@@ -1,15 +1,16 @@
-export type ApiResponse<T> = {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: T;
-};
-
 // 회원가입
 export type SignupRequest = {
   name: string;
   email: string;
   password: string;
+  passwordConfirm: string;
+  agreedTermsIds: number[];
+};
+
+export type SignupResult = {
+  memberId: number;
+  name: string;
+  createdAt: string;
 };
 
 // 로그인
@@ -19,6 +20,7 @@ export type LoginRequest = {
 };
 
 export type LoginResult = {
+  memberId: number;
   accessToken: string;
   refreshToken: string;
 };
@@ -28,9 +30,19 @@ export type EmailSendRequest = {
   email: string;
 };
 
+export type EmailSendResult = {
+  email: string;
+  expiresInSeconds: number;
+};
+
 export type EmailVerifyRequest = {
   email: string;
   code: string;
+};
+
+export type EmailVerifyResult = {
+  email: string;
+  verified: boolean;
 };
 
 // 비밀번호 재설정
@@ -56,4 +68,41 @@ export type ReissueRequest = {
 
 export type ReissueResult = {
   accessToken: string;
+  refreshToken: string;
+};
+
+// 구글 OAuth
+export type GoogleSignupRequest = {
+  agreedTermsIds: number[];
+};
+
+export type GoogleAuthorizationUrlResult = {
+  authorizationUrl: string;
+};
+
+export type GoogleExchangeRequest = {
+  ticket: string;
+};
+
+export type GoogleLoginResult = {
+  memberId: number;
+  accessToken: string;
+  refreshToken: string;
+};
+
+// 약관
+export type TermType = 'TERMS_OF_SERVICE' | 'PRIVACY_POLICY';
+
+export type TermItem = {
+  id: number;
+  title: string;
+  content: string;
+  type: TermType;
+  required: boolean;
+  version: string;
+  effectiveAt: string;
+};
+
+export type TermsResult = {
+  terms: TermItem[];
 };

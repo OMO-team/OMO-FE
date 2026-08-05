@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, type KeyboardEvent } from 'react';
+import axios from 'axios';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
 import mailIcon from '../../../assets/icons/icon-mail.svg';
 
@@ -6,7 +7,8 @@ type Step = 'sent' | 'inputCode' | 'success' | 'expired' | 'limitExceeded' | 'fa
 
 type EmailVerificationPageProps = {
   email?: string;
-  onResend?: () => void;
+  initialSeconds?: number;
+  onResend?: () => Promise<number | undefined> | void;
   onVerify?: (code: string) => Promise<void>;
   onServiceStart?: () => void;
 };
@@ -51,22 +53,26 @@ const descStyle: React.CSSProperties = {
 
 export default function EmailVerificationPage({
   email = 'example@email.com',
+  initialSeconds = TOTAL_SECONDS,
   onResend,
   onVerify,
   onServiceStart,
 }: EmailVerificationPageProps) {
   const [step, setStep] = useState<Step>('sent');
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
-  const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
+  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
   const [resendCount, setResendCount] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
+  const [resendError, setResendError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialSecondsRef = useRef(initialSeconds);
 
-  const startTimer = useCallback(() => {
+  const startTimer = useCallback((seconds?: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setSecondsLeft(TOTAL_SECONDS);
+    const duration = seconds ?? initialSecondsRef.current;
+    setSecondsLeft(duration);
     timerRef.current = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
@@ -80,9 +86,9 @@ export default function EmailVerificationPage({
   }, []);
 
   useEffect(() => {
-    if (step === 'inputCode') startTimer();
+    startTimer();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [step, startTimer]);
+  }, [startTimer]);
 
   const minutes = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
   const seconds = String(secondsLeft % 60).padStart(2, '0');
@@ -109,16 +115,25 @@ export default function EmailVerificationPage({
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (resendCount >= MAX_RESEND) {
       setStep('limitExceeded');
       return;
     }
+    const prevStep = step;
     setResendCount((c) => c + 1);
     setCode(Array(CODE_LENGTH).fill(''));
     setErrorCount(0);
+    setResendError('');
     setStep('inputCode');
-    onResend?.();
+    try {
+      const seconds = await onResend?.();
+      startTimer(typeof seconds === 'number' ? seconds : undefined);
+    } catch {
+      setResendCount((c) => c - 1);
+      setStep(prevStep);
+      setResendError('이메일 발송에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const handleVerify = async () => {
@@ -129,11 +144,22 @@ export default function EmailVerificationPage({
     try {
       await onVerify?.(fullCode);
       setStep('success');
-    } catch {
-      const nextErrorCount = errorCount + 1;
-      setErrorCount(nextErrorCount);
-      if (nextErrorCount >= 5) {
-        setStep('failed');
+    } catch (error) {
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (error.response?.status === 429 || code === 'AUTH429_1') {
+          setStep('limitExceeded');
+        } else if (code === 'AUTH400_1') {
+          setStep('expired');
+        } else {
+          const nextErrorCount = errorCount + 1;
+          setErrorCount(nextErrorCount);
+          if (nextErrorCount >= 5) setStep('failed');
+        }
+      } else {
+        const nextErrorCount = errorCount + 1;
+        setErrorCount(nextErrorCount);
+        if (nextErrorCount >= 5) setStep('failed');
       }
     } finally {
       setIsVerifying(false);
@@ -257,9 +283,14 @@ export default function EmailVerificationPage({
               </InfoBox>
             </div>
           </div>
-          <div className="flex items-center self-stretch gap-[12px]">
-            <LargeFillButton label="인증번호 다시 받기" variant="outline" onClick={handleResend} />
-            <LargeFillButton label="인증하기" onClick={handleVerify} disabled={isVerifying || code.join('').length < CODE_LENGTH} className="flex-1 title-05" />
+          <div className="flex flex-col items-center self-stretch gap-[8px]">
+            {resendError && (
+              <span className="body-04 text-red-500 self-stretch text-center">{resendError}</span>
+            )}
+            <div className="flex items-center self-stretch gap-[12px]">
+              <LargeFillButton label="인증번호 다시 받기" variant="outline" onClick={handleResend} />
+              <LargeFillButton label="인증하기" onClick={handleVerify} disabled={isVerifying || code.join('').length < CODE_LENGTH} className="flex-1 title-05" />
+            </div>
           </div>
         </div>
       )}

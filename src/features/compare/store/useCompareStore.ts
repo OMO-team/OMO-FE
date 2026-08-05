@@ -1,14 +1,17 @@
 import { create } from "zustand";
+import { useAuthStore } from "../../auth/store/useAuthStore";
+import { compareItemsApi } from "../api/compareItemsApi";
 
 const MAX_COMPARE_COUNT = 3;
 const MIN_COMPARE_COUNT = 2;
 
 interface CompareState {
-  compareList: string[];
+  compareList: number[];
   isModalOpen: boolean;
   showMaxWarning: boolean;
-  toggleCompare: (cityId: string) => void;
-  removeFromCompare: (cityId: string) => void;
+  toggleCompare: (cityId: number) => Promise<void>;
+  removeFromCompare: (cityId: number) => Promise<void>;
+  setCompareList: (cityIds: number[]) => void;
   clearCompare: () => void;
   openModal: () => void;
   closeModal: () => void;
@@ -20,29 +23,45 @@ export const useCompareStore = create<CompareState>((set, get) => ({
   isModalOpen: false,
   showMaxWarning: false,
 
-  toggleCompare: (cityId) => {
+  toggleCompare: async (cityId) => {
     const { compareList } = get();
     if (compareList.includes(cityId)) {
-      set({ compareList: compareList.filter((id) => id !== cityId) });
+      await get().removeFromCompare(cityId);
       return;
     }
     if (compareList.length >= MAX_COMPARE_COUNT) {
       set({ showMaxWarning: true }); // 최대 3개 초과 시 추가 무시하고 경고만 표시
       return;
     }
-    set({ compareList: [...compareList, cityId] });
+    if (useAuthStore.getState().isLoggedIn) {
+      try {
+        await compareItemsApi.add(cityId);
+      } catch {
+        return; // 담기 실패 시 로컬 상태는 바꾸지 않음
+      }
+    }
+    set({ compareList: [...get().compareList, cityId] });
   },
 
   hideMaxWarning: () => set({ showMaxWarning: false }),
 
-  removeFromCompare: (cityId) => {
+  removeFromCompare: async (cityId) => {
+    if (useAuthStore.getState().isLoggedIn) {
+      try {
+        await compareItemsApi.remove(cityId);
+      } catch {
+        return; // 삭제 실패 시 로컬 상태는 바꾸지 않음
+      }
+    }
     const next = get().compareList.filter((id) => id !== cityId);
-    // 모두 삭제되면 모달도 자동으로 닫힘
+    // 모두 삭제되면 모달도 자동으로 닫힘 (F-414)
     set({
       compareList: next,
       isModalOpen: next.length === 0 ? false : get().isModalOpen,
     });
   },
+
+  setCompareList: (cityIds) => set({ compareList: cityIds }),
 
   clearCompare: () => set({ compareList: [], isModalOpen: false }),
 

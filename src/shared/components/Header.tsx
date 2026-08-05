@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from "./Icon";
 import ExploreIcon from "./ExploreIcon";
 import HomeIcon from "./HomeIcon";
@@ -11,22 +11,34 @@ import { useAuthStore } from "../../features/auth/store/useAuthStore";
 type ActiveNav = "explore" | "myhome" | null;
 
 interface HeaderProps {
-  /** 이미지/사진 위에 겹쳐지는 히어로 배너 등에서 사용, 로고·아이콘·텍스트를 흰색으로 전환 */
-  variant?: "default" | "overlay";
+  /** overlay: 이미지 위 흰색 텍스트. transparent: 배경 투명 + 다크 텍스트(홈). default: 흰 배경 */
+  variant?: "default" | "overlay" | "transparent";
   onSmartBriefingClick?: () => void;
 }
 
 export default function Header({ variant = "default", onSmartBriefingClick }: HeaderProps) {
   const { isLoggedIn, userAvatarUrl, openModal, openSearch } = useAuthStore();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isOverlay = variant === "overlay";
+  const isTransparent = variant === "transparent";
 
   const activeNav: ActiveNav =
-    pathname === "/explore"
+    pathname === "/city-insight"
       ? "explore"
       : pathname.startsWith("/myhome")
         ? "myhome"
         : null;
+
+  const handleExploreClick = () => {
+    if (isLoggedIn) navigate('/city-insight');
+    else openModal('loginRequired');
+  };
+
+  const handleMyHomeClick = () => {
+    if (isLoggedIn) navigate('/myhome/empty');
+    else openModal('loginRequired');
+  };
 
   const getNavIconColor = (nav: ActiveNav) =>
     activeNav === nav
@@ -43,7 +55,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
         : "text-gray-700";
 
   return (
-    <header className={`flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay ? "bg-transparent" : "bg-white"}`}>
+    <header className={`flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-center self-stretch">
@@ -73,7 +85,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
         {/* 탐색 / 내홈 / 스마트 브리핑 — gap 없음 */}
         <div className="flex items-center">
           <button
-            onClick={() => openModal('loginRequired')}
+            onClick={handleExploreClick}
             className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("explore")}`}
           >
             <Icon size="sm">
@@ -83,7 +95,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
           </button>
 
           <button
-            onClick={() => openModal('loginRequired')}
+            onClick={handleMyHomeClick}
             className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("myhome")}`}
           >
             <Icon size="sm">

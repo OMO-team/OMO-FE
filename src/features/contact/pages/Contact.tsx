@@ -1,5 +1,6 @@
 // react
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // assests
 import backArrow from '../../../assets/icons/back-arrow.svg'
@@ -10,20 +11,34 @@ import DropDown from '../../../shared/components/DropDown'
 import ContactSuccessModal from '../components/ContactSuccessModal'
 
 // constants
-import { CONTACT_TYPE_OPTIONS, type ContactType } from '../constants/contactOptions'
+import { CONTACT_TYPE_OPTIONS, CONTACT_TYPE_MAP, type ContactType } from '../constants/contactOptions'
+
+// hooks
+import { useGetUploadUrls, useUploadFileToS3, usePostInquiry } from '../hooks/useInquiry'
 
 export default function Contact() {
+    const navigate = useNavigate()
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [content, setContent] = useState('')
     const [contactType, setContactType] = useState<ContactType | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [preview, setPreview] = useState<string[]>([])
+    const [files, setFiles] = useState<(File | null)[]>([null, null, null])
+
+    const { mutateAsync: getUploadUrls } = useGetUploadUrls()
+    const { mutateAsync: uploadFileToS3 } = useUploadFileToS3()
+    const { mutateAsync: postInquiry } = usePostInquiry()
 
     const handeFileChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const file = e.target.files?.[0]
-        if (!file)
-            return 
+        if (!file) return
+        setFiles(prev => {
+            const next = [...prev]
+            next[index] = file
+            return next
+        })
         const url = URL.createObjectURL(file)
         setPreview(prev => {
             const next = [...prev]
@@ -35,25 +50,73 @@ export default function Contact() {
     const handleRemovePreview = (e: React.MouseEvent, index: number) => {
         e.preventDefault()
         e.stopPropagation()
+        setFiles(prev => {
+            const next = [...prev]
+            next[index] = null
+            return next
+        })
         setPreview(prev => {
             const next = [...prev]
-            next[index] =''
+            next[index] = ''
             return next
         })
     }
 
-    const isValid = contactType !== null && name.trim() !== '' && email.trim() !== '' && content.trim() !== ''
+    const isValid = contactType !== null && name.trim() !== '' && email.trim() !== '' && content.trim().length >= 10 && content.trim().length <= 1000
 
-    const handleSubmit = () => {
-        setIsModalOpen(true) 
+    const handleSubmit = async () => {
+        setIsSubmitting(true)
+        try {
+            const validFiles = files.filter((f): f is File => f !== null)
+
+            let uploadToken = ''
+            let attachmentKeys: string[] = []
+
+            if (validFiles.length > 0) {
+                const { data } = await getUploadUrls({
+                    files: validFiles.map(f => ({
+                        fileName: f.name,
+                        contentType: f.type,
+                        fileSize: f.size,
+                    })),
+                })
+
+                uploadToken = data.result.uploadToken
+                attachmentKeys = data.result.uploads.map(u => u.objectKey)
+
+                await Promise.all(
+                    data.result.uploads.map((upload, i) =>
+                        uploadFileToS3({ uploadUrl: upload.uploadUrl, file: validFiles[i] })
+                    )
+                )
+            }
+
+            await postInquiry({
+                type: CONTACT_TYPE_MAP[contactType!],
+                name,
+                email,
+                content,
+                uploadToken,
+                attachmentKeys,
+            })
+
+            setIsModalOpen(true)
+        } catch (error) {
+            console.error('문의 제출 중 오류가 발생했습니다.', error)
+            alert('문의 제출 중 오류가 발생했습니다. 다시 시도해 주세요.')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const handleModalClose = () => {
-        setIsModalOpen(false) 
+        setIsModalOpen(false)
         setContactType(null)
         setName('')
         setEmail('')
         setContent('')
+        setFiles([null, null, null])
+        setPreview([])
     }
 
   return (
@@ -62,7 +125,9 @@ export default function Contact() {
             {/* 헤더 */}
             <div className='mt-14 mb-14'>
                 <div className='flex gap-5 mb-4.5'>
-                    <img src={backArrow} alt="" onClick={()=>{}} />
+                    <button type="button" onClick={() => navigate('/setting')} aria-label="설정으로 돌아가기">
+                        <img src={backArrow} alt="" />
+                    </button>
                     <h1 className='heading-05'>1:1 문의하기</h1>
                 </div>
                 <p className='body-03 text-gray-600'>서비스 이용 중 궁금한 점이나 도움이 필요한 내용을 남겨주세요. 확인 후 빠르게 답변을 드리겠습니다.</p>
@@ -170,7 +235,7 @@ export default function Contact() {
 
                 {/* 문의하기 버튼 */}
                 <div className='w-full flex justify-end mb-[300px]'>
-                    <button disabled={!isValid} onClick={handleSubmit} className='mt-20 w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02 disabled:bg-gray-400'>문의하기</button>
+                    <button disabled={!isValid || isSubmitting} onClick={handleSubmit} className='mt-20 w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02 disabled:bg-gray-400'>{isSubmitting ? '제출 중...' : '문의하기'}</button>
                 </div>
             </div>
         </div>

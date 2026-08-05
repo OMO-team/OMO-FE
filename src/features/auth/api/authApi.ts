@@ -1,19 +1,25 @@
 import { instance } from '../../../lib/axios';
+import type { ApiResponse } from '../../../shared/types/api';
 import type {
-  ApiResponse,
   SignupRequest,
+  SignupResult,
   LoginRequest,
   LoginResult,
   EmailSendRequest,
+  EmailSendResult,
   EmailVerifyRequest,
+  EmailVerifyResult,
   PasswordResetEmailRequest,
   PasswordResetVerifyRequest,
   PasswordResetRequest,
+  GoogleSignupRequest,
+  GoogleAuthorizationUrlResult,
+  GoogleExchangeRequest,
+  GoogleLoginResult,
 } from '../types/dto';
 
 export const authApi = {
-  signup: (body: SignupRequest) =>
-    instance.post<ApiResponse<null>>('/api/v1/members/signup', body),
+  signup: (body: SignupRequest) => instance.post<ApiResponse<SignupResult>>('/api/v1/members/signup', body),
 
   login: async (body: LoginRequest) => {
     const { data } = await instance.post<ApiResponse<LoginResult>>('/auth/v1/login/local', body);
@@ -31,11 +37,15 @@ export const authApi = {
     }
   },
 
-  sendEmailCode: (body: EmailSendRequest) =>
-    instance.post<ApiResponse<null>>('/auth/v1/email/send', body),
+  sendEmailCode: async (body: EmailSendRequest) => {
+    const { data } = await instance.post<ApiResponse<EmailSendResult>>('/auth/v1/email/send', body);
+    return data.result;
+  },
 
-  verifyEmailCode: (body: EmailVerifyRequest) =>
-    instance.post<ApiResponse<null>>('/auth/v1/email/verify', body),
+  verifyEmailCode: async (body: EmailVerifyRequest) => {
+    const { data } = await instance.post<ApiResponse<EmailVerifyResult>>('/auth/v1/email/verify', body);
+    return data.result;
+  },
 
   sendPasswordResetEmail: (body: PasswordResetEmailRequest) =>
     instance.post<ApiResponse<null>>('/auth/v1/password/reset/email', body),
@@ -45,4 +55,26 @@ export const authApi = {
 
   resetPassword: (body: PasswordResetRequest) =>
     instance.patch<ApiResponse<null>>('/auth/v1/password/reset', body),
+
+  getGoogleLoginUrl: async () => {
+    const { data } = await instance.get<ApiResponse<GoogleAuthorizationUrlResult>>('/auth/v1/oauth/google/login');
+    return data.result;
+  },
+
+  getGoogleSignupUrl: async (body: GoogleSignupRequest) => {
+    const { data } = await instance.post<ApiResponse<GoogleAuthorizationUrlResult>>('/auth/v1/oauth/google/signup', body);
+    return data.result;
+  },
+
+  exchangeGoogleTicket: async (body: GoogleExchangeRequest) => {
+    const { data } = await instance.post<ApiResponse<GoogleLoginResult>>('/auth/v1/oauth/google/exchange', body);
+    localStorage.setItem('accessToken', data.result.accessToken);
+    localStorage.setItem('refreshToken', data.result.refreshToken);
+    return data.result;
+  },
+
+  getGoogleLinkUrl: async () => {
+    const { data } = await instance.get<ApiResponse<GoogleAuthorizationUrlResult>>('/api/v1/members/me/social-accounts/google/link');
+    return data.result;
+  },
 };

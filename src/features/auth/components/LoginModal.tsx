@@ -6,6 +6,8 @@ import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
 import { authApi } from '../api/authApi';
+import { memberApi } from '../../settings/api/memberApi';
+import { useAuthStore } from '../store/useAuthStore';
 
 type LoginModalProps = {
   onClose: () => void;
@@ -18,6 +20,8 @@ export default function LoginModal({
   onSignupClick,
   onForgotPasswordClick,
 }: LoginModalProps) {
+  const signIn = useAuthStore((s) => s.signIn);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -44,15 +48,33 @@ export default function LoginModal({
     setIsSubmitting(true);
     try {
       await authApi.login({ email, password });
+      const info = await memberApi.getMyInfo().catch(() => null);
+      signIn(info?.profileImageUrl ?? undefined);
       onClose();
     } catch (error) {
-      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 401) {
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.status === 401) {
         setFormError('이메일 또는 비밀번호가 올바르지 않습니다.');
       } else {
         setFormError('로그인에 실패했습니다. 다시 시도해주세요.');
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (isGoogleLoading) return;
+    setIsGoogleLoading(true);
+    try {
+      const { authorizationUrl } = await authApi.getGoogleLoginUrl();
+      window.location.href = authorizationUrl;
+    } catch (error) {
+      setIsGoogleLoading(false);
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AUTH400_4') {
+        setFormError('Google 로그인 요청이 만료되었습니다. 다시 시도해주세요.');
+      } else {
+        setFormError('Google 로그인에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
@@ -218,7 +240,9 @@ export default function LoginModal({
                 {/* 구글 로그인 */}
                 <button
                   type="button"
-                  className="flex flex-col justify-center items-center rounded-2"
+                  onClick={handleGoogleLogin}
+                  disabled={isGoogleLoading}
+                  className="flex flex-col justify-center items-center rounded-2 disabled:opacity-50"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
                   style={{

@@ -10,7 +10,7 @@ export default function PasswordResetVerifyRoute() {
   return (
     <EmailVerificationPage
       email={email}
-      onResend={() => authApi.sendPasswordResetEmail({ email })}
+      onResend={async () => { await authApi.sendPasswordResetEmail({ email }); }}
       onVerify={async (code) => {
         await authApi.verifyPasswordResetCode({ email, code });
         navigate('/auth/password-reset/new', { state: { email, code } });

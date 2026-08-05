@@ -1,4 +1,5 @@
 import axios, { type AxiosError } from 'axios';
+import { useAuthStore } from '../features/auth/store/useAuthStore';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -37,7 +38,9 @@ instance.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         const { data } = await axios.post(`${BASE_URL}/auth/v1/reissue`, { refreshToken });
         const newAccessToken: string = data.result.accessToken;
+        const newRefreshToken: string = data.result.refreshToken;
         localStorage.setItem('accessToken', newAccessToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
         return newAccessToken;
       })().finally(() => {
         refreshTokenPromise = null;
@@ -51,6 +54,7 @@ instance.interceptors.response.use(
     } catch {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      useAuthStore.getState().signOut();
       return Promise.reject(error);
     }
   },

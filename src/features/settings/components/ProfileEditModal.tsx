@@ -1,4 +1,7 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+
+const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'] as const;
+const maxImageSize = 5 * 1024 * 1024;
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CloseButton from '../../../shared/components/CloseButton';
 import profileImage from '../../../assets/icons/profile-image.svg';
@@ -11,45 +14,94 @@ type ProfileEditModalProps = {
   name: string;
   email: string;
   avatarUrl?: string;
+  googleLinked?: boolean;
   onClose: () => void;
-  onSave: (data: { name: string; avatarFile: File | null }) => void;
+  onSave: (data: { name: string; avatarFile: File | null }) => Promise<void>;
+  onDeleteAvatar?: () => Promise<void>;
   onConnectKakao?: () => void;
   onConnectGoogle?: () => void;
+  onUnlinkGoogle?: () => Promise<void>;
+  isGoogleConnecting?: boolean;
 };
 
 export default function ProfileEditModal({
   name,
   email,
   avatarUrl,
+  googleLinked = false,
   onClose,
   onSave,
+  onDeleteAvatar,
   onConnectKakao,
   onConnectGoogle,
+  onUnlinkGoogle,
+  isGoogleConnecting = false,
 }: ProfileEditModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [nameValue, setNameValue] = useState(name);
   const [avatarPreview, setAvatarPreview] = useState(avatarUrl);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    if (!(allowedImageTypes as readonly string[]).includes(file.type)) {
+      setSaveError('jpg, png, webp 형식의 이미지만 업로드할 수 있습니다.');
+      return;
+    }
+    if (file.size > maxImageSize) {
+      setSaveError('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+    setSaveError('');
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  const handleAvatarDelete = () => {
-    setAvatarFile(null);
-    setAvatarPreview(undefined);
+  const handleAvatarDelete = async () => {
+    if (avatarFile !== null) {
+      if (avatarPreview?.startsWith('blob:')) URL.revokeObjectURL(avatarPreview);
+      setAvatarFile(null);
+      setAvatarPreview(avatarUrl);
+      return;
+    }
+    try {
+      await onDeleteAvatar?.();
+      setAvatarPreview(undefined);
+    } catch {
+      setSaveError('프로필 이미지 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const hasAvatar = Boolean(avatarPreview);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    onSave({ name: nameValue.trim(), avatarFile });
-    onClose();
+    if (isSubmitting) return;
+    setSaveError('');
+
+    const trimmedName = nameValue.trim();
+    if (trimmedName.length === 0) {
+      setSaveError('이름은 필수 입력값입니다.');
+      return;
+    }
+    if (trimmedName.length > 20) {
+      setSaveError('이름은 20자 이하로 입력해 주세요.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onSave({ name: trimmedName, avatarFile });
+      onClose();
+    } catch {
+      setSaveError('저장에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -106,7 +158,7 @@ export default function ProfileEditModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png"
+                accept={allowedImageTypes.join(',')}
                 className="hidden"
                 onChange={handleAvatarChange}
               />
@@ -136,7 +188,7 @@ export default function ProfileEditModal({
                       : 'bg-gray-100 text-gray-400 cursor-default',
                   ].join(' ')}
                 >
-                  {hasAvatar ? '프로필 삭제' : '프로필 삭제'}
+                  프로필 삭제
                 </button>
               </div>
             </div>
@@ -182,27 +234,54 @@ export default function ProfileEditModal({
                 </span>
                 <img src={chevronRightIcon} alt="" className="h-3.5" />
               </button>
-              <button
-                type="button"
-                onClick={onConnectGoogle}
-                className="flex h-[50px] w-full items-center justify-between"
-              >
-                <span className="flex items-center gap-2">
-                  <img src={googleIcon} alt="" className="size-6" />
-                  <span className="body-03 text-gray-900">Google 계정 연결하기</span>
-                </span>
-                <img src={chevronRightIcon} alt="" className="h-3.5" />
-              </button>
+              {googleLinked ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await onUnlinkGoogle?.();
+                    } catch {
+                      setSaveError('Google 계정 연결 해제에 실패했습니다. 다시 시도해주세요.');
+                    }
+                  }}
+                  className="flex h-[50px] w-full items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <img src={googleIcon} alt="" className="size-6" />
+                    <span className="body-03 text-gray-900">Google 계정 연결 해제</span>
+                  </span>
+                  <img src={chevronRightIcon} alt="" className="h-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onConnectGoogle}
+                  disabled={isGoogleConnecting}
+                  className="flex h-[50px] w-full items-center justify-between disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2">
+                    <img src={googleIcon} alt="" className="size-6" />
+                    <span className="body-03 text-gray-900">Google 계정 연결하기</span>
+                  </span>
+                  <img src={chevronRightIcon} alt="" className="h-3.5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="title-02 w-[400px] rounded-2 bg-primary-500 py-[13px] text-center text-white"
-        >
-          저장하기
-        </button>
+        <div className="flex w-[400px] flex-col gap-3">
+          {saveError && (
+            <span className="body-04 text-center text-[#FF2A14]">{saveError}</span>
+          )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="title-02 w-full rounded-2 bg-primary-500 py-[13px] text-center text-white disabled:opacity-50"
+          >
+            저장하기
+          </button>
+        </div>
       </form>
     </ModalOverlay>
   );

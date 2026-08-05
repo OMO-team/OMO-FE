@@ -1,4 +1,6 @@
-const METRIC_LABELS = ["평점", "생활비", "인터넷", "치안", "선호도"];
+import { STAT_ORDER, STAT_LABEL } from '../utils/compareStats';
+
+const METRIC_LABELS = ['평점', ...STAT_ORDER.map((type) => STAT_LABEL[type])];
 
 export default function CompareMetricLabelColumn() {
   return (

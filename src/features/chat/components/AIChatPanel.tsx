@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
 import clipIcon from '../../../assets/icons/icon-clip.svg';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
@@ -13,12 +14,16 @@ import alertRedIcon from '../../../assets/icons/icon-alert-red.svg';
 import fileErrorIcon from '../../../assets/icons/icon-file-error.svg';
 import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
 import AIChatThread from './AIChatThread';
+import { chatApi } from '../api/chatApi';
+import type { BriefingData, ChipInfo } from '../types/dto';
 
-const MOCK_HISTORY = [
-  { id: 1, title: '독일 어학연수' },
-  { id: 2, title: '독일 교환학생 비용' },
-  { id: 3, title: '독일 숙소비' },
-];
+type ChatEntry = {
+  id: string;
+  userMessage: string;
+  thinkingTime: number;
+  briefingData: BriefingData | null;
+  status: 'loading' | 'completed' | 'empty' | 'cancelled' | 'error';
+};
 
 const MOCK_IMAGES = [
   { id: '1', isDark: false },
@@ -27,13 +32,16 @@ const MOCK_IMAGES = [
   { id: '4', isDark: true },
 ];
 
+const POLL_INTERVAL_MS = 2000;
+const TIMEOUT_MS = 60000;
+
 type NoticeType = 'attachment' | 'briefing-error' | 'file-error' | 'timeout' | null;
 
 type AIChatPanelProps = {
-  hasChat?: boolean;
   onClose?: () => void;
   onNewChat?: () => void;
   defaultNotice?: NoticeType;
+  initialMessage?: string;
 };
 
 type BarConfig = {
@@ -93,7 +101,7 @@ const NOTICE_CONFIGS: Record<NonNullable<NoticeType>, BarConfig> = {
   },
 };
 
-export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defaultNotice = null }: AIChatPanelProps) {
+export default function AIChatPanel({ onClose, onNewChat, defaultNotice = null, initialMessage }: AIChatPanelProps) {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isTitleHovered, setIsTitleHovered] = useState(false);
@@ -104,17 +112,163 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
   const [isDragOver, setIsDragOver] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
 
+  const [chips, setChips] = useState<ChipInfo[]>([]);
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
+
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollStartTimeRef = useRef<number>(0);
+  const currentEntryIdRef = useRef<string | null>(null);
+  const initialSubmittedRef = useRef(false);
+
+  const hasChatStarted = chatHistory.length > 0;
+
+  const stopPolling = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  }, []);
+
+  const startPolling = useCallback((taskId: string) => {
+    pollStartTimeRef.current = Date.now();
+
+    const poll = async () => {
+      if (!pollTimerRef.current) return;
+
+      if (Date.now() - pollStartTimeRef.current > TIMEOUT_MS) {
+        stopPolling();
+        setIsStreaming(false);
+        setNoticeType('timeout');
+        return;
+      }
+
+      try {
+        const result = await chatApi.getBriefingStatus(taskId);
+
+        if (!pollTimerRef.current) return; // await 후 stale 체크
+
+        if (result.status === 'COMPLETED') {
+          stopPolling();
+          setIsStreaming(false);
+          const entryId = currentEntryIdRef.current;
+          if (result.briefingData) {
+            setChatHistory(prev => prev.map(e =>
+              e.id === entryId
+                ? { ...e, briefingData: result.briefingData, thinkingTime: result.briefingData!.thinkingTime, status: 'completed' }
+                : e
+            ));
+          } else {
+            setChatHistory(prev => prev.map(e =>
+              e.id === entryId ? { ...e, status: 'empty' } : e
+            ));
+          }
+        } else if (result.status === 'FAILED') {
+          stopPolling();
+          setIsStreaming(false);
+          setNoticeType('briefing-error');
+        } else {
+          pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
+        }
+      } catch (error) {
+        if (!pollTimerRef.current) return;
+        stopPolling();
+        setIsStreaming(false);
+        if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI-005') {
+          setSessionId(null);
+        }
+        const entryId = currentEntryIdRef.current;
+        if (entryId) {
+          setChatHistory(prev => prev.map(e =>
+            e.id === entryId && e.status === 'loading' ? { ...e, status: 'error' } : e
+          ));
+        }
+        setNoticeType('briefing-error');
+      }
+    };
+
+    pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
+  }, [stopPolling]);
+
+  const submitQuery = useCallback(async (query: string, currentSessionId: number | null) => {
+    const entryId = Date.now().toString();
+    currentEntryIdRef.current = entryId;
+    setChatHistory(prev => [...prev, { id: entryId, userMessage: query, thinkingTime: 0, briefingData: null, status: 'loading' }]);
+    setIsStreaming(true);
+    setNoticeType(null);
+    try {
+      const { sessionId: newSessionId, taskId } = await chatApi.startBriefing({
+        searchQuery: query,
+        isRefine: currentSessionId !== null,
+        sessionId: currentSessionId,
+      });
+      setSessionId(newSessionId);
+      startPolling(taskId);
+    } catch (error) {
+      setIsStreaming(false);
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'AI400_2' || code === 'VALID400_1') {
+          setSessionId(null);
+        }
+      }
+      setChatHistory(prev => prev.map(e =>
+        e.id === entryId && e.status === 'loading' ? { ...e, status: 'error' } : e
+      ));
+      setNoticeType('briefing-error');
+    }
+  }, [startPolling]);
+
+  useEffect(() => {
+    chatApi.getRecommendChips().then(setChips).catch(() => {});
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  useEffect(() => {
+    const query = initialMessage?.trim();
+    if (!query || initialSubmittedRef.current) return;
+    initialSubmittedRef.current = true;
+    submitQuery(query, null);
+  // 마운트 시 한 번만 실행 (StrictMode 이중 실행 방지)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const hasText = value.trim().length > 0;
   const hasImages = noticeType === 'attachment';
 
-  const handleSubmit = () => {
-    if (!hasText) return;
+  const handleSubmit = async () => {
+    if (!hasText || isStreaming) return;
+    const query = value.trim();
     setValue('');
-    setIsStreaming(true);
+    await submitQuery(query, sessionId);
   };
 
   const handleStop = () => {
+    stopPolling();
     setIsStreaming(false);
+    const entryId = currentEntryIdRef.current;
+    if (entryId) {
+      setChatHistory(prev => prev.map(e =>
+        e.id === entryId && e.status === 'loading' ? { ...e, status: 'cancelled' } : e
+      ));
+    }
+  };
+
+  const handleNewChat = async () => {
+    stopPolling();
+    setIsStreaming(false);
+    setChatHistory([]);
+    setNoticeType(null);
+    if (sessionId !== null) {
+      chatApi.deleteSession(sessionId).catch((error: unknown) => {
+        if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'AI-002') {
+          return;
+        }
+        setNoticeType('briefing-error');
+      });
+      setSessionId(null);
+    }
+    onNewChat?.();
   };
 
   const handleClipClick = () => {
@@ -156,8 +310,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
 
   return (
     <div
-      className="relative flex h-full flex-col border-l border-gray-300 bg-white"
-      style={{ width: '670px', flexShrink: 0 }}
+      className="relative flex h-full flex-col bg-white"
+      style={{ width: '670px', minWidth: '40px', maxWidth: '1000px', flexShrink: 0 }}
       onClick={() => {
         if (isDropdownOpen) setIsDropdownOpen(false);
         if (isMoreMenuOpen) setIsMoreMenuOpen(false);
@@ -166,11 +320,6 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragOver(false); }}
       onDrop={(e) => { e.preventDefault(); setIsDragOver(false); }}
     >
-      {/* Sidebar_Collapse_Handle */}
-      <div className="absolute left-0 top-0 bottom-0 flex items-center" style={{ paddingLeft: '10px', pointerEvents: 'none' }}>
-        <div className="bg-gray-200 flex-shrink-0" style={{ width: '6px', height: '120px', borderRadius: '10px' }} />
-      </div>
-
       {/* Image Upload Dropzone 오버레이 */}
       {isDragOver && (
         <div
@@ -260,7 +409,8 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
                   <span className="body-05 text-gray-600">지난 30일</span>
                 </div>
                 <div className="flex flex-col items-start" style={{ alignSelf: 'stretch' }}>
-                  {MOCK_HISTORY.map((item) => (
+                  {/* 세션 히스토리 API 미구현 — 추후 연동 */}
+                  {[].map((item: { id: number; title: string }) => (
                     <button
                       key={item.id}
                       type="button"
@@ -291,7 +441,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             <div className="relative">
               <button
                 type="button"
-                onClick={onNewChat}
+                onClick={handleNewChat}
                 onMouseEnter={() => setIsNewChatHovered(true)}
                 onMouseLeave={() => setIsNewChatHovered(false)}
                 className="size-icon-md flex items-center justify-center bg-transparent border-none cursor-pointer p-0"
@@ -311,7 +461,7 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
             </div>
 
             {/* More Menu(...) 버튼 — 채팅 시작 후에만 노출 */}
-            {hasChat && (
+            {hasChatStarted && (
               <div className="relative">
                 <button
                   type="button"
@@ -372,9 +522,34 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
       </div>
 
       {/* 콘텐츠 영역 */}
-      <div className={`flex-1 overflow-y-auto flex flex-col ${hasChat ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`} style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}>
-        {hasChat ? (
-          <AIChatThread />
+      <div className={`flex-1 overflow-y-auto flex flex-col ${hasChatStarted ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`} style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}>
+        {hasChatStarted ? (
+          <div className="flex flex-col items-start w-full pb-[200px]">
+            {chatHistory.map((entry) =>
+              entry.status === 'completed' && entry.briefingData ? (
+                <AIChatThread
+                  key={entry.id}
+                  userMessage={entry.userMessage}
+                  thinkingTime={entry.thinkingTime}
+                  briefingData={entry.briefingData}
+                />
+              ) : (
+                <div key={entry.id} className="flex flex-col items-start" style={{ padding: '76px 50px 0 50px', alignSelf: 'stretch' }}>
+                  <div className="flex flex-col items-end" style={{ padding: '40px 0 40px 160px', alignSelf: 'stretch' }}>
+                    <div className="flex items-center justify-center rounded-3 bg-primary-50 px-4 py-2">
+                      <span className="body-04 text-primary-700">{entry.userMessage}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {entry.status === 'loading' && <span className="body-04 text-gray-400">AI가 분석 중이에요...</span>}
+                    {entry.status === 'empty' && <span className="body-04 text-gray-400">조건에 맞는 결과를 찾지 못했어요.</span>}
+                    {entry.status === 'cancelled' && <span className="body-04 text-gray-400">응답이 중단되었어요.</span>}
+                    {entry.status === 'error' && <span className="body-04 text-gray-400">브리핑에 실패했어요.</span>}
+                  </div>
+                </div>
+              )
+            )}
+          </div>
         ) : (
           /* Frame 11205: Empty State */
           <div
@@ -392,35 +567,33 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
               </div>
             </div>
 
-            {/* Frame 11204: S_suggestion_chip 목록 */}
-            <div className="flex flex-col items-start gap-2 self-stretch">
-              {[
-                '치안이 좋고 영어로 생활 가능한 200만원 이하 도시',
-                '유럽에서 생활비가 저렴하고 대중교통 좋은 곳',
-                '아시아 워킹홀리데이 추천, 한 달 150만원 예산',
-              ].map((text) => (
-                <button
-                  key={text}
-                  type="button"
-                  onClick={() => setValue(text)}
-                  className="flex items-center gap-1 bg-gray-20 hover:bg-gray-50 transition-colors"
-                  style={{ height: '38px', padding: '8px 20px', borderRadius: '10px' }}
-                >
-                  <span
-                    className="body-04 text-gray-700"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitBoxOrient: 'vertical',
-                      WebkitLineClamp: 1,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
+            {/* 추천 프롬프트 칩 목록 */}
+            {chips.length > 0 && (
+              <div className="flex flex-col items-start gap-2 self-stretch">
+                {chips.map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => { if (!isStreaming) submitQuery(chip.title, sessionId); }}
+                    className="flex items-center gap-1 bg-gray-20 hover:bg-gray-50 transition-colors"
+                    style={{ height: '38px', padding: '8px 20px', borderRadius: '10px' }}
                   >
-                    {text}
-                  </span>
-                </button>
-              ))}
-            </div>
+                    <span
+                      className="body-04 text-gray-700"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 1,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {chip.title}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -491,8 +664,14 @@ export default function AIChatPanel({ hasChat = false, onClose, onNewChat, defau
               <textarea
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
                 placeholder="원하는 나라 조건을 자유롭게 입력해보세요. 예: 유럽에서 생활비가 저렴한 도시 추천해줘"
-                className="text-gray-400 bg-transparent border-none outline-none resize-none"
+                className="body-03 text-gray-900 placeholder:text-gray-400 bg-transparent border-none outline-hidden resize-none"
                 style={{
                   height: '48px',
                   alignSelf: 'stretch',

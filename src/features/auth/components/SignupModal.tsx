@@ -1,4 +1,5 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
@@ -8,6 +9,9 @@ import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
 import { authApi } from '../api/authApi';
 import { passwordRegex } from '../constants/passwordRegex';
+import { EMAIL_REGEX } from '../constants/emailRegex';
+import { useAuthStore } from '../store/useAuthStore';
+import type { TermType } from '../types/dto';
 
 type SignupModalProps = {
   onClose: () => void;
@@ -36,21 +40,40 @@ function ArrowIcon() {
 }
 
 export default function SignupModal({ onClose, onLoginClick }: SignupModalProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
+  const signupDraft = useAuthStore((s) => s.signupDraft);
+  const setSignupDraft = useAuthStore((s) => s.setSignupDraft);
+  const clearSignupDraft = useAuthStore((s) => s.clearSignupDraft);
+
+  const [name, setName] = useState(signupDraft?.name ?? '');
+  const [email, setEmail] = useState(signupDraft?.email ?? '');
+  const [password, setPassword] = useState(signupDraft?.password ?? '');
+  const [confirmPassword, setConfirmPassword] = useState(signupDraft?.confirmPassword ?? '');
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(signupDraft?.isEmailVerified ?? false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState('');
   const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
-  const [agreeAll, setAgreeAll] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [agreeAll, setAgreeAll] = useState((signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false);
+  const [agreeTerms, setAgreeTerms] = useState(signupDraft?.agreeTerms ?? false);
+  const [agreePrivacy, setAgreePrivacy] = useState(signupDraft?.agreePrivacy ?? false);
+
+  /** 이메일 인증/약관 확인처럼 잠시 화면을 벗어났다가 되돌아오는 흐름에서만 true로 설정 — 그 외(X 닫기, 바깥 클릭 등 실제 닫기)에는 언마운트 시 draft를 비움 */
+  const keepDraftOnUnmountRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (!keepDraftOnUnmountRef.current) {
+        clearSignupDraft();
+      }
+    };
+  }, [clearSignupDraft]);
 
   const handleAgreeAll = () => {
     const next = !agreeAll;
@@ -75,15 +98,76 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
   const handleSendEmailCode = async () => {
     if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
+    if (!EMAIL_REGEX.test(email)) { setEmailError('올바른 이메일 형식을 입력해주세요.'); return; }
     if (isSendingCode) return;
     setEmailError('');
     setIsSendingCode(true);
     try {
-      await authApi.sendEmailCode({ email });
+      const { expiresInSeconds } = await authApi.sendEmailCode({ email });
+      setSignupDraft({
+        name,
+        email,
+        password,
+        confirmPassword,
+        agreeTerms,
+        agreePrivacy,
+        isEmailVerified: false,
+      });
+      keepDraftOnUnmountRef.current = true;
+      onClose();
+      navigate('/auth/email-verify', { state: { email, expiresInSeconds } });
     } catch {
       setEmailError('인증번호 발송에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSendingCode(false);
+    }
+  };
+
+  const handleViewTerms = (type: TermType) => {
+    setSignupDraft({
+      name,
+      email,
+      password,
+      confirmPassword,
+      agreeTerms,
+      agreePrivacy,
+      isEmailVerified,
+    });
+    keepDraftOnUnmountRef.current = true;
+    onClose();
+    navigate('/support/terms', {
+      state: { fromSignup: true, initialTab: type === 'TERMS_OF_SERVICE' ? 0 : 1 },
+    });
+  };
+
+  const handleGoogleSignup = async () => {
+    if (isGoogleLoading) return;
+    if (!agreeTerms || !agreePrivacy) {
+      setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.');
+      return;
+    }
+    setIsGoogleLoading(true);
+    const agreedTermsIds = [
+      ...(agreeTerms ? [1] : []),
+      ...(agreePrivacy ? [2] : []),
+    ];
+    try {
+      const { authorizationUrl } = await authApi.getGoogleSignupUrl({ agreedTermsIds });
+      window.location.href = authorizationUrl;
+    } catch (error) {
+      setIsGoogleLoading(false);
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'MEMBER400_3') {
+          setGoogleError('필수 약관에 모두 동의해주세요.');
+        } else if (code === 'MEMBER400_2') {
+          setGoogleError('약관 정보가 올바르지 않습니다. 다시 시도해주세요.');
+        } else {
+          setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
+        }
+      } else {
+        setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
@@ -101,16 +185,30 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
     if (!passwordRegex.test(password)) { setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.'); hasError = true; }
     if (password !== confirmPassword) { setConfirmPasswordError('비밀번호가 일치하지 않습니다.'); hasError = true; }
+    if (!isEmailVerified) { setEmailError('이메일 인증을 완료해주세요.'); hasError = true; }
     if (!agreeTerms || !agreePrivacy) { setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.'); hasError = true; }
     if (hasError) return;
 
     setIsSubmitting(true);
     try {
-      await authApi.signup({ name, email, password });
+      // 약관 ID: 1 = 이용약관, 2 = 개인정보처리방침 (GET /api/v1/terms 기준, 백엔드 확정값)
+      const agreedTermsIds = [
+        ...(agreeTerms ? [1] : []),
+        ...(agreePrivacy ? [2] : []),
+      ];
+      await authApi.signup({ name, email, password, passwordConfirm: confirmPassword, agreedTermsIds });
+      clearSignupDraft();
       onClose();
     } catch (error) {
-      if (axios.isAxiosError<{ message: string }>(error) && error.response?.status === 409) {
-        setEmailError('이미 사용 중인 이메일입니다.');
+      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.status === 400) {
+        const code = error.response.data?.code;
+        if (code === 'MEMBER400_1') {
+          setEmailError('이미 사용 중인 이메일입니다.');
+        } else if (code === 'AUTH400_3') {
+          setEmailError('이메일 인증을 완료해주세요.');
+        } else {
+          setEmailError('회원가입에 실패했습니다. 다시 시도해주세요.');
+        }
       } else {
         setEmailError('회원가입에 실패했습니다. 다시 시도해주세요.');
       }
@@ -168,13 +266,23 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                     <Input
                       type="email"
                       value={email}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        setEmail(e.target.value);
+                        if (isEmailVerified) setIsEmailVerified(false);
+                      }}
                       placeholder="이메일을 입력해주세요"
                       error={emailError}
                     />
                   </div>
-                  <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendEmailCode} />
+                  <VerifyButton
+                    active={email.length > 0 && !isSendingCode && !isEmailVerified}
+                    onClick={handleSendEmailCode}
+                    label={isEmailVerified ? '인증완료' : isSendingCode ? '발송 중...' : '인증'}
+                  />
                 </div>
+                {isEmailVerified && (
+                  <span className="body-04 text-primary-500">이메일 인증이 완료되었습니다.</span>
+                )}
               </div>
 
               {/* 비밀번호 */}
@@ -188,7 +296,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
               />
 
               {/* 비밀번호 확인 */}
-              <div className="flex flex-col gap-[8px] self-stretch">
+              <div className="flex flex-col gap-[6px] self-stretch">
                 <Input
                   type="password"
                   value={confirmPassword}
@@ -237,7 +345,12 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                         <span className="body-04 text-gray-800">이용약관 동의</span>
                         <span className="body-04 text-primary-500">(필수)</span>
                       </div>
-                      <button type="button" className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleViewTerms('TERMS_OF_SERVICE')}
+                        className="flex justify-center items-center flex-shrink-0"
+                        style={{ width: '20px', height: '20px' }}
+                      >
                         <ArrowIcon />
                       </button>
                     </div>
@@ -253,7 +366,12 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                         <span className="body-04 text-black">개인정보 처리방침 동의</span>
                         <span className="body-04 text-primary-500">(필수)</span>
                       </div>
-                      <button type="button" className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleViewTerms('PRIVACY_POLICY')}
+                        className="flex justify-center items-center flex-shrink-0"
+                        style={{ width: '20px', height: '20px' }}
+                      >
                         <ArrowIcon />
                       </button>
                     </div>
@@ -305,7 +423,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
                 <button
                   type="button"
-                  className="flex flex-col justify-center items-center rounded-2"
+                  onClick={handleGoogleSignup}
+                  disabled={isGoogleLoading}
+                  className="flex flex-col justify-center items-center rounded-2 disabled:opacity-50"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
                   style={{ width: '400px', height: '48px', padding: '8px 12px 8px 10px', background: isGoogleHovered ? '#E7E6E6' : '#F2F2F2', gap: '4px', transition: 'background 0.15s' }}
@@ -317,6 +437,10 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                   </div>
                 </button>
               </div>
+
+              {googleError && (
+                <span className="body-02 text-[#FF2A14] self-start">{googleError}</span>
+              )}
 
               {/* 로그인 유도 */}
               <div className="flex items-center" style={{ gap: '8px' }}>
