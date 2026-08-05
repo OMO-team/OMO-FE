@@ -55,8 +55,15 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
       onSuccess?.();
       onClose();
     } catch (error) {
-      if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'MEMBER400_4') {
-        setCurrentPasswordError('현재 비밀번호가 일치하지 않습니다.');
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'MEMBER400_4') {
+          setCurrentPasswordError('현재 비밀번호가 일치하지 않습니다.');
+        } else if (code === 'MEMBER404_1') {
+          setCurrentPasswordError('회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+        } else {
+          setCurrentPasswordError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+        }
       } else {
         setCurrentPasswordError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
       }
