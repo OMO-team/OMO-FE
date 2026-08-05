@@ -38,7 +38,9 @@ instance.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         const { data } = await axios.post(`${BASE_URL}/auth/v1/reissue`, { refreshToken });
         const newAccessToken: string = data.result.accessToken;
+        const newRefreshToken: string = data.result.refreshToken;
         localStorage.setItem('accessToken', newAccessToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
         return newAccessToken;
       })().finally(() => {
         refreshTokenPromise = null;

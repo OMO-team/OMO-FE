@@ -62,6 +62,7 @@ export type ReissueRequest = {
 
 export type ReissueResult = {
   accessToken: string;
+  refreshToken: string;
 };
 
 // 구글 OAuth
