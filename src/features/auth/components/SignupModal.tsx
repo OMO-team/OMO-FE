@@ -124,9 +124,20 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     try {
       const { authorizationUrl } = await authApi.getGoogleSignupUrl({ agreedTermsIds });
       window.location.href = authorizationUrl;
-    } catch {
+    } catch (error) {
       setIsGoogleLoading(false);
-      setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (code === 'MEMBER400_3') {
+          setGoogleError('필수 약관에 모두 동의해주세요.');
+        } else if (code === 'MEMBER400_2') {
+          setGoogleError('약관 정보가 올바르지 않습니다. 다시 시도해주세요.');
+        } else {
+          setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
+        }
+      } else {
+        setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
