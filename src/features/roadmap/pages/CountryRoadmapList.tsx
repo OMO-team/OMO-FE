@@ -18,6 +18,7 @@ import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
 import { toCompareCity } from '../utils/compareAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import { wishKey } from '../utils/wishlistAdapter';
+import { getErrorMessage } from '../api/apiUtils';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
 import type { CreateRoadmapResult } from '../types/api';
@@ -84,6 +85,7 @@ export default function CountryRoadmapList({
   /** 같은 도시가 목적별로 여러 장 있을 수 있어 도시가 아니라 조합 키로 어느 카드의 리포트인지 식별 */
   const [reportCityKey, setReportCityKey] = useState<string | null>(null);
   const [isCreatingRoadmap, setIsCreatingRoadmap] = useState(false);
+  const [addErrorMessage, setAddErrorMessage] = useState<string | null>(null);
   const [createdRoadmap, setCreatedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
   /** 이미 추가한 도시는 리포트를 다시 열어도 버튼이 비활성 상태로 유지되도록 기억 */
   const [addedKeys, setAddedKeys] = useState<Set<string>>(new Set());
@@ -182,16 +184,20 @@ export default function CountryRoadmapList({
   const handleAddToRoadmap = async () => {
     if (!reportCity || !onAddRoadmap || isCreatingRoadmap) return;
     if (reportCity.purposeId == null) {
-      console.error('위시리스트 항목에 목적이 없어 로드맵을 만들 수 없음', reportCity.cityId);
+      setAddErrorMessage('이 도시의 목적 정보가 없어 로드맵을 만들 수 없어요.');
       return;
     }
     setIsCreatingRoadmap(true);
+    setAddErrorMessage(null);
     try {
       const result = await onAddRoadmap(Number(reportCity.cityId), reportCity.purposeId);
       setAddedKeys((prev) => new Set(prev).add(wishKey(reportCity.cityId, reportCity.purposeId)));
       setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: reportCity.cityName });
     } catch (error) {
       console.error('로드맵 생성 실패', error);
+      setAddErrorMessage(
+        getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.'),
+      );
     } finally {
       setIsCreatingRoadmap(false);
     }
@@ -277,7 +283,7 @@ export default function CountryRoadmapList({
                 isWished
                 onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
                 onCompare={() => toggleCompare(city.cityId)}
-                onReport={() => setReportCityKey(wishKey(city.cityId, city.purposeId))}
+                onReport={() => { setAddErrorMessage(null); setReportCityKey(wishKey(city.cityId, city.purposeId)); }}
               />
             ))}
           </div>
@@ -311,11 +317,12 @@ export default function CountryRoadmapList({
       {reportCity && (
         <CityReportModal
           isOpen
-          onClose={() => setReportCityKey(null)}
+          onClose={() => { setReportCityKey(null); setAddErrorMessage(null); }}
           data={buildCityReportData(reportCity)}
           onSearch={mockSearchResult}
           onAddToRoadmap={handleAddToRoadmap}
           isAddDisabled={isCreatingRoadmap || addedKeys.has(wishKey(reportCity.cityId, reportCity.purposeId))}
+          addErrorMessage={addErrorMessage}
         />
       )}
 

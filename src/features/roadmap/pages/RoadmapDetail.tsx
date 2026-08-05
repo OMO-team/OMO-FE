@@ -51,7 +51,11 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   const isValidRoadmapId = Number.isFinite(roadmapId);
 
-  const { data: detail } = useQuery({
+  const {
+    data: detail,
+    isPending,
+    isError,
+  } = useQuery({
     queryKey: roadmapQueryKeys.detail(roadmapId),
     queryFn: () => roadmapsApi.get(roadmapId),
     enabled: isValidRoadmapId,
@@ -93,7 +97,8 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
     onError: () => console.error('출국일 변경 실패'),
   });
 
-  if (isValidRoadmapId && detail === undefined) {
+  // isPending으로 판단해야 조회가 에러로 끝났을 때 스켈레톤에 갇히지 않고 안내 문구로 넘어간다
+  if (isValidRoadmapId && isPending && !isError) {
     return <RoadmapDetailSkeleton />;
   }
 

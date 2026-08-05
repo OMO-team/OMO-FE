@@ -30,8 +30,10 @@ type DocumentTaskDetailModalProps = {
   onCheck?: (taskDocumentId: number) => void;
   /** true면 이미 완료 처리된 태스크 — 서류 없는 태스크의 완료 버튼 대신 완료 상태 표시 */
   isCompleted?: boolean;
-  /** 지정하면 필요 서류가 없는 태스크에 "완료 처리" 버튼 표시 — PATCH /api/v1/tasks/{taskId}/complete */
+  /** 필요 서류가 없는 태스크의 "완료 처리" 버튼 핸들러 — PATCH /api/v1/tasks/{taskId}/complete */
   onComplete?: () => void;
+  /** 완료 요청 진행 중이면 버튼을 막아 중복 호출을 방지 */
+  isCompleting?: boolean;
 };
 
 export default function DocumentTaskDetailModal({
@@ -51,6 +53,7 @@ export default function DocumentTaskDetailModal({
   onCheck,
   isCompleted = false,
   onComplete,
+  isCompleting = false,
 }: DocumentTaskDetailModalProps) {
   const completedCount = documents.filter((d) => d.isChecked).length;
   const totalCount = documents.length;
@@ -122,7 +125,12 @@ export default function DocumentTaskDetailModal({
             <span className="title-03 text-primary-500">완료된 작업이에요</span>
           ) : (
             <div className="w-60">
-              <LargeFillButton label="완료 처리" onClick={onComplete} />
+              <LargeFillButton
+                label="완료 처리"
+                onClick={onComplete}
+                // 핸들러가 없으면 눌러도 아무 일이 없고, 요청 중이면 중복 호출되므로 둘 다 막는다
+                disabled={!onComplete || isCompleting}
+              />
             </div>
           )}
         </div>

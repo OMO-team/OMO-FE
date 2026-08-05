@@ -28,7 +28,7 @@ export default function RoadmapApp() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   const { data: roadmapItems = [] } = useQuery({
-    queryKey: [...roadmapQueryKeys.list, isLoggedIn],
+    queryKey: roadmapQueryKeys.list(isLoggedIn),
     queryFn: roadmapsApi.list,
   });
   const visibleRoadmapItems = useMemo(
@@ -37,7 +37,7 @@ export default function RoadmapApp() {
   );
 
   const { data: wishlistResult } = useQuery({
-    queryKey: [...wishlistQueryKeys.list, isLoggedIn],
+    queryKey: wishlistQueryKeys.list(isLoggedIn),
     queryFn: wishlistApi.list,
   });
   const wishlistCities = useMemo(() => (wishlistResult?.cities ?? []).map(toCityInsightData), [wishlistResult]);
@@ -58,7 +58,7 @@ export default function RoadmapApp() {
   const addWishMutation = useMutation({
     mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
       wishlistApi.add(cityId, purposeId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.list }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.all }),
   });
 
   /** 제거는 실패할 일이 거의 없어 낙관적으로 먼저 반영하고, 실패하면 되돌림 */
@@ -66,9 +66,9 @@ export default function RoadmapApp() {
     mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
       wishlistApi.remove(cityId, purposeId),
     onMutate: async ({ cityId, purposeId }) => {
-      await queryClient.cancelQueries({ queryKey: wishlistQueryKeys.list });
-      const previous = queryClient.getQueryData<WishlistCityListResult>(wishlistQueryKeys.list);
-      queryClient.setQueryData<WishlistCityListResult>(wishlistQueryKeys.list, (old) =>
+      await queryClient.cancelQueries({ queryKey: wishlistQueryKeys.list(isLoggedIn) });
+      const previous = queryClient.getQueryData<WishlistCityListResult>(wishlistQueryKeys.list(isLoggedIn));
+      queryClient.setQueryData<WishlistCityListResult>(wishlistQueryKeys.list(isLoggedIn), (old) =>
         old
           ? {
               ...old,
@@ -82,9 +82,9 @@ export default function RoadmapApp() {
       return { previous };
     },
     onError: (_error, _variables, context) => {
-      if (context?.previous) queryClient.setQueryData(wishlistQueryKeys.list, context.previous);
+      if (context?.previous) queryClient.setQueryData(wishlistQueryKeys.list(isLoggedIn), context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.list }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.all }),
   });
 
   /** 하트 on = 위시리스트 등록, 하트 off = 제거 — 둘 다 도시+목적 조합으로 식별 */
@@ -108,7 +108,7 @@ export default function RoadmapApp() {
   /** 목적 선택 모달이 로딩/에러 상태를 직접 다룰 수 있도록 Promise를 그대로 반환 */
   const handleCreateRoadmap = async (cityId: number, purposeId: number): Promise<CreateRoadmapResult> => {
     const result = await roadmapsApi.create({ cityId, purposeId });
-    await queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.list });
+    await queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all });
     return result;
   };
 
@@ -141,7 +141,7 @@ export default function RoadmapApp() {
     lastRemovedRoadmapItem.current = null;
 
     removeRoadmapMutation.mutate(item.roadmapId, {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.list }),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all }),
       onError: (error) => {
         console.error('로드맵 삭제 실패', error);
         setPendingDeleteRoadmapIds((prev) => {
