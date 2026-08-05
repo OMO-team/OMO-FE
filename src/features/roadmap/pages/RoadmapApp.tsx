@@ -60,6 +60,14 @@ export default function RoadmapApp() {
     () => groupByCountry(visibleRoadmapItems, cityCatalogMap),
     [visibleRoadmapItems, cityCatalogMap],
   );
+  /**
+   * 이미 로드맵이 있는 도시+목적 조합 — 같은 조합을 또 담지 못하게 막는 데 쓴다.
+   * 현재 페이지의 그룹이 아니라 목록 전체로 만들어야 다른 페이지에 있는 로드맵도 걸린다.
+   */
+  const roadmapKeys = useMemo(
+    () => new Set(visibleRoadmapItems.map((item) => wishKey(item.cityId, item.purposeId))),
+    [visibleRoadmapItems],
+  );
   /** 같은 도시라도 목적이 다르면 별개 항목이라 조합을 키로 씀 */
   const wishedKeys = useMemo(
     () => new Set(wishlistCities.map((city) => wishKey(city.cityId, city.purposeId))),
@@ -176,6 +184,7 @@ export default function RoadmapApp() {
       countryGroups={pagedGroups}
       wishlistCities={wishlistCities}
       wishedKeys={wishedKeys}
+      roadmapKeys={roadmapKeys}
       currentPage={currentPage}
       totalPages={totalPages}
       onPageChange={setCurrentPage}

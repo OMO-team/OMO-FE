@@ -41,6 +41,8 @@ type CountryRoadmapListProps = {
   wishlistCities: CityInsightData[];
   /** 위시 여부는 도시가 아니라 도시+목적 조합으로 판단 — wishKey()로 만든 키 집합 */
   wishedKeys: Set<string>;
+  /** 이미 로드맵이 있는 도시+목적 조합 — 같은 조합이 두 번 생기지 않도록 추가 버튼을 잠그는 데 씀 */
+  roadmapKeys: Set<string>;
   currentPage: number;
   totalPages: number;
   onPageChange?: (page: number) => void;
@@ -65,6 +67,7 @@ export default function CountryRoadmapList({
   countryGroups,
   wishlistCities,
   wishedKeys,
+  roadmapKeys,
   currentPage,
   totalPages,
   onPageChange,
@@ -321,7 +324,11 @@ export default function CountryRoadmapList({
           data={buildCityReportData(reportCity)}
           onSearch={mockSearchResult}
           onAddToRoadmap={handleAddToRoadmap}
-          isAddDisabled={isCreatingRoadmap || addedKeys.has(wishKey(reportCity.cityId, reportCity.purposeId))}
+          isAddDisabled={
+            isCreatingRoadmap ||
+            addedKeys.has(wishKey(reportCity.cityId, reportCity.purposeId)) ||
+            roadmapKeys.has(wishKey(reportCity.cityId, reportCity.purposeId))
+          }
           addErrorMessage={addErrorMessage}
         />
       )}
