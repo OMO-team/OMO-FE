@@ -90,21 +90,27 @@ export default function DatePickerModal({
           </div>
           {getCalendarWeeks(year, month).map((week, i) => (
             <div key={i} className="flex w-full items-center">
-              {week.map((day, j) => (
-                <button
-                  key={j}
-                  type="button"
-                  disabled={day === null}
-                  onClick={() => day && onSelectDay?.(day)}
-                  className={`body-04 flex size-[30px] items-center justify-center rounded-full transition-colors ${
-                    day === selectedDay
-                      ? 'bg-primary-100 text-primary-600'
-                      : 'text-gray-700 not-disabled:hover:bg-gray-50'
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
+              {week.map((day, j) => {
+                // 선택한 날짜보다 이른 날은 고를 수 없음 (같은 달 안에서만 판단)
+                const isBeforeSelected = day !== null && selectedDay !== undefined && day < selectedDay;
+                return (
+                  <button
+                    key={j}
+                    type="button"
+                    disabled={day === null || isBeforeSelected}
+                    onClick={() => day && onSelectDay?.(day)}
+                    className={`body-04 flex size-[30px] items-center justify-center rounded-full transition-colors ${
+                      day === selectedDay
+                        ? 'bg-primary-100 text-primary-600'
+                        : isBeforeSelected
+                          ? 'cursor-not-allowed text-gray-300'
+                          : 'text-gray-700 not-disabled:hover:bg-gray-50'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
             </div>
           ))}
         </div>
