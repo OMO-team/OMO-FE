@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, type KeyboardEvent } from 'react';
+import axios from 'axios';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
 import mailIcon from '../../../assets/icons/icon-mail.svg';
 
@@ -134,11 +135,22 @@ export default function EmailVerificationPage({
     try {
       await onVerify?.(fullCode);
       setStep('success');
-    } catch {
-      const nextErrorCount = errorCount + 1;
-      setErrorCount(nextErrorCount);
-      if (nextErrorCount >= 5) {
-        setStep('failed');
+    } catch (error) {
+      if (axios.isAxiosError<{ code?: string }>(error)) {
+        const code = error.response?.data?.code;
+        if (error.response?.status === 429 || code === 'AUTH429_1') {
+          setStep('limitExceeded');
+        } else if (code === 'AUTH400_1') {
+          setStep('expired');
+        } else {
+          const nextErrorCount = errorCount + 1;
+          setErrorCount(nextErrorCount);
+          if (nextErrorCount >= 5) setStep('failed');
+        }
+      } else {
+        const nextErrorCount = errorCount + 1;
+        setErrorCount(nextErrorCount);
+        if (nextErrorCount >= 5) setStep('failed');
       }
     } finally {
       setIsVerifying(false);
