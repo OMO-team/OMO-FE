@@ -34,13 +34,12 @@ import type { CityQueryParams, DifficultyType, StayDurationType } from '../types
 import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
 import { useCompareStore } from '../../compare/store/useCompareStore';
 
-// types
-import type { CityReportData } from '../../../shared/types/cityReport';
+// utils
+import { buildCityReportData } from '../../roadmap/utils/buildCityReportData';
 
 // constants & mocks
 import { DETAIL_OPTIONS } from '../constants/filterOptions';
 import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
-import { berlinReportData } from '../../city-ai-report/mocks/mockData';
 
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
@@ -59,10 +58,6 @@ const DIFFICULTY_MAP: Record<string, DifficultyType> = {
 };
 const STAY_DURATION_MAP: Record<string, StayDurationType> = {
   '3개월 이하': 'SHORT', '3 - 6개월': 'MEDIUM', '6개월 - 1년': 'LONG', '1년 이상': 'VERY_LONG',
-};
-
-const CITY_REPORT_DATA: Record<string, CityReportData> = {
-  베를린: berlinReportData,
 };
 
 export default function CityInsight() {
@@ -173,9 +168,15 @@ export default function CityInsight() {
     setResetKey(prev => prev + 1);
   };
 
-  const reportData = reportCityName ? CITY_REPORT_DATA[reportCityName] : null;
-  const reportCard = reportCityName
-    ? CITY_INSIGHT_CARDS.find(c => c.cityName === reportCityName)
+  const reportCity = reportCityName ? cities.find(c => c.name === reportCityName) : null;
+  const reportData = reportCity
+    ? buildCityReportData({
+        cityId: String(reportCity.cityId),
+        cityName: reportCity.name,
+        imageUrl: reportCity.imageUrl,
+        rating: reportCity.rating,
+        description: reportCity.description,
+      })
     : null;
 
   const handleAddToRoadmap = () => {
@@ -321,12 +322,12 @@ export default function CityInsight() {
           </div>
         )}
       </div>
-      {reportData && reportCard && (
+      {reportData && reportCity && (
         <CityReportModal
           isOpen
           onClose={() => setReportCityName(null)}
           data={reportData}
-          onSearch={question => cityAiReportApi.askQuestion(reportCard.cityId, { question })}
+          onSearch={question => cityAiReportApi.askQuestion(reportCity.cityId, { question })}
           onAddToRoadmap={handleAddToRoadmap}
         />
       )}
