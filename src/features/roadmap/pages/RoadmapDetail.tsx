@@ -11,7 +11,7 @@ import RoadmapDetailSkeleton from './RoadmapDetailSkeleton';
 import BagIcon from '../components/icons/BagIcon';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
-import { mockSearchResult } from '../../city-ai-report/mocks/mockData';
+import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../api/roadmapsApi';
 import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
@@ -304,7 +304,9 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           isOpen
           onClose={() => setIsReportOpen(false)}
           data={buildCityReportData(reportCityData)}
-          onSearch={mockSearchResult}
+          onSearch={question =>
+            cityAiReportApi.askQuestion(Number(reportCityData.cityId), { question })
+          }
         />
       )}
     </div>

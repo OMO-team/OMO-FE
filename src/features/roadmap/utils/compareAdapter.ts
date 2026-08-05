@@ -17,9 +17,27 @@ export function toCompareCity(city: CityInsightData): CompareCity {
     monthlyCost: city.monthlyCost,
     costPercent: city.costPercent,
     keyMetrics: [
-      { id: 'internet', label: '인터넷', percentage: toPercent(city.infrastructureScore), barColor: 'gradient' },
-      { id: 'safety', label: '치안', percentage: toPercent(city.securityScore), barColor: 'gray' },
-      { id: 'preference', label: '선호도', percentage: toPercent(city.rating), barColor: 'gradient' },
+      {
+        id: 'internet',
+        label: '인터넷',
+        percentage: toPercent(city.infrastructureScore),
+        barColor: 'gradient',
+        displayValue: `${toPercent(city.infrastructureScore)}%`,
+      },
+      {
+        id: 'safety',
+        label: '치안',
+        percentage: toPercent(city.securityScore),
+        barColor: 'gray',
+        displayValue: `${toPercent(city.securityScore)}%`,
+      },
+      {
+        id: 'preference',
+        label: '선호도',
+        percentage: toPercent(city.rating),
+        barColor: 'gradient',
+        displayValue: `${toPercent(city.rating)}%`,
+      },
     ],
   };
 }

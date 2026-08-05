@@ -46,7 +46,7 @@ export default function MainLayout() {
   const matches = useMatches();
   const headerVariant =
     matches.map((m) => (m.handle as RouteHandle | undefined)?.headerVariant).filter(Boolean).at(-1) ?? 'default';
-  const isOverlay = headerVariant === 'overlay';
+  const isOverlay = headerVariant === 'overlay' || headerVariant === 'overlay-light';
 
   const openChat = useCallback((initialMessage?: string) => {
     setChatInitialMessage(initialMessage);
