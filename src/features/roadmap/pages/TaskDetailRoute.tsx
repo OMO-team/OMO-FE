@@ -178,8 +178,6 @@ export default function TaskDetailRoute() {
           dDayLabel={formatDDay(taskDetail.scheduleDDay)}
           scheduledDate={formatDotDate(taskDetail.dueDate)}
           onDateClick={handleOpenDatePicker}
-          // 상단 날짜 버튼과 같은 달력을 연다 — 마감일이 없으면 추가, 있으면 변경
-          onAddSchedule={handleOpenDatePicker}
           onClose={closeTaskDetail}
           documents={documents}
           locked={taskDetail.status === 'LOCKED'}

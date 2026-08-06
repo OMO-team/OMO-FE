@@ -1,7 +1,6 @@
 import CalendarIcon from './icons/CalendarIcon';
 import EditIcon from './icons/EditIcon';
 import NoteInfoIcon from './icons/NoteInfoIcon';
-import PlusScheduleIcon from './icons/PlusScheduleIcon';
 import WarningIcon from './icons/WarningIcon';
 import RequiredDocumentCard, { type DocumentScheduleState } from './RequiredDocumentCard';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
@@ -24,8 +23,6 @@ type DocumentTaskDetailModalProps = {
    */
   editableTitle?: boolean;
   onTitleChange?: (title: string) => void;
-  /** 지정하면 하단 우측에 "+ 일정 추가하기" 버튼 표시 — 서류 유무와 상관없이 노출된다 */
-  onAddSchedule?: () => void;
   /** true면 선행 작업 미완료 상태 — 서류 목록 대신 안내 문구만 표시하고 체크 불가 */
   locked?: boolean;
   /** 서류 카드의 "파일 업로드" 버튼 클릭 시 호출 — Document Upload Modal을 여는 용도 */
@@ -56,7 +53,6 @@ export default function DocumentTaskDetailModal({
   onDateClick,
   editableTitle = false,
   onTitleChange,
-  onAddSchedule,
   locked = false,
   onOpenUpload,
   onCheck,
@@ -141,68 +137,55 @@ export default function DocumentTaskDetailModal({
           선행 작업을 먼저 완료해주세요
         </p>
       ) : (
-        <div className="flex w-full flex-col items-end gap-5">
-          <div className="flex w-full flex-col gap-6">
-            <div className="flex flex-col gap-4">
-              <div className="title-01 flex items-center justify-between">
-                <p className="heading-06 text-gray-900">할 일</p>
-                {hasDocuments ? (
-                  <span className="title-02 text-primary-500">
-                    {completedCount}/{totalCount} 완료
-                  </span>
-                ) : (
-                  // 서류가 하나도 없으면 진행률 대신 아직 할 일이 없다는 것을 같은 자리에 알려준다
-                  <span className="body-05 rounded-md bg-gray-100 px-3 py-1 text-gray-500">할 일 추가 필요</span>
-                )}
-              </div>
-              {/* 서류가 없으면 채울 진행률도 없으므로 빈 막대만 남긴다 */}
-              <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
-                {hasDocuments && (
-                  <div className="h-full rounded-full bg-primary-500" style={{ width: `${progressPercent}%` }} />
-                )}
-              </div>
+        <div className="flex w-full flex-col gap-6">
+          <div className="flex flex-col gap-4">
+            <div className="title-01 flex items-center justify-between">
+              <p className="heading-06 text-gray-900">할 일</p>
+              {hasDocuments ? (
+                <span className="title-02 text-primary-500">
+                  {completedCount}/{totalCount} 완료
+                </span>
+              ) : (
+                // 서류가 하나도 없으면 진행률 대신 아직 할 일이 없다는 것을 같은 자리에 알려준다
+                <span className="body-05 rounded-md bg-gray-100 px-3 py-1 text-gray-500">할 일 추가 필요</span>
+              )}
             </div>
-
-            {hasDocuments ? (
-              <div className="flex flex-col gap-3">
-                {documents.map((document) => (
-                  <RequiredDocumentCard
-                    key={document.taskDocumentId}
-                    document={document}
-                    scheduleState={scheduleState}
-                    onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
-                    onCheck={() => onCheck?.(document.taskDocumentId)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex w-full flex-col items-center gap-5 py-10">
-                <p className="body-02 text-gray-500">제출 서류 없는 단계</p>
-                {isCompleted ? (
-                  <span className="title-03 text-primary-500">완료된 작업이에요</span>
-                ) : (
-                  <div className="w-60">
-                    <LargeFillButton
-                      label="완료로 표시"
-                      onClick={onComplete}
-                      // 핸들러가 없으면 눌러도 아무 일이 없고, 요청 중이면 중복 호출되므로 둘 다 막는다
-                      disabled={!onComplete || isCompleting}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+            {/* 서류가 없으면 채울 진행률도 없으므로 빈 막대만 남긴다 */}
+            <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
+              {hasDocuments && (
+                <div className="h-full rounded-full bg-primary-500" style={{ width: `${progressPercent}%` }} />
+              )}
+            </div>
           </div>
 
-          {onAddSchedule && (
-            <button
-              type="button"
-              className="body-04 flex items-center gap-1 rounded-2 bg-gray-20 py-1.5 pl-4 pr-5 text-gray-500 transition-colors hover:bg-gray-50"
-              onClick={onAddSchedule}
-            >
-              <PlusScheduleIcon className="size-icon-md" />
-              일정 추가하기
-            </button>
+          {hasDocuments ? (
+            <div className="flex flex-col gap-3">
+              {documents.map((document) => (
+                <RequiredDocumentCard
+                  key={document.taskDocumentId}
+                  document={document}
+                  scheduleState={scheduleState}
+                  onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
+                  onCheck={() => onCheck?.(document.taskDocumentId)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex w-full flex-col items-center gap-5 py-10">
+              <p className="body-02 text-gray-500">제출 서류 없는 단계</p>
+              {isCompleted ? (
+                <span className="title-03 text-primary-500">완료된 작업이에요</span>
+              ) : (
+                <div className="w-60">
+                  <LargeFillButton
+                    label="완료로 표시"
+                    onClick={onComplete}
+                    // 핸들러가 없으면 눌러도 아무 일이 없고, 요청 중이면 중복 호출되므로 둘 다 막는다
+                    disabled={!onComplete || isCompleting}
+                  />
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
