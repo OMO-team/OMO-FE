@@ -27,8 +27,10 @@ type DocumentTaskDetailModalProps = {
   locked?: boolean;
   /** 서류 카드의 "파일 업로드" 버튼 클릭 시 호출 — Document Upload Modal을 여는 용도 */
   onOpenUpload?: (taskDocumentId: number) => void;
-  /** 촬영 자동 체크 성공 또는 수동 체크 시 호출 — PATCH /api/v1/task-documents/{taskDocumentId}/check */
+  /** 서류 카드의 원을 눌러 완료로 표시할 때 호출 — PATCH /api/v1/task-documents/{taskDocumentId}/check */
   onCheck?: (taskDocumentId: number) => void;
+  /** 서류에 붙은 파일 칩의 X를 눌렀을 때 호출 */
+  onRemoveFile?: (taskDocumentId: number, fileName: string) => void;
   /** true면 이미 완료된 행동형 태스크 — "완료로 표시" 버튼 대신 완료 상태를 보여줌 */
   isCompleted?: boolean;
   /**
@@ -56,6 +58,7 @@ export default function DocumentTaskDetailModal({
   locked = false,
   onOpenUpload,
   onCheck,
+  onRemoveFile,
   isCompleted = false,
   onComplete,
   isCompleting = false,
@@ -167,6 +170,9 @@ export default function DocumentTaskDetailModal({
                   scheduleState={scheduleState}
                   onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
                   onCheck={() => onCheck?.(document.taskDocumentId)}
+                  onRemoveFile={
+                    onRemoveFile ? (fileName) => onRemoveFile(document.taskDocumentId, fileName) : undefined
+                  }
                 />
               ))}
             </div>

@@ -18,6 +18,8 @@ type RequiredDocumentCardProps = {
   onOpenUpload?: () => void;
   /** 원을 눌러 서류를 완료로 표시할 때 호출 — PATCH /api/v1/task-documents/{id}/check */
   onCheck?: () => void;
+  /** 파일 칩의 X를 눌렀을 때 호출 */
+  onRemoveFile?: (fileName: string) => void;
   /** 속한 태스크의 일정 상태 — 지정하지 않으면 일정이 잡힌 것으로 본다 */
   scheduleState?: DocumentScheduleState;
 };
@@ -26,6 +28,7 @@ export default function RequiredDocumentCard({
   document,
   onOpenUpload,
   onCheck,
+  onRemoveFile,
   scheduleState = 'scheduled',
 }: RequiredDocumentCardProps) {
   const isDone = document.isChecked;
@@ -138,9 +141,17 @@ export default function RequiredDocumentCard({
                     <FileClipIcon className="size-icon-sm shrink-0" />
                     <span className="truncate">{fileName}</span>
                   </span>
-                  <RemoveIcon
-                    className={`size-icon-xs shrink-0 ${isOverdue ? 'text-gray-500' : 'text-primary-600'}`}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => onRemoveFile?.(fileName)}
+                    disabled={!onRemoveFile}
+                    aria-label={`${fileName} 삭제`}
+                    className={`shrink-0 rounded-full transition-opacity disabled:cursor-not-allowed not-disabled:hover:opacity-70 ${
+                      isOverdue ? 'text-gray-500' : 'text-primary-600'
+                    }`}
+                  >
+                    <RemoveIcon className="size-icon-xs" />
+                  </button>
                 </div>
               ))}
             </div>

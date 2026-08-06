@@ -186,6 +186,12 @@ export default function TaskDetailRoute() {
             setUploadTargetDocumentId(taskDocumentId);
           }}
           onCheck={(taskDocumentId) => checkDocumentMutation.mutate(taskDocumentId)}
+          onRemoveFile={(taskDocumentId, fileName) =>
+            setFilesByDocument((prev) => ({
+              ...prev,
+              [taskDocumentId]: (prev[taskDocumentId] ?? []).filter((name) => name !== fileName),
+            }))
+          }
           isCompleted={taskDetail.isCompleted}
           onComplete={() => completeTaskMutation.mutate()}
           isCompleting={completeTaskMutation.isPending}
