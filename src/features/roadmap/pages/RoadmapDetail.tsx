@@ -26,6 +26,10 @@ import type { CityInsightData } from '../types/cityInsight';
 /** 도시 정보는 거의 바뀌지 않아서 한 번 받아두고 화면 간에 재사용 */
 const CITY_CATALOG_STALE_TIME = 1000 * 60 * 60;
 
+/** 출국일 달력에서 "오늘 이전"을 막는 기준 — 모듈 로드 시점의 날짜를 쓴다 */
+const now = new Date();
+const TODAY = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+
 function parseDotDate(value?: string) {
   if (!value) return null;
   const [year, month, day] = value.split('.').map(Number);
@@ -286,6 +290,8 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
                   onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
                   onYearNext={() => setDatePickerViewYear((y) => y + 1)}
                   onSelectDay={handleSelectDeparture}
+                  // 출국일은 지난 날짜로 잡을 수 없어서 오늘 이전은 아예 못 고르게 막는다
+                  minDate={TODAY}
                 />
               </div>
             </>
