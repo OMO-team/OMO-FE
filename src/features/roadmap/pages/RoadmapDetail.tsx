@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
 import RoadmapTimeline from '../components/RoadmapTimeline';
@@ -14,7 +14,8 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../api/roadmapsApi';
 import { citiesApi } from '../api/citiesApi';
-import { cityQueryKeys, roadmapQueryKeys } from '../api/queryKeys';
+import { tasksApi } from '../api/tasksApi';
+import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys';
 import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
@@ -72,6 +73,24 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
     queryFn: citiesApi.list,
     staleTime: CITY_CATALOG_STALE_TIME,
   });
+
+  /**
+   * 타임라인 카드의 "3/4 완료"에 쓸 서류 완료 개수.
+   * 로드맵 상세 응답에는 totalDocumentCount만 있어서, 서류가 있는 태스크만 상세를 따로 받아 채운다.
+   * 태스크 상세는 모달에서도 같은 키로 쓰기 때문에 캐시가 공유된다.
+   */
+  const documentTaskIds = (detail?.tasks ?? []).filter((task) => task.totalDocumentCount > 0).map((task) => task.taskId);
+  const taskDetailResults = useQueries({
+    queries: documentTaskIds.map((taskId) => ({
+      queryKey: taskQueryKeys.detail(taskId),
+      queryFn: () => tasksApi.get(taskId),
+    })),
+  });
+  const completedCountByTask = new Map(
+    taskDetailResults.flatMap((result) =>
+      result.data ? [[result.data.taskId, result.data.completedDocumentCount] as const] : [],
+    ),
+  );
 
   /** 체류 기간 변경은 즉시 화면에 반영(낙관적 업데이트)하고, 실패하면 이전 값으로 되돌림 */
   const updateBudgetMutation = useMutation({
@@ -204,7 +223,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             }}
           />
           <RoadmapTimeline
-            tasks={detail.tasks.map(toRoadmapTaskData)}
+            tasks={detail.tasks.map((task) => toRoadmapTaskData(task, completedCountByTask.get(task.taskId)))}
             onTaskClick={(index) => {
               const taskId = detail.tasks[index]?.taskId;
               if (taskId != null) navigate(`task-detail/${taskId}`, { preventScrollReset: true });

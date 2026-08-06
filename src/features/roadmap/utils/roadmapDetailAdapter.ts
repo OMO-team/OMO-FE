@@ -39,8 +39,11 @@ export function formatDDay(scheduleDDay: number | null | undefined): string | un
   return scheduleDDay < 0 ? `D+${-scheduleDDay}` : `D-${scheduleDDay}`;
 }
 
-/** 로드맵 상세 API의 태스크 목록(RoadmapTaskItem)을 타임라인 카드가 쓰는 형태로 변환 */
-export function toRoadmapTaskData(task: RoadmapTaskItem): RoadmapTaskData {
+/**
+ * 로드맵 상세 API의 태스크 목록(RoadmapTaskItem)을 타임라인 카드가 쓰는 형태로 변환.
+ * completedDocumentCount는 목록 응답에 없어서 태스크 상세에서 따로 받아 넘겨준다.
+ */
+export function toRoadmapTaskData(task: RoadmapTaskItem, completedDocumentCount?: number): RoadmapTaskData {
   return {
     status: toTimelineStatus(task),
     dDay: formatDDay(task.scheduleDDay),
@@ -48,7 +51,7 @@ export function toRoadmapTaskData(task: RoadmapTaskItem): RoadmapTaskData {
     category: TASK_CATEGORY_LABEL[task.category],
     title: task.name,
     hasDocuments: task.totalDocumentCount > 0,
-    stepsCompleted: task.completedDocumentCount,
+    stepsCompleted: completedDocumentCount ?? task.completedDocumentCount,
     stepsTotal: task.totalDocumentCount,
   };
 }
