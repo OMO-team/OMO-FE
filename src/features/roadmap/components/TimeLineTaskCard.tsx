@@ -17,7 +17,7 @@ const STATUS_ICON: Record<TimeLineTaskCardStatus, typeof TimelineSuccessIcon> = 
 
 type TimeLineTaskCardProps = {
   status: TimeLineTaskCardStatus;
-  /** 있으면 D-day 태그 표시 (예: "000"), 없으면 태그 자체를 숨김 */
+  /** 있으면 D-day 태그 표시 (예: "D-15", 마감이 지났으면 "D+5"), 없으면 태그 자체를 숨김 */
   dDay?: string;
   date: string;
   category: string;
@@ -69,7 +69,7 @@ export default function TimeLineTaskCard({
                 isMuted ? 'bg-gray-100 text-gray-300' : 'bg-primary-100 text-primary-600'
               }`}
             >
-              D-{dDay}
+              {dDay}
             </span>
           )}
           <span className={`body-03 flex-1 ${isMuted ? 'text-gray-400' : 'text-primary-900'}`}>{date}</span>

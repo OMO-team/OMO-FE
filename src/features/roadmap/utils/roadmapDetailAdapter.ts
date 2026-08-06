@@ -30,11 +30,20 @@ function toTimelineStatus(task: RoadmapTaskItem): TimeLineTaskCardStatus {
   return 'upcoming';
 }
 
+/**
+ * D-day 표기. 마감이 지나면 scheduleDDay가 음수로 내려와서
+ * 그대로 "D-" 뒤에 붙이면 "D--5"처럼 대시가 두 번 찍히므로, 지난 일정은 D+N으로 쓴다.
+ */
+export function formatDDay(scheduleDDay: number | null | undefined): string | undefined {
+  if (scheduleDDay == null) return undefined;
+  return scheduleDDay < 0 ? `D+${-scheduleDDay}` : `D-${scheduleDDay}`;
+}
+
 /** 로드맵 상세 API의 태스크 목록(RoadmapTaskItem)을 타임라인 카드가 쓰는 형태로 변환 */
 export function toRoadmapTaskData(task: RoadmapTaskItem): RoadmapTaskData {
   return {
     status: toTimelineStatus(task),
-    dDay: task.scheduleDDay != null ? String(task.scheduleDDay) : undefined,
+    dDay: formatDDay(task.scheduleDDay),
     date: formatDotDate(task.dueDate) ?? '일정 미정',
     category: TASK_CATEGORY_LABEL[task.category],
     title: task.name,

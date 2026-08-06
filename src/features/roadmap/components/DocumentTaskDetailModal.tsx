@@ -2,7 +2,7 @@ import CalendarIcon from './icons/CalendarIcon';
 import EditIcon from './icons/EditIcon';
 import PlusScheduleIcon from './icons/PlusScheduleIcon';
 import WarningIcon from './icons/WarningIcon';
-import RequiredDocumentCard from './RequiredDocumentCard';
+import RequiredDocumentCard, { type DocumentScheduleState } from './RequiredDocumentCard';
 import LargeFillButton from '../../../shared/components/LargeFillButton';
 import type { RequiredDocumentData } from '../types/roadmap';
 
@@ -37,6 +37,8 @@ type DocumentTaskDetailModalProps = {
   onComplete?: () => void;
   /** 완료 요청 진행 중이면 버튼을 막아 중복 호출을 방지 */
   isCompleting?: boolean;
+  /** 서류 카드 색을 결정하는 태스크 일정 상태 (일정 추가 전/마감 전/오늘/기간 지남) */
+  scheduleState?: DocumentScheduleState;
 };
 
 export default function DocumentTaskDetailModal({
@@ -57,6 +59,7 @@ export default function DocumentTaskDetailModal({
   isCompleted = false,
   onComplete,
   isCompleting = false,
+  scheduleState = 'scheduled',
 }: DocumentTaskDetailModalProps) {
   const completedCount = documents.filter((d) => d.isChecked).length;
   const totalCount = documents.length;
@@ -142,7 +145,7 @@ export default function DocumentTaskDetailModal({
           <div className="flex w-full flex-col gap-6">
             <div className="flex flex-col gap-4">
               <div className="title-01 flex items-center justify-between">
-                <p className="heading-06 text-black">서류 목록</p>
+                <p className="heading-06 text-gray-900">할 일</p>
                 <span className="title-02 text-primary-500">
                   {completedCount}/{totalCount} 완료
                 </span>
@@ -157,6 +160,7 @@ export default function DocumentTaskDetailModal({
                 <RequiredDocumentCard
                   key={document.taskDocumentId}
                   document={document}
+                  scheduleState={scheduleState}
                   onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
                   onCheck={() => onCheck?.(document.taskDocumentId)}
                 />

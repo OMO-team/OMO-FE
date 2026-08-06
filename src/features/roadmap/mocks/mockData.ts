@@ -13,19 +13,19 @@ import countryCard3 from '../../../assets/images/country_card_3.png';
 
 /** 타임라인 순서(F-502 스펙): 여권 → 어학 → 숙소 → 재정 → 비자 → 항공권 */
 export const berlinRoadmapTasks: RoadmapTaskData[] = [
-  { status: 'success', dDay: '000', date: '2026.04.15', category: '여권', title: '여권 발급 신청' },
-  { status: 'success', dDay: '000', date: '2026.04.15', category: '어학', title: '어학 성적 제출' },
+  { status: 'success', dDay: 'D-000', date: '2026.04.15', category: '여권', title: '여권 발급 신청' },
+  { status: 'success', dDay: 'D-000', date: '2026.04.15', category: '어학', title: '어학 성적 제출' },
   {
     status: 'ongoing',
-    dDay: '15',
+    dDay: 'D-15',
     date: '2026.08.05',
     category: '숙소',
     title: '임시숙소 예약',
     stepsCompleted: 3,
     stepsTotal: 4,
   },
-  { status: 'upcoming', dDay: '30', date: '2026.04.15', category: '재정', title: '재정증명서 준비' },
-  { status: 'upcoming', dDay: '45', date: '2026.08.21', category: '비자', title: '비자 신청 서류 준비' },
+  { status: 'upcoming', dDay: 'D-30', date: '2026.04.15', category: '재정', title: '재정증명서 준비' },
+  { status: 'upcoming', dDay: 'D-45', date: '2026.08.21', category: '비자', title: '비자 신청 서류 준비' },
   {
     status: 'lock',
     date: '2026.09.01',
