@@ -96,6 +96,13 @@ export interface RoadmapTaskItem {
   isOverdue: boolean;
   status: TaskStatus;
   isCompleted: boolean;
+  /** 이 태스크에 딸린 서류 수 — 0이면 서류 없이 완료하는 행동형 태스크 */
+  totalDocumentCount: number;
+  /**
+   * 체크가 끝난 서류 수. 목록 응답에는 아직 없어서 optional —
+   * 백엔드에 추가되면 타임라인 카드의 "3/4 완료" 표기가 자동으로 켜진다.
+   */
+  completedDocumentCount?: number;
 }
 
 export interface DocumentItem {

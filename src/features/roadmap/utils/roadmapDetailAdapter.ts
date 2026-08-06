@@ -47,6 +47,9 @@ export function toRoadmapTaskData(task: RoadmapTaskItem): RoadmapTaskData {
     date: formatDotDate(task.dueDate) ?? '일정 미정',
     category: TASK_CATEGORY_LABEL[task.category],
     title: task.name,
+    hasDocuments: task.totalDocumentCount > 0,
+    stepsCompleted: task.completedDocumentCount,
+    stepsTotal: task.totalDocumentCount,
   };
 }
 
