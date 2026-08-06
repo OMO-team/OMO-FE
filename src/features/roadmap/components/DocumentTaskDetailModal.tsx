@@ -18,7 +18,10 @@ type DocumentTaskDetailModalProps = {
   /** 일정 날짜가 있을 때 날짜 선택 버튼으로 표시 (예: "2026.04.15") */
   scheduledDate?: string;
   onDateClick?: () => void;
-  /** true면 제목을 입력 가능한 필드로 표시 (연필 아이콘 + 클릭해서 수정) */
+  /**
+   * true면 제목을 입력 가능한 필드로 표시 (연필 아이콘 + 클릭해서 수정).
+   * 이름 변경 API가 아직 없어 현재는 켜지 않는다 — 엔드포인트가 생기면 켜면 된다.
+   */
   editableTitle?: boolean;
   onTitleChange?: (title: string) => void;
   /** 지정하면 하단 우측에 "+ 일정 추가하기" 버튼 표시 — 서류 유무와 상관없이 노출된다 */
