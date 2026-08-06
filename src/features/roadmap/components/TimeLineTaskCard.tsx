@@ -80,9 +80,11 @@ export default function TimeLineTaskCard({
           {/* 서류가 딸린 태스크임을 알려주는 유형 라벨 (배경 없는 글자) */}
           {hasDocuments && <span className="body-05 text-gray-500">서류</span>}
           <span className={`body-03 flex-1 ${isMuted ? 'text-gray-500' : 'text-primary-900'}`}>{date}</span>
+          {/* 우측은 완료면 배지, 진행 중이면 서류 진행률 — 예정·잠금 상태에는 아무것도 두지 않는다 */}
           {isSuccess ? (
             <span className="body-05 rounded-md bg-gray-100 px-3 py-0.5 text-gray-500">완료</span>
           ) : (
+            isOngoing &&
             hasProgress && (
               <span className="body-02 text-primary-500">
                 {stepsCompleted}/{stepsTotal} 완료
