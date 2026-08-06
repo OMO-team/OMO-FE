@@ -90,20 +90,26 @@ export default function RequiredDocumentCard({
     >
       <div className="flex items-start gap-2">
         {isDone ? (
+          // 완료는 되돌릴 수 없어서 체크된 뒤에는 누를 수 없는 아이콘으로 둔다
           <DocumentDoneIcon
             className={`size-icon-lg shrink-0 ${isOverdue ? 'text-gray-300' : 'text-primary-500'}`}
           />
         ) : (
-          <span
-            className={`size-icon-lg shrink-0 rounded-full ${
+          // 원을 누르면 서류가 완료로 바뀐다. 기간이 지났어도 체크할 수 있다.
+          <button
+            type="button"
+            onClick={onCheck}
+            // 핸들러가 없거나 서버가 문서를 읽는 중이면 누를 수 없다
+            disabled={!onCheck || isProcessing}
+            aria-label={`${document.name} 완료로 표시`}
+            className={`size-icon-lg shrink-0 rounded-full transition-colors disabled:cursor-not-allowed ${
               isProcessing
                 ? 'border-2 border-primary-500'
                 : // 일정이 잡혔지만 아직 안 한 서류는 테두리 대신 옅은 파란 원으로 표시
                   scheduleState === 'scheduled'
-                  ? 'bg-primary-200'
-                  : 'border-2 border-gray-300'
+                  ? 'bg-primary-200 not-disabled:hover:bg-primary-300'
+                  : 'border-2 border-gray-300 not-disabled:hover:border-primary-500'
             }`}
-            aria-hidden
           />
         )}
         <div className="flex flex-1 flex-col gap-2">
