@@ -10,7 +10,13 @@ import ModalOverlay from '../../../shared/components/ModalOverlay';
 import { tasksApi } from '../api/tasksApi';
 import { taskDocumentsApi } from '../api/taskDocumentsApi';
 import { roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys';
-import { formatDDay, formatDotDate, TASK_CATEGORY_LABEL, toRequiredDocumentData } from '../utils/roadmapDetailAdapter';
+import {
+  formatDDay,
+  formatDotDate,
+  getToday,
+  TASK_CATEGORY_LABEL,
+  toRequiredDocumentData,
+} from '../utils/roadmapDetailAdapter';
 import type { UploadedFileItem } from '../types/roadmap';
 import type { TaskDetailResult } from '../types/api';
 
@@ -258,6 +264,8 @@ export default function TaskDetailRoute() {
             onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
             onYearNext={() => setDatePickerViewYear((y) => y + 1)}
             onSelectDay={handleSelectDay}
+            // 태스크 일정도 출국 예정일과 같게 지난 날짜로는 잡을 수 없다
+            minDate={getToday()}
           />
         </ModalOverlay>
       )}

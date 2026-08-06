@@ -2,6 +2,15 @@ import type { DocumentItem, RoadmapTaskItem, TaskCategory } from '../types/api';
 import type { RequiredDocumentData, RoadmapTaskData } from '../types/roadmap';
 import type { TimeLineTaskCardStatus } from '../components/TimeLineTaskCard';
 
+/**
+ * 달력에서 "오늘 이전"을 막는 기준. 출국 예정일·태스크 일정 모두 지난 날짜로는 잡을 수 없다.
+ * 자정을 넘겨도 최신 날짜가 나오도록 호출 시점에 계산한다.
+ */
+export function getToday() {
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+}
+
 export const TASK_CATEGORY_LABEL: Record<TaskCategory, string> = {
   VISA: '비자',
   INSURANCE: '보험',

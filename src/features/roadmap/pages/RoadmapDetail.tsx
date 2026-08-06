@@ -16,7 +16,7 @@ import { roadmapsApi } from '../api/roadmapsApi';
 import { citiesApi } from '../api/citiesApi';
 import { tasksApi } from '../api/tasksApi';
 import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys';
-import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
+import { toRoadmapTaskData, formatDotDate, getToday } from '../utils/roadmapDetailAdapter';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import { CITY_INFO_KO } from '../mocks/cityCountryMap';
@@ -25,10 +25,6 @@ import type { CityInsightData } from '../types/cityInsight';
 
 /** 도시 정보는 거의 바뀌지 않아서 한 번 받아두고 화면 간에 재사용 */
 const CITY_CATALOG_STALE_TIME = 1000 * 60 * 60;
-
-/** 출국일 달력에서 "오늘 이전"을 막는 기준 — 모듈 로드 시점의 날짜를 쓴다 */
-const now = new Date();
-const TODAY = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
 
 function parseDotDate(value?: string) {
   if (!value) return null;
@@ -213,9 +209,9 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             }}
             // 지난 달로 가면 달력을 열어도 고를 수 있는 날짜가 없어서 아예 못 넘어가게 막는다
             isPrevMonthDisabled={
-              datePickerViewYear === TODAY.year
-                ? datePickerViewMonth <= TODAY.month
-                : datePickerViewYear < TODAY.year
+              datePickerViewYear === getToday().year
+                ? datePickerViewMonth <= getToday().month
+                : datePickerViewYear < getToday().year
             }
             startDate={startDate}
             /*
@@ -298,7 +294,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
                   onYearNext={() => setDatePickerViewYear((y) => y + 1)}
                   onSelectDay={handleSelectDeparture}
                   // 출국일은 지난 날짜로 잡을 수 없어서 오늘 이전은 아예 못 고르게 막는다
-                  minDate={TODAY}
+                  minDate={getToday()}
                 />
               </div>
             </>
