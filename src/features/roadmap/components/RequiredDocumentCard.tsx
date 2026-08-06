@@ -1,29 +1,8 @@
-import { useState } from 'react';
-import UploadIcon from './icons/UploadIcon';
 import CloudUploadIcon from './icons/CloudUploadIcon';
-import CameraIcon from './icons/CameraIcon';
-import UploadSpinnerIcon from './icons/UploadSpinnerIcon';
 import DocumentDoneIcon from './icons/DocumentDoneIcon';
 import FileClipIcon from './icons/FileClipIcon';
 import RemoveIcon from './icons/RemoveIcon';
-import ScanFailIcon from './icons/ScanFailIcon';
 import type { RequiredDocumentData } from '../types/roadmap';
-
-type ScanFailure = 'blurry' | 'wrong-document';
-type ScanState = 'idle' | 'scanning' | ScanFailure;
-
-/** 실제 카메라/OCR 없이 촬영-인식을 흉내내는 클라이언트 시뮬레이션 (F-603) */
-function simulateScanOutcome(): 'success' | ScanFailure {
-  const roll = Math.random();
-  if (roll < 0.7) return 'success';
-  if (roll < 0.85) return 'blurry';
-  return 'wrong-document';
-}
-
-const SCAN_FAILURE_MESSAGE: Record<ScanFailure, string> = {
-  blurry: '이미지가 흐려서 인식하지 못했어요. 다시 촬영해 주세요.',
-  'wrong-document': '다른 서류로 인식됐어요. 서류를 다시 확인해 주세요.',
-};
 
 /**
  * 카드 색과 아이콘은 서류 체크 여부만이 아니라 태스크의 일정 상태에 따라서도 달라진다.
@@ -37,10 +16,8 @@ export type DocumentScheduleState = 'unscheduled' | 'scheduled' | 'today' | 'ove
 type RequiredDocumentCardProps = {
   document: RequiredDocumentData;
   onOpenUpload?: () => void;
-  /** 촬영 시뮬레이션 성공 또는 실패 후 수동 체크 선택 시 호출 — 서류 완료 체크 API 재사용 */
+  /** 원을 눌러 서류를 완료로 표시할 때 호출 — PATCH /api/v1/task-documents/{id}/check */
   onCheck?: () => void;
-  /** 스캔 결과 판정 함수 — 기본값은 클라이언트 시뮬레이션, 실제 OCR 연동 시 이 prop만 교체하면 됨 */
-  scanFn?: () => 'success' | ScanFailure;
   /** 속한 태스크의 일정 상태 — 지정하지 않으면 일정이 잡힌 것으로 본다 */
   scheduleState?: DocumentScheduleState;
 };
@@ -49,11 +26,8 @@ export default function RequiredDocumentCard({
   document,
   onOpenUpload,
   onCheck,
-  scanFn = simulateScanOutcome,
   scheduleState = 'scheduled',
 }: RequiredDocumentCardProps) {
-  const [scanState, setScanState] = useState<ScanState>('idle');
-
   const isDone = document.isChecked;
   const isProcessing = !isDone && document.isProcessing;
   const isPending = !isDone && !isProcessing;
@@ -62,20 +36,6 @@ export default function RequiredDocumentCard({
   const isUnscheduled = scheduleState === 'unscheduled';
   /** 기간이 지나지 않은 상태에서 체크됐거나 처리 중이면 파란 카드로 강조 */
   const isHighlighted = !isOverdue && !isUnscheduled && (isDone || isProcessing);
-
-  const handleScan = () => {
-    if (scanState === 'scanning') return; // 중복 스캔 방지
-    setScanState('scanning');
-    setTimeout(() => {
-      const outcome = scanFn();
-      if (outcome === 'success') {
-        setScanState('idle');
-        onCheck?.();
-      } else {
-        setScanState(outcome);
-      }
-    }, 1500);
-  };
 
   return (
     <div
@@ -186,63 +146,6 @@ export default function RequiredDocumentCard({
             </div>
           )}
 
-          {isPending && scanState === 'idle' && (
-            <div className="flex items-center gap-2">
-              {document.ocrSupport && (
-                <button
-                  type="button"
-                  onClick={handleScan}
-                  className="body-05 flex w-fit items-center gap-1 rounded-2 bg-primary-100 px-3 py-1.5 text-primary-600"
-                >
-                  <CameraIcon className="size-icon-xs" />
-                  촬영하여 자동 체크
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={onOpenUpload}
-                className="body-05 flex w-fit items-center gap-1 rounded-2 bg-gray-100 px-3 py-1.5 text-gray-600"
-              >
-                <UploadIcon className="size-icon-xs" />
-                파일 업로드
-              </button>
-            </div>
-          )}
-
-          {scanState === 'scanning' && (
-            <p className="body-05 flex items-center gap-1 text-primary-600">
-              <UploadSpinnerIcon className="size-icon-xs" />
-              스캔 중이에요...
-            </p>
-          )}
-
-          {(scanState === 'blurry' || scanState === 'wrong-document') && (
-            <div className="flex flex-col gap-2 rounded-2 bg-white p-3">
-              <p className="body-05 flex items-center gap-1 text-red-500">
-                <ScanFailIcon className="size-icon-xs" />
-                {SCAN_FAILURE_MESSAGE[scanState]}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleScan}
-                  className="body-05 rounded-2 bg-primary-100 px-3 py-1.5 text-primary-600"
-                >
-                  다시 촬영
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setScanState('idle');
-                    onCheck?.();
-                  }}
-                  className="body-05 rounded-2 bg-gray-100 px-3 py-1.5 text-gray-600"
-                >
-                  직접 체크
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
