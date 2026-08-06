@@ -3,7 +3,6 @@ import EditIcon from './icons/EditIcon';
 import NoteInfoIcon from './icons/NoteInfoIcon';
 import WarningIcon from './icons/WarningIcon';
 import RequiredDocumentCard, { type DocumentScheduleState } from './RequiredDocumentCard';
-import LargeFillButton from '../../../shared/components/LargeFillButton';
 import type { RequiredDocumentData } from '../types/roadmap';
 
 type DocumentTaskDetailModalProps = {
@@ -139,60 +138,53 @@ export default function DocumentTaskDetailModal({
           <WarningIcon className="size-icon-sm" />
           선행 작업을 먼저 완료해주세요
         </p>
-      ) : (
+      ) : hasDocuments ? (
         <div className="flex w-full flex-col gap-6">
           <div className="flex flex-col gap-4">
             <div className="title-01 flex items-center justify-between">
               <p className="heading-06 text-gray-900">할 일</p>
-              {hasDocuments ? (
-                <span className="title-02 text-primary-500">
-                  {completedCount}/{totalCount} 완료
-                </span>
-              ) : (
-                // 서류가 하나도 없으면 진행률 대신 아직 할 일이 없다는 것을 같은 자리에 알려준다
-                <span className="body-05 rounded-md bg-gray-100 px-3 py-1 text-gray-500">할 일 추가 필요</span>
-              )}
+              <span className="title-02 text-primary-500">
+                {completedCount}/{totalCount} 완료
+              </span>
             </div>
-            {/* 서류가 없으면 채울 진행률도 없으므로 빈 막대만 남긴다 */}
             <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
-              {hasDocuments && (
-                <div className="h-full rounded-full bg-primary-500" style={{ width: `${progressPercent}%` }} />
-              )}
+              <div className="h-full rounded-full bg-primary-500" style={{ width: `${progressPercent}%` }} />
             </div>
           </div>
 
-          {hasDocuments ? (
-            <div className="flex flex-col gap-3">
-              {documents.map((document) => (
-                <RequiredDocumentCard
-                  key={document.taskDocumentId}
-                  document={document}
-                  scheduleState={scheduleState}
-                  onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
-                  onCheck={() => onCheck?.(document.taskDocumentId)}
-                  onRemoveFile={
-                    onRemoveFile ? (fileName) => onRemoveFile(document.taskDocumentId, fileName) : undefined
-                  }
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex w-full flex-col items-center gap-5 py-10">
-              <p className="body-02 text-gray-500">제출 서류 없는 단계</p>
-              {isCompleted ? (
-                <span className="title-03 text-primary-500">완료된 작업이에요</span>
-              ) : (
-                <div className="w-60">
-                  <LargeFillButton
-                    label="완료로 표시"
-                    onClick={onComplete}
-                    // 핸들러가 없으면 눌러도 아무 일이 없고, 요청 중이면 중복 호출되므로 둘 다 막는다
-                    disabled={!onComplete || isCompleting}
-                  />
-                </div>
-              )}
-            </div>
-          )}
+          <div className="flex flex-col gap-3">
+            {documents.map((document) => (
+              <RequiredDocumentCard
+                key={document.taskDocumentId}
+                document={document}
+                scheduleState={scheduleState}
+                onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
+                onCheck={() => onCheck?.(document.taskDocumentId)}
+                onRemoveFile={
+                  onRemoveFile ? (fileName) => onRemoveFile(document.taskDocumentId, fileName) : undefined
+                }
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* 서류가 없는 태스크는 할 일 목록 대신 완료 버튼만 가운데에 둔다 */
+        <div className="flex w-full max-w-[562px] flex-col items-center gap-13.5 self-center py-10">
+          <div className="body-01 flex flex-col items-center gap-1 text-center text-gray-800">
+            <p>별도의 서류 등록 없이 완료 처리를 할 수 있어요.</p>
+            <p>
+              <span className="title-05 text-primary-500">{title}</span>을 완료했다면 아래 버튼을 눌러 주세요.
+            </p>
+          </div>
+          {/* 이미 완료했거나 요청 중이면 눌리지 않는 회색 버튼으로 둔다 (완료는 되돌릴 수 없음) */}
+          <button
+            type="button"
+            onClick={onComplete}
+            disabled={isCompleted || !onComplete || isCompleting}
+            className="title-02 h-12 w-[282px] rounded-2 bg-primary-500 text-white transition-colors disabled:cursor-not-allowed disabled:bg-gray-300"
+          >
+            {isCompleted ? '완료됨' : '완료'}
+          </button>
         </div>
       )}
     </div>

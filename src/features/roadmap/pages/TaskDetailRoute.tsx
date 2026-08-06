@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import DocumentTaskDetailModal from '../components/DocumentTaskDetailModal';
 import type { DocumentScheduleState } from '../components/RequiredDocumentCard';
 import DocumentUploadModal from '../components/DocumentUploadModal';
+import CompleteTaskModal from '../components/CompleteTaskModal';
 import DatePickerModal from '../components/DatePickerModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import { tasksApi } from '../api/tasksApi';
@@ -49,6 +50,8 @@ export default function TaskDetailRoute() {
    * 백엔드에 파일 목록이 추가되면 이 상태 대신 응답값을 쓰면 된다.
    */
   const [filesByDocument, setFilesByDocument] = useState<Record<number, string[]>>({});
+  /** 서류 없는 태스크의 "완료" 버튼을 누르면 뜨는 확인 모달 */
+  const [isCompleteConfirmOpen, setIsCompleteConfirmOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
   const [datePickerViewYear, setDatePickerViewYear] = useState(new Date().getFullYear());
@@ -126,7 +129,10 @@ export default function TaskDetailRoute() {
 
   const completeTaskMutation = useMutation({
     mutationFn: () => tasksApi.complete(numericTaskId),
-    onSuccess: invalidateTaskAndRoadmap,
+    onSuccess: () => {
+      setIsCompleteConfirmOpen(false);
+      invalidateTaskAndRoadmap();
+    },
     onError: (error) => console.error('태스크 완료 처리 실패', error),
   });
 
@@ -193,11 +199,22 @@ export default function TaskDetailRoute() {
             }))
           }
           isCompleted={taskDetail.isCompleted}
-          onComplete={() => completeTaskMutation.mutate()}
+          onComplete={() => setIsCompleteConfirmOpen(true)}
           isCompleting={completeTaskMutation.isPending}
           scheduleState={toScheduleState(taskDetail)}
         />
       </ModalOverlay>
+
+      {isCompleteConfirmOpen && (
+        <ModalOverlay zIndex={60} onClose={() => setIsCompleteConfirmOpen(false)}>
+          <CompleteTaskModal
+            taskName={taskDetail.name}
+            onCancel={() => setIsCompleteConfirmOpen(false)}
+            onConfirm={() => completeTaskMutation.mutate()}
+            isCompleting={completeTaskMutation.isPending}
+          />
+        </ModalOverlay>
+      )}
 
       {uploadTargetDocumentId !== null && (
         <ModalOverlay zIndex={60} onClose={() => setUploadTargetDocumentId(null)}>
