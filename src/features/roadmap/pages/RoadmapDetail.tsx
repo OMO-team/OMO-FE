@@ -212,16 +212,17 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
               if (datePickerViewMonth === 12) setDatePickerViewYear((y) => y + 1);
             }}
             startDate={startDate}
+            /*
+             * 달력은 헤더에 표시된 달에서 그대로 열린다.
+             * 이미 잡힌 날짜의 달로 옮겨버리면 화살표로 옮겨둔 달이 무시돼서,
+             * 헤더의 월 이동이 아무 의미가 없어진다.
+             */
             onStartDateClick={() => {
-              setDatePickerViewYear(parsedStart?.year ?? datePickerViewYear);
-              setDatePickerViewMonth(parsedStart?.month ?? datePickerViewMonth);
               setDatePickerMode('day');
               setDatePickerTarget('start');
             }}
             departureDate={departureDate}
             onDepartureDateClick={() => {
-              setDatePickerViewYear(parsedDeparture?.year ?? datePickerViewYear);
-              setDatePickerViewMonth(parsedDeparture?.month ?? datePickerViewMonth);
               setDatePickerMode('day');
               setDatePickerTarget('departure');
             }}
