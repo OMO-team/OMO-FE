@@ -1,5 +1,6 @@
 import CalendarIcon from './icons/CalendarIcon';
 import EditIcon from './icons/EditIcon';
+import NoteInfoIcon from './icons/NoteInfoIcon';
 import PlusScheduleIcon from './icons/PlusScheduleIcon';
 import WarningIcon from './icons/WarningIcon';
 import RequiredDocumentCard, { type DocumentScheduleState } from './RequiredDocumentCard';
@@ -69,53 +70,64 @@ export default function DocumentTaskDetailModal({
   return (
     <div className="flex max-h-[85vh] w-[800px] max-w-[90vw] flex-col gap-[46px] overflow-y-auto rounded-5 bg-white px-11 pb-[60px] pt-10">
       <div className="flex flex-col gap-4">
-        <div className="flex items-start justify-between">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-              {dDayLabel && (
-                <span className="body-05 rounded-md bg-primary-100 px-3 py-1 text-primary-600">{dDayLabel}</span>
-              )}
-              <span className="body-05 rounded-md bg-primary-50 px-3 py-1 text-primary-700">{category}</span>
-            </div>
+        <div className="flex flex-col gap-6">
+          <div className="flex items-start gap-0.5">
+            <div className="flex flex-1 flex-col gap-4">
+              <div className="flex items-center gap-2 pl-2">
+                {dDayLabel && (
+                  <span className="body-05 rounded-md bg-primary-100 px-3 py-1 text-primary-600">{dDayLabel}</span>
+                )}
+                <span className="body-05 rounded-md bg-primary-50 px-3 py-1 text-primary-700">{category}</span>
+              </div>
 
-            {scheduledDate && (
-              <button
-                type="button"
-                className="body-02 flex items-center gap-2 rounded-2 px-2 py-1 text-gray-700 transition-colors hover:bg-gray-50"
-                onClick={onDateClick}
-              >
-                <CalendarIcon className="size-icon-sm" />
-                {scheduledDate}
-              </button>
-            )}
+              {/* 날짜와 제목은 한 덩어리로 붙여 둔다 (시안 기준 4px) */}
+              <div className="flex flex-col items-start gap-1">
+                {scheduledDate && (
+                  <button
+                    type="button"
+                    className="body-03 flex items-center gap-2 rounded-2 py-1 pl-2 pr-2.5 text-gray-700 transition-colors hover:bg-gray-50"
+                    onClick={onDateClick}
+                  >
+                    <CalendarIcon className="size-icon-sm" />
+                    {scheduledDate}
+                  </button>
+                )}
 
-            <div className="flex items-center gap-2">
-              {editableTitle ? (
-                <input
-                  type="text"
-                  className="heading-04 w-[500px] text-gray-900 outline-none"
-                  value={title}
-                  onChange={(e) => onTitleChange?.(e.target.value)}
-                />
-              ) : (
-                <p className="heading-04 text-gray-900">{title}</p>
-              )}
-              {editableTitle && <EditIcon className="size-icon-md text-gray-600" />}
+                <div className="flex items-center gap-2.5 pl-2">
+                  {editableTitle ? (
+                    <input
+                      type="text"
+                      // 제목 옆에 연필 아이콘이 바로 붙어야 해서 입력폭을 내용에 맞춘다
+                      className="heading-04 min-w-40 field-sizing-content text-gray-900 outline-none"
+                      value={title}
+                      onChange={(e) => onTitleChange?.(e.target.value)}
+                      aria-label="태스크 이름"
+                    />
+                  ) : (
+                    <p className="heading-04 text-gray-900">{title}</p>
+                  )}
+                  {editableTitle && <EditIcon className="size-icon-md shrink-0 text-gray-600" />}
+                </div>
+              </div>
             </div>
+            <button
+              type="button"
+              className="flex size-9 shrink-0 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-50"
+              onClick={onClose}
+              aria-label="닫기"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="size-icon-md" aria-hidden>
+                <path d="M19 5L5 19M5 5L19 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
-          <button
-            type="button"
-            className="flex size-9 items-center justify-center rounded-full text-gray-700"
-            onClick={onClose}
-            aria-label="닫기"
-          >
-            <svg viewBox="0 0 24 24" fill="none" className="size-icon-md" aria-hidden>
-              <path d="M19 5L5 19M5 5L19 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          <hr className="border-gray-100" />
         </div>
-        <hr className="border-gray-100" />
-        <div className="body-03 rounded-3 border border-primary-100 bg-primary-50 px-10 py-5 text-primary-500">
+        <div className="body-03 flex items-center justify-center gap-1 rounded-3 border border-primary-100 bg-primary-50 p-5 text-primary-500">
+          {/* 시안 기준 24px 아이콘 박스 안에 19.5×21.5 글리프 */}
+          <span className="flex size-icon-md shrink-0 items-center justify-center">
+            <NoteInfoIcon className="h-[21.5px] w-[19.5px]" />
+          </span>
           {infoBanner}
         </div>
       </div>

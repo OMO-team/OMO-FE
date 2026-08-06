@@ -49,6 +49,11 @@ export default function TaskDetailRoute() {
    * 백엔드에 파일 목록이 추가되면 이 상태 대신 응답값을 쓰면 된다.
    */
   const [filesByDocument, setFilesByDocument] = useState<Record<number, string[]>>({});
+  /**
+   * 편집 중인 태스크 이름. 아직 이름 변경 API가 없어서(/api/v1/tasks/{taskId}는 GET만 있음)
+   * 화면에서만 바뀌고 서버에는 저장되지 않는다 — 엔드포인트가 생기면 여기서 호출하면 된다.
+   */
+  const [editedTitle, setEditedTitle] = useState<string | null>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
   const [datePickerViewYear, setDatePickerViewYear] = useState(new Date().getFullYear());
@@ -173,7 +178,9 @@ export default function TaskDetailRoute() {
       <ModalOverlay onClose={closeTaskDetail}>
         <DocumentTaskDetailModal
           category={TASK_CATEGORY_LABEL[taskDetail.category]}
-          title={taskDetail.name}
+          title={editedTitle ?? taskDetail.name}
+          editableTitle
+          onTitleChange={setEditedTitle}
           infoBanner={taskDetail.description}
           dDayLabel={formatDDay(taskDetail.scheduleDDay)}
           scheduledDate={formatDotDate(taskDetail.dueDate)}
