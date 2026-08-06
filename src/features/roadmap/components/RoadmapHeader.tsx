@@ -5,6 +5,8 @@ type RoadmapHeaderProps = {
   month: number;
   onPrevMonth?: () => void;
   onNextMonth?: () => void;
+  /** true면 이전 달로 못 넘어감 */
+  isPrevMonthDisabled?: boolean;
   startDate?: string;
   departureDate?: string;
   onStartDateClick?: () => void;
@@ -16,6 +18,7 @@ export default function RoadmapHeader({
   month,
   onPrevMonth,
   onNextMonth,
+  isPrevMonthDisabled = false,
   startDate = '0000년 00월 00일',
   departureDate = '0000년 00월 00일',
   onStartDateClick,
@@ -23,7 +26,13 @@ export default function RoadmapHeader({
 }: RoadmapHeaderProps) {
   return (
     <div className="flex w-153.5 flex-col gap-4 rounded-4 border border-gray-100 bg-white px-6 pb-4 pt-7.5">
-      <RoadmapMonthSelector year={year} month={month} onPrevMonth={onPrevMonth} onNextMonth={onNextMonth} />
+      <RoadmapMonthSelector
+        year={year}
+        month={month}
+        onPrevMonth={onPrevMonth}
+        onNextMonth={onNextMonth}
+        isPrevDisabled={isPrevMonthDisabled}
+      />
       <div className="flex items-center gap-2">
         <button
           type="button"

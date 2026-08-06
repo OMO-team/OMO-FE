@@ -211,6 +211,12 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
               setDatePickerViewMonth((m) => (m === 12 ? 1 : m + 1));
               if (datePickerViewMonth === 12) setDatePickerViewYear((y) => y + 1);
             }}
+            // 지난 달로 가면 달력을 열어도 고를 수 있는 날짜가 없어서 아예 못 넘어가게 막는다
+            isPrevMonthDisabled={
+              datePickerViewYear === TODAY.year
+                ? datePickerViewMonth <= TODAY.month
+                : datePickerViewYear < TODAY.year
+            }
             startDate={startDate}
             /*
              * 달력은 헤더에 표시된 달에서 그대로 열린다.
