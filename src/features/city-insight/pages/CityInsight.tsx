@@ -101,6 +101,7 @@ export default function CityInsight() {
   const [addedCityName, setAddedCityName] = useState<string | null>(null);
   const addCity = useRoadmapStore(s => s.addCity);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
+  const resetCompare = useCompareStore(s => s.resetCompare);
 
   const activePurpose = purposes[activeIndex];
 
@@ -140,6 +141,13 @@ export default function CityInsight() {
     const timer = setTimeout(() => setAddedCityName(null), 5000);
     return () => clearTimeout(timer);
   }, [addedCityName]);
+
+  // 이 화면을 벗어나면 비교 중이던 상태를 초기화 — 비교는 화면별로 독립적으로 유지됨
+  useEffect(() => {
+    return () => {
+      resetCompare();
+    };
+  }, [resetCompare]);
 
   const handleSelect = (codes: string[], names: string[]) => {
     setSelectedCountries(codes.map((code, i) => ({ code, name: names[i] })));
