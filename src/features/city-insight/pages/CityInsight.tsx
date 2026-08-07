@@ -126,14 +126,21 @@ export default function CityInsight() {
     setPage(1);
   }
 
-  const { data: cities = [] } = useCities(queryParams, {
+  const PAGE_SIZE = 6;
+  // 필터(queryParams)와 별개로 관리 — page가 바뀔 때마다 apiParams가 바뀌면
+  // 위 "필터 변경 시 1페이지로 리셋" 로직이 페이지 이동을 필터 변경으로 오인해서 무한 리셋됨
+  const apiParams = useMemo<CityQueryParams>(
+    () => ({ ...queryParams, page: page - 1, size: PAGE_SIZE }), // 백엔드 page는 0-indexed
+    [queryParams, page],
+  );
+
+  const { data: citiesResult } = useCities(apiParams, {
     enabled: isFromSearch || !!activePurpose,
   });
 
-  const PAGE_SIZE = 6;
-  const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
-  const effectivePage = Math.min(page, totalPages);
-  const pagedCities = cities.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
+  const cities = citiesResult?.data ?? [];
+  const totalElements = citiesResult?.totalElements ?? 0;
+  const totalPages = Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
     if (!addedCityName) return;
@@ -237,7 +244,7 @@ export default function CityInsight() {
             </>
           )}
            {isFromSearch && (
-              <p className="body-03 text-gray-500">총 {cities.length}개의 검색결과가 나왔어요</p>
+              <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
             )}
           <div className="flex justify-between">
             <div className="flex gap-2">
@@ -274,10 +281,10 @@ export default function CityInsight() {
             />
           ))}
         </div>
-        {cities.length !== 0 ? (
+        {totalElements !== 0 ? (
           <>
             <div className="mt-11 grid grid-cols-2 gap-5">
-              {pagedCities.map(city => (
+              {cities.map(city => (
                 <CityInsightCard
                   key={city.cityId}
                   imageUrl={city.imageUrl}
@@ -298,7 +305,7 @@ export default function CityInsight() {
             </div>
             <div className="mt-25 mb-[304px]">
               <PageNavigation
-                currentPage={effectivePage}
+                currentPage={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
               />
