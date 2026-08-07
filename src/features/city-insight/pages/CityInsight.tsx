@@ -48,16 +48,25 @@ import searchInputIcon from '../../../assets/icons/search-input-list.svg';
 
 // API 파라미터 값 변환
 const MONTHLY_COST_MAP: Record<string, number> = {
-  '150 만원': 150, '200 만원': 200, '300 만원': 300,
+  '150 만원': 150,
+  '200 만원': 200,
+  '300 만원': 300,
 };
 const SAFETY_SCORE_MAP: Record<string, number> = {
-  '5점': 5, '4점': 4, '3점': 3,
+  '5점': 5,
+  '4점': 4,
+  '3점': 3,
 };
 const DIFFICULTY_MAP: Record<string, DifficultyType> = {
-  '쉬움': 'EASY', '보통': 'NORMAL', '어려움': 'HARD',
+  쉬움: 'EASY',
+  보통: 'NORMAL',
+  어려움: 'HARD',
 };
 const STAY_DURATION_MAP: Record<string, StayDurationType> = {
-  '3개월 이하': 'SHORT', '3 - 6개월': 'MEDIUM', '6개월 - 1년': 'LONG', '1년 이상': 'VERY_LONG',
+  '3개월 이하': 'SHORT',
+  '3 - 6개월': 'MEDIUM',
+  '6개월 - 1년': 'LONG',
+  '1년 이상': 'VERY_LONG',
 };
 
 export default function CityInsight() {
@@ -74,7 +83,10 @@ export default function CityInsight() {
   const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
-  const activeIndex = Math.max(0, purposes.findIndex(p => p.purposeId === purposeIdParam));
+  const activeIndex = Math.max(
+    0,
+    purposes.findIndex(p => p.purposeId === purposeIdParam)
+  );
   const categoryNames = purposes.map(p => p.name);
 
   const handleCategoryChange = (index: number) => {
@@ -102,6 +114,7 @@ export default function CityInsight() {
   const addCity = useRoadmapStore(s => s.addCity);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
   const resetCompare = useCompareStore(s => s.resetCompare);
+  const closeCompareModal = useCompareStore(s => s.closeModal);
 
   const activePurpose = purposes[activeIndex];
 
@@ -127,14 +140,21 @@ export default function CityInsight() {
     setPage(1);
   }
 
-  const { data: cities = [] } = useCities(queryParams, {
+  const PAGE_SIZE = 6;
+  // 필터(queryParams)와 별개로 관리 — page가 바뀔 때마다 apiParams가 바뀌면
+  // 위 "필터 변경 시 1페이지로 리셋" 로직이 페이지 이동을 필터 변경으로 오인해서 무한 리셋됨
+  const apiParams = useMemo<CityQueryParams>(
+    () => ({ ...queryParams, page: page - 1, size: PAGE_SIZE }), // 백엔드 page는 0-indexed
+    [queryParams, page]
+  );
+
+  const { data: citiesResult } = useCities(apiParams, {
     enabled: isFromSearch || !!activePurpose,
   });
 
-  const PAGE_SIZE = 6;
-  const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
-  const effectivePage = Math.min(page, totalPages);
-  const pagedCities = cities.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
+  const cities = citiesResult?.data ?? [];
+  const totalElements = citiesResult?.totalElements ?? 0;
+  const totalPages = Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
     if (!addedCityName) return;
@@ -207,6 +227,13 @@ export default function CityInsight() {
     setAddedCityName(city.name);
   };
 
+  /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 */
+  const handleSelectCompareCity = (cityId: number) => {
+    closeCompareModal();
+    const matched = cities.find(c => c.cityId === cityId);
+    setReportCityName(matched ? matched.name : null);
+  };
+
   return (
     <div className="w-full flex flex-col items-center justify-center mt-[30px]">
       <div className="w-[1064px]">
@@ -244,9 +271,9 @@ export default function CityInsight() {
               />
             </>
           )}
-           {isFromSearch && (
-              <p className="body-03 text-gray-500">총 {cities.length}개의 검색결과가 나왔어요</p>
-            )}
+          {isFromSearch && (
+            <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
+          )}
           <div className="flex justify-between">
             <div className="flex gap-2">
               <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
@@ -282,10 +309,10 @@ export default function CityInsight() {
             />
           ))}
         </div>
-        {cities.length !== 0 ? (
+        {totalElements !== 0 ? (
           <>
             <div className="mt-11 grid grid-cols-2 gap-5">
-              {pagedCities.map(city => (
+              {cities.map(city => (
                 <CityInsightCard
                   key={city.cityId}
                   imageUrl={city.imageUrl}
@@ -305,11 +332,7 @@ export default function CityInsight() {
               ))}
             </div>
             <div className="mt-25 mb-[304px]">
-              <PageNavigation
-                currentPage={effectivePage}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
+              <PageNavigation currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           </>
         ) : (
@@ -343,7 +366,7 @@ export default function CityInsight() {
         <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
       )}
       <CompareSelectionBar cities={CITY_INSIGHT_CARDS} />
-      <CompareModal />
+      <CompareModal onSelectCity={handleSelectCompareCity} />
     </div>
   );
 }
