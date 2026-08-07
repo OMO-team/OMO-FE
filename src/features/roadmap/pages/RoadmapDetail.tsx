@@ -42,9 +42,7 @@ type RoadmapDetailProps = {
 export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  /** 준비 시작일은 아직 백엔드 스펙에 없는 필드라 화면에서만 임시로 관리 (서버 미반영) */
-  const [startDate, setStartDate] = useState<string | undefined>(undefined);
-  const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | null>(null);
+  const [datePickerTarget, setDatePickerTarget] = useState<'departure' | null>(null);
   const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
   const [datePickerViewYear, setDatePickerViewYear] = useState(new Date().getFullYear());
   const [datePickerViewMonth, setDatePickerViewMonth] = useState(new Date().getMonth() + 1);
@@ -143,7 +141,6 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   const departureDate = formatDotDate(detail.departureDate);
   const parsedDeparture = parseDotDate(departureDate);
-  const parsedStart = parseDotDate(startDate);
 
   const months = detail.stayMonths ?? 1;
   const budget = detail.budget;
@@ -213,17 +210,14 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
                 ? datePickerViewMonth <= getToday().month
                 : datePickerViewYear < getToday().year
             }
-            startDate={startDate}
+            // 준비 시작일은 로드맵 생성 시점으로 서버가 정하므로 표시만 하고 누를 수 없다
+            startDate={formatDotDate(detail.startDate)}
+            departureDate={departureDate}
             /*
              * 달력은 헤더에 표시된 달에서 그대로 열린다.
              * 이미 잡힌 날짜의 달로 옮겨버리면 화살표로 옮겨둔 달이 무시돼서,
              * 헤더의 월 이동이 아무 의미가 없어진다.
              */
-            onStartDateClick={() => {
-              setDatePickerMode('day');
-              setDatePickerTarget('start');
-            }}
-            departureDate={departureDate}
             onDepartureDateClick={() => {
               setDatePickerMode('day');
               setDatePickerTarget('departure');
@@ -236,39 +230,6 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
               if (taskId != null) navigate(`task-detail/${taskId}`, { preventScrollReset: true });
             }}
           />
-
-          {datePickerTarget === 'start' && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setDatePickerTarget(null)} />
-              <div className="absolute left-0 top-30 z-50">
-                <DatePickerModal
-                  mode={datePickerMode}
-                  year={datePickerViewYear}
-                  month={datePickerViewMonth}
-                  selectedDay={
-                    parsedStart?.year === datePickerViewYear && parsedStart?.month === datePickerViewMonth
-                      ? parsedStart.day
-                      : undefined
-                  }
-                  selectedMonth={datePickerViewMonth}
-                  onClose={() => setDatePickerTarget(null)}
-                  onModeToggle={() => setDatePickerMode((m) => (m === 'day' ? 'month' : 'day'))}
-                  onSelectMonth={(m) => {
-                    setDatePickerViewMonth(m);
-                    setDatePickerMode('day');
-                  }}
-                  onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
-                  onYearNext={() => setDatePickerViewYear((y) => y + 1)}
-                  onSelectDay={(day) => {
-                    setStartDate(
-                      `${datePickerViewYear}.${String(datePickerViewMonth).padStart(2, '0')}.${String(day).padStart(2, '0')}`,
-                    );
-                    setDatePickerTarget(null);
-                  }}
-                />
-              </div>
-            </>
-          )}
 
           {datePickerTarget === 'departure' && (
             <>

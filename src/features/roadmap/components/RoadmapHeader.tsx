@@ -9,7 +9,6 @@ type RoadmapHeaderProps = {
   isPrevMonthDisabled?: boolean;
   startDate?: string;
   departureDate?: string;
-  onStartDateClick?: () => void;
   onDepartureDateClick?: () => void;
 };
 
@@ -21,7 +20,6 @@ export default function RoadmapHeader({
   isPrevMonthDisabled = false,
   startDate = '0000년 00월 00일',
   departureDate = '0000년 00월 00일',
-  onStartDateClick,
   onDepartureDateClick,
 }: RoadmapHeaderProps) {
   return (
@@ -34,13 +32,8 @@ export default function RoadmapHeader({
         isPrevDisabled={isPrevMonthDisabled}
       />
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          className="title-03 flex items-center gap-2 rounded-2 px-2.5 py-1.5 text-gray-500 transition-colors hover:bg-gray-50"
-          onClick={onStartDateClick}
-        >
-          준비 시작일 {startDate}
-        </button>
+        {/* 준비 시작일은 로드맵 생성 시점으로 서버가 정하는 값이라 고를 수 없다 */}
+        <p className="title-03 flex items-center gap-2 px-2.5 py-1.5 text-gray-500">준비 시작일 {startDate}</p>
         <button
           type="button"
           className="title-03 flex items-center gap-2 rounded-2 px-2.5 py-1.5 text-primary-400 transition-colors hover:bg-gray-50"

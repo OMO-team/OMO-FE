@@ -73,6 +73,8 @@ export interface RoadmapListItem {
   country: CityCountryInfo;
   purposeId: number;
   purposeName: string;
+  /** 준비 시작일 — 로드맵을 만든 시점으로 서버가 정하며, 사용자가 고르지 않는다 */
+  startDate: string | null;
   departureDate: string | null;
   stayMonths: number | null;
   departureDDay: number | null;
