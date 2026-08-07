@@ -12,6 +12,7 @@ export default function CompareModal({ onSelectCity }: CompareModalProps) {
   const compareList = useCompareStore((s) => s.compareList);
   const isModalOpen = useCompareStore((s) => s.isModalOpen);
   const closeModal = useCompareStore((s) => s.closeModal);
+  const resetCompare = useCompareStore((s) => s.resetCompare);
   const { data, isLoading, isError } = useCompareCities(compareList);
 
   if (!isModalOpen) return null;
@@ -29,7 +30,7 @@ export default function CompareModal({ onSelectCity }: CompareModalProps) {
       >
         <div className="flex w-full items-center justify-between">
           <p className="heading-05 text-gray-800">도시 비교</p>
-          <CloseButton onClick={closeModal} hasBackground={false} />
+          <CloseButton onClick={resetCompare} hasBackground={false} />
         </div>
 
         {isLoading && <p className="body-02 text-gray-500">불러오는 중...</p>}
