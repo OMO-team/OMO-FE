@@ -54,9 +54,14 @@ export interface WishlistCityListResult {
   cities: WishlistCityInfo[];
 }
 
-export interface CityListResult {
-  totalCount: number;
-  cities: CityInfo[];
+/** 도시 목록은 페이지네이션 응답 — 한 번에 최대 100개까지만 내려온다 */
+export interface CityPageResult {
+  data: CityInfo[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
 }
 
 export interface RoadmapListItem {

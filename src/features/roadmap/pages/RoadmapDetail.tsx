@@ -158,7 +158,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
    * AI 탐색 리포트에 쓸 도시 정보는 로드맵 API에 없어서 도시 카탈로그에서 찾아 씀.
    * 아직 못 받았거나 카탈로그에 없는 도시면 로드맵이 아는 값만으로 최소한을 채운다.
    */
-  const catalogCity = cityCatalog?.cities.find((city) => city.cityId === detail.cityId);
+  const catalogCity = cityCatalog?.find((city) => city.cityId === detail.cityId);
   const reportCityData: CityInsightData = catalogCity
     ? { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl }
     : {
