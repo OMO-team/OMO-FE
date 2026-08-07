@@ -25,7 +25,9 @@ export default function CompareModal({ onSelectCity }: CompareModalProps) {
       onClick={closeModal}
     >
       <div
-        className="flex flex-col items-start gap-[60px] rounded-[20px] bg-white px-11 pt-[50px] pb-[60px]"
+        // 콘텐츠가 뷰포트보다 길어도 모달 자체는 뷰포트 안에 들어오게 하고, 넘치는 부분만 내부에서 스크롤
+        // (X 버튼이 항상 보이는 헤더 영역 밖으로 밀려나지 않게 하기 위함)
+        className="flex max-h-[90vh] flex-col items-start gap-[60px] rounded-[20px] bg-white px-11 pt-[50px] pb-[60px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex w-full items-center justify-between">
@@ -33,23 +35,25 @@ export default function CompareModal({ onSelectCity }: CompareModalProps) {
           <CloseButton onClick={resetCompare} hasBackground={false} />
         </div>
 
-        {isLoading && <p className="body-02 text-gray-500">불러오는 중...</p>}
-        {isError && <p className="body-02 text-red-500">비교 정보를 가져오지 못했어요.</p>}
+        <div className="w-full overflow-y-auto">
+          {isLoading && <p className="body-02 text-gray-500">불러오는 중...</p>}
+          {isError && <p className="body-02 text-red-500">비교 정보를 가져오지 못했어요.</p>}
 
-        {data && (
-          <div className="flex items-start gap-5">
-            <CompareMetricLabelColumn />
-            {sortedCities.map((city, index) => (
-              <CompareCityColumn
-                key={city.cityId}
-                city={city}
-                stats={data.stats}
-                order={index + 1}
-                onSelect={() => onSelectCity?.(city.cityId)}
-              />
-            ))}
-          </div>
-        )}
+          {data && (
+            <div className="flex items-start gap-5">
+              <CompareMetricLabelColumn />
+              {sortedCities.map((city, index) => (
+                <CompareCityColumn
+                  key={city.cityId}
+                  city={city}
+                  stats={data.stats}
+                  order={index + 1}
+                  onSelect={() => onSelectCity?.(city.cityId)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
