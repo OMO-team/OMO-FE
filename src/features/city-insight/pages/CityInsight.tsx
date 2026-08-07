@@ -291,7 +291,7 @@ export default function CityInsight() {
                   languageScore={city.languageScore}
                   internetScore={city.internetScore}
                   {...adaptCityToCardProps(city)}
-                  onCompare={() => toggleCompare(city.cityId)}
+                  onCompare={() => toggleCompare(city.cityId, city.name)}
                   onReport={() => setReportCityName(city.name)}
                 />
               ))}

@@ -302,7 +302,7 @@ export default function CountryRoadmapList({
                 languageScore={city.languageScore}
                 internetScore={city.infrastructureScore}
                 onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
-                onCompare={() => toggleCompare(Number(city.cityId))}
+                onCompare={() => toggleCompare(Number(city.cityId), city.cityName)}
                 onReport={() => { setAddErrorMessage(null); setReportCityKey(wishKey(city.cityId, city.purposeId)); }}
               />
             ))}
