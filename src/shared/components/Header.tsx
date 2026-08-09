@@ -120,7 +120,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
 
         {/* 로그인 전/후 */}
         {isLoggedIn ? (
-          <button type="button" aria-label="내 계정" className="shrink-0">
+          <button type="button" aria-label="내 계정" className="shrink-0" onClick={() => navigate('/setting')}>
             {userAvatarUrl ? (
               <img src={userAvatarUrl} alt="" className="size-10 rounded-full object-cover" />
             ) : (
