@@ -26,7 +26,7 @@ export default function DropDown<T extends string>({ title, options, selectedOpt
     <>
     <div ref={containerRef} className='relative'>
         <button type="button" className={twMerge('bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer', triggerClassName)} onClick={handleOpen}>
-            <p className='text-gray-600 body-03'>{title}</p>
+            <span className='text-gray-600 body-03'>{title}</span>
             <ChevronDownIcon className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
         {isOpen && (

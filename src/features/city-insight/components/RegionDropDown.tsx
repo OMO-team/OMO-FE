@@ -69,7 +69,7 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
         onClick={() => setIsOpen(!isOpen)}
       >
         <RegionFilterIcon color={isOpen ? '#ffffff' : undefined} />
-        <p className={`body-03 ${isOpen ? 'text-white' : 'text-gray-600'}`}>지역</p>
+        <span className={`body-03 ${isOpen ? 'text-white' : 'text-gray-600'}`}>지역</span>
         <ChevronDownIcon color={isOpen ? '#ffffff' : undefined} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
