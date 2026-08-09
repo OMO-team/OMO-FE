@@ -42,6 +42,8 @@ type CountryRoadmapListProps = {
   wishedKeys: Set<string>;
   /** 이미 로드맵이 있는 도시+목적 조합 — 같은 조합이 두 번 생기지 않도록 추가 버튼을 잠그는 데 씀 */
   roadmapKeys: Set<string>;
+  /** 비교 선택 바가 칩을 그릴 때 참고하는 도시 목록 — 비교함에 담길 수 있는 도시를 모두 포함해야 한다 */
+  compareSelectableCities: { cityId: number; cityName: string }[];
   currentPage: number;
   totalPages: number;
   onPageChange?: (page: number) => void;
@@ -67,6 +69,7 @@ export default function CountryRoadmapList({
   wishlistCities,
   wishedKeys,
   roadmapKeys,
+  compareSelectableCities,
   currentPage,
   totalPages,
   onPageChange,
@@ -96,10 +99,6 @@ export default function CountryRoadmapList({
 
   const toggleCompare = useCompareStore((s) => s.toggleCompare);
   const closeCompareModal = useCompareStore((s) => s.closeModal);
-  const compareSelectableCities = wishlistCities.map((city) => ({
-    cityId: Number(city.cityId),
-    cityName: city.cityName,
-  }));
   const reportCity =
     wishlistCities.find((city) => wishKey(city.cityId, city.purposeId) === reportCityKey) ?? null;
 

@@ -8,6 +8,7 @@ import { citiesApi } from '../api/citiesApi';
 import { cityQueryKeys, roadmapQueryKeys, wishlistQueryKeys } from '../api/queryKeys';
 import { toCityInsightData, wishKey } from '../utils/wishlistAdapter';
 import { groupByCountry, type CityCatalogMap } from '../utils/roadmapAdapter';
+import { CITY_INFO_KO } from '../mocks/cityCountryMap';
 import { useAuthStore } from '../../auth/store/useAuthStore';
 import type { WishlistCityListResult, CreateRoadmapResult, RoadmapListItem } from '../types/api';
 
@@ -59,6 +60,21 @@ export default function RoadmapApp() {
   const countryGroups = useMemo(
     () => groupByCountry(visibleRoadmapItems, cityCatalogMap),
     [visibleRoadmapItems, cityCatalogMap],
+  );
+
+  /**
+   * 비교 선택 바에 넘길 도시 목록.
+   * 비교함에 담긴 도시가 여기 없으면 칩이 그려지지 않아 뺄 방법이 사라지고,
+   * 그러면 목록이 비워지지 않아 바가 영영 닫히지 않는다. 그래서 위시리스트가 아니라
+   * 도시 카탈로그 전체를 넘긴다(위시리스트에서 지운 도시가 비교함에 남아 있을 수 있음).
+   */
+  const compareSelectableCities = useMemo(
+    () =>
+      (cityCatalog ?? []).map((city) => ({
+        cityId: city.cityId,
+        cityName: CITY_INFO_KO[city.cityId]?.cityName ?? city.name,
+      })),
+    [cityCatalog],
   );
   /**
    * 이미 로드맵이 있는 도시+목적 조합 — 같은 조합을 또 담지 못하게 막는 데 쓴다.
@@ -185,6 +201,7 @@ export default function RoadmapApp() {
       wishlistCities={wishlistCities}
       wishedKeys={wishedKeys}
       roadmapKeys={roadmapKeys}
+      compareSelectableCities={compareSelectableCities}
       currentPage={currentPage}
       totalPages={totalPages}
       onPageChange={setCurrentPage}
