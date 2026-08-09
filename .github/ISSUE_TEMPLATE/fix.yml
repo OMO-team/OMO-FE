@@ -1,0 +1,25 @@
+name: 'Fix'
+description: '발생한 수정 리포트'
+title: '[Fix] '
+labels: ['Fix']
+body:
+  - type: textarea
+    attributes:
+      label: '🚨 수정 설명'
+      description: '어떤 수정이 필요한지 명확하게 설명해 주세요.'
+      placeholder: '예: 로그인 버튼을 누르면 화면이 멈춥니다.'
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: '🔄 재현 순서'
+      description: '수정을 재현하기 위한 단계를 순서대로 적어주세요.'
+      placeholder: "1. 메인 페이지 접속\n2. 로그인 버튼 클릭\n3. 화면 정지 확인"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: '📸 스크린샷 및 로그'
+      description: '오류 화면 캡처나 에러 로그가 있다면 첨부해 주세요.'
+    validations:
+      required: false
