@@ -18,6 +18,11 @@ type DatePickerModalProps = {
    * 출국 예정일처럼 지난 날짜를 넣으면 안 되는 경우에 오늘 날짜를 넘긴다.
    */
   minDate?: { year: number; month: number; day: number };
+  /**
+   * 이 날짜보다 늦은 날은 고를 수 없게 막는다.
+   * 태스크 마감일처럼 출국일을 넘길 수 없는 경우에 출국일을 넘긴다.
+   */
+  maxDate?: { year: number; month: number; day: number };
   onModeToggle?: () => void;
   onSelectDay?: (day: number) => void;
   onSelectMonth?: (month: number) => void;
@@ -56,6 +61,7 @@ export default function DatePickerModal({
   selectedMonth,
   warningMessage,
   minDate,
+  maxDate,
   onModeToggle,
   onSelectDay,
   onSelectMonth,
@@ -112,7 +118,10 @@ export default function DatePickerModal({
                  */
                 const isBeforeSelected =
                   minDate === undefined && day !== null && selectedDay !== undefined && day < selectedDay;
-                const isDisabled = day === null || isBeforeSelected || isBeforeMin;
+                const isAfterMax =
+                  day !== null && maxDate !== undefined &&
+                  toComparable(year, month, day) > toComparable(maxDate.year, maxDate.month, maxDate.day);
+                const isDisabled = day === null || isBeforeSelected || isBeforeMin || isAfterMax;
                 return (
                   <button
                     key={j}
@@ -122,7 +131,7 @@ export default function DatePickerModal({
                     className={`body-04 flex size-[30px] items-center justify-center rounded-full transition-colors ${
                       day === selectedDay
                         ? 'bg-primary-100 text-primary-600'
-                        : isBeforeSelected || isBeforeMin
+                        : isBeforeSelected || isBeforeMin || isAfterMax
                           ? 'cursor-not-allowed text-gray-300'
                           : 'text-gray-700 not-disabled:hover:bg-gray-50'
                     }`}
@@ -152,7 +161,9 @@ export default function DatePickerModal({
               type="button"
               onClick={onYearNext}
               aria-label="다음 해"
-              className="rounded-full p-1 text-gray-700 transition-colors hover:bg-gray-50"
+              // 고를 수 있는 최대 연도보다 더 앞으로는 넘길 수 없게 막는다
+              disabled={maxDate !== undefined && year >= maxDate.year}
+              className="rounded-full p-1 text-gray-700 transition-colors not-disabled:hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300"
             >
               <ChevronLeftIcon className="size-icon-sm rotate-180" />
             </button>
@@ -164,16 +175,21 @@ export default function DatePickerModal({
               const isBeforeMin =
                 minDate !== undefined &&
                 toComparable(year, m, lastDayOfMonth) < toComparable(minDate.year, minDate.month, minDate.day);
+              // 그 달 1일부터 이미 상한을 넘었으면 달째로 고를 수 없다
+              const isAfterMax =
+                maxDate !== undefined &&
+                toComparable(year, m, 1) > toComparable(maxDate.year, maxDate.month, maxDate.day);
+              const isMonthDisabled = isBeforeMin || isAfterMax;
               return (
                 <button
                   key={m}
                   type="button"
                   onClick={() => onSelectMonth?.(m)}
-                  disabled={isBeforeMin}
+                  disabled={isMonthDisabled}
                   className={`body-04 flex h-[34px] w-[66px] items-center justify-center rounded-full shadow-02 transition-colors ${
                     m === selectedMonth
                       ? 'bg-primary-500 text-white'
-                      : isBeforeMin
+                      : isMonthDisabled
                         ? 'cursor-not-allowed bg-gray-50 text-gray-300'
                         : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
