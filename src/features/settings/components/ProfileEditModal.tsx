@@ -107,12 +107,13 @@ export default function ProfileEditModal({
   return (
     <ModalOverlay onClose={onClose}>
       <form
-        className="flex w-[790px] flex-col items-center gap-[70px] rounded-5 bg-gray-20 px-11 py-[50px]"
+        className="flex max-h-[90vh] w-[790px] flex-col overflow-hidden rounded-5 bg-gray-20"
         onSubmit={handleSubmit}
         role="dialog"
         aria-modal="true"
         onClick={e => e.stopPropagation()}
       >
+        <div className="flex flex-col items-center gap-[70px] overflow-y-auto px-11 py-[50px]">
         <div className="flex w-full flex-col gap-[50px]">
           <div className="flex w-full items-center justify-between">
             <span className="heading-05 text-gray-800">프로필 수정</span>
@@ -282,6 +283,7 @@ export default function ProfileEditModal({
             저장하기
           </button>
         </div>
+      </div>
       </form>
     </ModalOverlay>
   );

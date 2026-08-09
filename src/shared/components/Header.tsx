@@ -22,7 +22,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
   const isTransparent = variant === "transparent";
 
   const activeNav: ActiveNav =
-    pathname === "/" || pathname === "/city-insight"
+    pathname === "/city-insight"
       ? "explore"
       : pathname.startsWith("/myhome")
         ? "myhome"
