@@ -1,6 +1,7 @@
 // react
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // shared components
 import CategoryTab from '../../../shared/components/CategoryTab';
@@ -17,6 +18,9 @@ import RegionDropDown from '../components/RegionDropDown';
 import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
+import { roadmapsApi } from '../../roadmap/api/roadmapsApi';
+import { roadmapQueryKeys } from '../../roadmap/api/queryKeys';
+import { getErrorMessage } from '../../roadmap/api/apiUtils';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
@@ -32,7 +36,6 @@ import { adaptCityToCardProps } from '../utils/cityAdapter';
 import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
 
 // stores
-import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
 import { useCompareStore } from '../../compare/store/useCompareStore';
 
 // utils
@@ -71,6 +74,7 @@ const STAY_DURATION_MAP: Record<string, StayDurationType> = {
 
 export default function CityInsight() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlKeyword = searchParams.get('keyword') ?? '';
@@ -110,8 +114,8 @@ export default function CityInsight() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
-  const [addedCityName, setAddedCityName] = useState<string | null>(null);
-  const addCity = useRoadmapStore(s => s.addCity);
+  const [addedRoadmap, setAddedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
+  const [addErrorMessage, setAddErrorMessage] = useState<string | null>(null);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
   const resetCompare = useCompareStore(s => s.resetCompare);
   const closeCompareModal = useCompareStore(s => s.closeModal);
@@ -157,10 +161,16 @@ export default function CityInsight() {
   const totalPages = Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
-    if (!addedCityName) return;
-    const timer = setTimeout(() => setAddedCityName(null), 5000);
+    if (!addedRoadmap) return;
+    const timer = setTimeout(() => setAddedRoadmap(null), 5000);
     return () => clearTimeout(timer);
-  }, [addedCityName]);
+  }, [addedRoadmap]);
+
+  const createRoadmapMutation = useMutation({
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      roadmapsApi.create({ cityId, purposeId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all }),
+  });
 
   // 이 화면을 벗어나면 비교 중이던 상태를 초기화 — 비교는 화면별로 독립적으로 유지됨
   useEffect(() => {
@@ -207,24 +217,24 @@ export default function CityInsight() {
       })
     : null;
 
-  const handleAddToRoadmap = () => {
+  /** 목적은 카테고리 탭에서 선택된 목적(activePurpose)을 그대로 사용 — 검색 진입(isFromSearch)에는 목적이 없어 추가할 수 없음 */
+  const handleAddToRoadmap = async () => {
     const city = cities.find(c => c.name === reportCityName);
-    if (!city) return;
-    addCity({
-      cityId: String(city.cityId),
-      cityName: city.name,
-      countryName: city.country.name,
-      description: city.description,
-      rating: city.rating,
-      imageUrl: city.imageUrl,
-      progressPercent: 0,
-      costProgressPercent: 0,
-      completedSteps: 0,
-      totalSteps: 0,
-      nextSchedule: '아직 일정이 없어요',
-    });
-    setReportCityName(null);
-    setAddedCityName(city.name);
+    if (!city || createRoadmapMutation.isPending) return;
+    const purposeId = activePurpose?.purposeId;
+    if (purposeId == null) {
+      setAddErrorMessage('이 도시의 목적 정보가 없어 로드맵을 만들 수 없어요.');
+      return;
+    }
+    setAddErrorMessage(null);
+    try {
+      const result = await createRoadmapMutation.mutateAsync({ cityId: city.cityId, purposeId });
+      setReportCityName(null);
+      setAddedRoadmap({ roadmapId: result.roadmapId, cityName: city.name });
+    } catch (error) {
+      console.error('로드맵 생성 실패', error);
+      setAddErrorMessage(getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.'));
+    }
   };
 
   /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 */
@@ -361,14 +371,20 @@ export default function CityInsight() {
       {reportData && reportCity && (
         <CityReportModal
           isOpen
-          onClose={() => setReportCityName(null)}
+          onClose={() => { setReportCityName(null); setAddErrorMessage(null); }}
           data={reportData}
           onSearch={question => cityAiReportApi.askQuestion(reportCity.cityId, { question })}
           onAddToRoadmap={handleAddToRoadmap}
+          isAddDisabled={createRoadmapMutation.isPending}
+          addErrorMessage={addErrorMessage}
         />
       )}
-      {addedCityName && (
-        <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
+      {addedRoadmap && (
+        <RoadmapAddedToast
+          cityName={addedRoadmap.cityName}
+          onViewRoadmap={() => { navigate(`/myhome/dashboard/${addedRoadmap.roadmapId}`); setAddedRoadmap(null); }}
+          onClose={() => setAddedRoadmap(null)}
+        />
       )}
       <CompareSelectionBar cities={CITY_INSIGHT_CARDS} />
       <CompareModal onSelectCity={handleSelectCompareCity} />
