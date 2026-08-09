@@ -11,30 +11,21 @@ type StayDurationPickerProps = {
 const PRESETS = [3, 6, 9, 12];
 
 export default function StayDurationPicker({ months, onChange, min = 1, max = 24 }: StayDurationPickerProps) {
-  /** 프리셋 중 하나가 골라진 상태인지 — 아직이면 모든 칩이 "선택 전"으로 보인다 */
-  const hasSelection = PRESETS.includes(months);
-
   return (
     <div className="flex w-full flex-col gap-2">
       <span className="body-02 text-gray-700">체류 기간</span>
 
+      {/* 체류 기간은 언제든 바뀔 수 있는 값이라, 하나를 고른 뒤에도 다른 기간을 바로 누를 수 있게 둔다 */}
       <div className="flex w-full items-center justify-center gap-2">
         {PRESETS.map((preset) => {
           const isSelected = preset === months;
-          // 기간을 한 번 고르면 나머지 프리셋은 비활성 — 이후 조정은 아래 스테퍼로 한다
-          const isDisabled = hasSelection && !isSelected;
           return (
             <button
               key={preset}
               type="button"
               onClick={() => onChange?.(preset)}
-              disabled={isDisabled}
-              className={`body-02 rounded-2 px-5.5 py-2 ${
-                isSelected
-                  ? 'bg-primary-500 text-white'
-                  : isDisabled
-                    ? 'cursor-not-allowed bg-gray-50 text-gray-400'
-                    : 'bg-gray-50 text-gray-800'
+              className={`body-02 rounded-2 px-5.5 py-2 transition-colors ${
+                isSelected ? 'bg-primary-500 text-white' : 'bg-gray-50 text-gray-800 hover:bg-gray-100'
               }`}
             >
               {preset}개월

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import AlertCircleIcon from './AlertCircleIcon';
 
 type ConfirmActionModalProps = {
@@ -9,6 +10,12 @@ type ConfirmActionModalProps = {
   confirmLabel: string;
   onCancel?: () => void;
   onConfirm?: () => void;
+  /** 되돌릴 수 없는 삭제는 danger(빨강), 그 외 일반 확인은 primary(파랑) */
+  tone?: 'danger' | 'primary';
+  /** 원 안에 넣을 아이콘 — 지정하지 않으면 경고 아이콘 */
+  icon?: ReactNode;
+  /** 확인 버튼을 잠시 막아야 할 때 (요청 중 중복 클릭 방지) */
+  isConfirmDisabled?: boolean;
 };
 
 export default function ConfirmActionModal({
@@ -20,13 +27,21 @@ export default function ConfirmActionModal({
   confirmLabel,
   onCancel,
   onConfirm,
+  tone = 'danger',
+  icon,
+  isConfirmDisabled = false,
 }: ConfirmActionModalProps) {
+  const isPrimary = tone === 'primary';
   return (
     <div className="flex w-[590px] flex-col items-center gap-[30px] rounded-4 bg-white px-12 pb-[50px] pt-[60px]">
       <div className="flex w-full flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-5">
-          <span className="flex size-[70px] items-center justify-center rounded-full bg-red-50">
-            <AlertCircleIcon className="size-icon-xl" />
+          <span
+            className={`flex size-[70px] items-center justify-center rounded-full ${
+              isPrimary ? 'bg-primary-50' : 'bg-red-50'
+            }`}
+          >
+            {icon ?? <AlertCircleIcon className="size-icon-xl" />}
           </span>
           <div className="flex w-[344px] flex-col items-center gap-2">
             <p className="heading-05 text-black">{title}</p>
@@ -59,7 +74,10 @@ export default function ConfirmActionModal({
         <button
           type="button"
           onClick={onConfirm}
-          className="title-02 h-[46px] flex-1 rounded-2 bg-red-500 text-white"
+          disabled={isConfirmDisabled}
+          className={`title-02 h-[46px] flex-1 rounded-2 text-white disabled:cursor-not-allowed disabled:bg-gray-300 ${
+            isPrimary ? 'bg-primary-500' : 'bg-red-500'
+          }`}
         >
           {confirmLabel}
         </button>

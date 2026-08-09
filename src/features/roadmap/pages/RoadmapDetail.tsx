@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
 import RoadmapTimeline from '../components/RoadmapTimeline';
@@ -14,8 +14,9 @@ import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../api/roadmapsApi';
 import { citiesApi } from '../api/citiesApi';
-import { cityQueryKeys, roadmapQueryKeys } from '../api/queryKeys';
-import { toRoadmapTaskData, formatDotDate } from '../utils/roadmapDetailAdapter';
+import { tasksApi } from '../api/tasksApi';
+import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys';
+import { toRoadmapTaskData, formatDotDate, getToday } from '../utils/roadmapDetailAdapter';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import { CITY_INFO_KO } from '../mocks/cityCountryMap';
@@ -41,9 +42,7 @@ type RoadmapDetailProps = {
 export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  /** 준비 시작일은 아직 백엔드 스펙에 없는 필드라 화면에서만 임시로 관리 (서버 미반영) */
-  const [startDate, setStartDate] = useState<string | undefined>(undefined);
-  const [datePickerTarget, setDatePickerTarget] = useState<'departure' | 'start' | null>(null);
+  const [datePickerTarget, setDatePickerTarget] = useState<'departure' | null>(null);
   const [datePickerMode, setDatePickerMode] = useState<'day' | 'month'>('day');
   const [datePickerViewYear, setDatePickerViewYear] = useState(new Date().getFullYear());
   const [datePickerViewMonth, setDatePickerViewMonth] = useState(new Date().getMonth() + 1);
@@ -72,6 +71,24 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
     queryFn: citiesApi.list,
     staleTime: CITY_CATALOG_STALE_TIME,
   });
+
+  /**
+   * 타임라인 카드의 "3/4 완료"에 쓸 서류 완료 개수.
+   * 로드맵 상세 응답에는 totalDocumentCount만 있어서, 서류가 있는 태스크만 상세를 따로 받아 채운다.
+   * 태스크 상세는 모달에서도 같은 키로 쓰기 때문에 캐시가 공유된다.
+   */
+  const documentTaskIds = (detail?.tasks ?? []).filter((task) => task.totalDocumentCount > 0).map((task) => task.taskId);
+  const taskDetailResults = useQueries({
+    queries: documentTaskIds.map((taskId) => ({
+      queryKey: taskQueryKeys.detail(taskId),
+      queryFn: () => tasksApi.get(taskId),
+    })),
+  });
+  const completedCountByTask = new Map(
+    taskDetailResults.flatMap((result) =>
+      result.data ? [[result.data.taskId, result.data.completedDocumentCount] as const] : [],
+    ),
+  );
 
   /** 체류 기간 변경은 즉시 화면에 반영(낙관적 업데이트)하고, 실패하면 이전 값으로 되돌림 */
   const updateBudgetMutation = useMutation({
@@ -124,7 +141,6 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   const departureDate = formatDotDate(detail.departureDate);
   const parsedDeparture = parseDotDate(departureDate);
-  const parsedStart = parseDotDate(startDate);
 
   const months = detail.stayMonths ?? 1;
   const budget = detail.budget;
@@ -139,7 +155,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
    * AI 탐색 리포트에 쓸 도시 정보는 로드맵 API에 없어서 도시 카탈로그에서 찾아 씀.
    * 아직 못 받았거나 카탈로그에 없는 도시면 로드맵이 아는 값만으로 최소한을 채운다.
    */
-  const catalogCity = cityCatalog?.cities.find((city) => city.cityId === detail.cityId);
+  const catalogCity = cityCatalog?.find((city) => city.cityId === detail.cityId);
   const reportCityData: CityInsightData = catalogCity
     ? { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl }
     : {
@@ -188,61 +204,32 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
               setDatePickerViewMonth((m) => (m === 12 ? 1 : m + 1));
               if (datePickerViewMonth === 12) setDatePickerViewYear((y) => y + 1);
             }}
-            startDate={startDate}
-            onStartDateClick={() => {
-              setDatePickerViewYear(parsedStart?.year ?? datePickerViewYear);
-              setDatePickerViewMonth(parsedStart?.month ?? datePickerViewMonth);
-              setDatePickerMode('day');
-              setDatePickerTarget('start');
-            }}
+            // 지난 달로 가면 달력을 열어도 고를 수 있는 날짜가 없어서 아예 못 넘어가게 막는다
+            isPrevMonthDisabled={
+              datePickerViewYear === getToday().year
+                ? datePickerViewMonth <= getToday().month
+                : datePickerViewYear < getToday().year
+            }
+            // 준비 시작일은 로드맵 생성 시점으로 서버가 정하므로 표시만 하고 누를 수 없다
+            startDate={formatDotDate(detail.startDate)}
             departureDate={departureDate}
+            /*
+             * 달력은 헤더에 표시된 달에서 그대로 열린다.
+             * 이미 잡힌 날짜의 달로 옮겨버리면 화살표로 옮겨둔 달이 무시돼서,
+             * 헤더의 월 이동이 아무 의미가 없어진다.
+             */
             onDepartureDateClick={() => {
-              setDatePickerViewYear(parsedDeparture?.year ?? datePickerViewYear);
-              setDatePickerViewMonth(parsedDeparture?.month ?? datePickerViewMonth);
               setDatePickerMode('day');
               setDatePickerTarget('departure');
             }}
           />
           <RoadmapTimeline
-            tasks={detail.tasks.map(toRoadmapTaskData)}
+            tasks={detail.tasks.map((task) => toRoadmapTaskData(task, completedCountByTask.get(task.taskId)))}
             onTaskClick={(index) => {
               const taskId = detail.tasks[index]?.taskId;
               if (taskId != null) navigate(`task-detail/${taskId}`, { preventScrollReset: true });
             }}
           />
-
-          {datePickerTarget === 'start' && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setDatePickerTarget(null)} />
-              <div className="absolute left-0 top-30 z-50">
-                <DatePickerModal
-                  mode={datePickerMode}
-                  year={datePickerViewYear}
-                  month={datePickerViewMonth}
-                  selectedDay={
-                    parsedStart?.year === datePickerViewYear && parsedStart?.month === datePickerViewMonth
-                      ? parsedStart.day
-                      : undefined
-                  }
-                  selectedMonth={datePickerViewMonth}
-                  onClose={() => setDatePickerTarget(null)}
-                  onModeToggle={() => setDatePickerMode((m) => (m === 'day' ? 'month' : 'day'))}
-                  onSelectMonth={(m) => {
-                    setDatePickerViewMonth(m);
-                    setDatePickerMode('day');
-                  }}
-                  onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
-                  onYearNext={() => setDatePickerViewYear((y) => y + 1)}
-                  onSelectDay={(day) => {
-                    setStartDate(
-                      `${datePickerViewYear}.${String(datePickerViewMonth).padStart(2, '0')}.${String(day).padStart(2, '0')}`,
-                    );
-                    setDatePickerTarget(null);
-                  }}
-                />
-              </div>
-            </>
-          )}
 
           {datePickerTarget === 'departure' && (
             <>
@@ -267,6 +254,8 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
                   onYearPrev={() => setDatePickerViewYear((y) => y - 1)}
                   onYearNext={() => setDatePickerViewYear((y) => y + 1)}
                   onSelectDay={handleSelectDeparture}
+                  // 출국일은 지난 날짜로 잡을 수 없어서 오늘 이전은 아예 못 고르게 막는다
+                  minDate={getToday()}
                 />
               </div>
             </>

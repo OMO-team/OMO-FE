@@ -6,6 +6,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const instance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -36,7 +37,7 @@ instance.interceptors.response.use(
     if (!refreshTokenPromise) {
       refreshTokenPromise = (async () => {
         const refreshToken = localStorage.getItem('refreshToken');
-        const { data } = await axios.post(`${BASE_URL}/auth/v1/reissue`, { refreshToken });
+        const { data } = await axios.post(`${BASE_URL}/auth/v1/reissue`, { refreshToken }, { withCredentials: true });
         const newAccessToken: string = data.result.accessToken;
         const newRefreshToken: string = data.result.refreshToken;
         localStorage.setItem('accessToken', newAccessToken);

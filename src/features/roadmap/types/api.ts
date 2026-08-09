@@ -54,9 +54,14 @@ export interface WishlistCityListResult {
   cities: WishlistCityInfo[];
 }
 
-export interface CityListResult {
-  totalCount: number;
-  cities: CityInfo[];
+/** 도시 목록은 페이지네이션 응답 — 한 번에 최대 100개까지만 내려온다 */
+export interface CityPageResult {
+  data: CityInfo[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
 }
 
 export interface RoadmapListItem {
@@ -68,6 +73,8 @@ export interface RoadmapListItem {
   country: CityCountryInfo;
   purposeId: number;
   purposeName: string;
+  /** 준비 시작일 — 로드맵을 만든 시점으로 서버가 정하며, 사용자가 고르지 않는다 */
+  startDate: string | null;
   departureDate: string | null;
   stayMonths: number | null;
   departureDDay: number | null;
@@ -96,6 +103,13 @@ export interface RoadmapTaskItem {
   isOverdue: boolean;
   status: TaskStatus;
   isCompleted: boolean;
+  /** 이 태스크에 딸린 서류 수 — 0이면 서류 없이 완료하는 행동형 태스크 */
+  totalDocumentCount: number;
+  /**
+   * 체크가 끝난 서류 수. 목록 응답에는 아직 없어서 optional —
+   * 백엔드에 추가되면 타임라인 카드의 "3/4 완료" 표기가 자동으로 켜진다.
+   */
+  completedDocumentCount?: number;
 }
 
 export interface DocumentItem {
