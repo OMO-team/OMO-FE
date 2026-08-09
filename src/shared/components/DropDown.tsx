@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useId } from 'react';
 import ChevronDownIcon from './ChevronDownIcon';
 import { twMerge } from 'tailwind-merge';
 import { useOutsideClick } from '../hooks/useOutsideClick';
@@ -16,6 +16,7 @@ interface DropDownProps<T extends string = string> {
 export default function DropDown<T extends string>({ title, options, selectedOption, onSelect, className, triggerClassName }: DropDownProps<T>) {
     const [isOpen, setIsOpen] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
+    const panelId = useId()
     useOutsideClick(containerRef, () => setIsOpen(false))
 
     const handleOpen = () => {
@@ -25,12 +26,12 @@ export default function DropDown<T extends string>({ title, options, selectedOpt
   return (
     <>
     <div ref={containerRef} className='relative'>
-        <button type="button" className={twMerge('bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer', triggerClassName)} onClick={handleOpen}>
+        <button type="button" aria-expanded={isOpen} aria-controls={panelId} className={twMerge('bg-gray-50 inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer', triggerClassName)} onClick={handleOpen}>
             <span className='text-gray-600 body-03'>{title}</span>
             <ChevronDownIcon className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
         {isOpen && (
-            <div className={twMerge('absolute top-10 z-1 bg-white w-32.5 flex flex-col justify-center items-center border border-gray-100 rounded-2 px-2 py-3 shadow-01', className)}>
+            <div id={panelId} className={twMerge('absolute top-10 z-1 bg-white w-32.5 flex flex-col justify-center items-center border border-gray-100 rounded-2 px-2 py-3 shadow-01', className)}>
                 {options.map((option, index) => {
                     const isSelected = selectedOption === option
                     return (

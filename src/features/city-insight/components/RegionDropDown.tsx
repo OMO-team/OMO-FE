@@ -65,6 +65,8 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
     <div ref={containerRef} className="relative cursor-pointer">
       <button
         type="button"
+        aria-expanded={isOpen}
+        aria-controls="region-dropdown-panel"
         className={`inline-flex justify-center items-center gap-1 rounded-2 py-1.5 px-2 cursor-pointer ${isOpen ? 'bg-primary-500' : 'bg-gray-50 hover:bg-gray-100'}`}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -73,7 +75,7 @@ export default function RegionDropDown({ purposeType, onSelect, onReset }: Regio
         <ChevronDownIcon color={isOpen ? '#ffffff' : undefined} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
-        <div className='absolute top-10 z-1 bg-white w-[340px] h-[340px] flex flex-col justify-start items-center border border-gray-100 rounded-2 pt-6 pb-4 shadow-01'>
+        <div id="region-dropdown-panel" className='absolute top-10 z-1 bg-white w-[340px] h-[340px] flex flex-col justify-start items-center border border-gray-100 rounded-2 pt-6 pb-4 shadow-01'>
           <div className="relative">
             <input
               type="text"
