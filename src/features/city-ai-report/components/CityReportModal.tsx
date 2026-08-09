@@ -69,7 +69,9 @@ export default function CityReportModal({
       onClick={onClose}
     >
       <div
-        className="w-[1040px] h-[900px] relative rounded-5 bg-white overflow-hidden flex flex-col"
+        // 900px 고정이면 브라우저 툴바 때문에 세로가 짧은 화면에서 하단 버튼이 잘린다.
+        // 화면보다 커지지 않게 상한을 씌우면 본문만 스크롤되고 푸터는 항상 보인다.
+        className="w-[1040px] max-w-[95vw] h-[900px] max-h-[90vh] relative rounded-5 bg-white overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <CloseButton onClick={onClose} className="absolute top-6 right-6 z-10 shadow-02" />

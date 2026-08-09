@@ -52,7 +52,7 @@ export default function RoadmapApp() {
     staleTime: CITY_CATALOG_STALE_TIME,
   });
   const cityCatalogMap = useMemo<CityCatalogMap>(
-    () => new Map((cityCatalog?.cities ?? []).map((city) => [city.cityId, city])),
+    () => new Map((cityCatalog ?? []).map((city) => [city.cityId, city])),
     [cityCatalog],
   );
 

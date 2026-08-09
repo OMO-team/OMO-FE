@@ -2,6 +2,15 @@ import type { DocumentItem, RoadmapTaskItem, TaskCategory } from '../types/api';
 import type { RequiredDocumentData, RoadmapTaskData } from '../types/roadmap';
 import type { TimeLineTaskCardStatus } from '../components/TimeLineTaskCard';
 
+/**
+ * 달력에서 "오늘 이전"을 막는 기준. 출국 예정일·태스크 일정 모두 지난 날짜로는 잡을 수 없다.
+ * 자정을 넘겨도 최신 날짜가 나오도록 호출 시점에 계산한다.
+ */
+export function getToday() {
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+}
+
 export const TASK_CATEGORY_LABEL: Record<TaskCategory, string> = {
   VISA: '비자',
   INSURANCE: '보험',
@@ -30,14 +39,29 @@ function toTimelineStatus(task: RoadmapTaskItem): TimeLineTaskCardStatus {
   return 'upcoming';
 }
 
-/** 로드맵 상세 API의 태스크 목록(RoadmapTaskItem)을 타임라인 카드가 쓰는 형태로 변환 */
-export function toRoadmapTaskData(task: RoadmapTaskItem): RoadmapTaskData {
+/**
+ * D-day 표기. 마감이 지나면 scheduleDDay가 음수로 내려와서
+ * 그대로 "D-" 뒤에 붙이면 "D--5"처럼 대시가 두 번 찍히므로, 지난 일정은 D+N으로 쓴다.
+ */
+export function formatDDay(scheduleDDay: number | null | undefined): string | undefined {
+  if (scheduleDDay == null) return undefined;
+  return scheduleDDay < 0 ? `D+${-scheduleDDay}` : `D-${scheduleDDay}`;
+}
+
+/**
+ * 로드맵 상세 API의 태스크 목록(RoadmapTaskItem)을 타임라인 카드가 쓰는 형태로 변환.
+ * completedDocumentCount는 목록 응답에 없어서 태스크 상세에서 따로 받아 넘겨준다.
+ */
+export function toRoadmapTaskData(task: RoadmapTaskItem, completedDocumentCount?: number): RoadmapTaskData {
   return {
     status: toTimelineStatus(task),
-    dDay: task.scheduleDDay != null ? String(task.scheduleDDay) : undefined,
+    dDay: formatDDay(task.scheduleDDay),
     date: formatDotDate(task.dueDate) ?? '일정 미정',
     category: TASK_CATEGORY_LABEL[task.category],
     title: task.name,
+    hasDocuments: task.totalDocumentCount > 0,
+    stepsCompleted: completedDocumentCount ?? task.completedDocumentCount,
+    stepsTotal: task.totalDocumentCount,
   };
 }
 
