@@ -8,6 +8,7 @@ import SearchInputBar from '../../../shared/components/SearchInputBar';
 import DropDown from '../../../shared/components/DropDown';
 import PageNavigation from '../../../shared/components/PageNavigation';
 import FilterIcon from '../../../shared/components/FilterIcon';
+import SmartBriefingFAB from '../../../shared/components/SmartBriefingFAB';
 
 // feature components
 import CityInsightCard from '../components/CityInsightCard';
@@ -44,7 +45,6 @@ import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
-import searchInputIcon from '../../../assets/icons/search-input-list.svg';
 
 // API 파라미터 값 변환
 const MONTHLY_COST_MAP: Record<string, number> = {
@@ -67,9 +67,9 @@ export default function CityInsight() {
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
 
-  // 진입 경로 판단
-  const isFromCountry = urlCountryCodes.length > 0;
+  // 진입 경로 판단 — keyword와 countryCodes는 상호 배타적으로 처리
   const isFromSearch = !!urlKeyword;
+  const isFromCountry = !isFromSearch;
 
   const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
 
@@ -202,6 +202,7 @@ export default function CityInsight() {
   return (
     <div className="w-full flex flex-col items-center justify-center mt-[30px]">
       <div className="w-[1064px]">
+        <SmartBriefingFAB/>
         {!isFromCountry && (
           <div className={`mb-6 ${isFromSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
             {isFromSearch ? (
@@ -232,7 +233,7 @@ export default function CityInsight() {
                 value={input}
                 onChange={setInput}
                 onSearch={handleSearch}
-                icon={searchInputIcon}
+                showIcon
               />
             </>
           )}
