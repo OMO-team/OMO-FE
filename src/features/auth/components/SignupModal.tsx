@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import checkboxCheckedIcon from '../../../assets/icons/icon-checkbox-checked.svg';
-import kakaoIcon from '../../../assets/icons/icon-kakao.svg';
 import googleIcon from '../../../assets/icons/icon-google.svg';
 import Input from '../../../shared/components/Input';
 import VerifyButton from '../../../shared/components/VerifyButton';
@@ -58,7 +57,6 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const [isEmailVerified, setIsEmailVerified] = useState(signupDraft?.isEmailVerified ?? false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState('');
-  const [isKakaoHovered, setIsKakaoHovered] = useState(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState((signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false);
   const [agreeTerms, setAgreeTerms] = useState(signupDraft?.agreeTerms ?? false);
@@ -405,22 +403,6 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
               {/* 소셜 로그인 버튼들 */}
               <div className="flex flex-col items-start" style={{ gap: '12px' }}>
-                <button
-                  type="button"
-                  className="flex flex-col justify-center items-center rounded-2"
-                  onMouseEnter={() => setIsKakaoHovered(true)}
-                  onMouseLeave={() => setIsKakaoHovered(false)}
-                  style={{ width: '400px', height: '48px', padding: '8px 12px 8px 10px', background: isKakaoHovered ? '#F5D401' : '#FAE100', gap: '4px', transition: 'background 0.15s' }}
-                >
-                  <div className="flex justify-center items-center" style={{ width: '350px', gap: '104px' }}>
-                    <div className="flex justify-center items-center flex-shrink-0" style={{ width: '24px', height: '24px', padding: '3px 2px' }}>
-                      <img src={kakaoIcon} alt="카카오" style={{ width: '20px', height: '18px', flexShrink: 0 }} />
-                    </div>
-                    <span className="title-02 text-gray-900 text-center" style={{ width: '96px' }}>카카오 로그인</span>
-                    <div style={{ width: '24px', height: '24px', flexShrink: 0 }} />
-                  </div>
-                </button>
-
                 <button
                   type="button"
                   onClick={handleGoogleSignup}
