@@ -1,4 +1,4 @@
-import { CITY_INFO_KO } from '../mocks/cityCountryMap';
+import { CITY_INFO_KO } from '../../../shared/constants/cityCountryMap';
 import type { CityInfo } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 

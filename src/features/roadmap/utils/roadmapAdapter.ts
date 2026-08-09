@@ -1,4 +1,4 @@
-import { CITY_INFO_KO } from '../mocks/cityCountryMap';
+import { CITY_INFO_KO } from '../../../shared/constants/cityCountryMap';
 import type { CityInfo, RoadmapListItem } from '../types/api';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 

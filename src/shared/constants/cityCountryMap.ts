@@ -1,9 +1,7 @@
 /**
- * cityId -> 한글 도시명/국가명 정적 매핑. 로드맵 목록 API(GET /api/v1/my-home/roadmaps)가
- * 아직 영어 이름만 내려주고 country 정보도 안 내려줘서, 백엔드가 공유한 한글 시드 데이터
- * (country/city 테이블) 기준으로 프론트에서 직접 매핑함.
- * 백엔드가 country.id/name을 응답에 포함해주거나 실제 DB에 이 한글 데이터가 반영되면
- * 이 파일은 더 이상 필요 없어짐 — 그때 제거할 것.
+ * cityId -> 한글 도시명/국가명 정적 매핑. 여러 API가 아직 영어 이름만 내려줘서,
+ * 백엔드가 공유한 한글 시드 데이터(country/city 테이블) 기준으로 프론트에서 직접 매핑함.
+ * 실제 DB에 이 한글 데이터가 반영되면 이 파일은 더 이상 필요 없어짐 — 그때 제거할 것.
  */
 export const CITY_INFO_KO: Record<number, { cityName: string; countryName: string }> = {
   1: { cityName: '오르후스', countryName: '덴마크' },
@@ -273,3 +271,12 @@ export const CITY_INFO_KO: Record<number, { cityName: string; countryName: strin
   265: { cityName: '자그레브', countryName: '크로아티아' },
   266: { cityName: '취리히', countryName: '스위스' },
 };
+
+/** 매핑에 없는 도시는 API가 준 영문 이름을 그대로 쓴다 */
+export function toKoreanCityName(cityId: number, fallback: string): string {
+  return CITY_INFO_KO[cityId]?.cityName ?? fallback;
+}
+
+export function toKoreanCountryName(cityId: number, fallback: string): string {
+  return CITY_INFO_KO[cityId]?.countryName ?? fallback;
+}

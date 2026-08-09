@@ -19,7 +19,7 @@ import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys
 import { toRoadmapTaskData, formatDotDate, getToday } from '../utils/roadmapDetailAdapter';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
-import { CITY_INFO_KO } from '../mocks/cityCountryMap';
+import { CITY_INFO_KO } from '../../../shared/constants/cityCountryMap';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
