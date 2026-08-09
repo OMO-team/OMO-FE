@@ -48,16 +48,25 @@ import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
 
 // API 파라미터 값 변환
 const MONTHLY_COST_MAP: Record<string, number> = {
-  '150 만원': 150, '200 만원': 200, '300 만원': 300,
+  '150 만원': 150,
+  '200 만원': 200,
+  '300 만원': 300,
 };
 const SAFETY_SCORE_MAP: Record<string, number> = {
-  '5점': 5, '4점': 4, '3점': 3,
+  '5점': 5,
+  '4점': 4,
+  '3점': 3,
 };
 const DIFFICULTY_MAP: Record<string, DifficultyType> = {
-  '쉬움': 'EASY', '보통': 'NORMAL', '어려움': 'HARD',
+  쉬움: 'EASY',
+  보통: 'NORMAL',
+  어려움: 'HARD',
 };
 const STAY_DURATION_MAP: Record<string, StayDurationType> = {
-  '3개월 이하': 'SHORT', '3 - 6개월': 'MEDIUM', '6개월 - 1년': 'LONG', '1년 이상': 'VERY_LONG',
+  '3개월 이하': 'SHORT',
+  '3 - 6개월': 'MEDIUM',
+  '6개월 - 1년': 'LONG',
+  '1년 이상': 'VERY_LONG',
 };
 
 export default function CityInsight() {
@@ -74,7 +83,10 @@ export default function CityInsight() {
   const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
-  const activeIndex = Math.max(0, purposes.findIndex(p => p.purposeId === purposeIdParam));
+  const activeIndex = Math.max(
+    0,
+    purposes.findIndex(p => p.purposeId === purposeIdParam)
+  );
   const categoryNames = purposes.map(p => p.name);
 
   const handleCategoryChange = (index: number) => {
@@ -101,6 +113,8 @@ export default function CityInsight() {
   const [addedCityName, setAddedCityName] = useState<string | null>(null);
   const addCity = useRoadmapStore(s => s.addCity);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
+  const resetCompare = useCompareStore(s => s.resetCompare);
+  const closeCompareModal = useCompareStore(s => s.closeModal);
 
   const activePurpose = purposes[activeIndex];
 
@@ -147,6 +161,13 @@ export default function CityInsight() {
     const timer = setTimeout(() => setAddedCityName(null), 5000);
     return () => clearTimeout(timer);
   }, [addedCityName]);
+
+  // 이 화면을 벗어나면 비교 중이던 상태를 초기화 — 비교는 화면별로 독립적으로 유지됨
+  useEffect(() => {
+    return () => {
+      resetCompare();
+    };
+  }, [resetCompare]);
 
   const handleSelect = (codes: string[], names: string[]) => {
     setSelectedCountries(codes.map((code, i) => ({ code, name: names[i] })));
@@ -204,6 +225,13 @@ export default function CityInsight() {
     });
     setReportCityName(null);
     setAddedCityName(city.name);
+  };
+
+  /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 */
+  const handleSelectCompareCity = (cityId: number) => {
+    closeCompareModal();
+    const matched = cities.find(c => c.cityId === cityId);
+    setReportCityName(matched ? matched.name : null);
   };
 
   return (
@@ -299,7 +327,7 @@ export default function CityInsight() {
                   languageScore={city.languageScore}
                   internetScore={city.internetScore}
                   {...adaptCityToCardProps(city)}
-                  onCompare={() => toggleCompare(city.cityId)}
+                  onCompare={() => toggleCompare(city.cityId, city.name)}
                   onReport={() => setReportCityName(city.name)}
                 />
               ))}
@@ -343,7 +371,7 @@ export default function CityInsight() {
         <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
       )}
       <CompareSelectionBar cities={CITY_INSIGHT_CARDS} />
-      <CompareModal />
+      <CompareModal onSelectCity={handleSelectCompareCity} />
     </div>
   );
 }
