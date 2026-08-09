@@ -82,7 +82,7 @@ export default function MainLayout() {
     <div className="relative flex min-h-screen flex-col">
       <ScrollRestoration />
       <div className={isOverlay ? 'absolute inset-x-0 top-0 z-20' : undefined}>
-        <Header variant={headerVariant} onSmartBriefingClick={() => setIsChatOpen(true)} />
+        <Header variant={headerVariant} />
       </div>
       <main className="flex flex-1 flex-col">
         <Outlet context={outletContext} />
