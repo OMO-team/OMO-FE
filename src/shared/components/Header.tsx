@@ -53,7 +53,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
         : "text-gray-700";
 
   return (
-    <header className={`flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
+    <header className={`sticky top-0 z-30 flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-center self-stretch">
@@ -117,13 +117,13 @@ export default function Header({ variant = "default" }: HeaderProps) {
           <div className="flex items-center gap-1">
             <button
               onClick={() => openModal('login')}
-              className={`flex items-center rounded-2 px-[18px] py-2.5 body-03 ${isOverlay ? "text-white" : "text-gray-700"}`}
+              className={`flex shrink-0 items-center rounded-2 px-[18px] py-2.5 body-03 whitespace-nowrap ${isOverlay ? "text-white" : "text-gray-700"}`}
             >
               로그인
             </button>
             <button
               onClick={() => openModal('signup')}
-              className="flex items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white"
+              className="flex shrink-0 items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
             >
               회원가입
             </button>
