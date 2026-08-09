@@ -1,6 +1,7 @@
 // react
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // shared components
 import CategoryTab from '../../../shared/components/CategoryTab';
@@ -8,6 +9,7 @@ import SearchInputBar from '../../../shared/components/SearchInputBar';
 import DropDown from '../../../shared/components/DropDown';
 import PageNavigation from '../../../shared/components/PageNavigation';
 import FilterIcon from '../../../shared/components/FilterIcon';
+import SmartBriefingFAB from '../../../shared/components/SmartBriefingFAB';
 
 // feature components
 import CityInsightCard from '../components/CityInsightCard';
@@ -16,6 +18,9 @@ import RegionDropDown from '../components/RegionDropDown';
 import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
+import { roadmapsApi } from '../../roadmap/api/roadmapsApi';
+import { roadmapQueryKeys } from '../../roadmap/api/queryKeys';
+import { getErrorMessage } from '../../roadmap/api/apiUtils';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
 import CompareModal from '../../compare/components/CompareModal';
@@ -31,7 +36,6 @@ import { adaptCityToCardProps } from '../utils/cityAdapter';
 import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
 
 // stores
-import { useRoadmapStore } from '../../roadmap/store/useRoadmapStore';
 import { useCompareStore } from '../../compare/store/useCompareStore';
 
 // utils
@@ -44,37 +48,49 @@ import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
-import searchInputIcon from '../../../assets/icons/search-input-list.svg';
 
 // API 파라미터 값 변환
 const MONTHLY_COST_MAP: Record<string, number> = {
-  '150 만원': 150, '200 만원': 200, '300 만원': 300,
+  '150 만원': 150,
+  '200 만원': 200,
+  '300 만원': 300,
 };
 const SAFETY_SCORE_MAP: Record<string, number> = {
-  '5점': 5, '4점': 4, '3점': 3,
+  '5점': 5,
+  '4점': 4,
+  '3점': 3,
 };
 const DIFFICULTY_MAP: Record<string, DifficultyType> = {
-  '쉬움': 'EASY', '보통': 'NORMAL', '어려움': 'HARD',
+  쉬움: 'EASY',
+  보통: 'NORMAL',
+  어려움: 'HARD',
 };
 const STAY_DURATION_MAP: Record<string, StayDurationType> = {
-  '3개월 이하': 'SHORT', '3 - 6개월': 'MEDIUM', '6개월 - 1년': 'LONG', '1년 이상': 'VERY_LONG',
+  '3개월 이하': 'SHORT',
+  '3 - 6개월': 'MEDIUM',
+  '6개월 - 1년': 'LONG',
+  '1년 이상': 'VERY_LONG',
 };
 
 export default function CityInsight() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
 
-  // 진입 경로 판단
-  const isFromCountry = urlCountryCodes.length > 0;
+  // 진입 경로 판단 — keyword와 countryCodes는 상호 배타적으로 처리
   const isFromSearch = !!urlKeyword;
+  const isFromCountry = !isFromSearch;
 
   const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
-  const activeIndex = Math.max(0, purposes.findIndex(p => p.purposeId === purposeIdParam));
+  const activeIndex = Math.max(
+    0,
+    purposes.findIndex(p => p.purposeId === purposeIdParam)
+  );
   const categoryNames = purposes.map(p => p.name);
 
   const handleCategoryChange = (index: number) => {
@@ -98,9 +114,11 @@ export default function CityInsight() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
   const [reportCityName, setReportCityName] = useState<string | null>(null);
-  const [addedCityName, setAddedCityName] = useState<string | null>(null);
-  const addCity = useRoadmapStore(s => s.addCity);
+  const [addedRoadmap, setAddedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
+  const [addErrorMessage, setAddErrorMessage] = useState<string | null>(null);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
+  const resetCompare = useCompareStore(s => s.resetCompare);
+  const closeCompareModal = useCompareStore(s => s.closeModal);
 
   const activePurpose = purposes[activeIndex];
 
@@ -126,20 +144,40 @@ export default function CityInsight() {
     setPage(1);
   }
 
-  const { data: cities = [] } = useCities(queryParams, {
+  const PAGE_SIZE = 6;
+  // 필터(queryParams)와 별개로 관리 — page가 바뀔 때마다 apiParams가 바뀌면
+  // 위 "필터 변경 시 1페이지로 리셋" 로직이 페이지 이동을 필터 변경으로 오인해서 무한 리셋됨
+  const apiParams = useMemo<CityQueryParams>(
+    () => ({ ...queryParams, page: page - 1, size: PAGE_SIZE }), // 백엔드 page는 0-indexed
+    [queryParams, page],
+  );
+
+  const { data: citiesResult } = useCities(apiParams, {
     enabled: isFromSearch || !!activePurpose,
   });
 
-  const PAGE_SIZE = 6;
-  const totalPages = Math.max(1, Math.ceil(cities.length / PAGE_SIZE));
-  const effectivePage = Math.min(page, totalPages);
-  const pagedCities = cities.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
+  const cities = citiesResult?.data ?? [];
+  const totalElements = citiesResult?.totalElements ?? 0;
+  const totalPages = Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
-    if (!addedCityName) return;
-    const timer = setTimeout(() => setAddedCityName(null), 5000);
+    if (!addedRoadmap) return;
+    const timer = setTimeout(() => setAddedRoadmap(null), 5000);
     return () => clearTimeout(timer);
-  }, [addedCityName]);
+  }, [addedRoadmap]);
+
+  const createRoadmapMutation = useMutation({
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      roadmapsApi.create({ cityId, purposeId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all }),
+  });
+
+  // 이 화면을 벗어나면 비교 중이던 상태를 초기화 — 비교는 화면별로 독립적으로 유지됨
+  useEffect(() => {
+    return () => {
+      resetCompare();
+    };
+  }, [resetCompare]);
 
   const handleSelect = (codes: string[], names: string[]) => {
     setSelectedCountries(codes.map((code, i) => ({ code, name: names[i] })));
@@ -179,29 +217,37 @@ export default function CityInsight() {
       })
     : null;
 
-  const handleAddToRoadmap = () => {
+  /** 목적은 카테고리 탭에서 선택된 목적(activePurpose)을 그대로 사용 — 검색 진입(isFromSearch)에는 목적이 없어 추가할 수 없음 */
+  const handleAddToRoadmap = async () => {
     const city = cities.find(c => c.name === reportCityName);
-    if (!city) return;
-    addCity({
-      cityId: String(city.cityId),
-      cityName: city.name,
-      countryName: city.country.name,
-      description: city.description,
-      rating: city.rating,
-      imageUrl: city.imageUrl,
-      progressPercent: 0,
-      costProgressPercent: 0,
-      completedSteps: 0,
-      totalSteps: 0,
-      nextSchedule: '아직 일정이 없어요',
-    });
-    setReportCityName(null);
-    setAddedCityName(city.name);
+    if (!city || createRoadmapMutation.isPending) return;
+    const purposeId = activePurpose?.purposeId;
+    if (purposeId == null) {
+      setAddErrorMessage('이 도시의 목적 정보가 없어 로드맵을 만들 수 없어요.');
+      return;
+    }
+    setAddErrorMessage(null);
+    try {
+      const result = await createRoadmapMutation.mutateAsync({ cityId: city.cityId, purposeId });
+      setReportCityName(null);
+      setAddedRoadmap({ roadmapId: result.roadmapId, cityName: city.name });
+    } catch (error) {
+      console.error('로드맵 생성 실패', error);
+      setAddErrorMessage(getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.'));
+    }
+  };
+
+  /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 */
+  const handleSelectCompareCity = (cityId: number) => {
+    closeCompareModal();
+    const matched = cities.find(c => c.cityId === cityId);
+    setReportCityName(matched ? matched.name : null);
   };
 
   return (
     <div className="w-full flex flex-col items-center justify-center mt-[30px]">
       <div className="w-[1064px]">
+        <SmartBriefingFAB/>
         {!isFromCountry && (
           <div className={`mb-6 ${isFromSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
             {isFromSearch ? (
@@ -232,12 +278,12 @@ export default function CityInsight() {
                 value={input}
                 onChange={setInput}
                 onSearch={handleSearch}
-                icon={searchInputIcon}
+                showIcon
               />
             </>
           )}
            {isFromSearch && (
-              <p className="body-03 text-gray-500">총 {cities.length}개의 검색결과가 나왔어요</p>
+              <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
             )}
           <div className="flex justify-between">
             <div className="flex gap-2">
@@ -274,10 +320,10 @@ export default function CityInsight() {
             />
           ))}
         </div>
-        {cities.length !== 0 ? (
+        {totalElements !== 0 ? (
           <>
             <div className="mt-11 grid grid-cols-2 gap-5">
-              {pagedCities.map(city => (
+              {cities.map(city => (
                 <CityInsightCard
                   key={city.cityId}
                   imageUrl={city.imageUrl}
@@ -291,14 +337,14 @@ export default function CityInsight() {
                   languageScore={city.languageScore}
                   internetScore={city.internetScore}
                   {...adaptCityToCardProps(city)}
-                  onCompare={() => toggleCompare(city.cityId)}
+                  onCompare={() => toggleCompare(city.cityId, city.name)}
                   onReport={() => setReportCityName(city.name)}
                 />
               ))}
             </div>
             <div className="mt-25 mb-[304px]">
               <PageNavigation
-                currentPage={effectivePage}
+                currentPage={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
               />
@@ -325,17 +371,23 @@ export default function CityInsight() {
       {reportData && reportCity && (
         <CityReportModal
           isOpen
-          onClose={() => setReportCityName(null)}
+          onClose={() => { setReportCityName(null); setAddErrorMessage(null); }}
           data={reportData}
           onSearch={question => cityAiReportApi.askQuestion(reportCity.cityId, { question })}
           onAddToRoadmap={handleAddToRoadmap}
+          isAddDisabled={createRoadmapMutation.isPending}
+          addErrorMessage={addErrorMessage}
         />
       )}
-      {addedCityName && (
-        <RoadmapAddedToast cityName={addedCityName} onClose={() => setAddedCityName(null)} />
+      {addedRoadmap && (
+        <RoadmapAddedToast
+          cityName={addedRoadmap.cityName}
+          onViewRoadmap={() => { navigate(`/myhome/dashboard/${addedRoadmap.roadmapId}`); setAddedRoadmap(null); }}
+          onClose={() => setAddedRoadmap(null)}
+        />
       )}
       <CompareSelectionBar cities={CITY_INSIGHT_CARDS} />
-      <CompareModal />
+      <CompareModal onSelectCity={handleSelectCompareCity} />
     </div>
   );
 }

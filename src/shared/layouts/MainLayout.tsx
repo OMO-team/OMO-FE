@@ -79,10 +79,10 @@ export default function MainLayout() {
   const outletContext: MainLayoutContext = useMemo(() => ({ openChat, closeChat }), [openChat, closeChat]);
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen min-w-[1200px] flex-col">
       <ScrollRestoration />
       <div className={isOverlay ? 'absolute inset-x-0 top-0 z-20' : undefined}>
-        <Header variant={headerVariant} onSmartBriefingClick={() => setIsChatOpen(true)} />
+        <Header variant={headerVariant} />
       </div>
       <main className="flex flex-1 flex-col">
         <Outlet context={outletContext} />

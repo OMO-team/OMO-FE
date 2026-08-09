@@ -8,6 +8,8 @@ export interface RoadmapTaskData {
   title: string;
   stepsCompleted?: number;
   stepsTotal?: number;
+  /** true면 D-day 태그 옆에 "서류" 유형 라벨 표시 (서류가 딸린 태스크) */
+  hasDocuments?: boolean;
   prerequisiteWarning?: string;
 }
 

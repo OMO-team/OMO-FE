@@ -96,6 +96,7 @@ export default function CountryRoadmapList({
 
   const toggleCompare = useCompareStore((s) => s.toggleCompare);
   const closeCompareModal = useCompareStore((s) => s.closeModal);
+  const resetCompare = useCompareStore((s) => s.resetCompare);
   const compareSelectableCities = wishlistCities.map((city) => ({
     cityId: Number(city.cityId),
     cityName: city.cityName,
@@ -120,6 +121,13 @@ export default function CountryRoadmapList({
     /** 실행 취소 창이 끝나기 전에 페이지를 벗어나도 삭제가 유실되지 않도록, 언마운트 시 남아있는 삭제를 확정 */
     return () => onCommitDeleteCity?.();
   }, [onCommitDeleteCity]);
+
+  // 이 화면을 벗어나면 비교 중이던 상태를 초기화 — 비교는 화면별로 독립적으로 유지됨
+  useEffect(() => {
+    return () => {
+      resetCompare();
+    };
+  }, [resetCompare]);
 
   useEffect(() => {
     if (!removedWish) return;
@@ -302,7 +310,7 @@ export default function CountryRoadmapList({
                 languageScore={city.languageScore}
                 internetScore={city.infrastructureScore}
                 onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
-                onCompare={() => toggleCompare(Number(city.cityId))}
+                onCompare={() => toggleCompare(Number(city.cityId), city.cityName)}
                 onReport={() => { setAddErrorMessage(null); setReportCityKey(wishKey(city.cityId, city.purposeId)); }}
               />
             ))}

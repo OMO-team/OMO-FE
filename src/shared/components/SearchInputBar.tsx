@@ -1,3 +1,5 @@
+import SmartBriefingIcon from './SmartBriefingIcon';
+
 interface SearchInputBarProps {
   value: string;
   onChange: (value: string) => void;
@@ -5,7 +7,7 @@ interface SearchInputBarProps {
   placeholder?: string;
   submittedQuery?: string | null;
   width?: string;
-  icon?: string;
+  showIcon?: boolean;
 }
 
 export default function SearchInputBar({
@@ -15,12 +17,12 @@ export default function SearchInputBar({
   placeholder = "검색어를 입력하세요",
   submittedQuery,
   width = 'w-[730px]',
-  icon,
+  showIcon = false,
 }: SearchInputBarProps) {
   return (
     <div className='flex justify-start items-center gap-2'>
-      <div className={`flex justify-start items-center ${width} overflow-hidden gap-1 ${icon ? 'px-6 py-4' : 'px-[27px] py-3'} rounded-3 bg-white border border-primary-100`}>
-        {icon && <img src={icon} alt="" className="shrink-0" />}
+      <div className={`flex justify-start items-center ${width} overflow-hidden gap-1 ${showIcon ? 'px-6 py-4' : 'px-[27px] py-3'} rounded-3 bg-white border border-primary-100`}>
+        {showIcon && <SmartBriefingIcon type="blue" />}
         {submittedQuery ? (
           <p className="text-base text-left text-gray-900 w-full truncate">
             {submittedQuery}
