@@ -5,7 +5,6 @@ import HomeIcon from "./HomeIcon";
 import profileImage from "../../assets/icons/profile-image.svg";
 import omoLogo from "../../assets/icons/omo-logo.svg";
 import iconSearch from "../../assets/icons/icon-search[24].svg";
-import iconSmartBriefing from "../../assets/icons/icon-smart-briefing.svg";
 import { useAuthStore } from "../../features/auth/store/useAuthStore";
 
 type ActiveNav = "explore" | "myhome" | null;
@@ -13,10 +12,9 @@ type ActiveNav = "explore" | "myhome" | null;
 interface HeaderProps {
   /** overlay: 이미지 위 흰색 텍스트. transparent: 배경 투명 + 다크 텍스트(홈). default: 흰 배경 */
   variant?: "default" | "overlay" | "transparent";
-  onSmartBriefingClick?: () => void;
 }
 
-export default function Header({ variant = "default", onSmartBriefingClick }: HeaderProps) {
+export default function Header({ variant = "default" }: HeaderProps) {
   const { isLoggedIn, userAvatarUrl, openModal, openSearch } = useAuthStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -24,7 +22,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
   const isTransparent = variant === "transparent";
 
   const activeNav: ActiveNav =
-    pathname === "/city-insight"
+    pathname === "/" || pathname === "/city-insight"
       ? "explore"
       : pathname.startsWith("/myhome")
         ? "myhome"
@@ -55,7 +53,7 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
         : "text-gray-700";
 
   return (
-    <header className={`flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
+    <header className={`sticky top-0 z-30 flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
       {/* 왼쪽: 로고 + 검색창 */}
       <div className="flex items-center gap-4">
         <button type="button" onClick={() => navigate('/')} className="flex items-center justify-center self-stretch">
@@ -104,18 +102,6 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
             내 홈
           </button>
 
-          <button
-            type="button"
-            onClick={onSmartBriefingClick}
-            className="flex shrink-0 flex-col items-start gap-[2px] rounded-lg py-[10px] pl-[10px] pr-3 hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow"
-          >
-            <div className="flex items-center gap-[10px] self-stretch">
-              <div className="flex h-5 w-5 items-center justify-center">
-                <img src={iconSmartBriefing} alt="" style={{ width: '18px', height: '12px' }} />
-              </div>
-              <span className="body-02 text-gray-700">스마트 브리핑</span>
-            </div>
-          </button>
         </div>
 
         {/* 로그인 전/후 */}
@@ -131,13 +117,13 @@ export default function Header({ variant = "default", onSmartBriefingClick }: He
           <div className="flex items-center gap-1">
             <button
               onClick={() => openModal('login')}
-              className={`flex items-center rounded-2 px-[18px] py-2.5 body-03 ${isOverlay ? "text-white" : "text-gray-700"}`}
+              className={`flex shrink-0 items-center rounded-2 px-[18px] py-2.5 body-03 whitespace-nowrap ${isOverlay ? "text-white" : "text-gray-700"}`}
             >
               로그인
             </button>
             <button
               onClick={() => openModal('signup')}
-              className="flex items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white"
+              className="flex shrink-0 items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
             >
               회원가입
             </button>
