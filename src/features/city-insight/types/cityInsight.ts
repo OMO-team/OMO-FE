@@ -1,7 +1,8 @@
 export type PurposeType = 'WORKING_HOLIDAY' | 'EXCHANGE_STUDENT' | 'INTERNSHIP';
 export type DifficultyType = 'EASY' | 'NORMAL' | 'HARD';
 export type StayDurationType = 'SHORT' | 'MEDIUM' | 'LONG' | 'VERY_LONG';
-export type ContinentType = 'Asia' | 'Europe' | 'North America' | 'South America' | 'Oceania' | 'Africa';
+export type ContinentType =
+  'Asia' | 'Europe' | 'North America' | 'South America' | 'Oceania' | 'Africa';
 
 export interface CityQueryParams {
   keyword?: string;
@@ -13,6 +14,8 @@ export interface CityQueryParams {
   visaDifficulty?: DifficultyType;
   stayDuration?: StayDurationType;
   continent?: ContinentType;
+  page?: number;
+  size?: number;
 }
 
 export interface CountryItem {
@@ -48,6 +51,10 @@ export interface CityItem {
 }
 
 export interface CitiesResponse {
-  totalCount: number;
-  cities: CityItem[];
+  data: CityItem[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
 }
