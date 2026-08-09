@@ -67,9 +67,9 @@ export default function CityInsight() {
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
 
-  // 진입 경로 판단
+  // 진입 경로 판단 — keyword와 countryCodes는 상호 배타적으로 처리
   const isFromSearch = !!urlKeyword;
-  const isFromCountry = urlCountryCodes.length > 0 || !isFromSearch;
+  const isFromCountry = !isFromSearch;
 
   const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
 
