@@ -39,18 +39,18 @@ export default function Header({ variant = "default" }: HeaderProps) {
   };
 
   const getNavIconColor = (nav: ActiveNav) =>
-    activeNav === nav
-      ? "var(--color-primary-500)"
-      : isOverlay
-        ? "#FFFFFF"
+    isOverlay
+      ? "#FFFFFF"
+      : activeNav === nav
+        ? "var(--color-primary-500)"
         : "#404959";
 
-  const getNavTextClass = (nav: ActiveNav) =>
-    activeNav === nav
-      ? "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500"
-      : isOverlay
-        ? "text-white"
-        : "text-gray-700";
+  const getNavTextClass = (nav: ActiveNav) => {
+    if (activeNav !== nav) return isOverlay ? "text-white" : "text-gray-700";
+    return isOverlay
+      ? "border border-white/20 bg-white/16 text-white"
+      : "border border-[rgba(0,106,204,0.20)] bg-[rgba(0,133,255,0.16)] text-primary-500";
+  };
 
   return (
     <header className={`sticky top-0 z-30 flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
@@ -106,12 +106,21 @@ export default function Header({ variant = "default" }: HeaderProps) {
 
         {/* 로그인 전/후 */}
         {isLoggedIn ? (
-          <button type="button" aria-label="내 계정" className="shrink-0">
-            <img
-              src={userAvatarUrl || profileImage}
-              alt=""
-              className={`size-10 rounded-full object-cover ${isOverlay ? "ring-2 ring-white" : ""}`}
-            />
+          <button type="button" aria-label="내 계정" className="shrink-0" onClick={() => navigate('/setting')}>
+            {userAvatarUrl ? (
+              <img src={userAvatarUrl} alt="" className="size-10 rounded-full object-cover" />
+            ) : (
+              <div className="relative size-10 overflow-hidden rounded-full">
+                {/* profile-image.svg는 102x102 캔버스 안에 그림자 여백을 두고 86x86 원이 (8,5)에 그려져 있어
+                    object-cover로 자르면 원이 중심에서 벗어나 보임 — 네이티브 비율로 확대해 원을 박스에 꽉 채움 */}
+                <img
+                  src={profileImage}
+                  alt=""
+                  className="absolute"
+                  style={{ left: "-9.302%", top: "-5.814%", width: "118.605%", height: "118.605%" }}
+                />
+              </div>
+            )}
           </button>
         ) : (
           <div className="flex items-center gap-1">

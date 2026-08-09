@@ -178,18 +178,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
-      <div className="relative">
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            className="body-02 absolute left-6 top-24 z-10 rounded-2 bg-black/30 px-4 py-2 text-white"
-          >
-            〈 목록으로
-          </button>
-        )}
-        <CityHeroBanner cityName={cityNameKo} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
-      </div>
+      <CityHeroBanner cityName={cityNameKo} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
 
       <div className="mx-auto flex w-full max-w-content gap-7.5 px-4 py-10">
         <div className="relative flex flex-col gap-5">
