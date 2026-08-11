@@ -212,6 +212,8 @@ export default function CityInsight() {
     ? buildCityReportData({
         cityId: String(reportCity.cityId),
         cityName: toKoreanCityName(reportCity.cityId, reportCity.name),
+        // 검색으로 들어오면 목적을 고르는 단계가 없어 표시할 값이 없다
+        purposeName: activePurpose?.name,
         imageUrl: reportCity.imageUrl,
         rating: reportCity.rating,
         description: reportCity.description,

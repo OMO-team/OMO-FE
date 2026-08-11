@@ -157,10 +157,12 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
    */
   const catalogCity = cityCatalog?.find((city) => city.cityId === detail.cityId);
   const reportCityData: CityInsightData = catalogCity
-    ? { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl }
+    ? // 목적은 도시가 아니라 이 로드맵에 딸린 값이라 로드맵 응답에서 가져온다
+      { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl, purposeName: detail.purposeName }
     : {
         cityId: String(detail.cityId),
         cityName: cityNameKo,
+        purposeName: detail.purposeName,
         countryName: cityInfo?.countryName ?? '준비중',
         imageUrl: detail.cityImageUrl,
         description: '준비중',
