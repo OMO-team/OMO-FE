@@ -19,7 +19,7 @@ import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys
 import { toRoadmapTaskData, formatDotDate, getToday } from '../utils/roadmapDetailAdapter';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
-import { CITY_INFO_KO } from '../../../shared/constants/cityCountryMap';
+import { toKoreanCountryName } from '../../../shared/constants/cityCountryMap';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -147,9 +147,6 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const livingCostSubtotal = (budget?.monthlyCost ?? 0) * months;
   const totalBudget = budget?.totalCost ?? (budget?.initialSettlementCost ?? 0) + livingCostSubtotal;
 
-  // 상세 API도 도시명이 영문으로, country 정보는 아예 안 내려줘서 시드 데이터 기반 한글 매핑으로 대신 채움
-  const cityInfo = CITY_INFO_KO[detail.cityId];
-  const cityNameKo = cityInfo?.cityName ?? detail.cityName;
 
   /**
    * AI 탐색 리포트에 쓸 도시 정보는 로드맵 API에 없어서 도시 카탈로그에서 찾아 씀.
@@ -161,9 +158,10 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
       { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl, purposeName: detail.purposeName }
     : {
         cityId: String(detail.cityId),
-        cityName: cityNameKo,
+        cityName: detail.cityName,
         purposeName: detail.purposeName,
-        countryName: cityInfo?.countryName ?? '준비중',
+        // 상세 API는 country 정보를 안 내려줘서 도시 기준 매핑으로 국가명을 채운다
+        countryName: toKoreanCountryName(detail.cityId, '준비중'),
         imageUrl: detail.cityImageUrl,
         description: '준비중',
         rating: 0,
@@ -180,7 +178,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
-      <CityHeroBanner cityName={cityNameKo} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
+      <CityHeroBanner cityName={detail.cityName} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
 
       <div className="mx-auto flex w-full max-w-content gap-7.5 px-4 py-10">
         <div className="relative flex flex-col gap-5">
@@ -265,7 +263,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           />
           <AiReportCard
             score={catalogCity?.rating ?? 0}
-            cityName={cityNameKo}
+            cityName={detail.cityName}
             summary={catalogCity?.description ?? '준비중'}
             onViewReport={() => setIsReportOpen(true)}
           />

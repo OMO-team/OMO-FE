@@ -18,7 +18,7 @@ import RegionDropDown from '../components/RegionDropDown';
 import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
-import { toKoreanCityName, toKoreanCountryName } from '../../../shared/constants/cityCountryMap';
+import { toKoreanCountryName } from '../../../shared/constants/cityCountryMap';
 import { roadmapsApi } from '../../roadmap/api/roadmapsApi';
 import { roadmapQueryKeys } from '../../roadmap/api/queryKeys';
 import { getErrorMessage } from '../../roadmap/api/apiUtils';
@@ -217,7 +217,7 @@ export default function CityInsight() {
   const reportData = reportCity
     ? buildCityReportData({
         cityId: String(reportCity.cityId),
-        cityName: toKoreanCityName(reportCity.cityId, reportCity.name),
+        cityName: reportCity.name,
         // 검색으로 들어오면 목적을 고르는 단계가 없어 표시할 값이 없다
         purposeName: activePurpose?.name,
         imageUrl: reportCity.imageUrl,
@@ -338,7 +338,7 @@ export default function CityInsight() {
                   imageUrl={city.imageUrl}
                   rating={city.rating}
                   isWishlisted={city.isWishlisted}
-                  name={toKoreanCityName(city.cityId, city.name)}
+                  name={city.name}
                   countryName={toKoreanCountryName(city.cityId, city.country.name)}
                   description={city.description}
                   monthlyCost={city.monthlyCost}
@@ -346,7 +346,7 @@ export default function CityInsight() {
                   languageScore={city.languageScore}
                   internetScore={city.internetScore}
                   {...adaptCityToCardProps(city)}
-                  onCompare={() => toggleCompare(city.cityId, toKoreanCityName(city.cityId, city.name))}
+                  onCompare={() => toggleCompare(city.cityId, city.name)}
                   onReport={() => setReportCityName(city.name)}
                 />
               ))}

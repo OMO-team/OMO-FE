@@ -1,4 +1,4 @@
-import { CITY_INFO_KO } from '../../../shared/constants/cityCountryMap';
+import { toKoreanCountryNameById } from '../../../shared/constants/cityCountryMap';
 import type { CityInfo, RoadmapListItem } from '../types/api';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 
@@ -9,15 +9,13 @@ export type CityCatalogMap = Map<number, CityInfo>;
 
 /** 로드맵 목록 API(RoadmapListItem)를 CityRoadmapCard가 쓰는 CityRoadmapData로 변환 */
 function toCityRoadmapData(item: RoadmapListItem, catalog?: CityCatalogMap): CityRoadmapData {
-  const cityInfo = CITY_INFO_KO[item.cityId];
   const catalogCity = catalog?.get(item.cityId);
   return {
     cityId: String(item.cityId),
     roadmapId: item.roadmapId,
-    // 목록 API가 도시명/국가명을 영문으로만 줘서 시드 데이터 기반 한글 매핑으로 표시명을 채우고,
-    // 매핑에 없는 도시는 '준비중' 같은 가짜 이름 대신 API가 준 영문 이름을 그대로 쓴다
-    cityName: cityInfo?.cityName ?? item.cityName,
-    countryName: cityInfo?.countryName ?? item.country.name,
+    cityName: item.cityName,
+    // 도시명은 서버가 한글로 주지만 국가명은 아직 영문이라 여기서 바꾼다
+    countryName: toKoreanCountryNameById(item.country.countryId, item.country.name),
     purposeId: item.purposeId,
     purposeName: item.purposeName,
     // progressRate는 0~100 퍼센트 값(실 데이터로 확인됨) — 소수점이 길게 내려와서 반올림
