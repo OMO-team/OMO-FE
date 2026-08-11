@@ -19,7 +19,8 @@ import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../../roadmap/api/roadmapsApi';
-import { roadmapQueryKeys } from '../../roadmap/api/queryKeys';
+import { wishlistApi } from '../../roadmap/api/wishlistApi';
+import { roadmapQueryKeys, wishlistQueryKeys } from '../../roadmap/api/queryKeys';
 import { getErrorMessage } from '../../roadmap/api/apiUtils';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
@@ -33,7 +34,7 @@ import { useCities } from '../hooks/useCities';
 import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
-import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
+import type { CityItem, CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
 
 // stores
 import { useCompareStore } from '../../compare/store/useCompareStore';
@@ -171,6 +172,34 @@ export default function CityInsight() {
       roadmapsApi.create({ cityId, purposeId }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all }),
   });
+
+  /** 위시리스트도 로드맵과 마찬가지로 목적이 있어야 담을 수 있음 — 검색 진입에는 목적이 없어 토글 불가 */
+  const invalidateWishRelatedQueries = () => {
+    queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.all });
+    queryClient.invalidateQueries({ queryKey: ['cities'] });
+  };
+  const addWishMutation = useMutation({
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      wishlistApi.add(cityId, purposeId),
+    onSuccess: invalidateWishRelatedQueries,
+  });
+  const removeWishMutation = useMutation({
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      wishlistApi.remove(cityId, purposeId),
+    onSuccess: invalidateWishRelatedQueries,
+  });
+  const handleToggleWish = (city: CityItem) => {
+    const purposeId = activePurpose?.purposeId;
+    if (purposeId == null) {
+      console.error('목적 없이는 위시리스트를 바꿀 수 없음', city.cityId);
+      return;
+    }
+    if (city.isWishlisted) {
+      removeWishMutation.mutate({ cityId: city.cityId, purposeId });
+    } else {
+      addWishMutation.mutate({ cityId: city.cityId, purposeId });
+    }
+  };
 
   // 이 화면을 벗어나면 비교 중이던 상태를 초기화 — 비교는 화면별로 독립적으로 유지됨
   useEffect(() => {
@@ -337,6 +366,7 @@ export default function CityInsight() {
                   languageScore={city.languageScore}
                   internetScore={city.internetScore}
                   {...adaptCityToCardProps(city)}
+                  onToggleWish={() => handleToggleWish(city)}
                   onCompare={() => toggleCompare(city.cityId, city.name)}
                   onReport={() => setReportCityName(city.name)}
                 />
