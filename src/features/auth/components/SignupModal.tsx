@@ -33,16 +33,22 @@ function CheckIcon({ color }: { color: string }) {
 function ArrowIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" fill="none">
-      <path d="M0.699951 0.699951L6.69995 6.69995L0.699951 12.7" stroke="var(--color-gray-400)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M0.699951 0.699951L6.69995 6.69995L0.699951 12.7"
+        stroke="var(--color-gray-400)"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 export default function SignupModal({ onClose, onLoginClick }: SignupModalProps) {
   const navigate = useNavigate();
-  const signupDraft = useAuthStore((s) => s.signupDraft);
-  const setSignupDraft = useAuthStore((s) => s.setSignupDraft);
-  const clearSignupDraft = useAuthStore((s) => s.clearSignupDraft);
+  const signupDraft = useAuthStore(s => s.signupDraft);
+  const setSignupDraft = useAuthStore(s => s.setSignupDraft);
+  const clearSignupDraft = useAuthStore(s => s.clearSignupDraft);
 
   const [name, setName] = useState(signupDraft?.name ?? '');
   const [email, setEmail] = useState(signupDraft?.email ?? '');
@@ -58,7 +64,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState('');
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
-  const [agreeAll, setAgreeAll] = useState((signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false);
+  const [agreeAll, setAgreeAll] = useState(
+    (signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false
+  );
   const [agreeTerms, setAgreeTerms] = useState(signupDraft?.agreeTerms ?? false);
   const [agreePrivacy, setAgreePrivacy] = useState(signupDraft?.agreePrivacy ?? false);
 
@@ -95,8 +103,14 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   };
 
   const handleSendEmailCode = async () => {
-    if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
-    if (!EMAIL_REGEX.test(email)) { setEmailError('올바른 이메일 형식을 입력해주세요.'); return; }
+    if (!email) {
+      setEmailError('이메일을 입력해주세요.');
+      return;
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      setEmailError('올바른 이메일 형식을 입력해주세요.');
+      return;
+    }
     if (isSendingCode) return;
     setEmailError('');
     setIsSendingCode(true);
@@ -145,10 +159,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       return;
     }
     setIsGoogleLoading(true);
-    const agreedTermsIds = [
-      ...(agreeTerms ? [1] : []),
-      ...(agreePrivacy ? [2] : []),
-    ];
+    const agreedTermsIds = [...(agreeTerms ? [1] : []), ...(agreePrivacy ? [2] : [])];
     try {
       const { authorizationUrl } = await authApi.getGoogleSignupUrl({ agreedTermsIds });
       window.location.href = authorizationUrl;
@@ -179,22 +190,43 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     setConfirmPasswordError('');
 
     let hasError = false;
-    if (!name) { setNameError('이름을 입력해주세요.'); hasError = true; }
-    if (!email) { setEmailError('이메일을 입력해주세요.'); hasError = true; }
-    if (!passwordRegex.test(password)) { setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.'); hasError = true; }
-    if (password !== confirmPassword) { setConfirmPasswordError('비밀번호가 일치하지 않습니다.'); hasError = true; }
-    if (!isEmailVerified) { setEmailError('이메일 인증을 완료해주세요.'); hasError = true; }
-    if (!agreeTerms || !agreePrivacy) { setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.'); hasError = true; }
+    if (!name) {
+      setNameError('이름을 입력해주세요.');
+      hasError = true;
+    }
+    if (!email) {
+      setEmailError('이메일을 입력해주세요.');
+      hasError = true;
+    }
+    if (!passwordRegex.test(password)) {
+      setPasswordError('영문, 숫자, 특수문자 중 2가지 이상 조합으로 8~20자 입력해주세요.');
+      hasError = true;
+    }
+    if (password !== confirmPassword) {
+      setConfirmPasswordError('비밀번호가 일치하지 않습니다.');
+      hasError = true;
+    }
+    if (!isEmailVerified) {
+      setEmailError('이메일 인증을 완료해주세요.');
+      hasError = true;
+    }
+    if (!agreeTerms || !agreePrivacy) {
+      setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.');
+      hasError = true;
+    }
     if (hasError) return;
 
     setIsSubmitting(true);
     try {
       // 약관 ID: 1 = 이용약관, 2 = 개인정보처리방침 (GET /api/v1/terms 기준, 백엔드 확정값)
-      const agreedTermsIds = [
-        ...(agreeTerms ? [1] : []),
-        ...(agreePrivacy ? [2] : []),
-      ];
-      await authApi.signup({ name, email, password, passwordConfirm: confirmPassword, agreedTermsIds });
+      const agreedTermsIds = [...(agreeTerms ? [1] : []), ...(agreePrivacy ? [2] : [])];
+      await authApi.signup({
+        name,
+        email,
+        password,
+        passwordConfirm: confirmPassword,
+        agreedTermsIds,
+      });
       clearSignupDraft();
       onClose();
     } catch (error) {
@@ -224,7 +256,6 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       aria-modal="true"
     >
       <div className="flex flex-col items-center" style={{ gap: '36px' }}>
-
         {/* 헤더: 타이틀 + 닫기 */}
         <div className="flex items-center" style={{ width: '400px', gap: '118px' }}>
           <span className="title-01 text-gray-900" style={{ width: '257px' }}>
@@ -242,10 +273,11 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
         <div className="flex flex-col items-center" style={{ gap: '24px', alignSelf: 'stretch' }}>
           <div className="flex flex-col items-center" style={{ gap: '40px', alignSelf: 'stretch' }}>
-
             {/* 회원가입 폼 */}
-            <div className="flex flex-col items-start" style={{ gap: '16px', alignSelf: 'stretch' }}>
-
+            <div
+              className="flex flex-col items-start"
+              style={{ gap: '16px', alignSelf: 'stretch' }}
+            >
               {/* 이름 */}
               <Input
                 label="이름"
@@ -298,19 +330,24 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                 <Input
                   type="password"
                   value={confirmPassword}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setConfirmPassword(e.target.value)
+                  }
                   placeholder="비밀번호를 다시 입력해주세요"
                   error={confirmPasswordError}
                 />
-                <span className="body-04 px-2 text-gray-400">8자 이상 20자 이하로 입력해 주세요.</span>
+                <span className="body-04 px-2 text-gray-400">
+                  8자 이상 20자 이하로 입력해 주세요.
+                </span>
               </div>
             </div>
 
             {/* 동의 + 회원가입 버튼 */}
-            <div className="flex flex-col items-start" style={{ gap: '24px', alignSelf: 'stretch' }}>
-
+            <div
+              className="flex flex-col items-start"
+              style={{ gap: '24px', alignSelf: 'stretch' }}
+            >
               <div className="flex flex-col items-start" style={{ width: '380px', gap: '8px' }}>
-
                 {/* 전체 동의하기 */}
                 <div className="flex items-center" style={{ gap: '4px', alignSelf: 'stretch' }}>
                   <button
@@ -323,21 +360,40 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                     style={{ width: '24px', height: '24px' }}
                   >
                     {agreeAll ? (
-                      <img src={checkboxCheckedIcon} alt="체크됨" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                      <img
+                        src={checkboxCheckedIcon}
+                        alt="체크됨"
+                        style={{ width: '20px', height: '20px', flexShrink: 0 }}
+                      />
                     ) : (
-                      <div className="border border-gray-300 bg-white rounded-1" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                      <div
+                        className="border border-gray-300 bg-white rounded-1"
+                        style={{ width: '20px', height: '20px', flexShrink: 0 }}
+                      />
                     )}
                   </button>
                   <span className="body-02 text-gray-900">전체 동의하기</span>
                 </div>
 
-                <div className="flex flex-col items-start" style={{ gap: '8px', alignSelf: 'stretch' }}>
-
+                <div
+                  className="flex flex-col items-start"
+                  style={{ gap: '8px', alignSelf: 'stretch' }}
+                >
                   {/* 이용약관 동의 */}
-                  <div className="flex items-center" style={{ paddingTop: '6px', alignSelf: 'stretch' }}>
+                  <div
+                    className="flex items-center"
+                    style={{ paddingTop: '6px', alignSelf: 'stretch' }}
+                  >
                     <div className="flex items-center" style={{ width: '360px', gap: '8px' }}>
-                      <button type="button" onClick={handleAgreeTerms} className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
-                        <CheckIcon color={agreeTerms ? 'var(--color-primary-500)' : 'var(--color-gray-300)'} />
+                      <button
+                        type="button"
+                        onClick={handleAgreeTerms}
+                        className="flex justify-center items-center flex-shrink-0"
+                        style={{ width: '20px', height: '20px' }}
+                      >
+                        <CheckIcon
+                          color={agreeTerms ? 'var(--color-primary-500)' : 'var(--color-gray-300)'}
+                        />
                       </button>
                       <div className="flex items-center flex-1" style={{ gap: '4px' }}>
                         <span className="body-04 text-gray-800">이용약관 동의</span>
@@ -355,10 +411,22 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                   </div>
 
                   {/* 개인정보 처리방침 동의 */}
-                  <div className="flex items-center" style={{ paddingTop: '6px', alignSelf: 'stretch' }}>
+                  <div
+                    className="flex items-center"
+                    style={{ paddingTop: '6px', alignSelf: 'stretch' }}
+                  >
                     <div className="flex items-center" style={{ width: '360px', gap: '8px' }}>
-                      <button type="button" onClick={handleAgreePrivacy} className="flex justify-center items-center flex-shrink-0" style={{ width: '20px', height: '20px' }}>
-                        <CheckIcon color={agreePrivacy ? 'var(--color-primary-500)' : 'var(--color-gray-300)'} />
+                      <button
+                        type="button"
+                        onClick={handleAgreePrivacy}
+                        className="flex justify-center items-center flex-shrink-0"
+                        style={{ width: '20px', height: '20px' }}
+                      >
+                        <CheckIcon
+                          color={
+                            agreePrivacy ? 'var(--color-primary-500)' : 'var(--color-gray-300)'
+                          }
+                        />
                       </button>
                       <div className="flex items-center flex-1" style={{ gap: '4px' }}>
                         <span className="body-04 text-black">개인정보 처리방침 동의</span>
@@ -391,7 +459,6 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
           {/* 또는 + 소셜 로그인 + 로그인 유도 */}
           <div className="flex flex-col items-center self-stretch" style={{ gap: '24px' }}>
-
             {/* 또는 구분선 */}
             <div className="flex items-center" style={{ gap: '12px' }}>
               <div className="bg-gray-400" style={{ width: '166px', height: '0.6px' }} />
@@ -400,7 +467,6 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
             </div>
 
             <div className="flex flex-col items-center" style={{ gap: '24px' }}>
-
               {/* 소셜 로그인 버튼들 */}
               <div className="flex flex-col items-start" style={{ gap: '12px' }}>
                 <button
@@ -410,11 +476,21 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                   className="flex flex-col justify-center items-center rounded-2 disabled:opacity-50"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
-                  style={{ width: '400px', height: '48px', padding: '8px 12px 8px 10px', background: isGoogleHovered ? '#E7E6E6' : '#F2F2F2', gap: '4px', transition: 'background 0.15s' }}
+                  style={{
+                    width: '400px',
+                    height: '48px',
+                    padding: '8px 12px 8px 10px',
+                    background: isGoogleHovered ? '#E7E6E6' : '#F2F2F2',
+                    gap: '4px',
+                    transition: 'background 0.15s',
+                  }}
                 >
-                  <div className="flex justify-center items-center self-stretch" style={{ gap: '82px' }}>
+                  <div
+                    className="flex justify-center items-center self-stretch"
+                    style={{ gap: '82px' }}
+                  >
                     <img src={googleIcon} alt="구글" style={{ width: '24px', height: '24px' }} />
-                    <span className="title-02 text-gray-900 text-center">Google 계정으로 로그인</span>
+                    <span className="title-02 text-gray-900 text-center">Google 계정으로 가입</span>
                     <div style={{ width: '24px', height: '24px', flexShrink: 0 }} />
                   </div>
                 </button>
