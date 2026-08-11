@@ -1,4 +1,3 @@
-import { toKoreanCountryNameById } from '../../../shared/constants/cityCountryMap';
 import type { CityInfo } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -49,8 +48,7 @@ export function toCityInsightData(city: CityInsightSource): CityInsightData {
   return {
     cityId: String(city.cityId),
     cityName: city.name,
-    // 도시명은 서버가 한글로 주지만 국가명은 아직 영문이라 여기서 바꾼다
-    countryName: toKoreanCountryNameById(city.country.countryId, city.country.name),
+    countryName: city.country.name,
     purposeId: city.purposeId,
     purposeName: city.purposeName,
     imageUrl: city.imageUrl ?? '',

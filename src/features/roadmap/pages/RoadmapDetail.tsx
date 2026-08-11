@@ -19,7 +19,6 @@ import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys
 import { toRoadmapTaskData, formatDotDate, getToday } from '../utils/roadmapDetailAdapter';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
-import { toKoreanCountryName } from '../../../shared/constants/cityCountryMap';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -147,7 +146,6 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const livingCostSubtotal = (budget?.monthlyCost ?? 0) * months;
   const totalBudget = budget?.totalCost ?? (budget?.initialSettlementCost ?? 0) + livingCostSubtotal;
 
-
   /**
    * AI 탐색 리포트에 쓸 도시 정보는 로드맵 API에 없어서 도시 카탈로그에서 찾아 씀.
    * 아직 못 받았거나 카탈로그에 없는 도시면 로드맵이 아는 값만으로 최소한을 채운다.
@@ -160,8 +158,8 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
         cityId: String(detail.cityId),
         cityName: detail.cityName,
         purposeName: detail.purposeName,
-        // 상세 API는 country 정보를 안 내려줘서 도시 기준 매핑으로 국가명을 채운다
-        countryName: toKoreanCountryName(detail.cityId, '준비중'),
+        // 상세 API는 country 정보를 안 내려주고, 카탈로그에도 없는 도시라 채울 방법이 없다
+        countryName: '준비중',
         imageUrl: detail.cityImageUrl,
         description: '준비중',
         rating: 0,

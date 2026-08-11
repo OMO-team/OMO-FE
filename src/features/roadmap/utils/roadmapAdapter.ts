@@ -1,4 +1,3 @@
-import { toKoreanCountryNameById } from '../../../shared/constants/cityCountryMap';
 import type { CityInfo, RoadmapListItem } from '../types/api';
 import type { CityRoadmapData, CountryGroupData } from '../types/roadmap';
 
@@ -14,8 +13,7 @@ function toCityRoadmapData(item: RoadmapListItem, catalog?: CityCatalogMap): Cit
     cityId: String(item.cityId),
     roadmapId: item.roadmapId,
     cityName: item.cityName,
-    // 도시명은 서버가 한글로 주지만 국가명은 아직 영문이라 여기서 바꾼다
-    countryName: toKoreanCountryNameById(item.country.countryId, item.country.name),
+    countryName: item.country.name,
     purposeId: item.purposeId,
     purposeName: item.purposeName,
     // progressRate는 0~100 퍼센트 값(실 데이터로 확인됨) — 소수점이 길게 내려와서 반올림

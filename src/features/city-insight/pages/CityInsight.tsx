@@ -18,7 +18,6 @@ import RegionDropDown from '../components/RegionDropDown';
 import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
-import { toKoreanCountryName } from '../../../shared/constants/cityCountryMap';
 import { roadmapsApi } from '../../roadmap/api/roadmapsApi';
 import { roadmapQueryKeys } from '../../roadmap/api/queryKeys';
 import { getErrorMessage } from '../../roadmap/api/apiUtils';
@@ -339,7 +338,7 @@ export default function CityInsight() {
                   rating={city.rating}
                   isWishlisted={city.isWishlisted}
                   name={city.name}
-                  countryName={toKoreanCountryName(city.cityId, city.country.name)}
+                  countryName={city.country.name}
                   description={city.description}
                   monthlyCost={city.monthlyCost}
                   safetyScore={city.safetyScore}

@@ -5,7 +5,6 @@ import CityCard from './CityCard';
 import ChevronDownIcon from '../../../shared/components/ChevronDownIcon';
 import { usePurposes } from '../hooks/usePurposes';
 import { useCountriesByPurpose } from '../hooks/useCountriesByPurpose';
-import { toKoreanCountryNameById } from '../../../shared/constants/cityCountryMap';
 
 export default function CategorySection() {
   const navigate = useNavigate();
@@ -61,7 +60,7 @@ export default function CategorySection() {
           {visibleCountries.map(country => (
             <CityCard
               key={country.countryId}
-              name={toKoreanCountryNameById(country.countryId, country.name)}
+              name={country.name}
               imageUrl={country.imageUrl}
               recommendedCityCount={country.recommendedCityCount}
               onClick={() => navigate(`/city-insight?purposeId=${activePurpose?.purposeId}&countryCodes=${country.code}`)}
