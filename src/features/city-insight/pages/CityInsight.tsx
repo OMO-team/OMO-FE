@@ -120,7 +120,13 @@ export default function CityInsight() {
   const resetCompare = useCompareStore(s => s.resetCompare);
   const closeCompareModal = useCompareStore(s => s.closeModal);
 
-  const activePurpose = purposes[activeIndex];
+  /**
+   * 검색으로 들어오면 목적을 고르는 단계가 없어 선택된 목적도 없다.
+   * usePurposes는 enabled가 false여도 캐시된 목록을 그대로 돌려주기 때문에
+   * (메인 화면이 같은 키로 미리 받아둠) 여기서 걸러주지 않으면
+   * 첫 번째 목적(워킹홀리데이)이 선택된 것처럼 잡힌다.
+   */
+  const activePurpose = isFromSearch ? undefined : purposes[activeIndex];
 
   const queryParams = useMemo<CityQueryParams>(() => {
     const currentCountryCodes = searchParams.getAll('countryCodes');
