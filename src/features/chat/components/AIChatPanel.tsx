@@ -31,6 +31,7 @@ const MAX_PANEL_WIDTH = 1000;
 const DEFAULT_PANEL_WIDTH = 670;
 const PANEL_COMPACT_THRESHOLD = 60;
 const HEADER_ICONS_MIN_WIDTH = 190;
+const SEND_BUTTON_CENTER_THRESHOLD = 165;
 
 type NoticeType = 'briefing-error' | 'file-error' | 'timeout' | null;
 
@@ -452,7 +453,7 @@ export default function AIChatPanel({
         <div className="flex items-center flex-shrink-0" style={{ width: '100%' }}>
           {/* AI Chat Title 드롭다운 버튼 — 겹칠 만큼 좁아지면 숨김 */}
           {panelWidth >= PANEL_COMPACT_THRESHOLD && (
-            <div className="relative" style={{ minWidth: 0 }}>
+            <div className="relative flex" style={{ minWidth: 0 }}>
               <button
                 type="button"
                 onClick={e => {
@@ -461,7 +462,7 @@ export default function AIChatPanel({
                 }}
                 onMouseEnter={() => setIsTitleHovered(true)}
                 onMouseLeave={() => setIsTitleHovered(false)}
-                className={`flex items-center justify-center gap-2 rounded-3 border-none cursor-pointer transition-colors ${isTitleHovered || isDropdownOpen ? 'bg-gray-20' : 'bg-transparent'}`}
+                className={`flex items-center justify-center gap-2 rounded-3 border-none cursor-pointer transition-colors min-w-0 ${isTitleHovered || isDropdownOpen ? 'bg-gray-20' : 'bg-transparent'}`}
                 style={{
                   height: '40px',
                   padding: '8px 18px',
@@ -469,7 +470,7 @@ export default function AIChatPanel({
                 }}
               >
                 <div className="flex items-center justify-center gap-2" style={{ minWidth: 0 }}>
-                  <span className="title-01 text-gray-700 overflow-hidden text-ellipsis whitespace-nowrap max-w-[300px]">
+                  <span className="title-01 text-gray-700 overflow-hidden text-ellipsis whitespace-nowrap max-w-[300px] min-w-0">
                     {displayedChatTitle}
                   </span>
                   <div className="size-icon-sm flex items-center justify-center flex-shrink-0">
@@ -845,15 +846,18 @@ export default function AIChatPanel({
                 />
               </div>
 
-              {/* Frame 11209: 아이콘 행 */}
-              <div className="flex items-center justify-between" style={{ alignSelf: 'stretch' }}>
+              {/* Frame 11209: 아이콘 행 — 입력창이 좁아 버튼이 밖으로 밀려나면 가운데 정렬로 전환 */}
+              <div
+                className={`flex items-center ${panelWidth < SEND_BUTTON_CENTER_THRESHOLD ? 'justify-center' : 'justify-between'}`}
+                style={{ alignSelf: 'stretch' }}
+              >
                 {/* 전송 / 중지 버튼 */}
                 {isStreaming ? (
                   <button
                     type="button"
                     aria-label="응답 중지"
                     onClick={handleStop}
-                    className="flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400 ml-auto"
+                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400 ${panelWidth < SEND_BUTTON_CENTER_THRESHOLD ? '' : 'ml-auto'}`}
                     style={{
                       width: '32px',
                       height: '32px',
@@ -887,7 +891,7 @@ export default function AIChatPanel({
                     type="button"
                     onClick={handleSubmit}
                     disabled={!hasText}
-                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ml-auto ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
+                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ${panelWidth < SEND_BUTTON_CENTER_THRESHOLD ? '' : 'ml-auto'} ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
                     style={{
                       width: '32px',
                       height: '32px',
