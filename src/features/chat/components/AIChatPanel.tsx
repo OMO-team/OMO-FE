@@ -1,15 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
-import clipIcon from '../../../assets/icons/icon-clip.svg';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
-import clipDarkIcon from '../../../assets/icons/icon-clip-dark.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
 import editIcon from '../../../assets/icons/icon-edit.svg';
 import trashIcon from '../../../assets/icons/icon-trash.svg';
 import chevronUpIcon from '../../../assets/icons/icon-chevron-up.svg';
-import closeCircleGrayIcon from '../../../assets/icons/icon-close-circle-gray.svg';
-import closeCircleWhiteIcon from '../../../assets/icons/icon-close-circle-white.svg';
 import alertRedIcon from '../../../assets/icons/icon-alert-red.svg';
 import fileErrorIcon from '../../../assets/icons/icon-file-error.svg';
 import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
@@ -25,13 +21,6 @@ type ChatEntry = {
   status: 'loading' | 'completed' | 'empty' | 'cancelled' | 'error';
 };
 
-const MOCK_IMAGES = [
-  { id: '1', isDark: false },
-  { id: '2', isDark: false },
-  { id: '3', isDark: false },
-  { id: '4', isDark: true },
-];
-
 const POLL_INTERVAL_MS = 2000;
 const TIMEOUT_MS = 60000;
 
@@ -41,7 +30,7 @@ const DEFAULT_PANEL_WIDTH = 670;
 const PANEL_COMPACT_THRESHOLD = 60;
 const HEADER_ICONS_MIN_WIDTH = 190;
 
-type NoticeType = 'attachment' | 'briefing-error' | 'file-error' | 'timeout' | null;
+type NoticeType = 'briefing-error' | 'file-error' | 'timeout' | null;
 
 type AIChatPanelProps = {
   onClose?: () => void;
@@ -63,17 +52,6 @@ type BarConfig = {
 };
 
 const NOTICE_CONFIGS: Record<NonNullable<NoticeType>, BarConfig> = {
-  attachment: {
-    borderClass: 'border border-gray-100',
-    bgClass: 'bg-white',
-    icon: clipDarkIcon,
-    iconW: 18,
-    iconH: 20,
-    mainText: '사진 및 파일 첨부',
-    mainColorClass: 'text-gray-900',
-    subText: '컴퓨터에서 업로드하세요   JPG, PNG, PDF · 파일당 최대 10MB',
-    subColorClass: 'text-gray-400',
-  },
   'briefing-error': {
     borderClass: 'border border-red-100',
     bgClass: 'bg-red-50',
@@ -306,7 +284,6 @@ export default function AIChatPanel({
   }, []);
 
   const hasText = value.trim().length > 0;
-  const hasImages = noticeType === 'attachment';
 
   const handleSubmit = async () => {
     if (!hasText || isStreaming) return;
@@ -346,10 +323,6 @@ export default function AIChatPanel({
       setSessionId(null);
     }
     onNewChat?.();
-  };
-
-  const handleClipClick = () => {
-    setNoticeType(prev => (prev === 'attachment' ? null : 'attachment'));
   };
 
   const renderNoticeBar = () => {
@@ -824,7 +797,7 @@ export default function AIChatPanel({
             <div
               className={`flex flex-col items-center rounded-4 ${isFocused ? 'border border-primary-400 bg-white' : 'border border-gray-100 bg-gray-20'}`}
               style={{
-                padding: hasImages ? '16px 24px 20px 24px' : '20px 24px',
+                padding: '20px 24px',
                 alignSelf: 'stretch',
                 boxShadow: isFocused
                   ? '0 4px 12px 0 rgba(23, 146, 255, 0.16)'
@@ -836,43 +809,8 @@ export default function AIChatPanel({
               {/* Frame 11211: 이미지(있을 경우) + 텍스트 입력 */}
               <div
                 className="flex flex-col items-start"
-                style={{ gap: hasImages ? '16px' : '8px', alignSelf: 'stretch' }}
+                style={{ gap: '8px', alignSelf: 'stretch' }}
               >
-                {/* Frame 11457: 이미지 썸네일 행 (이미지 있을때만) */}
-                {hasImages && (
-                  <div className="flex items-start gap-2">
-                    {MOCK_IMAGES.map(img => (
-                      <div
-                        key={img.id}
-                        className={`relative rounded-3 flex-shrink-0 ${img.isDark ? 'border border-gray-500 bg-gray-400' : 'border border-gray-200 bg-gray-100'}`}
-                        style={{ width: '100px', height: '124px' }}
-                      >
-                        {/* Frame 11452: 닫기 버튼 오버레이 */}
-                        <div
-                          className="absolute top-0 right-0 flex justify-end items-start"
-                          style={{
-                            width: '100px',
-                            padding: '8px 8px 0 0',
-                            boxSizing: 'border-box',
-                          }}
-                        >
-                          <button
-                            type="button"
-                            className="bg-transparent border-none cursor-pointer p-0 size-icon-sm"
-                          >
-                            <img
-                              src={img.isDark ? closeCircleWhiteIcon : closeCircleGrayIcon}
-                              alt="삭제"
-                              width={20}
-                              height={20}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 {/* Frame 11458: 텍스트 입력 */}
                 <textarea
                   value={value}
@@ -901,18 +839,6 @@ export default function AIChatPanel({
 
               {/* Frame 11209: 아이콘 행 */}
               <div className="flex items-center justify-between" style={{ alignSelf: 'stretch' }}>
-                {/* 클립 아이콘 버튼 */}
-                <button
-                  type="button"
-                  onClick={handleClipClick}
-                  className={`flex items-center justify-center gap-1 rounded-full border-none cursor-pointer transition-colors ${noticeType === 'attachment' ? 'bg-gray-100' : 'bg-transparent'}`}
-                  style={{ padding: '4px' }}
-                >
-                  <div className="size-icon-md flex items-center justify-center">
-                    <img src={clipIcon} alt="첨부" width={18} height={20} />
-                  </div>
-                </button>
-
                 {/* 전송 / 중지 버튼 */}
                 {isStreaming ? (
                   <button
