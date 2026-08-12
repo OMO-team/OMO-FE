@@ -8,7 +8,11 @@ type PageNavigationProps = {
   onPageChange?: (page: number) => void;
 };
 
-export default function PageNavigation({ currentPage, totalPages, onPageChange }: PageNavigationProps) {
+export default function PageNavigation({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PageNavigationProps) {
   if (totalPages <= 0) return null;
 
   const currentGroup = Math.floor((currentPage - 1) / GROUP_SIZE);
@@ -40,7 +44,7 @@ export default function PageNavigation({ currentPage, totalPages, onPageChange }
         <ChevronLeftIcon className="size-icon-sm" />
       </button>
       <div className="flex items-center gap-3">
-        {visiblePages.map((page) => (
+        {visiblePages.map(page => (
           <button
             key={page}
             type="button"
