@@ -3,7 +3,6 @@ import axios from 'axios';
 import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
-import editIcon from '../../../assets/icons/icon-edit.svg';
 import trashIcon from '../../../assets/icons/icon-trash.svg';
 import chevronUpIcon from '../../../assets/icons/icon-chevron-up.svg';
 import alertRedIcon from '../../../assets/icons/icon-alert-red.svg';
@@ -16,6 +15,7 @@ import type { ChipInfo, ChatEntry } from '../types/dto';
 import {
   loadSessions,
   saveSession,
+  removeSession,
   type SavedChatSession,
 } from '../utils/chatHistoryStorage';
 
@@ -328,18 +328,24 @@ export default function AIChatPanel({
     setChatHistory([]);
     setNoticeType(null);
     if (sessionId !== null) {
-      chatApi.deleteSession(sessionId).catch((error: unknown) => {
-        if (
-          axios.isAxiosError<{ code?: string }>(error) &&
-          error.response?.data?.code === 'AI-002'
-        ) {
-          return;
-        }
-        setNoticeType('briefing-error');
-      });
+      // 세션 삭제는 백엔드 정리용 best-effort 요청 — 실패해도 화면은 이미 초기화됐으므로 브리핑 오류 배너를 띄우지 않음
+      chatApi.deleteSession(sessionId).catch(() => {});
       setSessionId(null);
     }
     onNewChat?.();
+  };
+
+  const handleDeleteChat = () => {
+    setIsMoreMenuOpen(false);
+    stopPolling();
+    setIsStreaming(false);
+    setNoticeType(null);
+    if (sessionId !== null) {
+      chatApi.deleteSession(sessionId).catch(() => {});
+      removeSession(sessionId);
+      setSessionId(null);
+    }
+    setChatHistory([]);
   };
 
   const handleSelectSavedSession = (session: SavedChatSession) => {
@@ -630,7 +636,7 @@ export default function AIChatPanel({
                       onClick={e => e.stopPropagation()}
                       style={{
                         right: '-52px',
-                        bottom: '-76px',
+                        top: '36px',
                         width: '124px',
                         padding: '8px',
                         boxShadow: '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
@@ -640,14 +646,7 @@ export default function AIChatPanel({
                       <div className="flex flex-col items-start gap-1" style={{ width: '108px' }}>
                         <button
                           type="button"
-                          className="flex items-center gap-1 rounded-2 border-none cursor-pointer bg-transparent hover:bg-gray-100 transition-colors"
-                          style={{ height: '26px', padding: '4px 12px', alignSelf: 'stretch' }}
-                        >
-                          <img src={editIcon} alt="수정" width={16} height={16} />
-                          <span className="body-05 text-gray-600">이름 수정하기</span>
-                        </button>
-                        <button
-                          type="button"
+                          onClick={handleDeleteChat}
                           className="flex items-center gap-1 rounded-2 border-none cursor-pointer bg-transparent hover:bg-gray-100 transition-colors"
                           style={{ height: '26px', padding: '4px 12px', alignSelf: 'stretch' }}
                         >
