@@ -1,6 +1,6 @@
 import ChevronLeftIcon from './icons/ChevronLeftIcon';
 
-const GROUP_SIZE = 3;
+const GROUP_SIZE = 10;
 
 type PageNavigationProps = {
   currentPage: number;
