@@ -12,16 +12,13 @@ import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
 import AIChatThread from './AIChatThread';
 import { chatApi } from '../api/chatApi';
 import useTypingEffect from '../hooks/useTypingEffect';
-import type { BriefingData, ChipInfo, BriefingStatusResult } from '../types/dto';
-
-type ChatEntry = {
-  id: string;
-  userMessage: string;
-  thinkingTime: number;
-  briefingData: BriefingData | null;
-  briefingStatus?: BriefingStatusResult | null;
-  status: 'loading' | 'completed' | 'empty' | 'cancelled' | 'error';
-};
+import type { ChipInfo, ChatEntry } from '../types/dto';
+import {
+  loadSessions,
+  saveSession,
+  removeSession,
+  type SavedChatSession,
+} from '../utils/chatHistoryStorage';
 
 const POLL_INTERVAL_MS = 2000;
 const TIMEOUT_MS = 60000;
@@ -125,6 +122,15 @@ export default function AIChatPanel({
   const purposeCountryTitle = [activePurpose, selectedCountry].filter(Boolean).join(' - ');
   const chatTitle = purposeCountryTitle || lastEntry?.userMessage || 'OMO 스마트 브리핑';
   const displayedChatTitle = useTypingEffect(chatTitle, 30);
+
+  /** 드롭다운이 열릴 때만 로컬 스토리지에서 읽어옴 — 세션 목록 조회 API가 없어 로컬 미러를 사용 */
+  const savedSessions: SavedChatSession[] = isDropdownOpen ? loadSessions() : [];
+
+  /** 백엔드에 세션 목록 조회 API가 없어, 대화가 진행될 때마다 로컬 스토리지에 미러링해 "지난 30일" 목록/복원에 사용 */
+  useEffect(() => {
+    if (sessionId === null || chatHistory.length === 0) return;
+    saveSession({ sessionId, title: chatTitle, updatedAt: Date.now(), chatHistory });
+  }, [sessionId, chatHistory, chatTitle]);
 
   const handleResizeMove = useCallback((e: MouseEvent) => {
     const state = resizeRef.current;
@@ -332,9 +338,19 @@ export default function AIChatPanel({
         }
         setNoticeType('briefing-error');
       });
+      removeSession(sessionId);
       setSessionId(null);
     }
     onNewChat?.();
+  };
+
+  const handleSelectSavedSession = (session: SavedChatSession) => {
+    stopPolling();
+    setIsStreaming(false);
+    setNoticeType(null);
+    setChatHistory(session.chatHistory);
+    setSessionId(session.sessionId);
+    setIsDropdownOpen(false);
   };
 
   const renderNoticeBar = () => {
@@ -518,29 +534,36 @@ export default function AIChatPanel({
                     <span className="body-05 text-gray-600">지난 30일</span>
                   </div>
                   <div className="flex flex-col items-start" style={{ alignSelf: 'stretch' }}>
-                    {/* 세션 히스토리 API 미구현 — 추후 연동 */}
-                    {[].map((item: { id: number; title: string }) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className="flex items-center justify-center gap-1 rounded-2 border-none cursor-pointer text-left hover:bg-gray-20 bg-transparent transition-colors"
-                        style={{ padding: '8px 20px', alignSelf: 'stretch' }}
-                      >
-                        <span
-                          className="body-02 text-gray-800"
-                          style={{
-                            display: '-webkit-box',
-                            width: '210px',
-                            WebkitBoxOrient: 'vertical',
-                            WebkitLineClamp: 1,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
+                    {/* 세션 목록 조회 API가 없어 로컬 스토리지에 미러링된 대화 기록을 사용 */}
+                    {savedSessions.length === 0 ? (
+                      <div style={{ padding: '8px 20px', alignSelf: 'stretch' }}>
+                        <span className="body-05 text-gray-400">저장된 대화가 없어요.</span>
+                      </div>
+                    ) : (
+                      savedSessions.map(item => (
+                        <button
+                          key={item.sessionId}
+                          type="button"
+                          onClick={() => handleSelectSavedSession(item)}
+                          className={`flex items-center justify-center gap-1 rounded-2 border-none cursor-pointer text-left hover:bg-gray-20 transition-colors ${item.sessionId === sessionId ? 'bg-gray-20' : 'bg-transparent'}`}
+                          style={{ padding: '8px 20px', alignSelf: 'stretch' }}
                         >
-                          {item.title}
-                        </span>
-                      </button>
-                    ))}
+                          <span
+                            className="body-02 text-gray-800"
+                            style={{
+                              display: '-webkit-box',
+                              width: '210px',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 1,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {item.title}
+                          </span>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
