@@ -9,6 +9,7 @@ type SearchModalProps = {
   recentSearches?: string[];
   onRemove?: (index: number) => void;
   onClearAll?: () => void;
+  onSearch?: (query: string) => void;
 };
 
 export default function SearchModal({
@@ -16,14 +17,17 @@ export default function SearchModal({
   recentSearches = [],
   onRemove,
   onClearAll,
+  onSearch,
 }: SearchModalProps) {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
   const hasSearches = recentSearches.length > 0;
 
   const handleSearch = () => {
-    if (!searchValue.trim()) return;
-    navigate(`/city-insight?keyword=${encodeURIComponent(searchValue.trim())}`);
+    const query = searchValue.trim();
+    if (!query) return;
+    onSearch?.(query);
+    navigate(`/city-insight?keyword=${encodeURIComponent(query)}`);
     onClose();
   };
 
@@ -46,7 +50,7 @@ export default function SearchModal({
               placeholder="도시나 키워드로 검색하기"
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onKeyDown={e => e.key === 'Enter' && !e.nativeEvent.isComposing && handleSearch()}
             />
           </div>
           <button

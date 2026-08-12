@@ -140,7 +140,10 @@ export default function MainLayout() {
           <SearchModal
             onClose={closeSearch}
             recentSearches={recentSearches}
-            onRemove={index => setRecentSearches(prev => prev.filter((_, i) => i !== index))}
+            onSearch={(query) =>
+              setRecentSearches((prev) => [query, ...prev.filter((q) => q !== query)].slice(0, 10))
+            }
+            onRemove={(index) => setRecentSearches((prev) => prev.filter((_, i) => i !== index))}
             onClearAll={() => setRecentSearches([])}
           />
         </ModalOverlay>

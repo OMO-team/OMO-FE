@@ -12,11 +12,13 @@ export default function ModalOverlay({ children, onClose, zIndex = 50 }: ModalOv
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-gray-800/50 p-4"
+      className="fixed inset-0 overflow-y-auto bg-gray-800/50"
       style={{ zIndex }}
       onClick={onClose}
     >
-      <div onClick={stopPropagation}>{children}</div>
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div onClick={stopPropagation}>{children}</div>
+      </div>
     </div>
   );
 }
