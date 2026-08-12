@@ -401,8 +401,8 @@ export default function AIChatPanel({
     <div
       className={`relative flex h-full flex-col border-l border-gray-100 bg-white ${
         isClosing
-          ? 'animate-[panel-slide-out_0.22s_ease-in]'
-          : 'animate-[panel-slide-in_0.28s_ease-out]'
+          ? 'animate-[panel-slide-out_0.22s_ease-in_forwards]'
+          : 'animate-[panel-slide-in_0.28s_ease-out_forwards]'
       }`}
       style={{
         width: `${panelWidth}px`,
