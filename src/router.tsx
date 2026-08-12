@@ -31,8 +31,8 @@ export const router = createBrowserRouter([
   {
     element: <MainLayout />,
     children: [
-      { path: '/', element: <HomePage />, handle: { headerVariant: 'transparent' } },
-      { path: '/city-insight', element: <CityInsight /> },
+      { path: '/', element: <HomePage />, handle: { headerVariant: 'transparent', hasOwnChatEntry: true } },
+      { path: '/city-insight', element: <CityInsight />, handle: { hasOwnChatEntry: true } },
       { path: '/myhome/empty', element: <RoadmapApp /> },
       { path: '/auth/email-verify', element: <EmailVerifyRoute /> },
       { path: '/auth/password-reset/verify', element: <PasswordResetVerifyRoute /> },
