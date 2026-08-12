@@ -108,7 +108,7 @@ export default function MainLayout() {
       <main className="flex flex-1 flex-col">
         <Outlet context={outletContext} />
       </main>
-      <Footer />
+      <Footer onOpenSmartBriefing={() => openChat()} />
 
       <div className="fixed inset-y-0 right-0 z-40 flex">
         {/* Sidebar_Collapse_Handle — 페이지 자체 채팅 진입점이 없는 곳에서만 노출 */}
