@@ -16,7 +16,6 @@ import type { ChipInfo, ChatEntry } from '../types/dto';
 import {
   loadSessions,
   saveSession,
-  removeSession,
   type SavedChatSession,
 } from '../utils/chatHistoryStorage';
 
@@ -338,7 +337,6 @@ export default function AIChatPanel({
         }
         setNoticeType('briefing-error');
       });
-      removeSession(sessionId);
       setSessionId(null);
     }
     onNewChat?.();

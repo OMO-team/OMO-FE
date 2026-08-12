@@ -132,13 +132,7 @@ export default function MainLayout() {
           </button>
         )}
 
-        {isChatOpen && (
-          <AIChatPanel
-            initialMessage={chatInitialMessage}
-            onClose={closeChat}
-            onNewChat={closeChat}
-          />
-        )}
+        {isChatOpen && <AIChatPanel initialMessage={chatInitialMessage} onClose={closeChat} />}
       </div>
 
       {isSearchOpen && (
