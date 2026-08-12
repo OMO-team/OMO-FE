@@ -4,7 +4,6 @@ import suitcaseIcon from '../../../assets/icons/icon-suitcase[32].svg';
 import imageUploadIcon from '../../../assets/icons/icon-image-upload.svg';
 import moreMenuIcon from '../../../assets/icons/icon-more-menu.svg';
 import trashIcon from '../../../assets/icons/icon-trash.svg';
-import chevronUpIcon from '../../../assets/icons/icon-chevron-up.svg';
 import alertRedIcon from '../../../assets/icons/icon-alert-red.svg';
 import fileErrorIcon from '../../../assets/icons/icon-file-error.svg';
 import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
@@ -28,6 +27,7 @@ const DEFAULT_PANEL_WIDTH = 670;
 const PANEL_COMPACT_THRESHOLD = 60;
 const HEADER_ICONS_MIN_WIDTH = 190;
 const SEND_BUTTON_CENTER_THRESHOLD = 165;
+const PANEL_CLOSE_ANIMATION_MS = 220;
 
 type NoticeType = 'briefing-error' | 'file-error' | 'timeout' | null;
 
@@ -99,6 +99,7 @@ export default function AIChatPanel({
   const [noticeType, setNoticeType] = useState<NoticeType>(defaultNotice);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const [chips, setChips] = useState<ChipInfo[]>([]);
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -111,6 +112,7 @@ export default function AIChatPanel({
   const pollStartTimeRef = useRef<number>(0);
   const currentEntryIdRef = useRef<string | null>(null);
   const initialSubmittedRef = useRef(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hasChatStarted = chatHistory.length > 0;
 
@@ -160,6 +162,7 @@ export default function AIChatPanel({
     return () => {
       window.removeEventListener('mousemove', handleResizeMove);
       window.removeEventListener('mouseup', handleResizeEnd);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
   }, [handleResizeMove, handleResizeEnd]);
 
@@ -322,6 +325,13 @@ export default function AIChatPanel({
     }
   };
 
+  const handleClose = () => {
+    setIsClosing(true);
+    closeTimerRef.current = setTimeout(() => {
+      onClose?.();
+    }, PANEL_CLOSE_ANIMATION_MS);
+  };
+
   const handleNewChat = async () => {
     stopPolling();
     setIsStreaming(false);
@@ -389,7 +399,11 @@ export default function AIChatPanel({
 
   return (
     <div
-      className="relative flex h-full flex-col border-l border-gray-100 bg-white"
+      className={`relative flex h-full flex-col border-l border-gray-100 bg-white ${
+        isClosing
+          ? 'animate-[panel-slide-out_0.22s_ease-in]'
+          : 'animate-[panel-slide-in_0.28s_ease-out]'
+      }`}
       style={{
         width: `${panelWidth}px`,
         minWidth: `${MIN_PANEL_WIDTH}px`,
@@ -494,26 +508,25 @@ export default function AIChatPanel({
                   <span className="title-01 text-gray-700 overflow-hidden text-ellipsis whitespace-nowrap max-w-[300px] min-w-0">
                     {displayedChatTitle}
                   </span>
-                  <div className="size-icon-sm flex items-center justify-center flex-shrink-0">
-                    {isDropdownOpen ? (
-                      <img src={chevronUpIcon} alt="닫기" width={14} height={8} />
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="8"
-                        viewBox="0 0 14 8"
-                        fill="none"
-                      >
-                        <path
-                          d="M12.7 0.699219L6.69995 6.69922L0.699951 0.69922"
-                          stroke="var(--color-gray-500)"
-                          strokeWidth="1.4"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
+                  <div
+                    className="size-icon-sm flex items-center justify-center flex-shrink-0 transition-transform duration-200"
+                    style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="8"
+                      viewBox="0 0 14 8"
+                      fill="none"
+                    >
+                      <path
+                        d="M12.7 0.699219L6.69995 6.69922L0.699951 0.69922"
+                        stroke="var(--color-gray-500)"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </div>
                 </div>
               </button>
@@ -664,7 +677,7 @@ export default function AIChatPanel({
               {/* Collapse(>>) 버튼 */}
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="size-icon-md flex items-center justify-center bg-transparent border-none cursor-pointer p-0"
               >
                 <svg
