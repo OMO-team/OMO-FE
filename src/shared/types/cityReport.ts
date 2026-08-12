@@ -45,6 +45,8 @@ export interface CityReportData {
   /** AI 맞춤 검색(POST /api/v1/cities/{cityId}/ai-report) 호출에 쓰는 식별자 */
   cityId: number;
   cityName: string;
+  /** 어떤 목적으로 보고 있는지 — 목적 없이 들어오는 경로(검색)에서는 비어 있다 */
+  purposeName?: string;
   heroImageUrl: string;
   ratingBadge: number;
   totalScore: number;
