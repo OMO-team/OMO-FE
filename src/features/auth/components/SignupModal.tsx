@@ -62,7 +62,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(signupDraft?.isEmailVerified ?? false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [googleError, setGoogleError] = useState('');
+  const [termsError, setTermsError] = useState('');
   const [isGoogleHovered, setIsGoogleHovered] = useState(false);
   const [agreeAll, setAgreeAll] = useState(
     (signupDraft?.agreeTerms && signupDraft?.agreePrivacy) ?? false
@@ -100,6 +100,12 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     setAgreePrivacy(next);
     if (!next) setAgreeAll(false);
     else if (agreeTerms) setAgreeAll(true);
+  };
+
+  const getTermsErrorMessage = () => {
+    if (!agreeTerms && !agreePrivacy) return '이용약관 및 개인정보 처리방침에 동의해주세요.';
+    if (!agreeTerms) return '이용약관에 동의해주세요.';
+    return '개인정보 처리방침에 동의해주세요.';
   };
 
   const handleSendEmailCode = async () => {
@@ -154,8 +160,14 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
   const handleGoogleSignup = async () => {
     if (isGoogleLoading) return;
+    // 구글 가입은 이름/이메일/비밀번호 입력을 쓰지 않으므로, 일반 회원가입 폼에서 남은 에러는 무관해서 지운다.
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+    setTermsError('');
     if (!agreeTerms || !agreePrivacy) {
-      setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.');
+      setTermsError(getTermsErrorMessage());
       return;
     }
     setIsGoogleLoading(true);
@@ -168,14 +180,14 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       if (axios.isAxiosError<{ code?: string }>(error)) {
         const code = error.response?.data?.code;
         if (code === 'MEMBER400_3') {
-          setGoogleError('필수 약관에 모두 동의해주세요.');
+          setTermsError('필수 약관에 모두 동의해주세요.');
         } else if (code === 'MEMBER400_2') {
-          setGoogleError('약관 정보가 올바르지 않습니다. 다시 시도해주세요.');
+          setTermsError('약관 정보가 올바르지 않습니다. 다시 시도해주세요.');
         } else {
-          setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
+          setTermsError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
         }
       } else {
-        setGoogleError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
+        setTermsError('Google 회원가입에 실패했습니다. 다시 시도해주세요.');
       }
     }
   };
@@ -188,6 +200,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     setEmailError('');
     setPasswordError('');
     setConfirmPasswordError('');
+    setTermsError('');
 
     let hasError = false;
     if (!name) {
@@ -196,6 +209,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     }
     if (!email) {
       setEmailError('이메일을 입력해주세요.');
+      hasError = true;
+    } else if (!isEmailVerified) {
+      setEmailError('이메일 인증을 완료해주세요.');
       hasError = true;
     }
     if (!passwordRegex.test(password)) {
@@ -206,12 +222,8 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       setConfirmPasswordError('비밀번호가 일치하지 않습니다.');
       hasError = true;
     }
-    if (!isEmailVerified) {
-      setEmailError('이메일 인증을 완료해주세요.');
-      hasError = true;
-    }
     if (!agreeTerms || !agreePrivacy) {
-      setEmailError('이용약관 및 개인정보 처리방침에 동의해주세요.');
+      setTermsError(getTermsErrorMessage());
       hasError = true;
     }
     if (hasError) return;
@@ -443,6 +455,10 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                     </div>
                   </div>
                 </div>
+
+                {termsError && (
+                  <span className="body-04 px-2 text-warning-400">{termsError}</span>
+                )}
               </div>
 
               {/* 회원가입 버튼 */}
@@ -495,10 +511,6 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                   </div>
                 </button>
               </div>
-
-              {googleError && (
-                <span className="body-02 text-[#FF2A14] self-start">{googleError}</span>
-              )}
 
               {/* 로그인 유도 */}
               <div className="flex items-center" style={{ gap: '8px' }}>
