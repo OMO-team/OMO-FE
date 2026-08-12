@@ -1,6 +1,6 @@
 // react
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // shared components
@@ -19,7 +19,8 @@ import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../../roadmap/api/roadmapsApi';
-import { roadmapQueryKeys } from '../../roadmap/api/queryKeys';
+import { wishlistApi } from '../../roadmap/api/wishlistApi';
+import { roadmapQueryKeys, wishlistQueryKeys } from '../../roadmap/api/queryKeys';
 import { getErrorMessage } from '../../roadmap/api/apiUtils';
 import RoadmapAddedToast from '../../roadmap/components/RoadmapAddedToast';
 import CompareSelectionBar from '../../compare/components/CompareSelectionBar';
@@ -33,7 +34,8 @@ import { useCities } from '../hooks/useCities';
 import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
-import type { CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
+import type { CityItem, CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
+import type { CitySummary } from '../../chat/types/dto';
 
 // stores
 import { useCompareStore } from '../../compare/store/useCompareStore';
@@ -72,19 +74,44 @@ const STAY_DURATION_MAP: Record<string, StayDurationType> = {
   '1년 이상': 'VERY_LONG',
 };
 
+/** 스마트 브리핑의 "추천 도시 보러가기"로 들어온 도시들 — 목적(purpose) 필터 기준 카탈로그 API로는 조회할 수 없어 AI 응답에 실려온 데이터를 그대로 카드로 그린다 */
+function adaptSummaryToCityItem(city: CitySummary): CityItem {
+  return {
+    cityId: city.cityId,
+    name: city.cityName,
+    country: { countryId: 0, name: city.countryName },
+    continent: '',
+    imageUrl: city.imageUrl,
+    rating: city.rating,
+    description: '',
+    monthlyCost: city.monthlyCost,
+    safetyScore: city.safetyScore,
+    housingScore: city.housingScore,
+    visaScore: city.visaScore,
+    languageScore: city.languageScore,
+    internetScore: city.infraScore,
+    stayDuration: 'SHORT',
+    isWishlisted: false,
+  };
+}
+
 export default function CityInsight() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
+  const recommendedCities = (location.state as { recommendedCities?: CitySummary[] } | null)
+    ?.recommendedCities;
 
-  // 진입 경로 판단 — keyword와 countryCodes는 상호 배타적으로 처리
-  const isFromSearch = !!urlKeyword;
-  const isFromCountry = !isFromSearch;
+  // 진입 경로 판단 — keyword / countryCodes / AI 추천 도시는 상호 배타적으로 처리
+  const isFromRecommendation = !!recommendedCities?.length;
+  const isFromSearch = !isFromRecommendation && !!urlKeyword;
+  const isFromCountry = !isFromSearch && !isFromRecommendation;
 
-  const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
+  const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch && !isFromRecommendation });
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
   const activeIndex = Math.max(
@@ -120,7 +147,13 @@ export default function CityInsight() {
   const resetCompare = useCompareStore(s => s.resetCompare);
   const closeCompareModal = useCompareStore(s => s.closeModal);
 
-  const activePurpose = purposes[activeIndex];
+  /**
+   * 검색으로 들어오면 목적을 고르는 단계가 없어 선택된 목적도 없다.
+   * usePurposes는 enabled가 false여도 캐시된 목록을 그대로 돌려주기 때문에
+   * (메인 화면이 같은 키로 미리 받아둠) 여기서 걸러주지 않으면
+   * 첫 번째 목적(워킹홀리데이)이 선택된 것처럼 잡힌다.
+   */
+  const activePurpose = isFromSearch ? undefined : purposes[activeIndex];
 
   const queryParams = useMemo<CityQueryParams>(() => {
     const currentCountryCodes = searchParams.getAll('countryCodes');
@@ -153,12 +186,14 @@ export default function CityInsight() {
   );
 
   const { data: citiesResult } = useCities(apiParams, {
-    enabled: isFromSearch || !!activePurpose,
+    enabled: !isFromRecommendation && (isFromSearch || !!activePurpose),
   });
 
-  const cities = citiesResult?.data ?? [];
-  const totalElements = citiesResult?.totalElements ?? 0;
-  const totalPages = Math.max(1, citiesResult?.totalPages ?? 1);
+  const cities = isFromRecommendation
+    ? recommendedCities!.map(adaptSummaryToCityItem)
+    : citiesResult?.data ?? [];
+  const totalElements = isFromRecommendation ? cities.length : citiesResult?.totalElements ?? 0;
+  const totalPages = isFromRecommendation ? 1 : Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
     if (!addedRoadmap) return;
@@ -171,6 +206,34 @@ export default function CityInsight() {
       roadmapsApi.create({ cityId, purposeId }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.all }),
   });
+
+  /** 위시리스트도 로드맵과 마찬가지로 목적이 있어야 담을 수 있음 — 검색 진입에는 목적이 없어 토글 불가 */
+  const invalidateWishRelatedQueries = () => {
+    queryClient.invalidateQueries({ queryKey: wishlistQueryKeys.all });
+    queryClient.invalidateQueries({ queryKey: ['cities'] });
+  };
+  const addWishMutation = useMutation({
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      wishlistApi.add(cityId, purposeId),
+    onSuccess: invalidateWishRelatedQueries,
+  });
+  const removeWishMutation = useMutation({
+    mutationFn: ({ cityId, purposeId }: { cityId: number; purposeId: number }) =>
+      wishlistApi.remove(cityId, purposeId),
+    onSuccess: invalidateWishRelatedQueries,
+  });
+  const handleToggleWish = (city: CityItem) => {
+    const purposeId = activePurpose?.purposeId;
+    if (purposeId == null) {
+      console.error('목적 없이는 위시리스트를 바꿀 수 없음', city.cityId);
+      return;
+    }
+    if (city.isWishlisted) {
+      removeWishMutation.mutate({ cityId: city.cityId, purposeId });
+    } else {
+      addWishMutation.mutate({ cityId: city.cityId, purposeId });
+    }
+  };
 
   // 이 화면을 벗어나면 비교 중이던 상태를 초기화 — 비교는 화면별로 독립적으로 유지됨
   useEffect(() => {
@@ -211,6 +274,8 @@ export default function CityInsight() {
     ? buildCityReportData({
         cityId: String(reportCity.cityId),
         cityName: reportCity.name,
+        // 검색으로 들어오면 목적을 고르는 단계가 없어 표시할 값이 없다
+        purposeName: activePurpose?.name,
         imageUrl: reportCity.imageUrl,
         rating: reportCity.rating,
         description: reportCity.description,
@@ -264,62 +329,66 @@ export default function CityInsight() {
             )}
           </div>
         )}
-        <div className="flex flex-col gap-4">
-          {!isFromSearch && (
-            <>
-              <CategoryTab
-                categories={categoryNames}
-                activeIndex={activeIndex}
-                onChange={handleCategoryChange}
-              />
-              <SearchInputBar
-                placeholder="원하는 도시 조건을 입력해 보세요"
-                width="w-[974px]"
-                value={input}
-                onChange={setInput}
-                onSearch={handleSearch}
-                showIcon
-              />
-            </>
-          )}
-           {isFromSearch && (
-              <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
-            )}
-          <div className="flex justify-between">
-            <div className="flex gap-2">
-              <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
-              <RegionDropDown
-                key={`region-${resetKey}`}
-                purposeType={activePurpose?.type}
-                onSelect={handleSelect}
-                onReset={() => setSelectedCountries([])}
-              />
-              <div className="w-px h-7 bg-gray-300"></div>
-              {DETAIL_OPTIONS.map(({ title, options }) => (
-                <DropDown
-                  key={title}
-                  title={title}
-                  options={options}
-                  selectedOption={selectedOptions[title] ?? null}
-                  onSelect={option => handleSelectOption(title, option)}
+        {!isFromRecommendation && (
+          <>
+            <div className="flex flex-col gap-4">
+              {!isFromSearch && (
+                <>
+                  <CategoryTab
+                    categories={categoryNames}
+                    activeIndex={activeIndex}
+                    onChange={handleCategoryChange}
+                  />
+                  <SearchInputBar
+                    placeholder="원하는 도시 조건을 입력해 보세요"
+                    width="w-[974px]"
+                    value={input}
+                    onChange={setInput}
+                    onSearch={handleSearch}
+                    showIcon
+                  />
+                </>
+              )}
+               {isFromSearch && (
+                  <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
+                )}
+              <div className="flex justify-between">
+                <div className="flex gap-2">
+                  <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
+                  <RegionDropDown
+                    key={`region-${resetKey}`}
+                    purposeType={activePurpose?.type}
+                    onSelect={handleSelect}
+                    onReset={() => setSelectedCountries([])}
+                  />
+                  <div className="w-px h-7 bg-gray-300"></div>
+                  {DETAIL_OPTIONS.map(({ title, options }) => (
+                    <DropDown
+                      key={title}
+                      title={title}
+                      options={options}
+                      selectedOption={selectedOptions[title] ?? null}
+                      onSelect={option => handleSelectOption(title, option)}
+                    />
+                  ))}
+                </div>
+                <button className="flex items-center gap-1" onClick={handleReset}>
+                  <p className="body-03 text-gray-400">필터 초기화</p>
+                  <img src={filterResetIcon} alt="" />
+                </button>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              {selectedCountries.map(({ name, code }) => (
+                <FilterChip
+                  key={code}
+                  label={name}
+                  onRemove={() => setSelectedCountries(prev => prev.filter(c => c.code !== code))}
                 />
               ))}
             </div>
-            <button className="flex items-center gap-1" onClick={handleReset}>
-              <p className="body-03 text-gray-400">필터 초기화</p>
-              <img src={filterResetIcon} alt="" />
-            </button>
-          </div>
-        </div>
-        <div className="mt-3 flex gap-2">
-          {selectedCountries.map(({ name, code }) => (
-            <FilterChip
-              key={code}
-              label={name}
-              onRemove={() => setSelectedCountries(prev => prev.filter(c => c.code !== code))}
-            />
-          ))}
-        </div>
+          </>
+        )}
         {totalElements !== 0 ? (
           <>
             <div className="mt-11 grid grid-cols-2 gap-5">
@@ -337,18 +406,23 @@ export default function CityInsight() {
                   languageScore={city.languageScore}
                   internetScore={city.internetScore}
                   {...adaptCityToCardProps(city)}
+                  onToggleWish={() => handleToggleWish(city)}
                   onCompare={() => toggleCompare(city.cityId, city.name)}
                   onReport={() => setReportCityName(city.name)}
                 />
               ))}
             </div>
-            <div className="mt-25 mb-[304px]">
-              <PageNavigation
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-            </div>
+            {isFromRecommendation ? (
+              <div className="mb-[304px]" />
+            ) : (
+              <div className="mt-25 mb-[304px]">
+                <PageNavigation
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
           </>
         ) : (
           <div className="flex flex-col gap-[30px] items-center mt-[298px] mb-[295px]">

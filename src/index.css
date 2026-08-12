@@ -134,6 +134,16 @@
 }
 
 /* =========================================
+   Base
+   Tailwind v3+ 기본값(cursor: default)을 되돌려서 모든 버튼에 포인터 커서 적용
+   ========================================= */
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* =========================================
    Typography Styles
    사용법: className="heading-01" 처럼 그대로 클래스명 사용
    ========================================= */
@@ -303,5 +313,30 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none; /* Chrome, Safari */
+  }
+}
+
+/* =========================================
+   Panel Enter Animation
+   AI 채팅(스마트 브리핑) 패널이 열릴 때 오른쪽에서 부드럽게 슬라이드 인
+   ========================================= */
+@keyframes panel-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes panel-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(24px);
+    opacity: 0;
   }
 }

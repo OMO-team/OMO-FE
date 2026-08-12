@@ -1,4 +1,3 @@
-import { CITY_INFO_KO } from '../mocks/cityCountryMap';
 import type { CityInfo } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -46,12 +45,10 @@ export function wishKey(cityId: string | number, purposeId?: number): string {
 
 /** 도시 정보를 CityInsightCard / AI 리포트가 쓰는 CityInsightData로 변환 */
 export function toCityInsightData(city: CityInsightSource): CityInsightData {
-  // 도시명/국가명이 영문으로 내려와서, 시드 데이터 기반 한글 매핑으로 대신 채움
-  const cityInfo = CITY_INFO_KO[city.cityId];
   return {
     cityId: String(city.cityId),
-    cityName: cityInfo?.cityName ?? city.name,
-    countryName: cityInfo?.countryName ?? city.country.name,
+    cityName: city.name,
+    countryName: city.country.name,
     purposeId: city.purposeId,
     purposeName: city.purposeName,
     imageUrl: city.imageUrl ?? '',

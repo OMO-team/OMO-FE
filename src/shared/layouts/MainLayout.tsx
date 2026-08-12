@@ -16,10 +16,14 @@ import type { TermsAndPolicyLocationState } from '../pages/TermsAndPolicyRoute';
 import type { MainLayoutContext } from './useMainLayoutContext';
 import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
-type RouteHandle = { headerVariant?: 'default' | 'overlay' | 'transparent' };
+type RouteHandle = {
+  headerVariant?: 'default' | 'overlay' | 'transparent';
+  hasOwnChatEntry?: boolean;
+};
 
 export default function MainLayout() {
-  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } = useAuthStore();
+  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } =
+    useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
@@ -28,8 +32,9 @@ export default function MainLayout() {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
     const controller = new AbortController();
-    memberApi.getMyInfo()
-      .then((info) => {
+    memberApi
+      .getMyInfo()
+      .then(info => {
         if (controller.signal.aborted) return;
         if (localStorage.getItem('accessToken') !== token) return;
         signIn(info.profileImageUrl ?? undefined);
@@ -42,7 +47,9 @@ export default function MainLayout() {
           signOut();
         }
       });
-    return () => { controller.abort(); };
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   /**
@@ -55,7 +62,11 @@ export default function MainLayout() {
   useEffect(() => {
     const prev = prevLocationRef.current;
     const prevState = prev.state as TermsAndPolicyLocationState | null;
-    if (prev.pathname === '/support/terms' && prevState?.fromSignup && location.pathname !== '/support/terms') {
+    if (
+      prev.pathname === '/support/terms' &&
+      prevState?.fromSignup &&
+      location.pathname !== '/support/terms'
+    ) {
       openModal('signup');
     }
     prevLocationRef.current = location;
@@ -63,8 +74,15 @@ export default function MainLayout() {
 
   const matches = useMatches();
   const headerVariant =
-    matches.map((m) => (m.handle as RouteHandle | undefined)?.headerVariant).filter(Boolean).at(-1) ?? 'default';
+    matches
+      .map(m => (m.handle as RouteHandle | undefined)?.headerVariant)
+      .filter(Boolean)
+      .at(-1) ?? 'default';
   const isOverlay = headerVariant === 'overlay';
+  /** 페이지 자체에 채팅 진입점(홈의 프롬프트 입력창, 도시 탐색의 FAB)이 있으면 사이드바 손잡이가 중복이라 숨김 */
+  const hasPageOwnChatEntry = matches.some(
+    m => (m.handle as RouteHandle | undefined)?.hasOwnChatEntry
+  );
 
   const openChat = useCallback((initialMessage?: string) => {
     setChatInitialMessage(initialMessage);
@@ -76,7 +94,10 @@ export default function MainLayout() {
     setChatInitialMessage(undefined);
   }, []);
 
-  const outletContext: MainLayoutContext = useMemo(() => ({ openChat, closeChat }), [openChat, closeChat]);
+  const outletContext: MainLayoutContext = useMemo(
+    () => ({ openChat, closeChat, isChatOpen }),
+    [openChat, closeChat, isChatOpen]
+  );
 
   return (
     <div className="relative flex min-h-screen min-w-[1200px] flex-col">
@@ -87,35 +108,31 @@ export default function MainLayout() {
       <main className="flex flex-1 flex-col">
         <Outlet context={outletContext} />
       </main>
-      <Footer />
+      <Footer onOpenSmartBriefing={() => openChat()} />
 
       <div className="fixed inset-y-0 right-0 z-40 flex">
-        {/* Sidebar_Collapse_Handle */}
-        <button
-          type="button"
-          onClick={() => setIsChatOpen((prev) => !prev)}
-          aria-label={isChatOpen ? 'AI 채팅 닫기' : 'AI 채팅 열기'}
-          className="flex h-full items-center cursor-pointer outline-none border-0"
-          style={{
-            width: `${SIDEBAR_HANDLE_WIDTH}px`,
-            paddingLeft: '10px',
-            background: '#FFF',
-            borderLeft: '1px solid #E7EAEF',
-          }}
-        >
-          <div
-            className="flex flex-col items-start flex-shrink-0 bg-gray-200"
-            style={{ width: '6px', height: '120px', borderRadius: '10px' }}
-          />
-        </button>
-
-        {isChatOpen && (
-          <AIChatPanel
-            initialMessage={chatInitialMessage}
-            onClose={closeChat}
-            onNewChat={closeChat}
-          />
+        {/* Sidebar_Collapse_Handle — 페이지 자체 채팅 진입점이 없는 곳에서만 노출 */}
+        {!hasPageOwnChatEntry && (
+          <button
+            type="button"
+            onClick={() => setIsChatOpen(prev => !prev)}
+            aria-label={isChatOpen ? 'AI 채팅 닫기' : 'AI 채팅 열기'}
+            className="flex h-full items-center cursor-pointer outline-none border-0"
+            style={{
+              width: `${SIDEBAR_HANDLE_WIDTH}px`,
+              paddingLeft: '10px',
+              background: '#FFF',
+              borderLeft: '1px solid #E7EAEF',
+            }}
+          >
+            <div
+              className="flex flex-col items-start flex-shrink-0 bg-gray-200"
+              style={{ width: '6px', height: '120px', borderRadius: '10px' }}
+            />
+          </button>
         )}
+
+        {isChatOpen && <AIChatPanel initialMessage={chatInitialMessage} onClose={closeChat} />}
       </div>
 
       {isSearchOpen && (
@@ -123,6 +140,9 @@ export default function MainLayout() {
           <SearchModal
             onClose={closeSearch}
             recentSearches={recentSearches}
+            onSearch={(query) =>
+              setRecentSearches((prev) => [query, ...prev.filter((q) => q !== query)].slice(0, 10))
+            }
             onRemove={(index) => setRecentSearches((prev) => prev.filter((_, i) => i !== index))}
             onClearAll={() => setRecentSearches([])}
           />

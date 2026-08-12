@@ -22,7 +22,7 @@ const RESOURCE_TYPE_LABEL: Record<string, { label: string; bgClass: string; text
 const divider = (
   <div
     className="bg-gray-100 flex-shrink-0"
-    style={{ width: '360px', height: '2px', borderRadius: '10px' }}
+    style={{ alignSelf: 'stretch', height: '2px', borderRadius: '10px' }}
   />
 );
 
@@ -42,7 +42,7 @@ function ResourceCard({ resource }: { resource: ResourceDTO }) {
       style={{ padding: '8px 16px', alignSelf: 'stretch' }}
     >
       <div className="flex items-center justify-center gap-2" style={{ height: '26px', alignSelf: 'stretch' }}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" style={{ flex: '1 1 auto', minWidth: 0 }}>
           <div
             className={`flex items-center justify-center gap-1 rounded-2 flex-shrink-0 ${tag.bgClass}`}
             style={{ height: '24px', padding: '4px 12px' }}
@@ -51,7 +51,7 @@ function ResourceCard({ resource }: { resource: ResourceDTO }) {
           </div>
           <span
             className="body-04 text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap"
-            style={{ width: '194px' }}
+            style={{ flex: '1 1 auto', minWidth: 0 }}
           >
             {resource.title}
           </span>
@@ -85,7 +85,7 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
         </div>
 
         {/* AI 응답 */}
-        <div className="flex flex-col items-start gap-2" style={{ width: '360px' }}>
+        <div className="flex flex-col items-start gap-2" style={{ alignSelf: 'stretch' }}>
 
           {/* 생각 시간 */}
           <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
 
                   {/* 조건 태그 */}
                   {briefingData.extractedTags.length > 0 && (
-                    <div className="flex flex-col items-start gap-2" style={{ width: '265px' }}>
+                    <div className="flex flex-col items-start gap-2" style={{ alignSelf: 'stretch' }}>
                       <div className="flex items-center gap-2 flex-wrap" style={{ alignSelf: 'stretch' }}>
                         {briefingData.extractedTags.map((tag) => (
                           <div
@@ -136,7 +136,11 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
                 {firstCity && (
                   <button
                     type="button"
-                    onClick={() => navigate(`/city-insight?cityId=${firstCity.cityId}`)}
+                    onClick={() =>
+                      navigate('/city-insight', {
+                        state: { recommendedCities: briefingData.recommendedCities },
+                      })
+                    }
                     className="flex items-start gap-1"
                     style={{ alignSelf: 'stretch' }}
                   >
@@ -166,7 +170,7 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
                 >
                   <span className="body-04 text-gray-500">참고자료</span>
                 </div>
-                <div className="flex flex-col items-start gap-2" style={{ width: '317px' }}>
+                <div className="flex flex-col items-start gap-2" style={{ alignSelf: 'stretch' }}>
                   {briefingData.resources.map((resource) => (
                     <ResourceCard key={resource.url} resource={resource} />
                   ))}

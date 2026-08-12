@@ -8,6 +8,7 @@ import CompleteTaskModal from '../components/CompleteTaskModal';
 import DatePickerModal from '../components/DatePickerModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import { tasksApi } from '../api/tasksApi';
+import { roadmapsApi } from '../api/roadmapsApi';
 import { taskDocumentsApi } from '../api/taskDocumentsApi';
 import { roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys';
 import {
@@ -82,6 +83,16 @@ export default function TaskDetailRoute() {
     queryKey: taskQueryKeys.detail(numericTaskId),
     queryFn: () => tasksApi.get(numericTaskId),
     enabled: isValidTaskId,
+  });
+
+  /**
+   * 태스크 마감일은 출국일을 넘길 수 없어서 달력 상한으로 쓴다.
+   * 로드맵 상세 화면과 같은 쿼리 키라, 타임라인에서 들어오면 캐시를 그대로 재사용한다.
+   */
+  const { data: roadmapDetail } = useQuery({
+    queryKey: roadmapQueryKeys.detail(numericRoadmapId),
+    queryFn: () => roadmapsApi.get(numericRoadmapId),
+    enabled: Number.isFinite(numericRoadmapId),
   });
 
   useEffect(() => {
@@ -266,6 +277,8 @@ export default function TaskDetailRoute() {
             onSelectDay={handleSelectDay}
             // 태스크 일정도 출국 예정일과 같게 지난 날짜로는 잡을 수 없다
             minDate={getToday()}
+            // 출국한 뒤에 준비를 끝낼 수는 없으므로 출국일까지만 고를 수 있다
+            maxDate={parseIsoDate(roadmapDetail?.departureDate ?? null) ?? undefined}
           />
         </ModalOverlay>
       )}

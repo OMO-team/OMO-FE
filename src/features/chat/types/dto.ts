@@ -59,3 +59,12 @@ export type BriefingStatusResult = {
   emptyResultMessage: string | null;
   suggestedRelaxations: SuggestedRelaxation[] | null;
 };
+
+export type ChatEntry = {
+  id: string;
+  userMessage: string;
+  thinkingTime: number;
+  briefingData: BriefingData | null;
+  briefingStatus?: BriefingStatusResult | null;
+  status: 'loading' | 'completed' | 'empty' | 'cancelled' | 'error';
+};

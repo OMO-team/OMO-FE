@@ -8,12 +8,16 @@ const SEARCH_KEYWORDS = ['비자 신청 절차', '주거비용', '아르바이�
  * 위시리스트/로드맵의 도시 정보를 AI 리포트 모달이 받는 형태로 변환.
  * 핵심요약·장단점·브이로그 같은 상세 콘텐츠는 모달이 cityId로 직접 조회하므로 여기서 채우지 않는다.
  */
-type CityReportSource = Pick<CityInsightData, 'cityId' | 'cityName' | 'imageUrl' | 'rating' | 'description'>;
+type CityReportSource = Pick<
+  CityInsightData,
+  'cityId' | 'cityName' | 'imageUrl' | 'rating' | 'description' | 'purposeName'
+>;
 
 export function buildCityReportData(city: CityReportSource): CityReportData {
   return {
     cityId: Number(city.cityId),
     cityName: city.cityName,
+    purposeName: city.purposeName,
     heroImageUrl: city.imageUrl,
     ratingBadge: city.rating,
     totalScore: city.rating,
