@@ -845,7 +845,7 @@ export default function AIChatPanel({
                     type="button"
                     aria-label="응답 중지"
                     onClick={handleStop}
-                    className="flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400"
+                    className="flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400 ml-auto"
                     style={{
                       width: '32px',
                       height: '32px',
