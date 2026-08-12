@@ -519,8 +519,8 @@ export default function AIChatPanel({
                   className="absolute flex flex-col items-start border border-gray-200 bg-white rounded-4"
                   onClick={e => e.stopPropagation()}
                   style={{
-                    right: '-68px',
-                    bottom: '-164px',
+                    left: '0',
+                    top: '44px',
                     width: '274px',
                     padding: '10px 12px',
                     boxShadow: '4px 8px 16px 0 rgba(6, 49, 88, 0.20)',
