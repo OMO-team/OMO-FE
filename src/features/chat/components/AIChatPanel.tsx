@@ -806,7 +806,7 @@ export default function AIChatPanel({
                 transition: 'border 0.15s, box-shadow 0.15s, background 0.15s',
               }}
             >
-              {/* Frame 11211: 이미지(있을 경우) + 텍스트 입력 */}
+              {/* Frame 11211: 텍스트 입력 */}
               <div
                 className="flex flex-col items-start"
                 style={{ gap: '8px', alignSelf: 'stretch' }}
@@ -879,7 +879,7 @@ export default function AIChatPanel({
                     type="button"
                     onClick={handleSubmit}
                     disabled={!hasText}
-                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
+                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ml-auto ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
                     style={{
                       width: '32px',
                       height: '32px',
