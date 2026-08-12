@@ -136,7 +136,11 @@ export default function AIChatThread({ userMessage, thinkingTime, briefingData }
                 {firstCity && (
                   <button
                     type="button"
-                    onClick={() => navigate(`/city-insight?cityId=${firstCity.cityId}`)}
+                    onClick={() =>
+                      navigate('/city-insight', {
+                        state: { recommendedCities: briefingData.recommendedCities },
+                      })
+                    }
                     className="flex items-start gap-1"
                     style={{ alignSelf: 'stretch' }}
                   >
