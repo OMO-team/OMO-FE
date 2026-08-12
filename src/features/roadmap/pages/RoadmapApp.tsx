@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CountryRoadmapList from './CountryRoadmapList';
+import SmartBriefingFAB from '../../../shared/components/SmartBriefingFAB';
 import { roadmapsApi } from '../api/roadmapsApi';
 import { wishlistApi } from '../api/wishlistApi';
 import { citiesApi } from '../api/citiesApi';
@@ -180,21 +181,24 @@ export default function RoadmapApp() {
   }, []);
 
   return (
-    <CountryRoadmapList
-      countryGroups={pagedGroups}
-      wishlistCities={wishlistCities}
-      wishedKeys={wishedKeys}
-      roadmapKeys={roadmapKeys}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      onPageChange={setCurrentPage}
-      onViewRoadmap={(city) => city.roadmapId != null && navigate(`/myhome/dashboard/${city.roadmapId}`)}
-      onToggleWish={handleToggleWish}
-      onDeleteCity={handleDeleteCity}
-      onRestoreCity={handleRestoreCity}
-      onCommitDeleteCity={handleCommitDeleteCity}
-      onAddRoadmap={handleCreateRoadmap}
-      onViewCreatedRoadmap={(roadmapId) => navigate(`/myhome/dashboard/${roadmapId}`)}
-    />
+    <>
+      <SmartBriefingFAB />
+      <CountryRoadmapList
+        countryGroups={pagedGroups}
+        wishlistCities={wishlistCities}
+        wishedKeys={wishedKeys}
+        roadmapKeys={roadmapKeys}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        onViewRoadmap={(city) => city.roadmapId != null && navigate(`/myhome/dashboard/${city.roadmapId}`)}
+        onToggleWish={handleToggleWish}
+        onDeleteCity={handleDeleteCity}
+        onRestoreCity={handleRestoreCity}
+        onCommitDeleteCity={handleCommitDeleteCity}
+        onAddRoadmap={handleCreateRoadmap}
+        onViewCreatedRoadmap={(roadmapId) => navigate(`/myhome/dashboard/${roadmapId}`)}
+      />
+    </>
   );
 }
