@@ -479,6 +479,7 @@ export default function AIChatPanel({
                 onClick={e => {
                   e.stopPropagation();
                   setIsDropdownOpen(v => !v);
+                  setIsMoreMenuOpen(false);
                 }}
                 onMouseEnter={() => setIsTitleHovered(true)}
                 onMouseLeave={() => setIsTitleHovered(false)}
@@ -625,6 +626,7 @@ export default function AIChatPanel({
                     onClick={e => {
                       e.stopPropagation();
                       setIsMoreMenuOpen(v => !v);
+                      setIsDropdownOpen(false);
                     }}
                     className="size-icon-md flex items-center justify-center bg-transparent border-none cursor-pointer p-0"
                   >
