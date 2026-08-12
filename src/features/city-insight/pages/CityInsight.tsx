@@ -1,6 +1,6 @@
 // react
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // shared components
@@ -35,6 +35,7 @@ import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
 import type { CityItem, CityQueryParams, DifficultyType, StayDurationType } from '../types/cityInsight';
+import type { CitySummary } from '../../chat/types/dto';
 
 // stores
 import { useCompareStore } from '../../compare/store/useCompareStore';
@@ -73,19 +74,44 @@ const STAY_DURATION_MAP: Record<string, StayDurationType> = {
   '1년 이상': 'VERY_LONG',
 };
 
+/** 스마트 브리핑의 "추천 도시 보러가기"로 들어온 도시들 — 목적(purpose) 필터 기준 카탈로그 API로는 조회할 수 없어 AI 응답에 실려온 데이터를 그대로 카드로 그린다 */
+function adaptSummaryToCityItem(city: CitySummary): CityItem {
+  return {
+    cityId: city.cityId,
+    name: city.cityName,
+    country: { countryId: 0, name: city.countryName },
+    continent: '',
+    imageUrl: city.imageUrl,
+    rating: city.rating,
+    description: '',
+    monthlyCost: city.monthlyCost,
+    safetyScore: city.safetyScore,
+    housingScore: city.housingScore,
+    visaScore: city.visaScore,
+    languageScore: city.languageScore,
+    internetScore: city.infraScore,
+    stayDuration: 'SHORT',
+    isWishlisted: false,
+  };
+}
+
 export default function CityInsight() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
+  const recommendedCities = (location.state as { recommendedCities?: CitySummary[] } | null)
+    ?.recommendedCities;
 
-  // 진입 경로 판단 — keyword와 countryCodes는 상호 배타적으로 처리
-  const isFromSearch = !!urlKeyword;
-  const isFromCountry = !isFromSearch;
+  // 진입 경로 판단 — keyword / countryCodes / AI 추천 도시는 상호 배타적으로 처리
+  const isFromRecommendation = !!recommendedCities?.length;
+  const isFromSearch = !isFromRecommendation && !!urlKeyword;
+  const isFromCountry = !isFromSearch && !isFromRecommendation;
 
-  const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch });
+  const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch && !isFromRecommendation });
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
   const activeIndex = Math.max(
@@ -160,12 +186,14 @@ export default function CityInsight() {
   );
 
   const { data: citiesResult } = useCities(apiParams, {
-    enabled: isFromSearch || !!activePurpose,
+    enabled: !isFromRecommendation && (isFromSearch || !!activePurpose),
   });
 
-  const cities = citiesResult?.data ?? [];
-  const totalElements = citiesResult?.totalElements ?? 0;
-  const totalPages = Math.max(1, citiesResult?.totalPages ?? 1);
+  const cities = isFromRecommendation
+    ? recommendedCities!.map(adaptSummaryToCityItem)
+    : citiesResult?.data ?? [];
+  const totalElements = isFromRecommendation ? cities.length : citiesResult?.totalElements ?? 0;
+  const totalPages = isFromRecommendation ? 1 : Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
     if (!addedRoadmap) return;
@@ -301,62 +329,66 @@ export default function CityInsight() {
             )}
           </div>
         )}
-        <div className="flex flex-col gap-4">
-          {!isFromSearch && (
-            <>
-              <CategoryTab
-                categories={categoryNames}
-                activeIndex={activeIndex}
-                onChange={handleCategoryChange}
-              />
-              <SearchInputBar
-                placeholder="원하는 도시 조건을 입력해 보세요"
-                width="w-[974px]"
-                value={input}
-                onChange={setInput}
-                onSearch={handleSearch}
-                showIcon
-              />
-            </>
-          )}
-           {isFromSearch && (
-              <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
-            )}
-          <div className="flex justify-between">
-            <div className="flex gap-2">
-              <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
-              <RegionDropDown
-                key={`region-${resetKey}`}
-                purposeType={activePurpose?.type}
-                onSelect={handleSelect}
-                onReset={() => setSelectedCountries([])}
-              />
-              <div className="w-px h-7 bg-gray-300"></div>
-              {DETAIL_OPTIONS.map(({ title, options }) => (
-                <DropDown
-                  key={title}
-                  title={title}
-                  options={options}
-                  selectedOption={selectedOptions[title] ?? null}
-                  onSelect={option => handleSelectOption(title, option)}
+        {!isFromRecommendation && (
+          <>
+            <div className="flex flex-col gap-4">
+              {!isFromSearch && (
+                <>
+                  <CategoryTab
+                    categories={categoryNames}
+                    activeIndex={activeIndex}
+                    onChange={handleCategoryChange}
+                  />
+                  <SearchInputBar
+                    placeholder="원하는 도시 조건을 입력해 보세요"
+                    width="w-[974px]"
+                    value={input}
+                    onChange={setInput}
+                    onSearch={handleSearch}
+                    showIcon
+                  />
+                </>
+              )}
+               {isFromSearch && (
+                  <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
+                )}
+              <div className="flex justify-between">
+                <div className="flex gap-2">
+                  <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
+                  <RegionDropDown
+                    key={`region-${resetKey}`}
+                    purposeType={activePurpose?.type}
+                    onSelect={handleSelect}
+                    onReset={() => setSelectedCountries([])}
+                  />
+                  <div className="w-px h-7 bg-gray-300"></div>
+                  {DETAIL_OPTIONS.map(({ title, options }) => (
+                    <DropDown
+                      key={title}
+                      title={title}
+                      options={options}
+                      selectedOption={selectedOptions[title] ?? null}
+                      onSelect={option => handleSelectOption(title, option)}
+                    />
+                  ))}
+                </div>
+                <button className="flex items-center gap-1" onClick={handleReset}>
+                  <p className="body-03 text-gray-400">필터 초기화</p>
+                  <img src={filterResetIcon} alt="" />
+                </button>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              {selectedCountries.map(({ name, code }) => (
+                <FilterChip
+                  key={code}
+                  label={name}
+                  onRemove={() => setSelectedCountries(prev => prev.filter(c => c.code !== code))}
                 />
               ))}
             </div>
-            <button className="flex items-center gap-1" onClick={handleReset}>
-              <p className="body-03 text-gray-400">필터 초기화</p>
-              <img src={filterResetIcon} alt="" />
-            </button>
-          </div>
-        </div>
-        <div className="mt-3 flex gap-2">
-          {selectedCountries.map(({ name, code }) => (
-            <FilterChip
-              key={code}
-              label={name}
-              onRemove={() => setSelectedCountries(prev => prev.filter(c => c.code !== code))}
-            />
-          ))}
-        </div>
+          </>
+        )}
         {totalElements !== 0 ? (
           <>
             <div className="mt-11 grid grid-cols-2 gap-5">
@@ -380,13 +412,17 @@ export default function CityInsight() {
                 />
               ))}
             </div>
-            <div className="mt-25 mb-[304px]">
-              <PageNavigation
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-            </div>
+            {isFromRecommendation ? (
+              <div className="mb-[304px]" />
+            ) : (
+              <div className="mt-25 mb-[304px]">
+                <PageNavigation
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              </div>
+            )}
           </>
         ) : (
           <div className="flex flex-col gap-[30px] items-center mt-[298px] mb-[295px]">

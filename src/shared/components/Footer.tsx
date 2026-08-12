@@ -8,13 +8,8 @@ import YoutubeIcon from './YoutubeIcon';
 type LinkItem = {
   label: string;
   path?: string;
+  onClick?: () => void;
 };
-
-const SERVICE_LINKS: LinkItem[] = [
-  { label: 'AI스마트 브리핑' },
-  { label: '도시별 인사이트 리포트', path: '/city-insight' },
-  { label: '내 출국 준비 로드맵', path: '/myhome/empty' },
-];
 
 const POLICY_LINKS: LinkItem[] = [
   { label: '개인정보처리방침', path: '/support/terms' },
@@ -30,7 +25,17 @@ const SNS_LINKS = [
   { label: 'Blog', icon: <NaverBlogIcon className="size-5" /> },
 ];
 
-export default function Footer() {
+type FooterProps = {
+  onOpenSmartBriefing?: () => void;
+};
+
+export default function Footer({ onOpenSmartBriefing }: FooterProps) {
+  const serviceLinks: LinkItem[] = [
+    { label: 'AI스마트 브리핑', onClick: onOpenSmartBriefing },
+    { label: '도시별 인사이트 리포트', path: '/city-insight' },
+    { label: '내 출국 준비 로드맵', path: '/myhome/empty' },
+  ];
+
   return (
     <footer className="flex w-full flex-col items-center gap-4 bg-gray-50">
       <div className="mx-auto flex w-full max-w-content flex-col items-center gap-10 px-4">
@@ -63,12 +68,22 @@ export default function Footer() {
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
-              {SERVICE_LINKS.map(({ label, path }) =>
+              {serviceLinks.map(({ label, path, onClick }) =>
                 path ? (
                   <Link key={label} to={path} className="flex items-center gap-1">
                     <span className="body-05 w-35 text-gray-700">{label}</span>
                     <ChevronIcon className="size-icon-xs rotate-180 text-gray-700" />
                   </Link>
+                ) : onClick ? (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={onClick}
+                    className="flex items-center gap-1 text-left"
+                  >
+                    <span className="body-05 w-35 text-gray-700">{label}</span>
+                    <ChevronIcon className="size-icon-xs rotate-180 text-gray-700" />
+                  </button>
                 ) : (
                   <span key={label} className="body-05 w-35 text-gray-700">{label}</span>
                 ),
