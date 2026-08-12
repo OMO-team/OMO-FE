@@ -103,6 +103,7 @@ export default function CityInsight() {
 
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
+  const urlCountryCodesKey = urlCountryCodes.join(',');
   const recommendedCities = (location.state as { recommendedCities?: CitySummary[] } | null)
     ?.recommendedCities;
 
@@ -156,9 +157,8 @@ export default function CityInsight() {
   const activePurpose = isFromSearch ? undefined : purposes[activeIndex];
 
   const queryParams = useMemo<CityQueryParams>(() => {
-    const currentCountryCodes = searchParams.getAll('countryCodes');
     const selectedCodes = selectedCountries.map(c => c.code);
-    const activeCodes = selectedCodes.length > 0 ? selectedCodes : currentCountryCodes;
+    const activeCodes = selectedCodes.length > 0 ? selectedCodes : urlCountryCodes;
     return {
       keyword: keyword || undefined,
       purposeType: isFromSearch ? undefined : activePurpose?.type,
@@ -169,7 +169,7 @@ export default function CityInsight() {
       visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
       stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
     };
-  }, [keyword, isFromSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
+  }, [keyword, isFromSearch, activePurpose, selectedCountries, urlCountryCodesKey, selectedOptions]);
 
   const [prevQueryParams, setPrevQueryParams] = useState(queryParams);
   if (prevQueryParams !== queryParams) {
