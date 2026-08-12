@@ -11,13 +11,15 @@ import fileErrorIcon from '../../../assets/icons/icon-file-error.svg';
 import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
 import AIChatThread from './AIChatThread';
 import { chatApi } from '../api/chatApi';
-import type { BriefingData, ChipInfo } from '../types/dto';
+import useTypingEffect from '../hooks/useTypingEffect';
+import type { BriefingData, ChipInfo, BriefingStatusResult } from '../types/dto';
 
 type ChatEntry = {
   id: string;
   userMessage: string;
   thinkingTime: number;
   briefingData: BriefingData | null;
+  briefingStatus?: BriefingStatusResult | null;
   status: 'loading' | 'completed' | 'empty' | 'cancelled' | 'error';
 };
 
@@ -115,6 +117,14 @@ export default function AIChatPanel({
 
   const hasChatStarted = chatHistory.length > 0;
 
+  const lastEntry = chatHistory[chatHistory.length - 1];
+  const activePurpose = lastEntry?.briefingStatus?.activePurpose;
+  const selectedCountry = lastEntry?.briefingStatus?.selectedCountry;
+
+  const purposeCountryTitle = [activePurpose, selectedCountry].filter(Boolean).join(' - ');
+  const chatTitle = purposeCountryTitle || lastEntry?.userMessage || 'OMO 스마트 브리핑';
+  const displayedChatTitle = useTypingEffect(chatTitle, 30);
+
   const handleResizeMove = useCallback((e: MouseEvent) => {
     const state = resizeRef.current;
     if (!state) return;
@@ -184,6 +194,7 @@ export default function AIChatPanel({
                     ? {
                         ...e,
                         briefingData: result.briefingData,
+                        briefingStatus: result,
                         thinkingTime: result.briefingData!.thinkingTime,
                         status: 'completed',
                       }
@@ -452,17 +463,14 @@ export default function AIChatPanel({
                 onMouseLeave={() => setIsTitleHovered(false)}
                 className={`flex items-center justify-center gap-2 rounded-3 border-none cursor-pointer transition-colors ${isTitleHovered || isDropdownOpen ? 'bg-gray-20' : 'bg-transparent'}`}
                 style={{
-                  width: '100%',
-                  maxWidth: '206px',
-                  minWidth: 0,
                   height: '40px',
                   padding: '8px 18px',
                   boxSizing: 'border-box',
                 }}
               >
                 <div className="flex items-center justify-center gap-2" style={{ minWidth: 0 }}>
-                  <span className="title-01 text-gray-700 overflow-hidden text-ellipsis whitespace-nowrap">
-                    OMO 스마트 브리핑
+                  <span className="title-01 text-gray-700 overflow-hidden text-ellipsis whitespace-nowrap max-w-[300px]">
+                    {displayedChatTitle}
                   </span>
                   <div className="size-icon-sm flex items-center justify-center flex-shrink-0">
                     {isDropdownOpen ? (
