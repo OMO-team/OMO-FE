@@ -18,11 +18,9 @@ import RoadmapRemovedToast from '../components/RoadmapRemovedToast';
 import DeleteRoadmapModal from '../components/DeleteRoadmapModal';
 import CountryGroupHeader from '../components/CountryGroupHeader';
 import LockOutlineIcon from '../components/icons/LockOutlineIcon';
-import ScanFailIcon from '../components/icons/ScanFailIcon';
 import CalendarErrorIcon from '../components/icons/CalendarErrorIcon';
 import BagIcon from '../components/icons/BagIcon';
 import CalendarIcon from '../components/icons/CalendarIcon';
-import CameraIcon from '../components/icons/CameraIcon';
 import CheckCircleIcon from '../components/icons/CheckCircleIcon';
 import ChevronDownIcon from '../components/icons/ChevronDownIcon';
 import CloudUploadIcon from '../components/icons/CloudUploadIcon';
@@ -91,7 +89,6 @@ const ROADMAP_ICONS: { name: string; Icon: ComponentType<{ className?: string }>
   { name: 'BagIcon', Icon: BagIcon },
   { name: 'CalendarErrorIcon', Icon: CalendarErrorIcon },
   { name: 'CalendarIcon', Icon: CalendarIcon },
-  { name: 'CameraIcon', Icon: CameraIcon },
   { name: 'CheckCircleIcon', Icon: CheckCircleIcon },
   { name: 'ChevronDownIcon', Icon: ChevronDownIcon },
   { name: 'CloudUploadIcon', Icon: CloudUploadIcon },
@@ -111,7 +108,6 @@ const ROADMAP_ICONS: { name: string; Icon: ComponentType<{ className?: string }>
   { name: 'PlusStepperIcon', Icon: PlusStepperIcon },
   { name: 'RemoveIcon', Icon: RemoveIcon },
   { name: 'RoadmapTitleIcon', Icon: RoadmapTitleIcon },
-  { name: 'ScanFailIcon', Icon: ScanFailIcon },
   { name: 'TimelineLockIcon', Icon: TimelineLockIcon },
   { name: 'TimelineMissedIcon', Icon: TimelineMissedIcon },
   { name: 'TimelineOngoingIcon', Icon: TimelineOngoingIcon },
@@ -222,15 +218,6 @@ export default function ComponentPreview() {
           <RoadmapAlertCard
             icon={<LockOutlineIcon className="size-full" />}
             title="이전 단계를 먼저 완료해야 합니다"
-          />
-          <RoadmapAlertCard
-            icon={<ScanFailIcon className="size-full" />}
-            iconBgClassName="bg-[#fff3ec]"
-            iconColorClassName="text-[#ea580c]"
-            title="문서를 인식하지 못했어요"
-            description="다시 촬영하거나 직접 체크해 주세요"
-            actionLabel="직접 체크"
-            actionClassName="bg-[#ea580c] text-white"
           />
           <RoadmapAlertCard
             icon={<CalendarErrorIcon className="size-full" />}

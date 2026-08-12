@@ -35,14 +35,7 @@ export interface RequiredDocumentData {
   name: string;
   subtitle?: string;
   isChecked: boolean;
-  /** true면 "촬영하여 자동 체크" 버튼(카메라 아이콘) 노출 */
-  ocrSupport: boolean;
   displayOrder?: number;
-  /** 파일 업로드 후 서버 파싱을 기다리는 중일 때 표시 (isChecked가 false일 때만 의미 있음) */
-  isProcessing?: boolean;
-  scanStatus?: string;
-  scanProgressPercent?: number;
-  scanDetail?: string;
   /** isChecked일 때 업로드 완료된 파일명 목록 */
   uploadedFiles?: string[];
 }

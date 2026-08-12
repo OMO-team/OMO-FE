@@ -116,7 +116,6 @@ export interface DocumentItem {
   taskDocumentId: number;
   documentName: string;
   description: string;
-  ocrSupport: boolean;
   checked: boolean;
 }
 
