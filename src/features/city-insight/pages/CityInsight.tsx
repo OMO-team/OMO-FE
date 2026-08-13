@@ -413,6 +413,7 @@ export default function CityInsight() {
                   <RegionDropDown
                     key={`region-${resetKey}`}
                     purposeType={activePurpose?.type}
+                    value={selectedCountries}
                     onSelect={handleSelect}
                     onReset={() => setSelectedCountries([])}
                   />
