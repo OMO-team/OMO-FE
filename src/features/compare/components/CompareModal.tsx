@@ -27,7 +27,7 @@ export default function CompareModal({ onSelectCity }: CompareModalProps) {
       <div
         // 콘텐츠가 뷰포트보다 길어도 모달 자체는 뷰포트 안에 들어오게 하고, 넘치는 부분만 내부에서 스크롤
         // (X 버튼이 항상 보이는 헤더 영역 밖으로 밀려나지 않게 하기 위함)
-        className="flex max-h-[90vh] flex-col items-start gap-[60px] rounded-[20px] bg-white px-11 pt-[50px] pb-[60px]"
+        className="flex max-h-[90vh] flex-col items-start gap-10 rounded-[20px] bg-white pl-[46px] pr-[50px] pt-[50px] pb-[60px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex w-full items-center justify-between">
