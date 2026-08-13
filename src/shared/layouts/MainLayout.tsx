@@ -9,6 +9,12 @@ import SignupModal from '../../features/auth/components/SignupModal';
 import ForgotPasswordModal from '../../features/auth/components/ForgotPasswordModal';
 import LoginRequiredModal from '../../features/auth/components/LoginRequiredModal';
 import SearchModal from '../../features/search/components/SearchModal';
+import {
+  loadRecentSearches,
+  addRecentSearch,
+  removeRecentSearch,
+  clearRecentSearches,
+} from '../../features/search/utils/recentSearchesStorage';
 import AIChatPanel from '../../features/chat/components/AIChatPanel';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { memberApi } from '../../features/settings/api/memberApi';
@@ -24,7 +30,7 @@ type RouteHandle = {
 export default function MainLayout() {
   const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } =
     useAuthStore();
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => loadRecentSearches());
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
 
@@ -140,8 +146,9 @@ export default function MainLayout() {
           <SearchModal
             onClose={closeSearch}
             recentSearches={recentSearches}
-            onRemove={index => setRecentSearches(prev => prev.filter((_, i) => i !== index))}
-            onClearAll={() => setRecentSearches([])}
+            onSearch={query => setRecentSearches(addRecentSearch(query))}
+            onRemove={index => setRecentSearches(removeRecentSearch(index))}
+            onClearAll={() => setRecentSearches(clearRecentSearches())}
           />
         </ModalOverlay>
       )}
