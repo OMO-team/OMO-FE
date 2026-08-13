@@ -4,6 +4,8 @@ import StayDurationPicker from './StayDurationPicker';
 type BudgetPlanCardProps = {
   months: number;
   onMonthsChange?: (months: number) => void;
+  /** 체류 기간을 한 번이라도 정했는지 — 정하기 전에는 프리셋을 고를 수 있다 */
+  hasChosenMonths?: boolean;
   initialSettlementCost: number;
   monthlyLivingCost: number;
   stayMonths: number;
@@ -14,6 +16,7 @@ type BudgetPlanCardProps = {
 export default function BudgetPlanCard({
   months,
   onMonthsChange,
+  hasChosenMonths,
   initialSettlementCost,
   monthlyLivingCost,
   stayMonths,
@@ -28,7 +31,7 @@ export default function BudgetPlanCard({
           <p className="heading-06 text-primary-900">예산 계획</p>
         </div>
 
-        <StayDurationPicker months={months} onChange={onMonthsChange} />
+        <StayDurationPicker months={months} onChange={onMonthsChange} hasChosen={hasChosenMonths} />
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col items-start gap-5 rounded-2 bg-gray-20 px-5 pb-6 pt-5">

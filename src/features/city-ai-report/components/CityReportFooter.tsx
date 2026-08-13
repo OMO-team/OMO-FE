@@ -34,9 +34,10 @@ export default function CityReportFooter({
         type="button"
         onClick={onAddToRoadmap}
         disabled={isAdded}
-        className="flex h-12 w-[282px] items-center justify-center rounded-2 bg-primary-500 title-02 text-white disabled:cursor-not-allowed disabled:bg-gray-400"
+        className="flex h-12 w-[282px] items-center justify-center rounded-2 bg-primary-500 title-02 text-white disabled:cursor-not-allowed disabled:bg-gray-300"
       >
-        {isAdded ? '로드맵에 추가됨' : '로드맵에 추가하기'}
+        {/* 이미 담은 도시도 문구는 그대로 두고 회색으로만 구분한다 (시안 기준) */}
+        로드맵에 추가하기
       </button>
     </div>
   );

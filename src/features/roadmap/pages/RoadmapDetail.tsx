@@ -5,6 +5,7 @@ import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
 import RoadmapTimeline from '../components/RoadmapTimeline';
 import BudgetPlanCard from '../components/BudgetPlanCard';
+import { DEFAULT_STAY_MONTHS } from '../components/StayDurationPicker';
 import AiReportCard from '../components/AiReportCard';
 import DatePickerModal from '../components/DatePickerModal';
 import RoadmapAlertCard from '../components/RoadmapAlertCard';
@@ -141,7 +142,9 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const departureDate = formatDotDate(detail.departureDate);
   const parsedDeparture = parseDotDate(departureDate);
 
-  const months = detail.stayMonths ?? 1;
+  /** 아직 안 정했으면 12개월을 기본으로 보여주고, 프리셋은 고를 수 있는 상태로 둔다 */
+  const hasChosenMonths = detail.stayMonths != null;
+  const months = detail.stayMonths ?? DEFAULT_STAY_MONTHS;
   const budget = detail.budget;
   const livingCostSubtotal = (budget?.monthlyCost ?? 0) * months;
   const totalBudget = budget?.totalCost ?? (budget?.initialSettlementCost ?? 0) + livingCostSubtotal;
@@ -256,6 +259,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             initialSettlementCost={budget?.initialSettlementCost ?? 0}
             monthlyLivingCost={budget?.monthlyCost ?? 0}
             stayMonths={months}
+            hasChosenMonths={hasChosenMonths}
             livingCostSubtotal={livingCostSubtotal}
             totalBudget={totalBudget}
           />
