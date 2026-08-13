@@ -64,10 +64,14 @@ export default function RoadmapApp() {
   /**
    * 이미 로드맵이 있는 도시+목적 조합 — 같은 조합을 또 담지 못하게 막는 데 쓴다.
    * 현재 페이지의 그룹이 아니라 목록 전체로 만들어야 다른 페이지에 있는 로드맵도 걸린다.
+   *
+   * 화면에서 감춘 목록(visibleRoadmapItems)이 아니라 원본을 쓴다.
+   * 삭제는 실행 취소 창이 끝나야 서버에 반영되므로, 그 사이에 같은 조합을 다시 담으면
+   * 화면에는 없지만 서버에는 남아 있어 중복 생성으로 500이 난다.
    */
   const roadmapKeys = useMemo(
-    () => new Set(visibleRoadmapItems.map((item) => wishKey(item.cityId, item.purposeId))),
-    [visibleRoadmapItems],
+    () => new Set(roadmapItems.map((item) => wishKey(item.cityId, item.purposeId))),
+    [roadmapItems],
   );
   /** 같은 도시라도 목적이 다르면 별개 항목이라 조합을 키로 씀 */
   const wishedKeys = useMemo(
@@ -141,6 +145,12 @@ export default function RoadmapApp() {
   const handleDeleteCity = (roadmapId: number) => {
     const target = roadmapItems.find((item) => item.roadmapId === roadmapId);
     if (!target) return;
+    /**
+     * 실행 취소를 기다리는 삭제는 항상 하나만 둔다.
+     * 다음 삭제로 넘어갔다는 건 앞 건을 되돌릴 생각이 없다는 뜻이라 먼저 확정시킨다.
+     * 이렇게 안 하면 참조가 덮어써져서 앞 로드맵이 화면에서만 사라지고 서버에는 그대로 남는다.
+     */
+    handleCommitDeleteCity();
     lastRemovedRoadmapItem.current = target;
     setPendingDeleteRoadmapIds((prev) => new Set(prev).add(target.roadmapId));
   };
@@ -192,6 +202,8 @@ export default function RoadmapApp() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         onViewRoadmap={(city) => city.roadmapId != null && navigate(`/myhome/dashboard/${city.roadmapId}`)}
+        // 목적 없이 들어가도 탐색 화면에 목적 탭이 있어 첫 목적이 선택된 상태로 시작한다
+        onExploreCity={() => navigate('/city-insight')}
         onToggleWish={handleToggleWish}
         onDeleteCity={handleDeleteCity}
         onRestoreCity={handleRestoreCity}
