@@ -192,6 +192,8 @@ export default function RoadmapApp() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         onViewRoadmap={(city) => city.roadmapId != null && navigate(`/myhome/dashboard/${city.roadmapId}`)}
+        // 목적 없이 들어가도 탐색 화면에 목적 탭이 있어 첫 목적이 선택된 상태로 시작한다
+        onExploreCity={() => navigate('/city-insight')}
         onToggleWish={handleToggleWish}
         onDeleteCity={handleDeleteCity}
         onRestoreCity={handleRestoreCity}
