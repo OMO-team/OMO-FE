@@ -265,12 +265,14 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   return (
     <form
       onSubmit={handleSubmit}
-      className="inline-flex justify-center items-start rounded-4 bg-white"
-      style={{ padding: '30px 40px 40px 40px', gap: '4px' }}
+      className="flex max-h-[90vh] flex-col items-center overflow-hidden rounded-4 bg-white"
       role="dialog"
       aria-modal="true"
     >
-      <div className="flex flex-col items-center" style={{ gap: '36px' }}>
+      <div
+        className="scrollbar-hide flex flex-col items-center overflow-y-auto"
+        style={{ padding: '30px 40px 40px 40px', gap: '36px' }}
+      >
         {/* 헤더: 타이틀 + 닫기 */}
         <div className="flex items-center" style={{ width: '400px', gap: '118px' }}>
           <span className="title-01 text-gray-900" style={{ width: '257px' }}>
@@ -459,9 +461,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                   </div>
                 </div>
 
-                {termsError && (
-                  <span className="body-04 px-2 text-warning-400">{termsError}</span>
-                )}
+                {termsError && <span className="body-04 px-2 text-warning-400">{termsError}</span>}
               </div>
 
               {/* 회원가입 버튼 */}
