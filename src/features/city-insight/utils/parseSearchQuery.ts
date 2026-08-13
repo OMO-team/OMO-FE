@@ -27,6 +27,7 @@ const DIFFICULTY_KEYWORDS: Record<string, DifficultyType> = {
   편한: 'EASY',
   편해: 'EASY',
   편하고: 'EASY',
+  용이: 'EASY',
   보통: 'NORMAL',
   무난: 'NORMAL',
   어려운: 'HARD',

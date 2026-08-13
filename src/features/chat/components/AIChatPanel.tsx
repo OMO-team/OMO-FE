@@ -116,12 +116,12 @@ export default function AIChatPanel({
 
   const hasChatStarted = chatHistory.length > 0;
 
-  const lastEntry = chatHistory[chatHistory.length - 1];
-  const activePurpose = lastEntry?.briefingStatus?.activePurpose;
-  const selectedCountry = lastEntry?.briefingStatus?.selectedCountry;
+  const firstEntry = chatHistory[0];
+  const activePurpose = firstEntry?.briefingStatus?.activePurpose;
+  const selectedCountry = firstEntry?.briefingStatus?.selectedCountry;
 
   const purposeCountryTitle = [activePurpose, selectedCountry].filter(Boolean).join(' - ');
-  const chatTitle = purposeCountryTitle || lastEntry?.userMessage || 'OMO 스마트 브리핑';
+  const chatTitle = purposeCountryTitle || firstEntry?.userMessage || 'OMO 스마트 브리핑';
   const displayedChatTitle = useTypingEffect(chatTitle, 30);
 
   /** 드롭다운이 열릴 때만 로컬 스토리지에서 읽어옴 — 세션 목록 조회 API가 없어 로컬 미러를 사용 */
