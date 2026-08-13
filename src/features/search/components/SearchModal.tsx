@@ -46,7 +46,7 @@ export default function SearchModal({
 
   return (
     <div
-      className="flex h-[496px] w-[1440px] flex-col items-center bg-white"
+      className="flex h-[496px] w-[1440px] flex-col items-center overflow-hidden bg-white"
       role="dialog"
       aria-modal="true"
     >
@@ -82,7 +82,7 @@ export default function SearchModal({
       </div>
 
       {/* L_Search Content */}
-      <div className="flex w-[1064px] flex-col items-center">
+      <div className="flex w-[1064px] min-h-0 flex-1 flex-col items-center">
         <div className="flex items-center justify-between self-stretch px-5 pb-0 pt-10">
           <span className="heading-06 text-gray-900">최근 검색어</span>
           {hasSearches && (
@@ -96,7 +96,7 @@ export default function SearchModal({
         </div>
 
         {hasSearches ? (
-          <div className="mt-4 flex w-full flex-col items-start">
+          <div className="scrollbar-hide mt-4 flex w-full min-h-0 flex-1 flex-col items-start overflow-x-hidden overflow-y-auto pb-4">
             {recentSearches.map((query, i) => (
               <div key={i} className="flex w-[1064px] items-center gap-1 px-5 py-5">
                 <button

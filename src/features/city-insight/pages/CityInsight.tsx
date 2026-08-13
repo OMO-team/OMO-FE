@@ -178,16 +178,22 @@ export default function CityInsight() {
 
   const [input, setInput] = useState(urlKeyword);
   const [keyword, setKeyword] = useState(urlKeyword);
-  const [prevUrlKeyword, setPrevUrlKeyword] = useState(urlKeyword);
-  if (prevUrlKeyword !== urlKeyword) {
-    setPrevUrlKeyword(urlKeyword);
-    setInput(urlKeyword);
-    setKeyword(urlKeyword);
-  }
   const [page, setPage] = useState(1);
   const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [resetKey, setResetKey] = useState(0);
+  const [prevUrlKeyword, setPrevUrlKeyword] = useState(urlKeyword);
+  /** 헤더에서 새로 전역 검색을 하면 같은 화면(컴포넌트)이 재사용되어 이전 검색의 필터가
+   *  그대로 남는다 — 지역 코드가 남아있으면 새 검색어와 무관한 국가로 걸러져 결과가
+   *  아예 안 뜨는 문제가 생기므로, 검색어 자체가 바뀌면 필터를 전부 초기화한다 */
+  if (prevUrlKeyword !== urlKeyword) {
+    setPrevUrlKeyword(urlKeyword);
+    setInput(urlKeyword);
+    setKeyword(urlKeyword);
+    setSelectedCountries([]);
+    setSelectedOptions({});
+    setResetKey(prev => prev + 1);
+  }
   /** 같은 도시가 목적 수만큼 나오므로 이름이 아니라 도시+목적 키로 어떤 카드를 열었는지 기억한다 */
   const [reportKey, setReportKey] = useState<string | null>(null);
   const [addedRoadmap, setAddedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(
@@ -325,9 +331,18 @@ export default function CityInsight() {
 
   /** 새로 들어온 검색어당 한 번만 자동 적용 — 그래야 사용자가 필터를 직접 지우거나
    *  바꾼 뒤에 결과가 재계산되어도 그 선택을 덮어쓰지 않는다. prevUrlKeyword와 같은 방식으로
-   *  렌더 중에 바로 반영해, 이펙트에서 setState를 호출해 생기는 불필요한 리렌더를 피한다 */
+   *  렌더 중에 바로 반영해, 이펙트에서 setState를 호출해 생기는 불필요한 리렌더를 피한다.
+   *  keyword === urlKeyword로 위 검색어 전환 리셋이 이미 반영된 렌더인지 확인한다 —
+   *  그렇지 않으면 검색어가 막 바뀐 시점에 이전 검색어로 캐시된 결과를 읽어 옛 국가를
+   *  다시 선택해버리고, 그 값을 "이미 처리함"으로 표시해 새 검색어의 진짜 결과가 와도
+   *  다시는 반영되지 않는다 */
   const [autoSelectedKeyword, setAutoSelectedKeyword] = useState<string | null>(null);
-  if (isFromSearch && autoSelectedKeyword !== urlKeyword && searchFilteredCombinations.length > 0) {
+  if (
+    isFromSearch &&
+    keyword === urlKeyword &&
+    autoSelectedKeyword !== urlKeyword &&
+    searchFilteredCombinations.length > 0
+  ) {
     const names = Array.from(new Set(searchFilteredCombinations.map(c => c.country.name)));
     const matched = names
       .map(name => ({ name, code: countryNameToCode.get(name) }))
@@ -456,11 +471,16 @@ export default function CityInsight() {
     setKeyword(input);
   };
 
-  // 필터 전체 초기화
+  /** 필터 초기화 — 전역 검색으로 들어온 화면은 검색어 자체와 거기서 자동으로 체크된
+   *  지역 칩까지가 "검색 결과"다. 여기서 keyword나 selectedCountries를 지우면 검색
+   *  결과 자체가 바뀌어버리므로, 검색 위에 얹은 상세 필터(월 생활비 등)만 초기화한다.
+   *  목적/국가를 고르고 들어온 도시 탐색 화면(isFromCountry)에서는 전부 지운다 */
   const handleReset = () => {
-    setInput('');
-    setKeyword('');
-    setSelectedCountries([]);
+    if (!isFromSearch) {
+      setInput('');
+      setKeyword('');
+      setSelectedCountries([]);
+    }
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
   };
