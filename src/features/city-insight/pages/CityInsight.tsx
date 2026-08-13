@@ -1,7 +1,8 @@
+
 // react
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // shared components
 import CategoryTab from '../../../shared/components/CategoryTab';
@@ -19,6 +20,8 @@ import FilterChip from '../components/FilterChip';
 import CityReportModal from '../../city-ai-report/components/CityReportModal';
 import { cityAiReportApi } from '../../city-ai-report/api/cityAiReportApi';
 import { roadmapsApi } from '../../roadmap/api/roadmapsApi';
+import { wishKey } from '../../roadmap/utils/wishlistAdapter';
+import { useAuthStore } from '../../auth/store/useAuthStore';
 import { wishlistApi } from '../../roadmap/api/wishlistApi';
 import { roadmapQueryKeys, wishlistQueryKeys } from '../../roadmap/api/queryKeys';
 import { getErrorMessage } from '../../roadmap/api/apiUtils';
@@ -30,12 +33,24 @@ import CompareModal from '../../compare/components/CompareModal';
 import { usePurposes } from '../../home/hooks/usePurposes';
 import { useCities } from '../hooks/useCities';
 import { useAllCountries } from '../hooks/useAllCountries';
+import {
+  useCityPurposeCombinations,
+  usePurposeCityIdSets,
+  combinationKey,
+  type CityPurposeCombination,
+} from '../hooks/useCityPurposeCombinations';
 
 // utils
 import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
-import type { CityItem, CityQueryParams, DifficultyType, PurposeType, StayDurationType } from '../types/cityInsight';
+import type { 
+  CityItem, 
+  CityQueryParams, 
+  DifficultyType, 
+  PurposeType, 
+  StayDurationType 
+} from '../types/cityInsight';
 import type { CitySummary } from '../../chat/types/dto';
 
 // stores
@@ -190,10 +205,27 @@ export default function CityInsight() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const isLoggedIn = useAuthStore(s => s.isLoggedIn);
+
+  /**
+   * 이미 로드맵이 있는 도시+목적 조합은 다시 담지 못하게 막는다.
+   * 백엔드가 같은 조합을 거부하는데 409가 아니라 500으로 떨어져서, 누르기 전에 걸러야 한다.
+   * 내 홈과 같은 쿼리 키를 써서 이미 받아둔 목록이 있으면 그대로 재사용한다.
+   */
+  const { data: myRoadmaps = [] } = useQuery({
+    queryKey: roadmapQueryKeys.list(isLoggedIn),
+    queryFn: roadmapsApi.list,
+  });
+  const roadmapKeys = useMemo(
+    () => new Set(myRoadmaps.map(item => wishKey(item.cityId, item.purposeId))),
+    [myRoadmaps]
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
+  const urlCountryCodesKey = urlCountryCodes.join(',');
+
   const locationState = location.state as
     | {
         recommendedCities?: CitySummary[];
@@ -213,9 +245,7 @@ export default function CityInsight() {
    *  한 번 더 확인 — 비어 있으면 필터 없는 전체 목록 대신 "조건을 이해하지 못했다" 안내로 처리 */
   const hasParsedFilters = isFromParsedSearch && hasStructuredCondition(parsedSearch!);
 
-  const { data: purposes = [] } = usePurposes({
-    enabled: !isFromSearch && !isFromRecommendation && !isFromParsedSearch,
-  });
+  const { data: purposes = [] } = usePurposes();
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
   const activeIndex = Math.max(
@@ -248,14 +278,22 @@ export default function CityInsight() {
     buildInitialSelectedOptions(parsedSearch?.params)
   );
   const [resetKey, setResetKey] = useState(0);
-  const [reportCityName, setReportCityName] = useState<string | null>(null);
-  const [addedRoadmap, setAddedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
+  /** 같은 도시가 목적 수만큼 나오므로 이름이 아니라 도시+목적 키로 어떤 카드를 열었는지 기억한다 */
+  const [reportKey, setReportKey] = useState<string | null>(null);
+  const [addedRoadmap, setAddedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(
+    null
+  );
   const [addErrorMessage, setAddErrorMessage] = useState<string | null>(null);
   const toggleCompare = useCompareStore(s => s.toggleCompare);
   const resetCompare = useCompareStore(s => s.resetCompare);
   const closeCompareModal = useCompareStore(s => s.closeModal);
 
-  const activePurpose = purposes[activeIndex];
+  /**
+   * 목적 탭은 국가로 들어온 경로에만 있다. 검색·추천에는 고르는 단계가 없어 선택된 목적도 없고,
+   * 여기서 걸러주지 않으면 목록의 첫 목적(워킹홀리데이)이 선택된 것처럼 잡힌다.
+   * 그 경로들은 대신 결과를 목적별 카드로 나눠서, 카드마다 목적이 정해진 상태로 다룬다.
+   */
+  const activePurpose = isFromSearch || isFromRecommendation ? undefined : purposes[activeIndex];
 
   // 문장형 검색(AI 브리핑 포함)에 국가/대륙이 언급됐는지 확인하려면 목적 무관 전체 국가 목록이 필요
   const { data: allCountries = [] } = useAllCountries(isFromParsedSearch);
@@ -290,9 +328,13 @@ export default function CityInsight() {
   }, [isFromParsedSearch, allCountries, parsedSearch]);
 
   const queryParams = useMemo<CityQueryParams>(() => {
-    const currentCountryCodes = searchParams.getAll('countryCodes');
     const selectedCodes = selectedCountries.map(c => c.code);
-    const activeCodes = selectedCodes.length > 0 ? selectedCodes : currentCountryCodes;
+    const activeCodes =
+      selectedCodes.length > 0
+        ? selectedCodes
+        : urlCountryCodesKey
+          ? urlCountryCodesKey.split(',')
+          : [];
 
     if (isFromParsedSearch) {
       const base = parsedSearch!.params;
@@ -302,15 +344,25 @@ export default function CityInsight() {
         // 상세필터에서 직접 값을 고르면(상관없음 포함) 문장에서 파싱된 값을 덮어씀 — 드롭다운을
         // 아예 건드리지 않았을 때만 파싱된 기본값을 그대로 씀
         maxMonthlyCost:
-          '월 생활비' in selectedOptions ? MONTHLY_COST_MAP[selectedOptions['월 생활비']] : base.maxMonthlyCost,
+          '월 생활비' in selectedOptions
+            ? MONTHLY_COST_MAP[selectedOptions['월 생활비']]
+            : base.maxMonthlyCost,
         minSafetyScore:
-          '치안' in selectedOptions ? SAFETY_SCORE_MAP[selectedOptions['치안']] : base.minSafetyScore,
+          '치안' in selectedOptions
+            ? SAFETY_SCORE_MAP[selectedOptions['치안']]
+            : base.minSafetyScore,
         housingDifficulty:
-          '숙소 난이도' in selectedOptions ? DIFFICULTY_MAP[selectedOptions['숙소 난이도']] : base.housingDifficulty,
+          '숙소 난이도' in selectedOptions
+            ? DIFFICULTY_MAP[selectedOptions['숙소 난이도']]
+            : base.housingDifficulty,
         visaDifficulty:
-          '비자 난이도' in selectedOptions ? DIFFICULTY_MAP[selectedOptions['비자 난이도']] : base.visaDifficulty,
+          '비자 난이도' in selectedOptions
+            ? DIFFICULTY_MAP[selectedOptions['비자 난이도']]
+            : base.visaDifficulty,
         stayDuration:
-          '체류 기간' in selectedOptions ? STAY_DURATION_MAP[selectedOptions['체류 기간']] : base.stayDuration,
+          '체류 기간' in selectedOptions
+            ? STAY_DURATION_MAP[selectedOptions['체류 기간']]
+            : base.stayDuration,
       };
     }
 
@@ -324,7 +376,16 @@ export default function CityInsight() {
       visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
       stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
     };
-  }, [keyword, isFromSearch, isFromParsedSearch, parsedSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
+  }, [
+    keyword,
+    isFromSearch,
+    isFromParsedSearch,
+    parsedSearch,
+    activePurpose,
+    selectedCountries,
+    urlCountryCodesKey,
+    selectedOptions,
+  ]);
 
   const [prevQueryParams, setPrevQueryParams] = useState(queryParams);
   if (prevQueryParams !== queryParams) {
@@ -337,7 +398,7 @@ export default function CityInsight() {
   // 위 "필터 변경 시 1페이지로 리셋" 로직이 페이지 이동을 필터 변경으로 오인해서 무한 리셋됨
   const apiParams = useMemo<CityQueryParams>(
     () => ({ ...queryParams, page: page - 1, size: PAGE_SIZE }), // 백엔드 page는 0-indexed
-    [queryParams, page],
+    [queryParams, page]
   );
 
   // activePurpose는 이전 방문에서 캐시된 값이 남아있을 수 있어(usePurposes가 비활성이어도 캐시는 유지됨),
@@ -359,9 +420,34 @@ export default function CityInsight() {
     fetchAll: needsClientRefilter,
   });
 
+  // 검색은 목적별로 나눠 받아 합치므로 서버 페이지네이션을 쓸 수 없다 — 전부 받아 여기서 자른다
+  const { combinations } = useCityPurposeCombinations(queryParams, purposes, {
+    enabled: isFromSearch,
+  });
+
+  // 추천 도시는 AI 응답에 실려와서 목적을 모른다 — 목적별 후보 목록과 맞춰보고 붙인다
+  const { sets: purposeCityIdSets } = usePurposeCityIdSets(purposes, {
+    enabled: isFromRecommendation,
+  });
+  const recommendedCombinations = useMemo<CityPurposeCombination[]>(() => {
+    if (!isFromRecommendation) return [];
+    return recommendedCities!.flatMap(summary => {
+      const city = adaptSummaryToCityItem(summary);
+      const matched = purposes.filter(p => purposeCityIdSets.get(p.purposeId)?.has(city.cityId));
+      // 어느 목적 후보에도 없으면 목적 없는 카드 한 장으로 둔다
+      if (matched.length === 0) return [city];
+      return matched.map(p => ({
+        ...city,
+        purposeId: p.purposeId,
+        purposeName: p.name,
+        purposeType: p.type,
+      }));
+    });
+  }, [isFromRecommendation, recommendedCities, purposes, purposeCityIdSets]);
+
   const rawCities = isFromRecommendation
     ? recommendedCities!.map(adaptSummaryToCityItem)
-    : citiesResult?.data ?? [];
+    : (citiesResult?.data ?? []);
 
   const searchMatchedCities = isFromSearch
     ? // 전역 검색은 백엔드가 도시명·국가명뿐 아니라 한줄 요약(description)까지 매칭해 결과를 주므로,
@@ -374,20 +460,29 @@ export default function CityInsight() {
       ? rawCities.filter(c => matchesClientOnlyCondition(c, parsedSearch!))
       : rawCities;
 
-  const cities = needsClientRefilter
-    ? searchMatchedCities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-    : searchMatchedCities;
+  const cities: CityPurposeCombination[] = isFromRecommendation
+    ? recommendedCombinations
+    : isFromSearch
+      ? combinations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+      : needsClientRefilter
+        ? searchMatchedCities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+        : searchMatchedCities;
 
   const totalElements = isFromRecommendation
     ? cities.length
-    : needsClientRefilter
-      ? searchMatchedCities.length
-      : citiesResult?.totalElements ?? 0;
+    : isFromSearch
+      ? combinations.length
+      : needsClientRefilter
+        ? searchMatchedCities.length
+        : (citiesResult?.totalElements ?? 0);
+
   const totalPages = isFromRecommendation
     ? 1
-    : needsClientRefilter
-      ? Math.max(1, Math.ceil(searchMatchedCities.length / PAGE_SIZE))
-      : Math.max(1, citiesResult?.totalPages ?? 1);
+    : isFromSearch
+      ? Math.max(1, Math.ceil(combinations.length / PAGE_SIZE))
+      : needsClientRefilter
+        ? Math.max(1, Math.ceil(searchMatchedCities.length / PAGE_SIZE))
+        : Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
     if (!addedRoadmap) return;
@@ -416,8 +511,9 @@ export default function CityInsight() {
       wishlistApi.remove(cityId, purposeId),
     onSuccess: invalidateWishRelatedQueries,
   });
-  const handleToggleWish = (city: CityItem) => {
-    const purposeId = activePurpose?.purposeId;
+  const handleToggleWish = (city: CityPurposeCombination) => {
+    // 목적 탭이 있는 경로는 탭 선택을, 검색은 카드에 붙은 목적을 쓴다
+    const purposeId = activePurpose?.purposeId ?? city.purposeId;
     if (purposeId == null) {
       console.error('목적 없이는 위시리스트를 바꿀 수 없음', city.cityId);
       return;
@@ -466,42 +562,49 @@ export default function CityInsight() {
     setResetKey(prev => prev + 1);
   };
 
-  const reportCity = reportCityName ? cities.find(c => c.name === reportCityName) : null;
+  const reportCity = reportKey
+    ? cities.find(c => combinationKey(c.cityId, c.purposeId) === reportKey)
+    : null;
   const reportData = reportCity
     ? buildCityReportData({
         cityId: String(reportCity.cityId),
         cityName: reportCity.name,
+        purposeName: activePurpose?.name ?? reportCity.purposeName,
         imageUrl: reportCity.imageUrl,
         rating: reportCity.rating,
         description: reportCity.description,
       })
     : null;
 
-  /** 목적은 카테고리 탭에서 선택된 목적(activePurpose)을 그대로 사용 — 검색 진입(isFromSearch)에는 목적이 없어 추가할 수 없음 */
+  /** 목적은 탭에서 고른 값(activePurpose)을, 검색이면 카드에 붙은 목적을 쓴다 */
   const handleAddToRoadmap = async () => {
-    const city = cities.find(c => c.name === reportCityName);
+    const city = reportCity;
     if (!city || createRoadmapMutation.isPending) return;
-    const purposeId = activePurpose?.purposeId;
+    const purposeId = activePurpose?.purposeId ?? city.purposeId;
     if (purposeId == null) {
-      setAddErrorMessage('이 도시의 목적 정보가 없어 로드맵을 만들 수 없어요.');
+      // 어느 목적 후보에도 들지 않은 도시 — 검색에는 뜨지만 로드맵으로는 만들 수 없다
+      setAddErrorMessage('아직 준비 목적이 정해지지 않은 도시라 로드맵을 만들 수 없어요.');
       return;
     }
     setAddErrorMessage(null);
     try {
       const result = await createRoadmapMutation.mutateAsync({ cityId: city.cityId, purposeId });
-      setReportCityName(null);
+      setReportKey(null);
       setAddedRoadmap({ roadmapId: result.roadmapId, cityName: city.name });
     } catch (error) {
       console.error('로드맵 생성 실패', error);
-      setAddErrorMessage(getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.'));
+      setAddErrorMessage(
+        getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.')
+      );
     }
   };
 
   /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 */
   const handleSelectCompareCity = (cityId: number) => {
     closeCompareModal();
+    // 비교는 도시 단위라 목적을 모른다 — 그 도시의 첫 조합(목적 순서상 가장 앞)을 연다
     const matched = cities.find(c => c.cityId === cityId);
-    setReportCityName(matched ? matched.name : null);
+    setReportKey(matched ? combinationKey(matched.cityId, matched.purposeId) : null);
   };
 
   // 결과 화면 상단 'AI가 적용한 조건' 칩 — AI 채팅에서 넘어온 경우 채팅에 떴던 태그 문구("치안 우수" 등)를
@@ -520,12 +623,17 @@ export default function CityInsight() {
   return (
     <div className="w-full flex flex-col items-center justify-center mt-[30px]">
       <div className="w-[1064px]">
-        <SmartBriefingFAB/>
+        <SmartBriefingFAB />
         {!isFromCountry && (
-          <div className={`mb-6 ${isFromSearch || isFromParsedSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
+          <div
+            className={`mb-6 ${isFromSearch || isFromParsedSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}
+          >
             {isFromSearch || isFromParsedSearch ? (
               <h1 className="heading-05">
-                <span className="text-blue-500">'{isFromParsedSearch ? parsedSearch!.query : urlKeyword}'</span>에 대한 검색 결과
+                <span className="text-blue-500">
+                  '{isFromParsedSearch ? parsedSearch!.query : urlKeyword}'
+                </span>
+                에 대한 검색 결과
               </h1>
             ) : (
               <div className="flex items-center gap-5">
@@ -585,6 +693,7 @@ export default function CityInsight() {
                   <RegionDropDown
                     key={`region-${resetKey}`}
                     purposeType={activePurpose?.type ?? parsedSearch?.params.purposeType}
+                    value={selectedCountries}
                     onSelect={handleSelect}
                     onReset={() => {
                       setSelectedCountries([]);
@@ -624,12 +733,13 @@ export default function CityInsight() {
             <div className="mt-11 grid grid-cols-2 gap-5">
               {cities.map(city => (
                 <CityInsightCard
-                  key={city.cityId}
+                  key={combinationKey(city.cityId, city.purposeId)}
                   imageUrl={city.imageUrl}
                   rating={city.rating}
                   isWishlisted={city.isWishlisted}
                   name={city.name}
                   countryName={city.country.name}
+                  purposeName={city.purposeName}
                   description={city.description}
                   monthlyCost={city.monthlyCost}
                   safetyScore={city.safetyScore}
@@ -638,7 +748,7 @@ export default function CityInsight() {
                   {...adaptCityToCardProps(city)}
                   onToggleWish={() => handleToggleWish(city)}
                   onCompare={() => toggleCompare(city.cityId, city.name)}
-                  onReport={() => setReportCityName(city.name)}
+                  onReport={() => setReportKey(combinationKey(city.cityId, city.purposeId))}
                 />
               ))}
             </div>
@@ -646,11 +756,7 @@ export default function CityInsight() {
               <div className="mb-[304px]" />
             ) : (
               <div className="mt-25 mb-[304px]">
-                <PageNavigation
-                  currentPage={page}
-                  totalPages={totalPages}
-                  onPageChange={setPage}
-                />
+                <PageNavigation currentPage={page} totalPages={totalPages} onPageChange={setPage} />
               </div>
             )}
           </>
@@ -685,18 +791,30 @@ export default function CityInsight() {
       {reportData && reportCity && (
         <CityReportModal
           isOpen
-          onClose={() => { setReportCityName(null); setAddErrorMessage(null); }}
+          onClose={() => {
+            setReportKey(null);
+            setAddErrorMessage(null);
+          }}
           data={reportData}
           onSearch={question => cityAiReportApi.askQuestion(reportCity.cityId, { question })}
           onAddToRoadmap={handleAddToRoadmap}
-          isAddDisabled={createRoadmapMutation.isPending}
+          isAddDisabled={
+            createRoadmapMutation.isPending ||
+            // 이미 로드맵이 있는 조합이면 "로드맵에 추가됨"으로 잠긴다
+            roadmapKeys.has(
+              wishKey(reportCity.cityId, activePurpose?.purposeId ?? reportCity.purposeId)
+            )
+          }
           addErrorMessage={addErrorMessage}
         />
       )}
       {addedRoadmap && (
         <RoadmapAddedToast
           cityName={addedRoadmap.cityName}
-          onViewRoadmap={() => { navigate(`/myhome/dashboard/${addedRoadmap.roadmapId}`); setAddedRoadmap(null); }}
+          onViewRoadmap={() => {
+            navigate(`/myhome/dashboard/${addedRoadmap.roadmapId}`);
+            setAddedRoadmap(null);
+          }}
           onClose={() => setAddedRoadmap(null)}
         />
       )}

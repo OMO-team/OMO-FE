@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import searchIcon from '../../../assets/icons/icon-search[18].svg';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import trashIcon from '../../../assets/icons/icon-trash.svg';
-import { parseSearchQuery, hasStructuredCondition } from '../../city-insight/utils/parseSearchQuery';
+import {
+  parseSearchQuery,
+  hasStructuredCondition,
+} from '../../city-insight/utils/parseSearchQuery';
 
 type SearchModalProps = {
   onClose: () => void;
@@ -51,7 +54,11 @@ export default function SearchModal({
       <div className="flex w-[1440px] flex-col items-center">
         <div className="flex w-[1064px] items-center justify-between px-5 pb-6 pt-9">
           <div className="flex flex-1 items-center gap-[57px]">
-            <button type="button" onClick={handleSearch} className="flex size-6 shrink-0 items-center justify-center">
+            <button
+              type="button"
+              onClick={handleSearch}
+              className="flex size-6 shrink-0 items-center justify-center"
+            >
               <img src={searchIcon} alt="검색" className="size-[18px]" />
             </button>
             <input
@@ -60,7 +67,7 @@ export default function SearchModal({
               placeholder="도시나 키워드로 검색하기"
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onKeyDown={e => e.key === 'Enter' && !e.nativeEvent.isComposing && handleSearch()}
             />
           </div>
           <button
@@ -104,8 +111,19 @@ export default function SearchModal({
                   onClick={() => onRemove?.(i)}
                   className="size-4 shrink-0 cursor-pointer"
                 >
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1l8 8M9 1L1 9" stroke="#6B7A94" strokeWidth="1" strokeLinecap="round" />
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M1 1l8 8M9 1L1 9"
+                      stroke="#6B7A94"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 </button>
               </div>

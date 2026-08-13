@@ -5,6 +5,7 @@ import CityHeroBanner from '../components/CityHeroBanner';
 import RoadmapHeader from '../components/RoadmapHeader';
 import RoadmapTimeline from '../components/RoadmapTimeline';
 import BudgetPlanCard from '../components/BudgetPlanCard';
+import { DEFAULT_STAY_MONTHS } from '../components/StayDurationPicker';
 import AiReportCard from '../components/AiReportCard';
 import DatePickerModal from '../components/DatePickerModal';
 import RoadmapAlertCard from '../components/RoadmapAlertCard';
@@ -19,7 +20,6 @@ import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys
 import { toRoadmapTaskData, formatDotDate, getToday } from '../utils/roadmapDetailAdapter';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
-import { CITY_INFO_KO } from '../mocks/cityCountryMap';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
 import type { CityInsightData } from '../types/cityInsight';
 
@@ -142,14 +142,12 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
   const departureDate = formatDotDate(detail.departureDate);
   const parsedDeparture = parseDotDate(departureDate);
 
-  const months = detail.stayMonths ?? 1;
+  /** 아직 안 정했으면 12개월을 기본으로 보여주고, 프리셋은 고를 수 있는 상태로 둔다 */
+  const hasChosenMonths = detail.stayMonths != null;
+  const months = detail.stayMonths ?? DEFAULT_STAY_MONTHS;
   const budget = detail.budget;
   const livingCostSubtotal = (budget?.monthlyCost ?? 0) * months;
   const totalBudget = budget?.totalCost ?? (budget?.initialSettlementCost ?? 0) + livingCostSubtotal;
-
-  // 상세 API도 도시명이 영문으로, country 정보는 아예 안 내려줘서 시드 데이터 기반 한글 매핑으로 대신 채움
-  const cityInfo = CITY_INFO_KO[detail.cityId];
-  const cityNameKo = cityInfo?.cityName ?? detail.cityName;
 
   /**
    * AI 탐색 리포트에 쓸 도시 정보는 로드맵 API에 없어서 도시 카탈로그에서 찾아 씀.
@@ -157,11 +155,14 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
    */
   const catalogCity = cityCatalog?.find((city) => city.cityId === detail.cityId);
   const reportCityData: CityInsightData = catalogCity
-    ? { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl }
+    ? // 목적은 도시가 아니라 이 로드맵에 딸린 값이라 로드맵 응답에서 가져온다
+      { ...toCityInsightData(catalogCity), imageUrl: detail.cityImageUrl, purposeName: detail.purposeName }
     : {
         cityId: String(detail.cityId),
-        cityName: cityNameKo,
-        countryName: cityInfo?.countryName ?? '준비중',
+        cityName: detail.cityName,
+        purposeName: detail.purposeName,
+        // 상세 API는 country 정보를 안 내려주고, 카탈로그에도 없는 도시라 채울 방법이 없다
+        countryName: '준비중',
         imageUrl: detail.cityImageUrl,
         description: '준비중',
         rating: 0,
@@ -178,7 +179,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-20">
-      <CityHeroBanner cityName={cityNameKo} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
+      <CityHeroBanner cityName={detail.cityName} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
 
       <div className="mx-auto flex w-full max-w-content gap-7.5 px-4 py-10">
         <div className="relative flex flex-col gap-5">
@@ -258,12 +259,13 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             initialSettlementCost={budget?.initialSettlementCost ?? 0}
             monthlyLivingCost={budget?.monthlyCost ?? 0}
             stayMonths={months}
+            hasChosenMonths={hasChosenMonths}
             livingCostSubtotal={livingCostSubtotal}
             totalBudget={totalBudget}
           />
           <AiReportCard
             score={catalogCity?.rating ?? 0}
-            cityName={cityNameKo}
+            cityName={detail.cityName}
             summary={catalogCity?.description ?? '준비중'}
             onViewReport={() => setIsReportOpen(true)}
           />

@@ -2,12 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import DocumentTaskDetailModal from '../components/DocumentTaskDetailModal';
-import type { DocumentScheduleState } from '../components/RequiredDocumentCard';
-import DocumentUploadModal from '../components/DocumentUploadModal';
 import CompleteTaskModal from '../components/CompleteTaskModal';
 import DatePickerModal from '../components/DatePickerModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
 import { tasksApi } from '../api/tasksApi';
+import { roadmapsApi } from '../api/roadmapsApi';
 import { taskDocumentsApi } from '../api/taskDocumentsApi';
 import { roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys';
 import {
@@ -17,21 +16,7 @@ import {
   TASK_CATEGORY_LABEL,
   toRequiredDocumentData,
 } from '../utils/roadmapDetailAdapter';
-import type { UploadedFileItem } from '../types/roadmap';
 import type { TaskDetailResult } from '../types/api';
-
-/**
- * 서류 카드 색을 정하는 일정 상태.
- * 마감일이 없으면 아직 일정을 안 잡은 것이고, scheduleDDay가 0이면 오늘이 마감이다.
- */
-function toScheduleState(task: TaskDetailResult): DocumentScheduleState {
-  if (!task.dueDate) return 'unscheduled';
-  // 태스크를 완료하면 백엔드가 isOverdue를 false로 되돌리는데, 시안의 "기간 지남 + 수행 O"는
-  // 완료한 뒤에도 유지되는 상태라 완료 여부를 타지 않는 D-day 부호로 판단한다
-  if (task.isOverdue || (task.scheduleDDay ?? 0) < 0) return 'overdue';
-  if (task.scheduleDDay === 0) return 'today';
-  return 'scheduled';
-}
 
 function parseIsoDate(value: string | null) {
   if (!value) return null;
@@ -48,14 +33,6 @@ export default function TaskDetailRoute() {
   const numericTaskId = Number(taskId);
   const numericRoadmapId = Number(roadmapId);
 
-  const [uploadTargetDocumentId, setUploadTargetDocumentId] = useState<number | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
-  /**
-   * 서류별로 업로드한 파일명 — 카드 안의 파일 칩 목록에 쓴다.
-   * 태스크 상세 응답(DocumentItem)에 파일 필드가 없어서 화면에서만 들고 있다(새로고침하면 사라짐).
-   * 백엔드에 파일 목록이 추가되면 이 상태 대신 응답값을 쓰면 된다.
-   */
-  const [filesByDocument, setFilesByDocument] = useState<Record<number, string[]>>({});
   /** 서류 없는 태스크의 "완료" 버튼을 누르면 뜨는 확인 모달 */
   const [isCompleteConfirmOpen, setIsCompleteConfirmOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -84,18 +61,24 @@ export default function TaskDetailRoute() {
     enabled: isValidTaskId,
   });
 
+  /**
+   * 태스크 마감일은 출국일을 넘길 수 없어서 달력 상한으로 쓴다.
+   * 로드맵 상세 화면과 같은 쿼리 키라, 타임라인에서 들어오면 캐시를 그대로 재사용한다.
+   */
+  const { data: roadmapDetail } = useQuery({
+    queryKey: roadmapQueryKeys.detail(numericRoadmapId),
+    queryFn: () => roadmapsApi.get(numericRoadmapId),
+    enabled: Number.isFinite(numericRoadmapId),
+  });
+
   useEffect(() => {
     if (!isValidTaskId || isError) closeTaskDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValidTaskId, isError]);
 
   const documents = useMemo(
-    () =>
-      (taskDetail?.documents ?? []).map((document) => ({
-        ...toRequiredDocumentData(document),
-        uploadedFiles: filesByDocument[document.taskDocumentId],
-      })),
-    [taskDetail, filesByDocument],
+    () => (taskDetail?.documents ?? []).map(toRequiredDocumentData),
+    [taskDetail],
   );
 
   /** 태스크/로드맵 상세 둘 다 새로고침 — 서류 체크·일정 변경·완료 처리 모두 타임라인 진행률에 영향을 주기 때문 */
@@ -104,7 +87,7 @@ export default function TaskDetailRoute() {
     queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.detail(numericRoadmapId) });
   };
 
-  /** 체크 먼저 화면에 반영하고, 실패하면 되돌림 — 서류 촬영 자동 체크에도 동일하게 사용 */
+  /** 체크 먼저 화면에 반영하고, 실패하면 되돌림 */
   const checkDocumentMutation = useMutation({
     mutationFn: (taskDocumentId: number) => taskDocumentsApi.updateCheck(taskDocumentId, { checked: true }),
     onMutate: async (taskDocumentId) => {
@@ -127,6 +110,22 @@ export default function TaskDetailRoute() {
     onSettled: invalidateTaskAndRoadmap,
   });
 
+  /**
+   * "할 일 모두 완료하기" — 서류를 한 번에 체크하는 API가 없어서 아직 안 된 것만 골라 각각 보낸다.
+   * 하나라도 실패하면 서버 상태를 알 수 없으므로 낙관적 반영 없이 결과를 받고 다시 조회한다.
+   * 서류를 전부 체크하면 백엔드가 태스크까지 완료 처리한다.
+   */
+  const completeAllDocumentsMutation = useMutation({
+    mutationFn: async () => {
+      const pending = (taskDetail?.documents ?? []).filter((d) => !d.checked);
+      await Promise.all(
+        pending.map((d) => taskDocumentsApi.updateCheck(d.taskDocumentId, { checked: true })),
+      );
+    },
+    onError: (error) => console.error('서류 일괄 완료 실패', error),
+    onSettled: invalidateTaskAndRoadmap,
+  });
+
   const updateTaskScheduleMutation = useMutation({
     mutationFn: (dueDate: string) => tasksApi.updateSchedule(numericTaskId, { dueDate }),
     onSuccess: invalidateTaskAndRoadmap,
@@ -142,25 +141,6 @@ export default function TaskDetailRoute() {
     onError: (error) => console.error('태스크 완료 처리 실패', error),
   });
 
-  const handleSelectFiles = (fileList: FileList) => {
-    const newItems: UploadedFileItem[] = Array.from(fileList).map((file) => ({
-      name: file.name,
-      uploadedSizeMB: 0,
-      totalSizeMB: Math.max(1, Math.round(file.size / 1024 / 1024)),
-      status: 'uploading',
-    }));
-    setUploadedFiles((prev) => [...prev, ...newItems]);
-    newItems.forEach((item) => {
-      setTimeout(() => {
-        setUploadedFiles((prev) =>
-          prev.map((f) => (f.name === item.name ? { ...f, uploadedSizeMB: f.totalSizeMB, status: 'processing' } : f)),
-        );
-      }, 1500);
-      setTimeout(() => {
-        setUploadedFiles((prev) => prev.map((f) => (f.name === item.name ? { ...f, status: 'completed' } : f)));
-      }, 3000);
-    });
-  };
 
   const handleOpenDatePicker = () => {
     const parsed = parseIsoDate(taskDetail?.dueDate ?? null);
@@ -193,21 +173,12 @@ export default function TaskDetailRoute() {
           onClose={closeTaskDetail}
           documents={documents}
           locked={taskDetail.status === 'LOCKED'}
-          onOpenUpload={(taskDocumentId) => {
-            setUploadedFiles([]);
-            setUploadTargetDocumentId(taskDocumentId);
-          }}
           onCheck={(taskDocumentId) => checkDocumentMutation.mutate(taskDocumentId)}
-          onRemoveFile={(taskDocumentId, fileName) =>
-            setFilesByDocument((prev) => ({
-              ...prev,
-              [taskDocumentId]: (prev[taskDocumentId] ?? []).filter((name) => name !== fileName),
-            }))
-          }
+          onCompleteAll={() => completeAllDocumentsMutation.mutate()}
+          isCompletingAll={completeAllDocumentsMutation.isPending}
           isCompleted={taskDetail.isCompleted}
           onComplete={() => setIsCompleteConfirmOpen(true)}
           isCompleting={completeTaskMutation.isPending}
-          scheduleState={toScheduleState(taskDetail)}
         />
       </ModalOverlay>
 
@@ -222,26 +193,7 @@ export default function TaskDetailRoute() {
         </ModalOverlay>
       )}
 
-      {uploadTargetDocumentId !== null && (
-        <ModalOverlay zIndex={60} onClose={() => setUploadTargetDocumentId(null)}>
-          <DocumentUploadModal
-            files={uploadedFiles}
-            onSelectFiles={handleSelectFiles}
-            onRemoveFile={(name) => setUploadedFiles((prev) => prev.filter((f) => f.name !== name))}
-            onComplete={() => {
-              // 업로드가 끝난 파일명을 서류에 붙여두어야 카드에 파일 칩으로 보인다
-              const fileNames = uploadedFiles.map((file) => file.name);
-              setFilesByDocument((prev) => ({
-                ...prev,
-                [uploadTargetDocumentId]: [...(prev[uploadTargetDocumentId] ?? []), ...fileNames],
-              }));
-              checkDocumentMutation.mutate(uploadTargetDocumentId);
-              setUploadTargetDocumentId(null);
-            }}
-            onClose={() => setUploadTargetDocumentId(null)}
-          />
-        </ModalOverlay>
-      )}
+
 
       {isDatePickerOpen && (
         <ModalOverlay zIndex={60} onClose={() => setIsDatePickerOpen(false)}>
@@ -266,6 +218,8 @@ export default function TaskDetailRoute() {
             onSelectDay={handleSelectDay}
             // 태스크 일정도 출국 예정일과 같게 지난 날짜로는 잡을 수 없다
             minDate={getToday()}
+            // 출국한 뒤에 준비를 끝낼 수는 없으므로 출국일까지만 고를 수 있다
+            maxDate={parseIsoDate(roadmapDetail?.departureDate ?? null) ?? undefined}
           />
         </ModalOverlay>
       )}

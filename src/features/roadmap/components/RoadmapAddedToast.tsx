@@ -1,4 +1,5 @@
 import addIcon from '../../../assets/icons/icon-add.svg';
+import { getSubjectParticle } from '../utils/korean';
 
 type RoadmapAddedToastProps = {
   cityName: string;
@@ -17,7 +18,10 @@ export default function RoadmapAddedToast({ cityName, onViewRoadmap, onClose }: 
         <span className="flex items-center rounded-full bg-primary-100 p-1.5">
           <img src={addIcon} alt="" className="size-5" />
         </span>
-        <p className="title-03 whitespace-nowrap text-primary-600">{cityName}이 로드맵에 추가되었어요.</p>
+        <p className="title-03 whitespace-nowrap text-primary-600">
+          {cityName}
+          {getSubjectParticle(cityName)} 로드맵에 추가되었어요.
+        </p>
       </div>
       <div className="flex items-center gap-2">
         <button

@@ -10,7 +10,6 @@ import RoadmapTimeline from '../components/RoadmapTimeline';
 import StayDurationPicker from '../components/StayDurationPicker';
 import DatePickerModal from '../components/DatePickerModal';
 import DocumentTaskDetailModal from '../components/DocumentTaskDetailModal';
-import DocumentUploadModal from '../components/DocumentUploadModal';
 import EmptyStateIcon from '../components/icons/EmptyStateIcon';
 import RoadmapAlertCard from '../components/RoadmapAlertCard';
 import AiReportCard from '../components/AiReportCard';
@@ -18,28 +17,19 @@ import RoadmapRemovedToast from '../components/RoadmapRemovedToast';
 import DeleteRoadmapModal from '../components/DeleteRoadmapModal';
 import CountryGroupHeader from '../components/CountryGroupHeader';
 import LockOutlineIcon from '../components/icons/LockOutlineIcon';
-import ScanFailIcon from '../components/icons/ScanFailIcon';
 import CalendarErrorIcon from '../components/icons/CalendarErrorIcon';
 import BagIcon from '../components/icons/BagIcon';
 import CalendarIcon from '../components/icons/CalendarIcon';
-import CameraIcon from '../components/icons/CameraIcon';
 import CheckCircleIcon from '../components/icons/CheckCircleIcon';
 import ChevronDownIcon from '../components/icons/ChevronDownIcon';
-import CloudUploadIcon from '../components/icons/CloudUploadIcon';
-import CsvFileIcon from '../components/icons/CsvFileIcon';
-import DefaultFileIcon from '../components/icons/DefaultFileIcon';
-import DocFileIcon from '../components/icons/DocFileIcon';
 import DocumentDoneIcon from '../components/icons/DocumentDoneIcon';
 import EditIcon from '../components/icons/EditIcon';
-import FileClipIcon from '../components/icons/FileClipIcon';
 import InfoCircleIcon from '../components/icons/InfoCircleIcon';
 import LocationPinIcon from '../components/icons/LocationPinIcon';
 import MinusStepperIcon from '../components/icons/MinusStepperIcon';
 import MoneyIcon from '../components/icons/MoneyIcon';
-import PdfFileIcon from '../components/icons/PdfFileIcon';
 import PlusScheduleIcon from '../components/icons/PlusScheduleIcon';
 import PlusStepperIcon from '../components/icons/PlusStepperIcon';
-import RemoveIcon from '../components/icons/RemoveIcon';
 import RoadmapTitleIcon from '../components/icons/RoadmapTitleIcon';
 import TimelineLockIcon from '../components/icons/TimelineLockIcon';
 import TimelineMissedIcon from '../components/icons/TimelineMissedIcon';
@@ -49,7 +39,6 @@ import TimelineUpcomingIcon from '../components/icons/TimelineUpcomingIcon';
 import ToastCloseIcon from '../components/icons/ToastCloseIcon';
 import TrashIcon from '../components/icons/TrashIcon';
 import UploadIcon from '../components/icons/UploadIcon';
-import UploadSpinnerIcon from '../components/icons/UploadSpinnerIcon';
 import WarningIcon from '../components/icons/WarningIcon';
 import {
   berlinRoadmapTasks,
@@ -57,7 +46,6 @@ import {
   berlinAiReport,
   apostilleRequiredDocuments,
   countryRoadmapGroups,
-  documentUploadFiles,
 } from '../mocks/mockData';
 
 function Section({
@@ -91,27 +79,18 @@ const ROADMAP_ICONS: { name: string; Icon: ComponentType<{ className?: string }>
   { name: 'BagIcon', Icon: BagIcon },
   { name: 'CalendarErrorIcon', Icon: CalendarErrorIcon },
   { name: 'CalendarIcon', Icon: CalendarIcon },
-  { name: 'CameraIcon', Icon: CameraIcon },
   { name: 'CheckCircleIcon', Icon: CheckCircleIcon },
   { name: 'ChevronDownIcon', Icon: ChevronDownIcon },
-  { name: 'CloudUploadIcon', Icon: CloudUploadIcon },
-  { name: 'CsvFileIcon', Icon: CsvFileIcon },
-  { name: 'DefaultFileIcon', Icon: DefaultFileIcon },
-  { name: 'DocFileIcon', Icon: DocFileIcon },
   { name: 'DocumentDoneIcon', Icon: DocumentDoneIcon },
   { name: 'EditIcon', Icon: EditIcon },
-  { name: 'FileClipIcon', Icon: FileClipIcon },
   { name: 'InfoCircleIcon', Icon: InfoCircleIcon },
   { name: 'LocationPinIcon', Icon: LocationPinIcon },
   { name: 'LockOutlineIcon', Icon: LockOutlineIcon },
   { name: 'MinusStepperIcon', Icon: MinusStepperIcon },
   { name: 'MoneyIcon', Icon: MoneyIcon },
-  { name: 'PdfFileIcon', Icon: PdfFileIcon },
   { name: 'PlusScheduleIcon', Icon: PlusScheduleIcon },
   { name: 'PlusStepperIcon', Icon: PlusStepperIcon },
-  { name: 'RemoveIcon', Icon: RemoveIcon },
   { name: 'RoadmapTitleIcon', Icon: RoadmapTitleIcon },
-  { name: 'ScanFailIcon', Icon: ScanFailIcon },
   { name: 'TimelineLockIcon', Icon: TimelineLockIcon },
   { name: 'TimelineMissedIcon', Icon: TimelineMissedIcon },
   { name: 'TimelineOngoingIcon', Icon: TimelineOngoingIcon },
@@ -120,7 +99,6 @@ const ROADMAP_ICONS: { name: string; Icon: ComponentType<{ className?: string }>
   { name: 'ToastCloseIcon', Icon: ToastCloseIcon },
   { name: 'TrashIcon', Icon: TrashIcon },
   { name: 'UploadIcon', Icon: UploadIcon },
-  { name: 'UploadSpinnerIcon', Icon: UploadSpinnerIcon },
   { name: 'WarningIcon', Icon: WarningIcon },
 ];
 
@@ -185,16 +163,12 @@ export default function ComponentPreview() {
         <AiReportCard {...berlinAiReport} />
       </Section>
 
-      <Section title="RequiredDocumentCard" path="src/features/roadmap/components/RequiredDocumentCard.tsx" note="OCR 지원 서류는 '촬영하여 자동 체크' 버튼 클릭해서 시뮬레이션 확인 가능">
+      <Section title="RequiredDocumentCard" path="src/features/roadmap/components/RequiredDocumentCard.tsx" note="왼쪽 원을 눌러 완료 처리 확인 가능">
         <RequiredDocumentCardDemo />
       </Section>
 
       <Section title="DocumentTaskDetailModal" path="src/features/roadmap/components/DocumentTaskDetailModal.tsx">
         <DocumentTaskDetailModalDemo />
-      </Section>
-
-      <Section title="DocumentUploadModal" path="src/features/roadmap/components/DocumentUploadModal.tsx" note="uploading/completed/error 상태 동시 표시">
-        <DocumentUploadModal files={documentUploadFiles} maxSizeMB={10} />
       </Section>
 
       <Section title="DatePickerModal" path="src/features/roadmap/components/DatePickerModal.tsx" note="mode: day / month · warningMessage 있으면 상단에 경고 pill 표시">
@@ -222,15 +196,6 @@ export default function ComponentPreview() {
           <RoadmapAlertCard
             icon={<LockOutlineIcon className="size-full" />}
             title="이전 단계를 먼저 완료해야 합니다"
-          />
-          <RoadmapAlertCard
-            icon={<ScanFailIcon className="size-full" />}
-            iconBgClassName="bg-[#fff3ec]"
-            iconColorClassName="text-[#ea580c]"
-            title="문서를 인식하지 못했어요"
-            description="다시 촬영하거나 직접 체크해 주세요"
-            actionLabel="직접 체크"
-            actionClassName="bg-[#ea580c] text-white"
           />
           <RoadmapAlertCard
             icon={<CalendarErrorIcon className="size-full" />}
@@ -280,7 +245,7 @@ function RequiredDocumentCardDemo() {
 
   return (
     <div className="w-100">
-      <RequiredDocumentCard document={document} onOpenUpload={() => {}} onCheck={() => setDocument((d) => ({ ...d, isChecked: true }))} />
+      <RequiredDocumentCard document={document} onCheck={() => setDocument((d) => ({ ...d, isChecked: true }))} />
     </div>
   );
 }
