@@ -67,6 +67,7 @@ export default function LoginModal({
     setIsGoogleLoading(true);
     try {
       const { authorizationUrl } = await authApi.getGoogleLoginUrl();
+      sessionStorage.setItem('oauthIntent', 'login');
       window.location.href = authorizationUrl;
     } catch (error) {
       setIsGoogleLoading(false);

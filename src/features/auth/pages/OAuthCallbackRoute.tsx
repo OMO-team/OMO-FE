@@ -9,6 +9,7 @@ export default function OAuthCallbackRoute() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const signIn = useAuthStore((s) => s.signIn);
+  const showAuthToast = useAuthStore((s) => s.showAuthToast);
   const called = useRef(false);
 
   useEffect(() => {
@@ -36,6 +37,9 @@ export default function OAuthCallbackRoute() {
       .then(() => memberApi.getMyInfo().catch(() => null))
       .then((info) => {
         signIn(info?.profileImageUrl ?? undefined);
+        const intent = sessionStorage.getItem('oauthIntent');
+        sessionStorage.removeItem('oauthIntent');
+        showAuthToast(intent === 'signup' ? 'signup' : 'login');
         navigate('/', { replace: true });
       })
       .catch((error: unknown) => {

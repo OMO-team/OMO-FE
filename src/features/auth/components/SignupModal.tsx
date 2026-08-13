@@ -175,6 +175,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     const agreedTermsIds = [...(agreeTerms ? [1] : []), ...(agreePrivacy ? [2] : [])];
     try {
       const { authorizationUrl } = await authApi.getGoogleSignupUrl({ agreedTermsIds });
+      sessionStorage.setItem('oauthIntent', 'signup');
       window.location.href = authorizationUrl;
     } catch (error) {
       setIsGoogleLoading(false);
