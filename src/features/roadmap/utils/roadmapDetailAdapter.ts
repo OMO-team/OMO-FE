@@ -72,6 +72,5 @@ export function toRequiredDocumentData(document: DocumentItem): RequiredDocument
     name: document.documentName,
     subtitle: document.description,
     isChecked: document.checked,
-    ocrSupport: document.ocrSupport,
   };
 }
