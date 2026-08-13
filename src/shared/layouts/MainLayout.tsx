@@ -107,7 +107,7 @@ export default function MainLayout() {
   );
 
   return (
-    <div className="relative flex min-h-screen min-w-[1200px] flex-col">
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
       <ScrollRestoration />
       <div className={isOverlay ? 'absolute inset-x-0 top-0 z-20' : undefined}>
         <Header variant={headerVariant} />

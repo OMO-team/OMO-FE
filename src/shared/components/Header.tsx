@@ -52,10 +52,13 @@ export default function Header({ variant = "default" }: HeaderProps) {
   };
 
   return (
-    <header className={`sticky top-0 z-30 flex w-full items-center justify-between px-[188px] pt-6 pb-6 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
-      {/* 왼쪽: 로고 + 검색창 */}
-      <div className="flex items-center gap-4">
-        <button type="button" onClick={() => navigate('/')} className="flex items-center justify-center self-stretch">
+    <header className={`sticky top-0 z-30 w-full px-4 py-4 sm:px-8 sm:py-5 ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
+    {/* 콘텐츠(로고+검색창+메뉴)가 필요한 만큼만 자라도록 최대 폭을 두고 중앙 정렬 —
+        검색창이 최대치(418px)에 닿으면 그 이후 남는 공간은 내부 빈틈이 아니라 헤더 양옆 여백으로 붙음 */}
+    <div className="mx-auto flex w-full max-w-[860px] items-center gap-3 sm:gap-4">
+      {/* 왼쪽: 로고 + 검색창 — 오른쪽 그룹이 쓰고 남는 공간을 전부 차지, 좁아지면 검색창부터 줄어듦 */}
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+        <button type="button" onClick={() => navigate('/')} className="flex shrink-0 items-center justify-center self-stretch">
           <img
             src={omoLogo}
             alt="OMO 로고"
@@ -65,40 +68,42 @@ export default function Header({ variant = "default" }: HeaderProps) {
         </button>
 
         <div
-          className="flex h-10 w-[418px] cursor-pointer items-center gap-8 rounded-2 bg-gray-50 py-2 pl-5 pr-4 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]"
+          className="flex h-10 min-w-0 flex-1 max-w-[418px] cursor-pointer items-center justify-end gap-2 rounded-2 bg-gray-50 px-3 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]"
           onClick={openSearch}
         >
-          <span className="body-03 flex-1 text-gray-400">
+          <span className="body-03 min-w-0 flex-1 truncate text-gray-400">
             도시나 키워드로 검색하기
           </span>
-          <Icon size="md">
-            <img src={iconSearch} alt="검색" />
-          </Icon>
+          <span className="shrink-0">
+            <Icon size="md">
+              <img src={iconSearch} alt="검색" />
+            </Icon>
+          </span>
         </div>
       </div>
 
-      {/* 오른쪽: Frame 76 — gap-4(16px), 탐색/내홈/스마트브리핑은 gap 없음 */}
-      <div className="flex items-center gap-4">
+      {/* 오른쪽: Frame 76 — 고정 폭, 줄어들지 않음 */}
+      <div className="flex shrink-0 items-center gap-2 sm:gap-4">
         {/* 탐색 / 내홈 / 스마트 브리핑 — gap 없음 */}
         <div className="flex items-center">
           <button
             onClick={handleExploreClick}
-            className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("explore")}`}
+            className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-2.5 sm:pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("explore")}`}
           >
             <Icon size="sm">
               <ExploreIcon color={getNavIconColor("explore")} />
             </Icon>
-            탐색
+            <span className="hidden sm:inline">탐색</span>
           </button>
 
           <button
             onClick={handleMyHomeClick}
-            className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("myhome")}`}
+            className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-2.5 sm:pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("myhome")}`}
           >
             <Icon size="sm">
               <HomeIcon color={getNavIconColor("myhome")} />
             </Icon>
-            내 홈
+            <span className="hidden sm:inline">내 홈</span>
           </button>
 
         </div>
@@ -125,19 +130,20 @@ export default function Header({ variant = "default" }: HeaderProps) {
           <div className="flex items-center gap-1">
             <button
               onClick={() => openModal('login')}
-              className={`flex shrink-0 items-center rounded-2 px-[18px] py-2.5 body-03 whitespace-nowrap ${isOverlay ? "text-white" : "text-gray-700"}`}
+              className={`flex shrink-0 items-center rounded-2 px-2.5 sm:px-[18px] py-2.5 body-03 whitespace-nowrap ${isOverlay ? "text-white" : "text-gray-700"}`}
             >
               로그인
             </button>
             <button
               onClick={() => openModal('signup')}
-              className="flex shrink-0 items-center rounded-2 bg-primary-500 px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
+              className="flex shrink-0 items-center rounded-2 bg-primary-500 px-2.5 sm:px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
             >
               회원가입
             </button>
           </div>
         )}
       </div>
+    </div>
     </header>
   );
 }
