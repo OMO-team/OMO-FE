@@ -1,3 +1,5 @@
+import { getDirectionParticle } from '../../roadmap/utils/korean';
+
 interface CityReportFooterProps {
   cityName: string;
   onAddToRoadmap?: () => void;
@@ -19,7 +21,8 @@ export default function CityReportFooter({
     <div className="flex w-full shrink-0 items-center justify-between border-t border-gray-200 bg-white px-[72px] pt-[30px] pb-10 shadow-[4px_-2px_16px_0px_rgba(6,49,88,0.1)]">
       <div className="flex flex-col gap-1">
         <p className="title-02 text-gray-900">
-          <span className="text-primary-500">{cityName}</span>으로 시작해 볼까요?
+          <span className="text-primary-500">{cityName}</span>
+          {getDirectionParticle(cityName)} 시작해 볼까요?
         </p>
         {errorMessage && (
           <p role="alert" className="body-04 text-red-500">
