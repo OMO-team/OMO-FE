@@ -20,7 +20,7 @@ export default function RoadmapRemovedToast({
     <div className="fixed left-1/2 top-6 z-[70] flex -translate-x-1/2 items-center gap-4 rounded-full border border-primary-100 bg-primary-50 px-5 py-2 shadow-[0px_3px_4px_rgba(6,49,88,0.16)]">
       <div className="flex shrink-0 items-center gap-2">
         <CheckCircleIcon className="size-icon-sm shrink-0 text-primary-500" />
-        <p className="body-02 w-60 whitespace-nowrap text-primary-500">
+        <p className="body-02 whitespace-nowrap text-primary-500">
           {cityName}{getSubjectParticle(cityName)} {location}에서 제거되었어요.
         </p>
       </div>
