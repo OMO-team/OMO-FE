@@ -142,7 +142,7 @@ export default function MainLayout() {
       </div>
 
       {isSearchOpen && (
-        <ModalOverlay onClose={closeSearch}>
+        <ModalOverlay onClose={closeSearch} align="top">
           <SearchModal
             onClose={closeSearch}
             recentSearches={recentSearches}
