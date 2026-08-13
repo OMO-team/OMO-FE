@@ -42,6 +42,12 @@ import { useCompareStore } from '../../compare/store/useCompareStore';
 
 // utils
 import { buildCityReportData } from '../../roadmap/utils/buildCityReportData';
+import {
+  hasStructuredCondition,
+  hasClientOnlyCondition,
+  matchesClientOnlyCondition,
+  type ParsedSearchQuery,
+} from '../utils/parseSearchQuery';
 
 // constants & mocks
 import { DETAIL_OPTIONS } from '../constants/filterOptions';
@@ -74,7 +80,8 @@ const STAY_DURATION_MAP: Record<string, StayDurationType> = {
   '1년 이상': 'VERY_LONG',
 };
 
-/** 스마트 브리핑의 "추천 도시 보러가기"로 들어온 도시들 — 목적(purpose) 필터 기준 카탈로그 API로는 조회할 수 없어 AI 응답에 실려온 데이터를 그대로 카드로 그린다 */
+/** 스마트 브리핑의 "추천 도시 보러가기"로 들어온 도시들 — 목적(purpose) 필터 기준 카탈로그 API로는 조회할 수 없어
+ *  AI 응답에 실려온 데이터를 그대로 카드로 그린다. infraScore는 응답에서 종종 누락되어 오므로(백엔드 확인됨) 0으로 대체한다 */
 function adaptSummaryToCityItem(city: CitySummary): CityItem {
   return {
     cityId: city.cityId,
@@ -89,7 +96,7 @@ function adaptSummaryToCityItem(city: CitySummary): CityItem {
     housingScore: city.housingScore,
     visaScore: city.visaScore,
     languageScore: city.languageScore,
-    internetScore: city.infraScore,
+    internetScore: city.infraScore ?? 0,
     stayDuration: 'SHORT',
     isWishlisted: false,
   };
@@ -103,15 +110,25 @@ export default function CityInsight() {
 
   const urlKeyword = searchParams.get('keyword') ?? '';
   const urlCountryCodes = searchParams.getAll('countryCodes');
-  const recommendedCities = (location.state as { recommendedCities?: CitySummary[] } | null)
-    ?.recommendedCities;
+  const locationState = location.state as
+    | { recommendedCities?: CitySummary[]; parsedSearch?: { query: string } & ParsedSearchQuery }
+    | null;
+  const recommendedCities = locationState?.recommendedCities;
+  const parsedSearch = locationState?.parsedSearch;
 
-  // 진입 경로 판단 — keyword / countryCodes / AI 추천 도시는 상호 배타적으로 처리
+  // 진입 경로 판단 — keyword / countryCodes / AI 추천 도시 / 문장형 구조화 검색은 상호 배타적으로 처리
   const isFromRecommendation = !!recommendedCities?.length;
-  const isFromSearch = !isFromRecommendation && !!urlKeyword;
-  const isFromCountry = !isFromSearch && !isFromRecommendation;
+  const isFromParsedSearch = !isFromRecommendation && !!parsedSearch;
+  const isFromSearch = !isFromRecommendation && !isFromParsedSearch && !!urlKeyword;
+  const isFromCountry = !isFromSearch && !isFromRecommendation && !isFromParsedSearch;
 
-  const { data: purposes = [] } = usePurposes({ enabled: !isFromSearch && !isFromRecommendation });
+  /** 검색창이 조건을 하나도 못 뽑아냈으면 애초에 parsedSearch 대신 keyword로 보내지만, 방어적으로
+   *  한 번 더 확인 — 비어 있으면 필터 없는 전체 목록 대신 "조건을 이해하지 못했다" 안내로 처리 */
+  const hasParsedFilters = isFromParsedSearch && hasStructuredCondition(parsedSearch!);
+
+  const { data: purposes = [] } = usePurposes({
+    enabled: !isFromSearch && !isFromRecommendation && !isFromParsedSearch,
+  });
 
   const purposeIdParam = Number(searchParams.get('purposeId'));
   const activeIndex = Math.max(
@@ -153,6 +170,27 @@ export default function CityInsight() {
     const currentCountryCodes = searchParams.getAll('countryCodes');
     const selectedCodes = selectedCountries.map(c => c.code);
     const activeCodes = selectedCodes.length > 0 ? selectedCodes : currentCountryCodes;
+
+    if (isFromParsedSearch) {
+      const base = parsedSearch!.params;
+      return {
+        ...base,
+        countryCodes: activeCodes.length > 0 ? activeCodes : undefined,
+        // 상세필터에서 직접 값을 고르면(상관없음 포함) 문장에서 파싱된 값을 덮어씀 — 드롭다운을
+        // 아예 건드리지 않았을 때만 파싱된 기본값을 그대로 씀
+        maxMonthlyCost:
+          '월 생활비' in selectedOptions ? MONTHLY_COST_MAP[selectedOptions['월 생활비']] : base.maxMonthlyCost,
+        minSafetyScore:
+          '치안' in selectedOptions ? SAFETY_SCORE_MAP[selectedOptions['치안']] : base.minSafetyScore,
+        housingDifficulty:
+          '숙소 난이도' in selectedOptions ? DIFFICULTY_MAP[selectedOptions['숙소 난이도']] : base.housingDifficulty,
+        visaDifficulty:
+          '비자 난이도' in selectedOptions ? DIFFICULTY_MAP[selectedOptions['비자 난이도']] : base.visaDifficulty,
+        stayDuration:
+          '체류 기간' in selectedOptions ? STAY_DURATION_MAP[selectedOptions['체류 기간']] : base.stayDuration,
+      };
+    }
+
     return {
       keyword: keyword || undefined,
       purposeType: isFromSearch ? undefined : activePurpose?.type,
@@ -163,7 +201,7 @@ export default function CityInsight() {
       visaDifficulty: DIFFICULTY_MAP[selectedOptions['비자 난이도']],
       stayDuration: STAY_DURATION_MAP[selectedOptions['체류 기간']],
     };
-  }, [keyword, isFromSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
+  }, [keyword, isFromSearch, isFromParsedSearch, parsedSearch, activePurpose, selectedCountries, searchParams, selectedOptions]);
 
   const [prevQueryParams, setPrevQueryParams] = useState(queryParams);
   if (prevQueryParams !== queryParams) {
@@ -179,15 +217,54 @@ export default function CityInsight() {
     [queryParams, page],
   );
 
-  const { data: citiesResult } = useCities(apiParams, {
-    enabled: !isFromRecommendation && (isFromSearch || !!activePurpose),
+  // activePurpose는 이전 방문에서 캐시된 값이 남아있을 수 있어(usePurposes가 비활성이어도 캐시는 유지됨),
+  // 문장형 검색 모드에서는 그 값을 절대 신뢰하지 않고 hasParsedFilters로만 판단한다
+  const shouldFetchCities = isFromSearch
+    ? true
+    : isFromParsedSearch
+      ? hasParsedFilters
+      : !!activePurpose;
+
+  /** 어학·인프라·평점처럼 /api/v1/cities에 필터 파라미터가 없는 조건이 있는 문장형 검색은
+   *  (키워드 검색처럼) 전체 매칭 결과를 다 받아와 프론트에서 다시 걸러낸 뒤 페이지네이션해야
+   *  진짜 AND 교집합이 됨 — 조건 목록은 parseSearchQuery.ts의 hasClientOnlyCondition 참고 */
+  const needsClientRefilter =
+    isFromSearch || (isFromParsedSearch && hasClientOnlyCondition(parsedSearch!));
+
+  const { data: citiesResult } = useCities(needsClientRefilter ? queryParams : apiParams, {
+    enabled: !isFromRecommendation && shouldFetchCities,
+    fetchAll: needsClientRefilter,
   });
 
-  const cities = isFromRecommendation
+  const rawCities = isFromRecommendation
     ? recommendedCities!.map(adaptSummaryToCityItem)
     : citiesResult?.data ?? [];
-  const totalElements = isFromRecommendation ? cities.length : citiesResult?.totalElements ?? 0;
-  const totalPages = isFromRecommendation ? 1 : Math.max(1, citiesResult?.totalPages ?? 1);
+
+  const searchMatchedCities = isFromSearch
+    ? // 전역 검색은 백엔드가 도시명·국가명뿐 아니라 한줄 요약(description)까지 매칭해 결과를 주므로,
+      // 요약 문구에서만 걸린 카드는 빼고(도시명 또는 국가명 매칭만 남기고) 다시 걸러낸다
+      rawCities.filter(c => {
+        const q = keyword.trim().toLowerCase();
+        return c.name.toLowerCase().includes(q) || c.country.name.toLowerCase().includes(q);
+      })
+    : isFromParsedSearch
+      ? rawCities.filter(c => matchesClientOnlyCondition(c, parsedSearch!))
+      : rawCities;
+
+  const cities = needsClientRefilter
+    ? searchMatchedCities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+    : searchMatchedCities;
+
+  const totalElements = isFromRecommendation
+    ? cities.length
+    : needsClientRefilter
+      ? searchMatchedCities.length
+      : citiesResult?.totalElements ?? 0;
+  const totalPages = isFromRecommendation
+    ? 1
+    : needsClientRefilter
+      ? Math.max(1, Math.ceil(searchMatchedCities.length / PAGE_SIZE))
+      : Math.max(1, citiesResult?.totalPages ?? 1);
 
   useEffect(() => {
     if (!addedRoadmap) return;
@@ -306,10 +383,10 @@ export default function CityInsight() {
       <div className="w-[1064px]">
         <SmartBriefingFAB/>
         {!isFromCountry && (
-          <div className={`mb-6 ${isFromSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
-            {isFromSearch ? (
+          <div className={`mb-6 ${isFromSearch || isFromParsedSearch ? 'border-b border-gray-200 pb-[30px]' : ''}`}>
+            {isFromSearch || isFromParsedSearch ? (
               <h1 className="heading-05">
-                <span className="text-blue-500">'{urlKeyword}'</span>에 대한 검색 결과
+                <span className="text-blue-500">'{isFromParsedSearch ? parsedSearch!.query : urlKeyword}'</span>에 대한 검색 결과
               </h1>
             ) : (
               <div className="flex items-center gap-5">
@@ -324,7 +401,7 @@ export default function CityInsight() {
         {!isFromRecommendation && (
           <>
             <div className="flex flex-col gap-4">
-              {!isFromSearch && (
+              {!isFromSearch && !isFromParsedSearch && (
                 <>
                   <CategoryTab
                     categories={categoryNames}
@@ -341,7 +418,7 @@ export default function CityInsight() {
                   />
                 </>
               )}
-               {isFromSearch && (
+               {(isFromSearch || isFromParsedSearch) && (
                   <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
                 )}
               <div className="flex justify-between">
@@ -349,7 +426,7 @@ export default function CityInsight() {
                   <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
                   <RegionDropDown
                     key={`region-${resetKey}`}
-                    purposeType={activePurpose?.type}
+                    purposeType={activePurpose?.type ?? parsedSearch?.params.purposeType}
                     onSelect={handleSelect}
                     onReset={() => setSelectedCountries([])}
                   />
@@ -422,15 +499,25 @@ export default function CityInsight() {
               <FilterIcon width={42} height={42} />
             </div>
             <div className="flex flex-col gap-2 items-center">
-              <h1 className="heading-05 text-gray-600">조건에 맞는 도시가 없습니다.</h1>
-              <p className="title-03 text-gray-300">필터를 완화하면 더 많은 도시를 볼 수 있어요.</p>
+              <h1 className="heading-05 text-gray-600">
+                {isFromParsedSearch && !hasParsedFilters
+                  ? '검색어에서 조건을 이해하지 못했어요.'
+                  : '조건에 맞는 도시가 없습니다.'}
+              </h1>
+              <p className="title-03 text-gray-300">
+                {isFromParsedSearch && !hasParsedFilters
+                  ? '치안, 예산, 대륙, 목적(워킹홀리데이 등)을 조금 더 구체적으로 적어보세요.'
+                  : '필터를 완화하면 더 많은 도시를 볼 수 있어요.'}
+              </p>
             </div>
-            <button
-              className="bg-blue-100 text-blue-400 px-[26px] py-3 title-02 rounded-[12px] hover:bg-[#9FD2FF]"
-              onClick={handleReset}
-            >
-              필터 초기화 하기
-            </button>
+            {!isFromParsedSearch && (
+              <button
+                className="bg-blue-100 text-blue-400 px-[26px] py-3 title-02 rounded-[12px] hover:bg-[#9FD2FF]"
+                onClick={handleReset}
+              >
+                필터 초기화 하기
+              </button>
+            )}
           </div>
         )}
       </div>

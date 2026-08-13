@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import searchIcon from '../../../assets/icons/icon-search[18].svg';
 import closeIcon from '../../../assets/icons/icon-close[14].svg';
 import trashIcon from '../../../assets/icons/icon-trash.svg';
+import { parseSearchQuery, hasStructuredCondition } from '../../city-insight/utils/parseSearchQuery';
 
 type SearchModalProps = {
   onClose: () => void;
@@ -22,8 +23,16 @@ export default function SearchModal({
   const hasSearches = recentSearches.length > 0;
 
   const handleSearch = () => {
-    if (!searchValue.trim()) return;
-    navigate(`/city-insight?keyword=${encodeURIComponent(searchValue.trim())}`);
+    const query = searchValue.trim();
+    if (!query) return;
+    // "아시아"처럼 단어 하나만 쳐도 조건이 파싱되면 구조화 검색으로 보낸다 — 문장 모양이 아니라
+    // 실제로 뽑힌 조건 유무로 판단해야 대륙명 단독 검색 같은 경우를 놓치지 않는다
+    const parsed = parseSearchQuery(query);
+    if (hasStructuredCondition(parsed)) {
+      navigate('/city-insight', { state: { parsedSearch: { query, ...parsed } } });
+    } else {
+      navigate(`/city-insight?keyword=${encodeURIComponent(query)}`);
+    }
     onClose();
   };
 
