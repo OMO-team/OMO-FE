@@ -36,15 +36,6 @@ export interface RequiredDocumentData {
   subtitle?: string;
   isChecked: boolean;
   displayOrder?: number;
-  /** isChecked일 때 업로드 완료된 파일명 목록 */
-  uploadedFiles?: string[];
-}
-
-export interface UploadedFileItem {
-  name: string;
-  uploadedSizeMB: number;
-  totalSizeMB: number;
-  status: 'uploading' | 'processing' | 'completed' | 'error';
 }
 
 export interface CityRoadmapData {

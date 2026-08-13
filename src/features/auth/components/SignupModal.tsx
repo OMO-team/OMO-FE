@@ -49,6 +49,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   const signupDraft = useAuthStore(s => s.signupDraft);
   const setSignupDraft = useAuthStore(s => s.setSignupDraft);
   const clearSignupDraft = useAuthStore(s => s.clearSignupDraft);
+  const showAuthToast = useAuthStore(s => s.showAuthToast);
 
   const [name, setName] = useState(signupDraft?.name ?? '');
   const [email, setEmail] = useState(signupDraft?.email ?? '');
@@ -174,6 +175,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     const agreedTermsIds = [...(agreeTerms ? [1] : []), ...(agreePrivacy ? [2] : [])];
     try {
       const { authorizationUrl } = await authApi.getGoogleSignupUrl({ agreedTermsIds });
+      sessionStorage.setItem('oauthIntent', 'signup');
       window.location.href = authorizationUrl;
     } catch (error) {
       setIsGoogleLoading(false);
@@ -240,6 +242,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
         agreedTermsIds,
       });
       clearSignupDraft();
+      showAuthToast('signup');
       onClose();
     } catch (error) {
       if (axios.isAxiosError<{ code?: string }>(error) && error.response?.status === 400) {
