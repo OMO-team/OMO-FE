@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import DocumentTaskDetailModal from '../components/DocumentTaskDetailModal';
-import type { DocumentScheduleState } from '../components/RequiredDocumentCard';
 import CompleteTaskModal from '../components/CompleteTaskModal';
 import DatePickerModal from '../components/DatePickerModal';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
@@ -18,19 +17,6 @@ import {
   toRequiredDocumentData,
 } from '../utils/roadmapDetailAdapter';
 import type { TaskDetailResult } from '../types/api';
-
-/**
- * 서류 카드 색을 정하는 일정 상태.
- * 마감일이 없으면 아직 일정을 안 잡은 것이고, scheduleDDay가 0이면 오늘이 마감이다.
- */
-function toScheduleState(task: TaskDetailResult): DocumentScheduleState {
-  if (!task.dueDate) return 'unscheduled';
-  // 태스크를 완료하면 백엔드가 isOverdue를 false로 되돌리는데, 시안의 "기간 지남 + 수행 O"는
-  // 완료한 뒤에도 유지되는 상태라 완료 여부를 타지 않는 D-day 부호로 판단한다
-  if (task.isOverdue || (task.scheduleDDay ?? 0) < 0) return 'overdue';
-  if (task.scheduleDDay === 0) return 'today';
-  return 'scheduled';
-}
 
 function parseIsoDate(value: string | null) {
   if (!value) return null;
@@ -175,7 +161,6 @@ export default function TaskDetailRoute() {
           isCompleted={taskDetail.isCompleted}
           onComplete={() => setIsCompleteConfirmOpen(true)}
           isCompleting={completeTaskMutation.isPending}
-          scheduleState={toScheduleState(taskDetail)}
         />
       </ModalOverlay>
 

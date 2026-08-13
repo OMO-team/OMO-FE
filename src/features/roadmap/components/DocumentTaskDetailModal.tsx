@@ -2,7 +2,7 @@ import CalendarIcon from './icons/CalendarIcon';
 import EditIcon from './icons/EditIcon';
 import NoteInfoIcon from './icons/NoteInfoIcon';
 import WarningIcon from './icons/WarningIcon';
-import RequiredDocumentCard, { type DocumentScheduleState } from './RequiredDocumentCard';
+import RequiredDocumentCard from './RequiredDocumentCard';
 import type { RequiredDocumentData } from '../types/roadmap';
 
 type DocumentTaskDetailModalProps = {
@@ -35,8 +35,6 @@ type DocumentTaskDetailModalProps = {
   onComplete?: () => void;
   /** 완료 요청 진행 중이면 버튼을 막아 중복 호출을 방지 */
   isCompleting?: boolean;
-  /** 서류 카드 색을 결정하는 태스크 일정 상태 (일정 추가 전/마감 전/오늘/기간 지남) */
-  scheduleState?: DocumentScheduleState;
 };
 
 export default function DocumentTaskDetailModal({
@@ -55,7 +53,6 @@ export default function DocumentTaskDetailModal({
   isCompleted = false,
   onComplete,
   isCompleting = false,
-  scheduleState = 'scheduled',
 }: DocumentTaskDetailModalProps) {
   const completedCount = documents.filter((d) => d.isChecked).length;
   const totalCount = documents.length;
@@ -151,7 +148,6 @@ export default function DocumentTaskDetailModal({
               <RequiredDocumentCard
                 key={document.taskDocumentId}
                 document={document}
-                scheduleState={scheduleState}
                 onCheck={() => onCheck?.(document.taskDocumentId)}
               />
             ))}
