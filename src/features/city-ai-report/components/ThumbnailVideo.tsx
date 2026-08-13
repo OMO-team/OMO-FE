@@ -1,4 +1,7 @@
+import { useYoutubeChannelName } from '../hooks/useYoutubeChannelName';
+
 interface ThumbnailVideoProps {
+  /** 채널명을 가져오기 전이나 실패했을 때 보여줄 대체 값 */
   tag: string;
   title: string;
   thumbnailUrl?: string;
@@ -11,6 +14,9 @@ export default function ThumbnailVideo({
   thumbnailUrl,
   url,
 }: ThumbnailVideoProps) {
+  const { data: channelName } = useYoutubeChannelName(url);
+  const displayTag = channelName ?? tag;
+
   return (
     <a
       href={url}
@@ -32,7 +38,9 @@ export default function ThumbnailVideo({
       />
       <div className="flex flex-col justify-end items-start w-[184px] absolute left-[17px] bottom-3 gap-1">
         <div className="flex justify-center items-center gap-1 px-2 py-1 rounded-md bg-white/40">
-          <p className="label-03 text-gray-700">{tag}</p>
+          {/* 재생 아이콘이 카드 정중앙(왼쪽 92px 지점부터)에 고정돼 있어, 뱃지 텍스트 시작
+              위치(25px)부터 아이콘과 닿기 전인 67px보다 여유 있게 50px에서 잘라 말줄임표로 보여준다 */}
+          <p className="label-03 max-w-[50px] truncate text-gray-700">{displayTag}</p>
         </div>
         <p className="body-04 text-white w-[184px] line-clamp-2">{title}</p>
       </div>

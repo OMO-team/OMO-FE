@@ -58,6 +58,7 @@ export default function CompareCityColumn({
       <CompareActionButton
         label="선택하기"
         variant="primary"
+        shape="rounded"
         onClick={onSelect}
         className="w-full"
       />
