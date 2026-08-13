@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from 'react';
+import { useEffect, type MouseEvent, type ReactNode } from 'react';
 
 type ModalOverlayProps = {
   children: ReactNode;
@@ -9,6 +9,16 @@ type ModalOverlayProps = {
 
 export default function ModalOverlay({ children, onClose, zIndex = 50 }: ModalOverlayProps) {
   const stopPropagation = (e: MouseEvent) => e.stopPropagation();
+
+  // 모달 내용이 뷰포트보다 길면 배경(body)까지 같이 스크롤되던 문제 — 모달이 떠 있는 동안은
+  // 배경 스크롤을 막아, 모달 자체의 overflow-y-auto로만 스크롤되게 한다
+  useEffect(() => {
+    const original = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, []);
 
   return (
     <div
