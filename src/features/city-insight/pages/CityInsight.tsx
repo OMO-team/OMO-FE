@@ -120,6 +120,7 @@ export default function CityInsight() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const isLoggedIn = useAuthStore(s => s.isLoggedIn);
+  const openModal = useAuthStore(s => s.openModal);
 
   /**
    * 이미 로드맵이 있는 도시+목적 조합은 다시 담지 못하게 막는다.
@@ -454,6 +455,10 @@ export default function CityInsight() {
 
   /** 목적은 탭에서 고른 값(activePurpose)을, 검색이면 카드에 붙은 목적을 쓴다 */
   const handleAddToRoadmap = async () => {
+    if (!isLoggedIn) {
+      openModal('loginRequired');
+      return;
+    }
     const city = reportCity;
     if (!city || createRoadmapMutation.isPending) return;
     const purposeId = activePurpose?.purposeId ?? city.purposeId;
