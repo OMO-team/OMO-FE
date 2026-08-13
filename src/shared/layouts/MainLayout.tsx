@@ -9,7 +9,14 @@ import SignupModal from '../../features/auth/components/SignupModal';
 import ForgotPasswordModal from '../../features/auth/components/ForgotPasswordModal';
 import LoginRequiredModal from '../../features/auth/components/LoginRequiredModal';
 import SearchModal from '../../features/search/components/SearchModal';
+import {
+  loadRecentSearches,
+  addRecentSearch,
+  removeRecentSearch,
+  clearRecentSearches,
+} from '../../features/search/utils/recentSearchesStorage';
 import AIChatPanel from '../../features/chat/components/AIChatPanel';
+import AuthSuccessToast from '../../features/auth/components/AuthSuccessToast';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { memberApi } from '../../features/settings/api/memberApi';
 import type { TermsAndPolicyLocationState } from '../pages/TermsAndPolicyRoute';
@@ -22,9 +29,9 @@ type RouteHandle = {
 };
 
 export default function MainLayout() {
-  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } =
+  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut, authToast, clearAuthToast } =
     useAuthStore();
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => loadRecentSearches());
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
 
@@ -136,15 +143,13 @@ export default function MainLayout() {
       </div>
 
       {isSearchOpen && (
-        <ModalOverlay onClose={closeSearch}>
+        <ModalOverlay onClose={closeSearch} align="top">
           <SearchModal
             onClose={closeSearch}
             recentSearches={recentSearches}
-            onSearch={(query) =>
-              setRecentSearches((prev) => [query, ...prev.filter((q) => q !== query)].slice(0, 10))
-            }
-            onRemove={(index) => setRecentSearches((prev) => prev.filter((_, i) => i !== index))}
-            onClearAll={() => setRecentSearches([])}
+            onSearch={query => setRecentSearches(addRecentSearch(query))}
+            onRemove={index => setRecentSearches(removeRecentSearch(index))}
+            onClearAll={() => setRecentSearches(clearRecentSearches())}
           />
         </ModalOverlay>
       )}
@@ -175,6 +180,10 @@ export default function MainLayout() {
         <ModalOverlay onClose={closeModal}>
           <LoginRequiredModal onClose={closeModal} onLoginClick={() => openModal('login')} />
         </ModalOverlay>
+      )}
+
+      {authToast !== null && (
+        <AuthSuccessToast type={authToast} onClose={clearAuthToast} />
       )}
     </div>
   );

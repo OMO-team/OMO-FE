@@ -2,7 +2,7 @@ import CalendarIcon from './icons/CalendarIcon';
 import EditIcon from './icons/EditIcon';
 import NoteInfoIcon from './icons/NoteInfoIcon';
 import WarningIcon from './icons/WarningIcon';
-import RequiredDocumentCard, { type DocumentScheduleState } from './RequiredDocumentCard';
+import RequiredDocumentCard from './RequiredDocumentCard';
 import type { RequiredDocumentData } from '../types/roadmap';
 
 type DocumentTaskDetailModalProps = {
@@ -24,12 +24,12 @@ type DocumentTaskDetailModalProps = {
   onTitleChange?: (title: string) => void;
   /** true면 선행 작업 미완료 상태 — 서류 목록 대신 안내 문구만 표시하고 체크 불가 */
   locked?: boolean;
-  /** 서류 카드의 "파일 업로드" 버튼 클릭 시 호출 — Document Upload Modal을 여는 용도 */
-  onOpenUpload?: (taskDocumentId: number) => void;
   /** 서류 카드의 원을 눌러 완료로 표시할 때 호출 — PATCH /api/v1/task-documents/{taskDocumentId}/check */
   onCheck?: (taskDocumentId: number) => void;
-  /** 서류에 붙은 파일 칩의 X를 눌렀을 때 호출 */
-  onRemoveFile?: (taskDocumentId: number, fileName: string) => void;
+  /** "할 일 모두 완료하기" — 아직 체크되지 않은 서류를 한 번에 완료 처리 */
+  onCompleteAll?: () => void;
+  /** 일괄 완료 요청 중이면 버튼을 막아 중복 호출을 방지 */
+  isCompletingAll?: boolean;
   /** true면 이미 완료된 행동형 태스크 — "완료로 표시" 버튼 대신 완료 상태를 보여줌 */
   isCompleted?: boolean;
   /**
@@ -39,8 +39,6 @@ type DocumentTaskDetailModalProps = {
   onComplete?: () => void;
   /** 완료 요청 진행 중이면 버튼을 막아 중복 호출을 방지 */
   isCompleting?: boolean;
-  /** 서류 카드 색을 결정하는 태스크 일정 상태 (일정 추가 전/마감 전/오늘/기간 지남) */
-  scheduleState?: DocumentScheduleState;
 };
 
 export default function DocumentTaskDetailModal({
@@ -55,13 +53,12 @@ export default function DocumentTaskDetailModal({
   editableTitle = false,
   onTitleChange,
   locked = false,
-  onOpenUpload,
   onCheck,
-  onRemoveFile,
+  onCompleteAll,
+  isCompletingAll = false,
   isCompleted = false,
   onComplete,
   isCompleting = false,
-  scheduleState = 'scheduled',
 }: DocumentTaskDetailModalProps) {
   const completedCount = documents.filter((d) => d.isChecked).length;
   const totalCount = documents.length;
@@ -69,7 +66,7 @@ export default function DocumentTaskDetailModal({
   const progressPercent = hasDocuments ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="flex max-h-[85vh] w-[800px] max-w-[90vw] flex-col gap-[46px] overflow-y-auto rounded-5 bg-white px-11 pb-[60px] pt-10">
+    <div className="flex max-h-[85vh] w-[800px] max-w-[90vw] flex-col gap-[46px] overflow-y-auto scrollbar-hide rounded-5 bg-white px-11 pb-[60px] pt-10">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6">
           <div className="flex items-start gap-0.5">
@@ -141,11 +138,24 @@ export default function DocumentTaskDetailModal({
       ) : hasDocuments ? (
         <div className="flex w-full flex-col gap-6">
           <div className="flex flex-col gap-4">
-            <div className="title-01 flex items-center justify-between">
-              <p className="heading-06 text-gray-900">할 일</p>
-              <span className="title-02 text-primary-500">
-                {completedCount}/{totalCount} 완료
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <p className="heading-06 text-gray-900">할 일</p>
+                <span className="title-01 text-primary-500">
+                  {completedCount}/{totalCount} 완료
+                </span>
+              </div>
+              {/* 이미 다 체크했으면 누를 일이 없어서 버튼 자체를 감춘다 */}
+              {completedCount < totalCount && (
+                <button
+                  type="button"
+                  onClick={onCompleteAll}
+                  disabled={!onCompleteAll || isCompletingAll}
+                  className="body-05 rounded-md bg-primary-50 px-3 py-1 text-primary-600 transition-colors disabled:cursor-not-allowed not-disabled:hover:bg-primary-100"
+                >
+                  할 일 모두 완료하기
+                </button>
+              )}
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
               <div className="h-full rounded-full bg-primary-500" style={{ width: `${progressPercent}%` }} />
@@ -157,12 +167,7 @@ export default function DocumentTaskDetailModal({
               <RequiredDocumentCard
                 key={document.taskDocumentId}
                 document={document}
-                scheduleState={scheduleState}
-                onOpenUpload={() => onOpenUpload?.(document.taskDocumentId)}
                 onCheck={() => onCheck?.(document.taskDocumentId)}
-                onRemoveFile={
-                  onRemoveFile ? (fileName) => onRemoveFile(document.taskDocumentId, fileName) : undefined
-                }
               />
             ))}
           </div>
