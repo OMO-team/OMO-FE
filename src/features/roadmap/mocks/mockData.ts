@@ -4,7 +4,6 @@ import type {
   AiReportData,
   RequiredDocumentData,
   CountryGroupData,
-  UploadedFileItem,
 } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
 import countryCard1 from '../../../assets/images/country_card_1.png';
@@ -73,7 +72,6 @@ export const apostilleRequiredDocuments: RequiredDocumentData[] = [
     subtitle: '업로드 완료',
     isChecked: true,
     displayOrder: 1,
-    uploadedFiles: ['졸업증명서_스캔본.pdf', '졸업증명서_원본.jpg'],
   },
   {
     taskDocumentId: 54,
@@ -82,7 +80,6 @@ export const apostilleRequiredDocuments: RequiredDocumentData[] = [
     subtitle: '업로드 완료',
     isChecked: true,
     displayOrder: 2,
-    uploadedFiles: ['성적증명서.pdf'],
   },
   {
     taskDocumentId: 55,
@@ -100,13 +97,6 @@ export const apostilleRequiredDocuments: RequiredDocumentData[] = [
     isChecked: false,
     displayOrder: 4,
   },
-];
-
-export const documentUploadFiles: UploadedFileItem[] = [
-  { name: '졸업증명서.pdf', uploadedSizeMB: 2.4, totalSizeMB: 4, status: 'uploading' },
-  { name: '재학증명서.doc', uploadedSizeMB: 2, totalSizeMB: 2, status: 'processing' },
-  { name: '아포스티유_확인서.csv', uploadedSizeMB: 3, totalSizeMB: 3, status: 'completed' },
-  { name: '통장잔고증명서.jpg', uploadedSizeMB: 1.2, totalSizeMB: 1.2, status: 'error' },
 ];
 
 /** 지원 범위: 8개국 9개 도시 (워홀 6개국 / 인턴십 6개국 / 교환학생 4개국) */

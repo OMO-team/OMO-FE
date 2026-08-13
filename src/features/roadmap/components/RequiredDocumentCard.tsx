@@ -1,7 +1,4 @@
-import CloudUploadIcon from './icons/CloudUploadIcon';
 import DocumentDoneIcon from './icons/DocumentDoneIcon';
-import FileClipIcon from './icons/FileClipIcon';
-import RemoveIcon from './icons/RemoveIcon';
 import type { RequiredDocumentData } from '../types/roadmap';
 
 /**
@@ -15,20 +12,15 @@ export type DocumentScheduleState = 'unscheduled' | 'scheduled' | 'today' | 'ove
 
 type RequiredDocumentCardProps = {
   document: RequiredDocumentData;
-  onOpenUpload?: () => void;
   /** 원을 눌러 서류를 완료로 표시할 때 호출 — PATCH /api/v1/task-documents/{id}/check */
   onCheck?: () => void;
-  /** 파일 칩의 X를 눌렀을 때 호출 */
-  onRemoveFile?: (fileName: string) => void;
   /** 속한 태스크의 일정 상태 — 지정하지 않으면 일정이 잡힌 것으로 본다 */
   scheduleState?: DocumentScheduleState;
 };
 
 export default function RequiredDocumentCard({
   document,
-  onOpenUpload,
   onCheck,
-  onRemoveFile,
   scheduleState = 'scheduled',
 }: RequiredDocumentCardProps) {
   const isDone = document.isChecked;
@@ -71,61 +63,15 @@ export default function RequiredDocumentCard({
           />
         )}
         <div className="flex flex-1 flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <p
-              className={`title-02 ${isUnscheduled ? 'text-gray-500' : 'text-gray-900'} ${
-                // 기간이 지난 뒤 완료된 서류는 지나간 일이라는 뜻으로 취소선을 긋는다
-                isOverdue && isDone ? 'line-through' : ''
-              }`}
-            >
-              {document.name}
-            </p>
-            <button
-              type="button"
-              onClick={onOpenUpload}
-              aria-label="파일 업로드"
-              className="shrink-0 text-primary-300"
-            >
-              <CloudUploadIcon className="size-icon-md" />
-            </button>
-          </div>
+          <p
+            className={`title-02 ${isUnscheduled ? 'text-gray-500' : 'text-gray-900'} ${
+              // 기간이 지난 뒤 완료된 서류는 지나간 일이라는 뜻으로 취소선을 긋는다
+              isOverdue && isDone ? 'line-through' : ''
+            }`}
+          >
+            {document.name}
+          </p>
           {document.subtitle && <p className="body-03 text-gray-500">{document.subtitle}</p>}
-
-          {isDone && document.uploadedFiles && document.uploadedFiles.length > 0 && (
-            // 파일 목록만 위 간격이 16px — 카드 세로 간격(8px)에 8px을 더해 맞춘다
-            <div className="mt-2 flex flex-col gap-2">
-              {document.uploadedFiles.map((fileName) => (
-                <div
-                  key={fileName}
-                  // 파란 칩 배경(#d2eaff)과 hover(#c3e3ff)는 primary-100과 200 사이 값이라 대응하는 토큰이 없어 그대로 씀
-                  className={`flex h-7.25 items-center justify-between gap-2 rounded-md px-2 py-1 transition-colors ${
-                    isOverdue ? 'bg-gray-100 hover:bg-gray-200' : 'bg-[#d2eaff] hover:bg-[#c3e3ff]'
-                  }`}
-                >
-                  <span
-                    className={`body-03 flex items-center gap-2 truncate ${
-                      isOverdue ? 'text-gray-500' : 'text-primary-600'
-                    }`}
-                  >
-                    <FileClipIcon className="size-icon-sm shrink-0" />
-                    <span className="truncate">{fileName}</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveFile?.(fileName)}
-                    disabled={!onRemoveFile}
-                    aria-label={`${fileName} 삭제`}
-                    className={`shrink-0 rounded-full transition-opacity disabled:cursor-not-allowed not-disabled:hover:opacity-70 ${
-                      isOverdue ? 'text-gray-500' : 'text-primary-600'
-                    }`}
-                  >
-                    <RemoveIcon className="size-icon-xs" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
         </div>
       </div>
     </div>

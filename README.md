@@ -198,7 +198,7 @@ pnpm format:check  # Prettier 포맷 위반 여부 확인 (CI용)
 | 메인 홈 | `/` | 카테고리별 추천 도시, AI 프롬프트 검색 |
 | 도시 인사이트 | `/city-insight` | 도시 상세 정보 카드 |
 | 내 홈 (로드맵·위시리스트) | `/myhome/empty` | 국가별 로드맵과 위시리스트 탭 |
-| 로드맵 상세 | `/myhome/dashboard/:roadmapId` | 타임라인·예산·AI 리포트·서류 업로드 |
+| 로드맵 상세 | `/myhome/dashboard/:roadmapId` | 타임라인·예산·AI 리포트 |
 | 태스크 상세 | `/myhome/dashboard/:roadmapId/task-detail/:taskId` | 단계별 준비 서류 체크 |
 | 문의하기 | `/contact` | 문의 폼 |
 | 약관·정책 | `/support/terms` | 이용약관·개인정보처리방침 |
@@ -240,7 +240,7 @@ pnpm format:check  # Prettier 포맷 위반 여부 확인 (CI용)
     │       └─ 국가별로 묶인 도시 로드맵 카드
     │               ├─ [로드맵 상세]
     │               │       ├─ 타임라인 (비자 · 보험 · 서류 · 항공권 · 숙소 · 재정)
-    │               │       │       └─ [태스크 상세] 준비 서류 체크 · 업로드
+    │               │       │       └─ [태스크 상세] 준비 서류 체크
     │               │       ├─ 예산 계획 (체류 기간 선택 → 초기 정착금 · 월 생활비 합산)
     │               │       └─ AI 리포트 카드 → [AI 도시 리포트 모달]
     │
