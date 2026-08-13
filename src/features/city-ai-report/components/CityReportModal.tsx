@@ -78,6 +78,7 @@ export default function CityReportModal({
         <div className="flex-1 flex flex-col justify-start items-center overflow-y-auto scrollbar-hide gap-10 pb-10">
           <ReportHero
             cityName={data.cityName}
+            purposeName={data.purposeName}
             heroImageUrl={data.heroImageUrl}
             ratingBadge={data.ratingBadge}
           />

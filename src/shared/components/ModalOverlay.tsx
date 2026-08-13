@@ -23,7 +23,9 @@ export default function ModalOverlay({
       style={{ zIndex }}
       onClick={onClose}
     >
-      <div onClick={stopPropagation}>{children}</div>
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div onClick={stopPropagation}>{children}</div>
+      </div>
     </div>
   );
 }

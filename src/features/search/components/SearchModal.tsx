@@ -11,6 +11,7 @@ type SearchModalProps = {
   onSearch?: (query: string) => void;
   onRemove?: (index: number) => void;
   onClearAll?: () => void;
+  onSearch?: (query: string) => void;
 };
 
 export default function SearchModal({
@@ -19,6 +20,7 @@ export default function SearchModal({
   onSearch,
   onRemove,
   onClearAll,
+  onSearch,
 }: SearchModalProps) {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
@@ -60,7 +62,7 @@ export default function SearchModal({
               placeholder="도시나 키워드로 검색하기"
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onKeyDown={e => e.key === 'Enter' && !e.nativeEvent.isComposing && handleSearch()}
             />
           </div>
           <button

@@ -4,7 +4,6 @@ import type {
   AiReportData,
   RequiredDocumentData,
   CountryGroupData,
-  UploadedFileItem,
 } from '../types/roadmap';
 import type { CityInsightData } from '../types/cityInsight';
 import countryCard1 from '../../../assets/images/country_card_1.png';
@@ -70,34 +69,25 @@ export const apostilleRequiredDocuments: RequiredDocumentData[] = [
     taskDocumentId: 53,
     documentTemplateId: 7,
     name: '졸업 증명서',
-    subtitle: '파싱 완료',
+    subtitle: '업로드 완료',
     isChecked: true,
-    ocrSupport: true,
     displayOrder: 1,
-    uploadedFiles: ['졸업증명서_스캔본.pdf', '졸업증명서_원본.jpg'],
   },
   {
     taskDocumentId: 54,
     documentTemplateId: 8,
     name: '성적 증명서',
-    subtitle: '파싱 완료',
+    subtitle: '업로드 완료',
     isChecked: true,
-    ocrSupport: false,
     displayOrder: 2,
-    uploadedFiles: ['성적증명서.pdf'],
   },
   {
     taskDocumentId: 55,
     documentTemplateId: 9,
     name: '재학 증명서',
-    subtitle: '파싱 완료',
+    subtitle: '업로드 완료',
     isChecked: false,
-    ocrSupport: true,
     displayOrder: 3,
-    isProcessing: true,
-    scanStatus: '문서 스캔 중 ...',
-    scanProgressPercent: 80,
-    scanDetail: '이미지 분석중 · AI 텍스트 추출 중',
   },
   {
     taskDocumentId: 56,
@@ -105,16 +95,8 @@ export const apostilleRequiredDocuments: RequiredDocumentData[] = [
     name: '통장 잔고 증명서',
     subtitle: '파일을 업로드해주세요',
     isChecked: false,
-    ocrSupport: true,
     displayOrder: 4,
   },
-];
-
-export const documentUploadFiles: UploadedFileItem[] = [
-  { name: '졸업증명서.pdf', uploadedSizeMB: 2.4, totalSizeMB: 4, status: 'uploading' },
-  { name: '재학증명서.doc', uploadedSizeMB: 2, totalSizeMB: 2, status: 'processing' },
-  { name: '아포스티유_확인서.csv', uploadedSizeMB: 3, totalSizeMB: 3, status: 'completed' },
-  { name: '통장잔고증명서.jpg', uploadedSizeMB: 1.2, totalSizeMB: 1.2, status: 'error' },
 ];
 
 /** 지원 범위: 8개국 9개 도시 (워홀 6개국 / 인턴십 6개국 / 교환학생 4개국) */

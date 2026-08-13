@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import RegionFilterIcon from "../../../shared/components/RegionFilterIcon"
 import ChevronDownIcon from "../../../shared/components/ChevronDownIcon"
 import searchIcon from '../../../assets/icons/icon-search[18].svg'
@@ -8,16 +8,24 @@ import type { Purpose } from "../../home/types/home"
 
 interface RegionDropDownProps {
   purposeType?: Purpose['type'];
+  value?: { name: string; code: string }[];
   onSelect: (codes: string[], names: string[]) => void;
   onReset: () => void;
 }
 
-export default function RegionDropDown({ purposeType, onSelect, onReset }: RegionDropDownProps) {
+export default function RegionDropDown({ purposeType, value, onSelect, onReset }: RegionDropDownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [openContinents, setOpenContinents] = useState<string[]>([])
-  const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([])
+  const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>(value ?? [])
   const [searchQuery, setSearchQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setSelectedCountries(value ?? [])
+    if ((value ?? []).length === 0) {
+      setOpenContinents([])
+    }
+  }, [value])
   useOutsideClick(containerRef, () => setIsOpen(false))
 
   const { data: countries = [] } = useCountriesByPurpose(isOpen ? purposeType : undefined)

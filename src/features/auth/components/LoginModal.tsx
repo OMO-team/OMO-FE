@@ -20,6 +20,7 @@ export default function LoginModal({
   onForgotPasswordClick,
 }: LoginModalProps) {
   const signIn = useAuthStore((s) => s.signIn);
+  const showAuthToast = useAuthStore((s) => s.showAuthToast);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,6 +49,7 @@ export default function LoginModal({
       await authApi.login({ email, password });
       const info = await memberApi.getMyInfo().catch(() => null);
       signIn(info?.profileImageUrl ?? undefined);
+      showAuthToast('login');
       onClose();
     } catch (error) {
       if (axios.isAxiosError<{ code?: string }>(error) && error.response?.status === 401) {
@@ -65,6 +67,7 @@ export default function LoginModal({
     setIsGoogleLoading(true);
     try {
       const { authorizationUrl } = await authApi.getGoogleLoginUrl();
+      sessionStorage.setItem('oauthIntent', 'login');
       window.location.href = authorizationUrl;
     } catch (error) {
       setIsGoogleLoading(false);
