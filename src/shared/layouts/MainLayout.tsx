@@ -10,6 +10,7 @@ import ForgotPasswordModal from '../../features/auth/components/ForgotPasswordMo
 import LoginRequiredModal from '../../features/auth/components/LoginRequiredModal';
 import SearchModal from '../../features/search/components/SearchModal';
 import AIChatPanel from '../../features/chat/components/AIChatPanel';
+import AuthSuccessToast from '../../features/auth/components/AuthSuccessToast';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { memberApi } from '../../features/settings/api/memberApi';
 import type { TermsAndPolicyLocationState } from '../pages/TermsAndPolicyRoute';
@@ -22,7 +23,7 @@ type RouteHandle = {
 };
 
 export default function MainLayout() {
-  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut } =
+  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut, authToast, clearAuthToast } =
     useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -175,6 +176,10 @@ export default function MainLayout() {
         <ModalOverlay onClose={closeModal}>
           <LoginRequiredModal onClose={closeModal} onLoginClick={() => openModal('login')} />
         </ModalOverlay>
+      )}
+
+      {authToast !== null && (
+        <AuthSuccessToast type={authToast} onClose={clearAuthToast} />
       )}
     </div>
   );
