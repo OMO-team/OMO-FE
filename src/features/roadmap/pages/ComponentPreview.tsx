@@ -181,7 +181,7 @@ export default function ComponentPreview() {
         <AiReportCard {...berlinAiReport} />
       </Section>
 
-      <Section title="RequiredDocumentCard" path="src/features/roadmap/components/RequiredDocumentCard.tsx" note="OCR 지원 서류는 '촬영하여 자동 체크' 버튼 클릭해서 시뮬레이션 확인 가능">
+      <Section title="RequiredDocumentCard" path="src/features/roadmap/components/RequiredDocumentCard.tsx" note="왼쪽 원을 눌러 완료 처리 확인 가능">
         <RequiredDocumentCardDemo />
       </Section>
 

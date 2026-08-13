@@ -115,7 +115,7 @@ export default function TaskDetailRoute() {
     queryClient.invalidateQueries({ queryKey: roadmapQueryKeys.detail(numericRoadmapId) });
   };
 
-  /** 체크 먼저 화면에 반영하고, 실패하면 되돌림 — 서류 촬영 자동 체크에도 동일하게 사용 */
+  /** 체크 먼저 화면에 반영하고, 실패하면 되돌림 */
   const checkDocumentMutation = useMutation({
     mutationFn: (taskDocumentId: number) => taskDocumentsApi.updateCheck(taskDocumentId, { checked: true }),
     onMutate: async (taskDocumentId) => {

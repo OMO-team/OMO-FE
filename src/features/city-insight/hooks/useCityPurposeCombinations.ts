@@ -22,12 +22,17 @@ export function combinationKey(cityId: number, purposeId?: number): string {
   return `${cityId}:${purposeId ?? ''}`;
 }
 
-/** 서버 페이지네이션은 목적별로 따로 매겨져서 합칠 수 없다. 한 번에 다 받아 프론트에서 자른다 */
+/** 서버가 허용하는 페이지 크기 상한. 이보다 크게 요청하면 400으로 거절당한다 */
 const FETCH_SIZE = 100;
 
-async function fetchCities(params: CityQueryParams): Promise<CitiesResponse> {
+/** 한 페이지가 100개를 넘을 수 없어서, 무한정 도는 일이 없도록 상한을 둔다 (도시 전체가 266개) */
+const MAX_PAGES = 10;
+
+async function fetchCitiesPage(params: CityQueryParams, page: number): Promise<CitiesResponse> {
   const cleanParams = Object.fromEntries(
-    Object.entries(params).filter(([, v]) => v !== undefined && !(Array.isArray(v) && v.length === 0))
+    Object.entries({ ...params, page, size: FETCH_SIZE }).filter(
+      ([, v]) => v !== undefined && !(Array.isArray(v) && v.length === 0)
+    )
   );
   const { data } = await instance.get<ApiResponse<CitiesResponse>>('/api/v1/cities', {
     params: cleanParams,
@@ -35,6 +40,21 @@ async function fetchCities(params: CityQueryParams): Promise<CitiesResponse> {
   });
   if (!data.isSuccess) throw new Error(data.message);
   return data.result;
+}
+
+/**
+ * 조건에 맞는 도시를 끝까지 받아온다.
+ * 목적별 결과를 합쳐서 다시 쪼개는 구조라 서버 페이지네이션을 그대로 쓸 수 없고,
+ * 한 번만 받으면 100개에서 잘려 워킹홀리데이(109개) 같은 목적에서 도시가 누락된다.
+ */
+async function fetchAllCities(params: CityQueryParams): Promise<CityItem[]> {
+  const cities: CityItem[] = [];
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const result = await fetchCitiesPage(params, page);
+    cities.push(...result.data);
+    if (!result.hasNext) break;
+  }
+  return cities;
 }
 
 /**
@@ -50,14 +70,14 @@ export function usePurposeCityIdSets(purposes: Purpose[], options?: { enabled?: 
       queryKey: ['cities', 'purposeCityIds', purpose.type],
       staleTime: 1000 * 60 * 5,
       enabled,
-      queryFn: () => fetchCities({ purposeType: purpose.type, page: 0, size: FETCH_SIZE }),
+      queryFn: () => fetchAllCities({ purposeType: purpose.type }),
     })),
   });
 
   /** purposeId -> 그 목적의 후보 도시 id 집합 */
   const sets = new Map<number, Set<number>>();
   results.forEach((result, index) => {
-    sets.set(purposes[index].purposeId, new Set(result.data?.data.map((c) => c.cityId) ?? []));
+    sets.set(purposes[index].purposeId, new Set(result.data?.map((c) => c.cityId) ?? []));
   });
 
   return { sets, isLoading: results.some((r) => r.isLoading) };
@@ -80,7 +100,7 @@ export function useCityPurposeCombinations(
       queryKey: ['cities', 'combinations', { ...params, purposeType }],
       staleTime: 1000 * 60 * 5,
       enabled,
-      queryFn: () => fetchCities({ ...params, purposeType, page: 0, size: FETCH_SIZE }),
+      queryFn: () => fetchAllCities({ ...params, purposeType }),
     })),
   });
 
@@ -92,7 +112,7 @@ export function useCityPurposeCombinations(
 
   purposeResults.forEach((result, index) => {
     const purpose = purposes[index];
-    result.data?.data.forEach((city) => {
+    result.data?.forEach((city) => {
       citiesWithPurpose.add(city.cityId);
       combinations.push({
         ...city,
@@ -104,7 +124,7 @@ export function useCityPurposeCombinations(
   });
 
   // 목적이 하나도 없는 도시는 목적 없는 조합으로 한 장만 넣는다
-  allResult.data?.data.forEach((city) => {
+  allResult.data?.forEach((city) => {
     if (!citiesWithPurpose.has(city.cityId)) combinations.push({ ...city });
   });
 
