@@ -110,6 +110,22 @@ export default function TaskDetailRoute() {
     onSettled: invalidateTaskAndRoadmap,
   });
 
+  /**
+   * "할 일 모두 완료하기" — 서류를 한 번에 체크하는 API가 없어서 아직 안 된 것만 골라 각각 보낸다.
+   * 하나라도 실패하면 서버 상태를 알 수 없으므로 낙관적 반영 없이 결과를 받고 다시 조회한다.
+   * 서류를 전부 체크하면 백엔드가 태스크까지 완료 처리한다.
+   */
+  const completeAllDocumentsMutation = useMutation({
+    mutationFn: async () => {
+      const pending = (taskDetail?.documents ?? []).filter((d) => !d.checked);
+      await Promise.all(
+        pending.map((d) => taskDocumentsApi.updateCheck(d.taskDocumentId, { checked: true })),
+      );
+    },
+    onError: (error) => console.error('서류 일괄 완료 실패', error),
+    onSettled: invalidateTaskAndRoadmap,
+  });
+
   const updateTaskScheduleMutation = useMutation({
     mutationFn: (dueDate: string) => tasksApi.updateSchedule(numericTaskId, { dueDate }),
     onSuccess: invalidateTaskAndRoadmap,
@@ -158,6 +174,8 @@ export default function TaskDetailRoute() {
           documents={documents}
           locked={taskDetail.status === 'LOCKED'}
           onCheck={(taskDocumentId) => checkDocumentMutation.mutate(taskDocumentId)}
+          onCompleteAll={() => completeAllDocumentsMutation.mutate()}
+          isCompletingAll={completeAllDocumentsMutation.isPending}
           isCompleted={taskDetail.isCompleted}
           onComplete={() => setIsCompleteConfirmOpen(true)}
           isCompleting={completeTaskMutation.isPending}
