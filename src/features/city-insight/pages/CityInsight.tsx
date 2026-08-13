@@ -279,17 +279,13 @@ export default function CityInsight() {
 
   // activePurpose는 이전 방문에서 캐시된 값이 남아있을 수 있어(usePurposes가 비활성이어도 캐시는 유지됨),
   // 문장형 검색 모드에서는 그 값을 절대 신뢰하지 않고 hasParsedFilters로만 판단한다
-  const shouldFetchCities = isFromSearch
-    ? true
-    : isFromParsedSearch
-      ? hasParsedFilters
-      : !!activePurpose;
+  // 전역 키워드 검색(isFromSearch)은 useCityPurposeCombinations가 따로 전체 조회하므로 여기서는 조회하지 않는다
+  const shouldFetchCities = isFromParsedSearch ? hasParsedFilters : !!activePurpose;
 
   /** 어학·인프라·평점처럼 /api/v1/cities에 필터 파라미터가 없는 조건이 있는 문장형 검색은
-   *  (키워드 검색처럼) 전체 매칭 결과를 다 받아와 프론트에서 다시 걸러낸 뒤 페이지네이션해야
+   *  전체 매칭 결과를 다 받아와 프론트에서 다시 걸러낸 뒤 페이지네이션해야
    *  진짜 AND 교집합이 됨 — 조건 목록은 parseSearchQuery.ts의 hasClientOnlyCondition 참고 */
-  const needsClientRefilter =
-    isFromSearch || (isFromParsedSearch && hasClientOnlyCondition(parsedSearch!));
+  const needsClientRefilter = isFromParsedSearch && hasClientOnlyCondition(parsedSearch!);
 
   const { data: citiesResult } = useCities(needsClientRefilter ? queryParams : apiParams, {
     enabled: !isFromRecommendation && shouldFetchCities,
@@ -300,6 +296,20 @@ export default function CityInsight() {
   const { combinations } = useCityPurposeCombinations(queryParams, purposes, {
     enabled: isFromSearch,
   });
+
+  /** 전역 키워드 검색 필터링 — 백엔드는 keyword를 도시명/국가명/한줄요약(description)에 한꺼번에
+   *  매칭해 내려주므로, 프론트에서 어떤 필드에 걸렸는지 우선순위(도시명 > 국가명 > 설명)를 매겨
+   *  하나의 기준으로만 다시 걸러낸다. 도시별 목적 카드(워킹홀리데이/교환학생/인턴십)는 이미
+   *  combinations 단계에서 나뉘어 있어, 도시 단위로 필터링해도 3장이 함께 남거나 함께 빠진다 */
+  const searchFilteredCombinations = useMemo(() => {
+    if (!isFromSearch) return combinations;
+    const q = keyword.trim().toLowerCase();
+    const nameMatches = combinations.filter(c => c.name.toLowerCase().includes(q));
+    if (nameMatches.length > 0) return nameMatches;
+    const countryMatches = combinations.filter(c => c.country.name.toLowerCase().includes(q));
+    if (countryMatches.length > 0) return countryMatches;
+    return combinations.filter(c => c.description.toLowerCase().includes(q));
+  }, [isFromSearch, combinations, keyword]);
 
   // 추천 도시는 AI 응답에 실려와서 목적을 모른다 — 목적별 후보 목록과 맞춰보고 붙인다
   const { sets: purposeCityIdSets } = usePurposeCityIdSets(purposes, {
@@ -325,21 +335,14 @@ export default function CityInsight() {
     ? recommendedCities!.map(adaptSummaryToCityItem)
     : (citiesResult?.data ?? []);
 
-  const searchMatchedCities = isFromSearch
-    ? // 전역 검색은 백엔드가 도시명·국가명뿐 아니라 한줄 요약(description)까지 매칭해 결과를 주므로,
-      // 요약 문구에서만 걸린 카드는 빼고(도시명 또는 국가명 매칭만 남기고) 다시 걸러낸다
-      rawCities.filter(c => {
-        const q = keyword.trim().toLowerCase();
-        return c.name.toLowerCase().includes(q) || c.country.name.toLowerCase().includes(q);
-      })
-    : isFromParsedSearch
-      ? rawCities.filter(c => matchesClientOnlyCondition(c, parsedSearch!))
-      : rawCities;
+  const searchMatchedCities = isFromParsedSearch
+    ? rawCities.filter(c => matchesClientOnlyCondition(c, parsedSearch!))
+    : rawCities;
 
   const cities: CityPurposeCombination[] = isFromRecommendation
     ? recommendedCombinations
     : isFromSearch
-      ? combinations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+      ? searchFilteredCombinations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
       : needsClientRefilter
         ? searchMatchedCities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
         : searchMatchedCities;
@@ -347,7 +350,7 @@ export default function CityInsight() {
   const totalElements = isFromRecommendation
     ? cities.length
     : isFromSearch
-      ? combinations.length
+      ? searchFilteredCombinations.length
       : needsClientRefilter
         ? searchMatchedCities.length
         : (citiesResult?.totalElements ?? 0);
@@ -355,7 +358,7 @@ export default function CityInsight() {
   const totalPages = isFromRecommendation
     ? 1
     : isFromSearch
-      ? Math.max(1, Math.ceil(combinations.length / PAGE_SIZE))
+      ? Math.max(1, Math.ceil(searchFilteredCombinations.length / PAGE_SIZE))
       : needsClientRefilter
         ? Math.max(1, Math.ceil(searchMatchedCities.length / PAGE_SIZE))
         : Math.max(1, citiesResult?.totalPages ?? 1);
