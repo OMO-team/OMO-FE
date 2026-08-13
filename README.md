@@ -36,8 +36,8 @@
 ## 팀원 및 역할 분담
 | 팀원 | 역할 |
 |---|---|
-| 김성연 | 탐색 탭, 문의하기, 스켈레톤 UI, |
-| 유승지 | 내 홈 탭, 로드맵, 위시리스트, |
+| 김성연 | 탐색 탭, 문의하기, 스켈레톤 UI |
+| 유승지 | 내 홈 탭, 로드맵, 태스크·서류, 예산 계획, 위시리스트 |
 | 이지우 | 회원가입, 로그인, 메인 탐색 홈, AI 스마트 브리핑, 글로벌 검색 |
 | 이지현 | 도시 비교, AI 탐색 리포트, AI 스마트 브리핑, 설정, 이용약관 |
 
@@ -68,25 +68,39 @@ src/
 │   │   ├── api/                # 인증 API
 │   │   ├── components/         # 로그인·회원가입 모달
 │   │   ├── constants/
+│   │   ├── hooks/
 │   │   ├── pages/              # 이메일 인증·OAuth 콜백 라우트
 │   │   ├── store/              # Zustand 스토어
 │   │   └── types/
 │   ├── chat/                   # AI 채팅
 │   │   ├── api/
 │   │   ├── components/
-│   │   └── types/
+│   │   ├── hooks/
+│   │   ├── types/
+│   │   └── utils/
 │   ├── city-ai-report/         # AI 도시 리포트 (모달)
+│   │   ├── api/
 │   │   ├── components/
+│   │   ├── hooks/
 │   │   ├── mocks/
+│   │   ├── types/
+│   │   ├── utils/
 │   │   └── index.ts            # public API
 │   ├── city-insight/           # 도시 인사이트
 │   │   ├── components/
 │   │   ├── constants/
+│   │   ├── hooks/
 │   │   ├── mocks/
-│   │   └── pages/
+│   │   ├── pages/
+│   │   ├── types/
+│   │   └── utils/
 │   ├── compare/                # 도시 비교 (모달)
+│   │   ├── api/
 │   │   ├── components/
-│   │   └── store/
+│   │   ├── hooks/
+│   │   ├── store/
+│   │   ├── types/
+│   │   └── utils/
 │   ├── contact/                # 문의하기
 │   │   ├── components/
 │   │   ├── constants/
@@ -95,7 +109,9 @@ src/
 │   │   └── types/
 │   ├── home/                   # 메인 홈
 │   │   ├── components/
-│   │   └── pages/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   └── types/
 │   ├── roadmap/                # 로드맵·태스크·예산·위시리스트
 │   │   ├── api/                # 로드맵/태스크/예산/위시리스트 API
 │   │   ├── components/
@@ -108,14 +124,16 @@ src/
 │   ├── search/                 # 검색 모달
 │   │   └── components/
 │   └── settings/               # 설정
+│       ├── api/
 │       ├── components/
-│       └── pages/
+│       ├── pages/
+│       └── types/
 │
 ├── shared/                     # 여러 feature에서 공통으로 사용하는 리소스
 │   ├── components/             # 공통 컴포넌트 (Header, Footer, Chip 등)
 │   ├── constants/
+│   ├── hooks/
 │   ├── layouts/                # MainLayout 등 레이아웃
-│   ├── mocks/
 │   ├── pages/                  # 약관·정책 페이지
 │   └── types/
 │
@@ -220,11 +238,11 @@ pnpm format:check  # Prettier 포맷 위반 여부 확인 (CI용)
 [내 홈]
     ├─ 나라별 로드맵 탭
     │       └─ 국가별로 묶인 도시 로드맵 카드
-    │               └─ [로드맵 상세]
-    │                       ├─ 타임라인 (비자 · 보험 · 서류 · 항공권 · 숙소 · 재정)
-    │                       │       └─ [태스크 상세] 준비 서류 체크 · 업로드
-    │                       ├─ 예산 계획 (체류 기간 선택 → 초기 정착금 · 월 생활비 합산)
-    │                       └─ AI 리포트 카드 → [AI 도시 리포트 모달]
+    │               ├─ [로드맵 상세]
+    │               │       ├─ 타임라인 (비자 · 보험 · 서류 · 항공권 · 숙소 · 재정)
+    │               │       │       └─ [태스크 상세] 준비 서류 체크 · 업로드
+    │               │       ├─ 예산 계획 (체류 기간 선택 → 초기 정착금 · 월 생활비 합산)
+    │               │       └─ AI 리포트 카드 → [AI 도시 리포트 모달]
     │
     └─ 위시 리스트 탭
             └─ 목적별로 담은 도시 카드
