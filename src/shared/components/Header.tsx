@@ -29,8 +29,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
         : null;
 
   const handleExploreClick = () => {
-    if (isLoggedIn) navigate('/city-insight');
-    else openModal('loginRequired');
+    navigate('/city-insight');
   };
 
   const handleMyHomeClick = () => {

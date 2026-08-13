@@ -20,9 +20,21 @@ const POLICY_LINKS: LinkItem[] = [
 ];
 
 const SNS_LINKS = [
-  { label: 'Instagram', icon: <InstagramIcon className="size-5" /> },
-  { label: 'YouTube', icon: <YoutubeIcon className="size-5" /> },
-  { label: 'Blog', icon: <NaverBlogIcon className="size-5" /> },
+  {
+    label: 'Instagram',
+    icon: <InstagramIcon className="size-5" />,
+    url: 'https://www.instagram.com/omo.team.official',
+  },
+  {
+    label: 'YouTube',
+    icon: <YoutubeIcon className="size-5" />,
+    url: 'https://www.youtube.com/@omo-team-official',
+  },
+  {
+    label: 'Blog',
+    icon: <NaverBlogIcon className="size-5" />,
+    url: 'https://blog.naver.com/omo-official',
+  },
 ];
 
 type FooterProps = {
@@ -53,15 +65,16 @@ export default function Footer({ onOpenSmartBriefing }: FooterProps) {
               <div className="flex flex-col gap-1">
                 <div className="flex gap-9">
                   <span className="body-05 text-gray-700">이메일 주소</span>
-                  <span className="body-04 text-gray-700">cs@omo-travel.com</span>
+                  <span className="body-04 text-gray-700">omo.team.official@gmail.com</span>
                 </div>
                 <div className="flex gap-6">
                   <span className="body-05 text-gray-700">대표 전화번호</span>
-                  <span className="body-04 text-gray-700">010-0000-0000</span>
+                  <span className="body-04 text-gray-700">010-2488-0122</span>
                 </div>
               </div>
               <p className="body-05 flex items-center gap-2 whitespace-nowrap text-gray-700">
-                해외 도시 탐색·출국 준비 로드맵 <span className="text-gray-200">|</span> 워홀·교환학생·인턴 준비생 대상
+                해외 도시 탐색·출국 준비 로드맵 <span className="text-gray-200">|</span>{' '}
+                워홀·교환학생·인턴 준비생 대상
               </p>
             </div>
           </div>
@@ -85,18 +98,23 @@ export default function Footer({ onOpenSmartBriefing }: FooterProps) {
                     <ChevronIcon className="size-icon-xs rotate-180 text-gray-700" />
                   </button>
                 ) : (
-                  <span key={label} className="body-05 w-35 text-gray-700">{label}</span>
-                ),
+                  <span key={label} className="body-05 w-35 text-gray-700">
+                    {label}
+                  </span>
+                )
               )}
             </div>
             <div className="flex items-center justify-end gap-2 pr-3">
-              {SNS_LINKS.map(({ label, icon }) => (
-                <span
+              {SNS_LINKS.map(({ label, icon, url }) => (
+                <a
                   key={label}
-                  className="flex size-8.5 items-center justify-center rounded-full bg-white"
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex size-8.5 items-center justify-center rounded-full bg-white hover:opacity-80 transition-opacity"
                 >
                   {icon}
-                </span>
+                </a>
               ))}
             </div>
           </div>

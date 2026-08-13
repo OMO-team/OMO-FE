@@ -31,6 +31,7 @@ import CompareModal from '../../compare/components/CompareModal';
 
 // hooks
 import { usePurposes } from '../../home/hooks/usePurposes';
+import { useAllCountries as useAllCountriesByPurpose } from '../../home/hooks/useAllCountries';
 import { useCities } from '../hooks/useCities';
 import { useAllCountries } from '../hooks/useAllCountries';
 import {
@@ -206,6 +207,7 @@ export default function CityInsight() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const isLoggedIn = useAuthStore(s => s.isLoggedIn);
+  const openModal = useAuthStore(s => s.openModal);
 
   /**
    * 이미 로드맵이 있는 도시+목적 조합은 다시 담지 못하게 막는다.
@@ -264,12 +266,6 @@ export default function CityInsight() {
 
   const [input, setInput] = useState(urlKeyword);
   const [keyword, setKeyword] = useState(urlKeyword);
-  const [prevUrlKeyword, setPrevUrlKeyword] = useState(urlKeyword);
-  if (prevUrlKeyword !== urlKeyword) {
-    setPrevUrlKeyword(urlKeyword);
-    setInput(urlKeyword);
-    setKeyword(urlKeyword);
-  }
   const [page, setPage] = useState(1);
   const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>(() =>
     loadStoredCountries()
@@ -278,6 +274,21 @@ export default function CityInsight() {
     buildInitialSelectedOptions(parsedSearch?.params)
   );
   const [resetKey, setResetKey] = useState(0);
+  const [prevUrlKeyword, setPrevUrlKeyword] = useState(urlKeyword);
+  /** 헤더에서 새로 전역 검색을 하면 같은 화면(컴포넌트)이 재사용되어 이전 검색의 필터가
+   *  그대로 남는다 — 지역 코드가 남아있으면 새 검색어와 무관한 국가로 걸러져 결과가
+   *  아예 안 뜨는 문제가 생기므로, 검색어 자체가 바뀌면 필터를 전부 초기화한다.
+   *  selectedCountries는 세션에도 저장되므로(loadStoredCountries) 여기서 지울 때도
+   *  같이 비워야, 새로고침해도 옛 검색의 국가 필터가 되살아나지 않는다 */
+  if (prevUrlKeyword !== urlKeyword) {
+    setPrevUrlKeyword(urlKeyword);
+    setInput(urlKeyword);
+    setKeyword(urlKeyword);
+    setSelectedCountries([]);
+    saveStoredCountries([]);
+    setSelectedOptions({});
+    setResetKey(prev => prev + 1);
+  }
   /** 같은 도시가 목적 수만큼 나오므로 이름이 아니라 도시+목적 키로 어떤 카드를 열었는지 기억한다 */
   const [reportKey, setReportKey] = useState<string | null>(null);
   const [addedRoadmap, setAddedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(
@@ -296,7 +307,7 @@ export default function CityInsight() {
   const activePurpose = isFromSearch || isFromRecommendation ? undefined : purposes[activeIndex];
 
   // 문장형 검색(AI 브리핑 포함)에 국가/대륙이 언급됐는지 확인하려면 목적 무관 전체 국가 목록이 필요
-  const { data: allCountries = [] } = useAllCountries(isFromParsedSearch);
+  const { data: parsedSearchCountries = [] } = useAllCountries(isFromParsedSearch);
   const appliedCountryMatchRef = useRef(false);
 
   // /city-insight에 있는 상태에서 채팅으로 "추천 도시 보러가기"를 다시 누르면 같은 라우트라
@@ -310,11 +321,12 @@ export default function CityInsight() {
   }
 
   useEffect(() => {
-    if (!isFromParsedSearch || appliedCountryMatchRef.current || allCountries.length === 0) return;
+    if (!isFromParsedSearch || appliedCountryMatchRef.current || parsedSearchCountries.length === 0)
+      return;
     appliedCountryMatchRef.current = true;
 
     const queryText = parsedSearch!.query;
-    const matchedCountries = allCountries.filter(c => queryText.includes(c.name));
+    const matchedCountries = parsedSearchCountries.filter(c => queryText.includes(c.name));
 
     // 질의에 특정 국가명이 언급되면 그 국가(들)만 칩으로 교체한다. 대륙(예: 유럽)만 언급된 경우는
     // 대륙 전체 국가를 칩으로 늘어놓지 않는다 — 대륙 필터는 params.continent로 이미 그대로 적용되고
@@ -325,7 +337,7 @@ export default function CityInsight() {
       setSelectedCountries(next);
       saveStoredCountries(next);
     }
-  }, [isFromParsedSearch, allCountries, parsedSearch]);
+  }, [isFromParsedSearch, parsedSearchCountries, parsedSearch]);
 
   const queryParams = useMemo<CityQueryParams>(() => {
     const selectedCodes = selectedCountries.map(c => c.code);
@@ -403,17 +415,13 @@ export default function CityInsight() {
 
   // activePurpose는 이전 방문에서 캐시된 값이 남아있을 수 있어(usePurposes가 비활성이어도 캐시는 유지됨),
   // 문장형 검색 모드에서는 그 값을 절대 신뢰하지 않고 hasParsedFilters로만 판단한다
-  const shouldFetchCities = isFromSearch
-    ? true
-    : isFromParsedSearch
-      ? hasParsedFilters
-      : !!activePurpose;
+  // 전역 키워드 검색(isFromSearch)은 useCityPurposeCombinations가 따로 전체 조회하므로 여기서는 조회하지 않는다
+  const shouldFetchCities = isFromParsedSearch ? hasParsedFilters : !!activePurpose;
 
   /** 어학·인프라·평점처럼 /api/v1/cities에 필터 파라미터가 없는 조건이 있는 문장형 검색은
-   *  (키워드 검색처럼) 전체 매칭 결과를 다 받아와 프론트에서 다시 걸러낸 뒤 페이지네이션해야
+   *  전체 매칭 결과를 다 받아와 프론트에서 다시 걸러낸 뒤 페이지네이션해야
    *  진짜 AND 교집합이 됨 — 조건 목록은 parseSearchQuery.ts의 hasClientOnlyCondition 참고 */
-  const needsClientRefilter =
-    isFromSearch || (isFromParsedSearch && hasClientOnlyCondition(parsedSearch!));
+  const needsClientRefilter = isFromParsedSearch && hasClientOnlyCondition(parsedSearch!);
 
   const { data: citiesResult } = useCities(needsClientRefilter ? queryParams : apiParams, {
     enabled: !isFromRecommendation && shouldFetchCities,
@@ -424,6 +432,54 @@ export default function CityInsight() {
   const { combinations } = useCityPurposeCombinations(queryParams, purposes, {
     enabled: isFromSearch,
   });
+
+  /** 전역 키워드 검색 필터링 — 백엔드는 keyword를 도시명/국가명/한줄요약(description)에 한꺼번에
+   *  매칭해 내려주므로, 프론트에서 어떤 필드에 걸렸는지 우선순위(도시명 > 국가명 > 설명)를 매겨
+   *  하나의 기준으로만 다시 걸러낸다. 도시별 목적 카드(워킹홀리데이/교환학생/인턴십)는 이미
+   *  combinations 단계에서 나뉘어 있어, 도시 단위로 필터링해도 3장이 함께 남거나 함께 빠진다 */
+  const searchFilteredCombinations = useMemo(() => {
+    if (!isFromSearch) return combinations;
+    const q = keyword.trim().toLowerCase();
+    const nameMatches = combinations.filter(c => c.name.toLowerCase().includes(q));
+    if (nameMatches.length > 0) return nameMatches;
+    const countryMatches = combinations.filter(c => c.country.name.toLowerCase().includes(q));
+    if (countryMatches.length > 0) return countryMatches;
+    return combinations.filter(c => c.description.toLowerCase().includes(q));
+  }, [isFromSearch, combinations, keyword]);
+
+  /** 목적이 정해지지 않은 진입(전역 검색 등)은 RegionDropDown이 목적별 국가 목록을
+   *  가져오지 못해 패널이 비어 보인다 — 목적별 국가 목록을 모두 합쳐 그 대신 넘겨주고,
+   *  검색 결과에 실린 국가를 찾는 이름→코드 매핑에도 함께 쓴다 */
+  const regionPurposeType = activePurpose?.type ?? parsedSearch?.params.purposeType;
+  const { countries: allCountries } = useAllCountriesByPurpose(purposes, { enabled: !regionPurposeType });
+  const countryNameToCode = useMemo(
+    () => new Map(allCountries.map(c => [c.name, c.code])),
+    [allCountries]
+  );
+
+  /** 새로 들어온 검색어당 한 번만 자동 적용 — 그래야 사용자가 필터를 직접 지우거나
+   *  바꾼 뒤에 결과가 재계산되어도 그 선택을 덮어쓰지 않는다. prevUrlKeyword와 같은 방식으로
+   *  렌더 중에 바로 반영해, 이펙트에서 setState를 호출해 생기는 불필요한 리렌더를 피한다.
+   *  keyword === urlKeyword로 위 검색어 전환 리셋이 이미 반영된 렌더인지 확인한다 —
+   *  그렇지 않으면 검색어가 막 바뀐 시점에 이전 검색어로 캐시된 결과를 읽어 옛 국가를
+   *  다시 선택해버리고, 그 값을 "이미 처리함"으로 표시해 새 검색어의 진짜 결과가 와도
+   *  다시는 반영되지 않는다 */
+  const [autoSelectedKeyword, setAutoSelectedKeyword] = useState<string | null>(null);
+  if (
+    isFromSearch &&
+    keyword === urlKeyword &&
+    autoSelectedKeyword !== urlKeyword &&
+    searchFilteredCombinations.length > 0
+  ) {
+    const names = Array.from(new Set(searchFilteredCombinations.map(c => c.country.name)));
+    const matched = names
+      .map(name => ({ name, code: countryNameToCode.get(name) }))
+      .filter((c): c is { name: string; code: string } => !!c.code);
+    if (matched.length > 0) {
+      setAutoSelectedKeyword(urlKeyword);
+      setSelectedCountries(matched);
+    }
+  }
 
   // 추천 도시는 AI 응답에 실려와서 목적을 모른다 — 목적별 후보 목록과 맞춰보고 붙인다
   const { sets: purposeCityIdSets } = usePurposeCityIdSets(purposes, {
@@ -449,21 +505,14 @@ export default function CityInsight() {
     ? recommendedCities!.map(adaptSummaryToCityItem)
     : (citiesResult?.data ?? []);
 
-  const searchMatchedCities = isFromSearch
-    ? // 전역 검색은 백엔드가 도시명·국가명뿐 아니라 한줄 요약(description)까지 매칭해 결과를 주므로,
-      // 요약 문구에서만 걸린 카드는 빼고(도시명 또는 국가명 매칭만 남기고) 다시 걸러낸다
-      rawCities.filter(c => {
-        const q = keyword.trim().toLowerCase();
-        return c.name.toLowerCase().includes(q) || c.country.name.toLowerCase().includes(q);
-      })
-    : isFromParsedSearch
-      ? rawCities.filter(c => matchesClientOnlyCondition(c, parsedSearch!))
-      : rawCities;
+  const searchMatchedCities = isFromParsedSearch
+    ? rawCities.filter(c => matchesClientOnlyCondition(c, parsedSearch!))
+    : rawCities;
 
   const cities: CityPurposeCombination[] = isFromRecommendation
     ? recommendedCombinations
     : isFromSearch
-      ? combinations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+      ? searchFilteredCombinations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
       : needsClientRefilter
         ? searchMatchedCities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
         : searchMatchedCities;
@@ -471,7 +520,7 @@ export default function CityInsight() {
   const totalElements = isFromRecommendation
     ? cities.length
     : isFromSearch
-      ? combinations.length
+      ? searchFilteredCombinations.length
       : needsClientRefilter
         ? searchMatchedCities.length
         : (citiesResult?.totalElements ?? 0);
@@ -479,7 +528,7 @@ export default function CityInsight() {
   const totalPages = isFromRecommendation
     ? 1
     : isFromSearch
-      ? Math.max(1, Math.ceil(combinations.length / PAGE_SIZE))
+      ? Math.max(1, Math.ceil(searchFilteredCombinations.length / PAGE_SIZE))
       : needsClientRefilter
         ? Math.max(1, Math.ceil(searchMatchedCities.length / PAGE_SIZE))
         : Math.max(1, citiesResult?.totalPages ?? 1);
@@ -552,12 +601,17 @@ export default function CityInsight() {
     setKeyword(input);
   };
 
-  // 필터 전체 초기화
+  /** 필터 초기화 — 전역 검색으로 들어온 화면은 검색어 자체와 거기서 자동으로 체크된
+   *  지역 칩까지가 "검색 결과"다. 여기서 keyword나 selectedCountries를 지우면 검색
+   *  결과 자체가 바뀌어버리므로, 검색 위에 얹은 상세 필터(월 생활비 등)만 초기화한다.
+   *  목적/국가를 고르고 들어온 도시 탐색 화면(isFromCountry)에서는 전부 지운다 */
   const handleReset = () => {
-    setInput('');
-    setKeyword('');
-    setSelectedCountries([]);
-    saveStoredCountries([]);
+    if (!isFromSearch) {
+      setInput('');
+      setKeyword('');
+      setSelectedCountries([]);
+      saveStoredCountries([]);
+    }
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
   };
@@ -578,6 +632,10 @@ export default function CityInsight() {
 
   /** 목적은 탭에서 고른 값(activePurpose)을, 검색이면 카드에 붙은 목적을 쓴다 */
   const handleAddToRoadmap = async () => {
+    if (!isLoggedIn) {
+      openModal('loginRequired');
+      return;
+    }
     const city = reportCity;
     if (!city || createRoadmapMutation.isPending) return;
     const purposeId = activePurpose?.purposeId ?? city.purposeId;
@@ -692,7 +750,8 @@ export default function CityInsight() {
                   <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
                   <RegionDropDown
                     key={`region-${resetKey}`}
-                    purposeType={activePurpose?.type ?? parsedSearch?.params.purposeType}
+                    purposeType={regionPurposeType}
+                    countries={regionPurposeType ? undefined : allCountries}
                     value={selectedCountries}
                     onSelect={handleSelect}
                     onReset={() => {
