@@ -1,5 +1,6 @@
+
 // react
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -31,6 +32,7 @@ import CompareModal from '../../compare/components/CompareModal';
 // hooks
 import { usePurposes } from '../../home/hooks/usePurposes';
 import { useCities } from '../hooks/useCities';
+import { useAllCountries } from '../hooks/useAllCountries';
 import {
   useCityPurposeCombinations,
   usePurposeCityIdSets,
@@ -42,11 +44,12 @@ import {
 import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
-import type {
-  CityItem,
-  CityQueryParams,
-  DifficultyType,
-  StayDurationType,
+import type { 
+  CityItem, 
+  CityQueryParams, 
+  DifficultyType, 
+  PurposeType, 
+  StayDurationType 
 } from '../types/cityInsight';
 import type { CitySummary } from '../../chat/types/dto';
 
@@ -69,6 +72,27 @@ import { CITY_INSIGHT_CARDS } from '../mocks/cityInsightCards';
 // assets
 import backArrow from '../../../assets/icons/back-arrow.svg';
 import filterResetIcon from '../../../assets/icons/icon-filter-reset.svg';
+import checkConditionIcon from '../../../assets/icons/icon-check-condition.svg';
+
+// 국가 필터는 채팅에서 넘어오든 카테고리 탭에서 직접 고르든 브라우저 세션 동안 유지된다
+const SELECTED_COUNTRIES_STORAGE_KEY = 'omo:cityInsight:selectedCountries';
+
+function loadStoredCountries(): { name: string; code: string }[] {
+  try {
+    const raw = sessionStorage.getItem(SELECTED_COUNTRIES_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveStoredCountries(countries: { name: string; code: string }[]) {
+  try {
+    sessionStorage.setItem(SELECTED_COUNTRIES_STORAGE_KEY, JSON.stringify(countries));
+  } catch {
+    // 프라이빗 모드 등 sessionStorage 접근 불가 환경에서는 조용히 무시
+  }
+}
 
 // API 파라미터 값 변환
 const MONTHLY_COST_MAP: Record<string, number> = {
@@ -92,6 +116,68 @@ const STAY_DURATION_MAP: Record<string, StayDurationType> = {
   '6개월 - 1년': 'LONG',
   '1년 이상': 'VERY_LONG',
 };
+
+// 위 맵의 역방향 — 문장형 검색으로 들어온 파싱값을 상세필터 드롭다운의 선택 상태로 되돌리는 데 사용
+const REVERSE_MONTHLY_COST_MAP: Record<number, string> = Object.fromEntries(
+  Object.entries(MONTHLY_COST_MAP).map(([label, value]) => [value, label])
+);
+const REVERSE_SAFETY_SCORE_MAP: Record<number, string> = Object.fromEntries(
+  Object.entries(SAFETY_SCORE_MAP).map(([label, value]) => [value, label])
+);
+const REVERSE_DIFFICULTY_MAP: Record<DifficultyType, string> = Object.fromEntries(
+  Object.entries(DIFFICULTY_MAP).map(([label, value]) => [value, label])
+) as Record<DifficultyType, string>;
+const REVERSE_STAY_DURATION_MAP: Record<StayDurationType, string> = Object.fromEntries(
+  Object.entries(STAY_DURATION_MAP).map(([label, value]) => [value, label])
+) as Record<StayDurationType, string>;
+
+/** 문장형 검색(AI 스마트 브리핑 포함)에서 파싱된 조건을 상세필터 드롭다운의 초기 선택값으로 변환 —
+ *  드롭다운 트리거 자체는 라벨 고정이라 값이 바뀌지 않지만, 패널을 열었을 때 해당 옵션이 강조 표시된다.
+ *  정규식으로 뽑힌 값이 프리셋 옵션(150/200/300 등)과 정확히 일치하지 않으면 표시만 생략되고
+ *  필터링 자체는 base 파라미터로 그대로 적용된다 */
+function buildInitialSelectedOptions(params?: CityQueryParams): Record<string, string> {
+  if (!params) return {};
+  const result: Record<string, string> = {};
+  if (params.maxMonthlyCost !== undefined && REVERSE_MONTHLY_COST_MAP[params.maxMonthlyCost]) {
+    result['월 생활비'] = REVERSE_MONTHLY_COST_MAP[params.maxMonthlyCost];
+  }
+  if (params.minSafetyScore !== undefined && REVERSE_SAFETY_SCORE_MAP[params.minSafetyScore]) {
+    result['치안'] = REVERSE_SAFETY_SCORE_MAP[params.minSafetyScore];
+  }
+  if (params.housingDifficulty) {
+    result['숙소 난이도'] = REVERSE_DIFFICULTY_MAP[params.housingDifficulty];
+  }
+  if (params.visaDifficulty) {
+    result['비자 난이도'] = REVERSE_DIFFICULTY_MAP[params.visaDifficulty];
+  }
+  if (params.stayDuration) {
+    result['체류 기간'] = REVERSE_STAY_DURATION_MAP[params.stayDuration];
+  }
+  return result;
+}
+
+const PURPOSE_LABELS: Record<PurposeType, string> = {
+  WORKING_HOLIDAY: '워킹홀리데이',
+  EXCHANGE_STUDENT: '교환학생',
+  INTERNSHIP: '인턴십',
+};
+
+/** 파싱된 조건을 결과 화면 상단 'AI가 적용한 조건' 칩 문구로 변환 — 국가/지역은 selectedCountries
+ *  칩으로 이미 따로 보여지므로 여기서는 다루지 않는다 */
+function buildAppliedConditionLabels(parsed: ParsedSearchQuery): string[] {
+  const { params } = parsed;
+  const labels: string[] = [];
+  if (params.purposeType) labels.push(PURPOSE_LABELS[params.purposeType]);
+  if (params.maxMonthlyCost !== undefined) labels.push(`예산 ${params.maxMonthlyCost}만원 이하`);
+  if (params.minSafetyScore !== undefined) labels.push(`치안 ${params.minSafetyScore}점 이상`);
+  if (params.housingDifficulty) labels.push(`숙소 난이도 ${REVERSE_DIFFICULTY_MAP[params.housingDifficulty]}`);
+  if (params.visaDifficulty) labels.push(`비자 난이도 ${REVERSE_DIFFICULTY_MAP[params.visaDifficulty]}`);
+  if (params.stayDuration) labels.push(`체류 기간 ${REVERSE_STAY_DURATION_MAP[params.stayDuration]}`);
+  if (parsed.minLanguageScore !== undefined) labels.push('영어 소통 가능');
+  if (parsed.minInfraScore !== undefined) labels.push('인프라 우수');
+  if (parsed.minRating !== undefined) labels.push('평점 우수');
+  return labels;
+}
 
 /** 스마트 브리핑의 "추천 도시 보러가기"로 들어온 도시들 — 목적(purpose) 필터 기준 카탈로그 API로는 조회할 수 없어
  *  AI 응답에 실려온 데이터를 그대로 카드로 그린다. infraScore는 응답에서 종종 누락되어 오므로(백엔드 확인됨) 0으로 대체한다 */
@@ -140,10 +226,12 @@ export default function CityInsight() {
   const urlCountryCodes = searchParams.getAll('countryCodes');
   const urlCountryCodesKey = urlCountryCodes.join(',');
 
-  const locationState = location.state as {
-    recommendedCities?: CitySummary[];
-    parsedSearch?: { query: string } & ParsedSearchQuery;
-  } | null;
+  const locationState = location.state as
+    | {
+        recommendedCities?: CitySummary[];
+        parsedSearch?: { query: string; conditionLabels?: string[] } & ParsedSearchQuery;
+      }
+    | null;
   const recommendedCities = locationState?.recommendedCities;
   const parsedSearch = locationState?.parsedSearch;
 
@@ -183,8 +271,12 @@ export default function CityInsight() {
     setKeyword(urlKeyword);
   }
   const [page, setPage] = useState(1);
-  const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>(() =>
+    loadStoredCountries()
+  );
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() =>
+    buildInitialSelectedOptions(parsedSearch?.params)
+  );
   const [resetKey, setResetKey] = useState(0);
   /** 같은 도시가 목적 수만큼 나오므로 이름이 아니라 도시+목적 키로 어떤 카드를 열었는지 기억한다 */
   const [reportKey, setReportKey] = useState<string | null>(null);
@@ -202,6 +294,38 @@ export default function CityInsight() {
    * 그 경로들은 대신 결과를 목적별 카드로 나눠서, 카드마다 목적이 정해진 상태로 다룬다.
    */
   const activePurpose = isFromSearch || isFromRecommendation ? undefined : purposes[activeIndex];
+
+  // 문장형 검색(AI 브리핑 포함)에 국가/대륙이 언급됐는지 확인하려면 목적 무관 전체 국가 목록이 필요
+  const { data: allCountries = [] } = useAllCountries(isFromParsedSearch);
+  const appliedCountryMatchRef = useRef(false);
+
+  // /city-insight에 있는 상태에서 채팅으로 "추천 도시 보러가기"를 다시 누르면 같은 라우트라
+  // CityInsight가 리마운트되지 않아 selectedOptions/국가 매칭이 이전 질의 값에 멈춰 있을 수 있다 —
+  // parsedSearch(location.state)가 바뀔 때마다 상세필터·국가 매칭을 새 질의 기준으로 다시 계산한다
+  const [prevParsedSearch, setPrevParsedSearch] = useState(parsedSearch);
+  if (prevParsedSearch !== parsedSearch) {
+    setPrevParsedSearch(parsedSearch);
+    setSelectedOptions(buildInitialSelectedOptions(parsedSearch?.params));
+    appliedCountryMatchRef.current = false;
+  }
+
+  useEffect(() => {
+    if (!isFromParsedSearch || appliedCountryMatchRef.current || allCountries.length === 0) return;
+    appliedCountryMatchRef.current = true;
+
+    const queryText = parsedSearch!.query;
+    const matchedCountries = allCountries.filter(c => queryText.includes(c.name));
+
+    // 질의에 특정 국가명이 언급되면 그 국가(들)만 칩으로 교체한다. 대륙(예: 유럽)만 언급된 경우는
+    // 대륙 전체 국가를 칩으로 늘어놓지 않는다 — 대륙 필터는 params.continent로 이미 그대로 적용되고
+    // (queryParams에서 API에 전달), 화면 표시는 'AI가 적용한 조건' 칩의 텍스트로 대신한다.
+    // 국가 언급이 아예 없으면 세션에 저장된 기존 필터를 그대로 둔다(초기값)
+    if (matchedCountries.length > 0) {
+      const next = matchedCountries.map(c => ({ name: c.name, code: c.code }));
+      setSelectedCountries(next);
+      saveStoredCountries(next);
+    }
+  }, [isFromParsedSearch, allCountries, parsedSearch]);
 
   const queryParams = useMemo<CityQueryParams>(() => {
     const selectedCodes = selectedCountries.map(c => c.code);
@@ -409,7 +533,9 @@ export default function CityInsight() {
   }, [resetCompare]);
 
   const handleSelect = (codes: string[], names: string[]) => {
-    setSelectedCountries(codes.map((code, i) => ({ code, name: names[i] })));
+    const next = codes.map((code, i) => ({ code, name: names[i] }));
+    setSelectedCountries(next);
+    saveStoredCountries(next);
   };
 
   const handleSelectOption = (title: string, option: string) => {
@@ -431,6 +557,7 @@ export default function CityInsight() {
     setInput('');
     setKeyword('');
     setSelectedCountries([]);
+    saveStoredCountries([]);
     setSelectedOptions({});
     setResetKey(prev => prev + 1);
   };
@@ -480,6 +607,19 @@ export default function CityInsight() {
     setReportKey(matched ? combinationKey(matched.cityId, matched.purposeId) : null);
   };
 
+  // 결과 화면 상단 'AI가 적용한 조건' 칩 — AI 채팅에서 넘어온 경우 채팅에 떴던 태그 문구("치안 우수" 등)를
+  // 그대로 쓰고, 태그가 없는 문장형 검색(전역 검색)은 파싱된 조건에서 문구를 새로 만든다.
+  // (사용자가 이후 상세필터를 직접 바꿔도 이 칩은 최초 해석 결과를 유지)
+  const appliedConditionLabels = isFromParsedSearch
+    ? [
+        ...(parsedSearch!.conditionLabels ?? buildAppliedConditionLabels(parsedSearch!)),
+        // 대륙만 언급되고 특정 국가는 안 나온 경우 — 국가 칩으로는 안 늘어놓으니 여기 텍스트로 표시
+        ...(parsedSearch!.params.continent && selectedCountries.length === 0
+          ? [`지역 ${parsedSearch!.params.continent}`]
+          : []),
+      ]
+    : [];
+
   return (
     <div className="w-full flex flex-col items-center justify-center mt-[30px]">
       <div className="w-[1064px]">
@@ -525,8 +665,27 @@ export default function CityInsight() {
                   />
                 </>
               )}
-              {(isFromSearch || isFromParsedSearch) && (
-                <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
+               {(isFromSearch || isFromParsedSearch) && (
+                  <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
+                )}
+              {appliedConditionLabels.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <p className="body-05 text-gray-500">AI가 적용한 조건</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {appliedConditionLabels.map(label => (
+                      <div
+                        key={label}
+                        className="flex items-center justify-center gap-1 rounded-2 bg-primary-50"
+                        style={{ padding: '4px 10px 4px 8px' }}
+                      >
+                        <div className="size-icon-sm flex items-center justify-center flex-shrink-0">
+                          <img src={checkConditionIcon} alt="체크" width={14} height={10} />
+                        </div>
+                        <span className="body-04 text-primary-700">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
               <div className="flex justify-between">
                 <div className="flex gap-2">
@@ -536,7 +695,10 @@ export default function CityInsight() {
                     purposeType={activePurpose?.type ?? parsedSearch?.params.purposeType}
                     value={selectedCountries}
                     onSelect={handleSelect}
-                    onReset={() => setSelectedCountries([])}
+                    onReset={() => {
+                      setSelectedCountries([]);
+                      saveStoredCountries([]);
+                    }}
                   />
                   <div className="w-px h-7 bg-gray-300"></div>
                   {DETAIL_OPTIONS.map(({ title, options }) => (
@@ -555,7 +717,7 @@ export default function CityInsight() {
                 </button>
               </div>
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               {selectedCountries.map(({ name, code }) => (
                 <FilterChip
                   key={code}
