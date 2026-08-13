@@ -22,15 +22,14 @@ export default function Header({ variant = "default" }: HeaderProps) {
   const isTransparent = variant === "transparent";
 
   const activeNav: ActiveNav =
-    pathname === "/" || pathname === "/city-insight"
+    pathname === "/city-insight"
       ? "explore"
       : pathname.startsWith("/myhome")
         ? "myhome"
         : null;
 
   const handleExploreClick = () => {
-    if (isLoggedIn) navigate('/city-insight');
-    else openModal('loginRequired');
+    navigate('/city-insight');
   };
 
   const handleMyHomeClick = () => {

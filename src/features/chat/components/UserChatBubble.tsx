@@ -50,8 +50,8 @@ export default function UserChatBubble({ text = '', images }: UserChatBubbleProp
   // 이미지만
   if (hasImages && !text) {
     return (
-      <div className="flex flex-col items-end gap-4" style={{ width: '370px' }}>
-        <div className="flex flex-col items-end gap-3" style={{ width: '370px' }}>
+      <div className="flex flex-col items-end gap-4" style={{ maxWidth: '370px' }}>
+        <div className="flex flex-col items-end gap-3" style={{ maxWidth: '370px' }}>
           <ImageStack images={images} />
         </div>
       </div>
@@ -61,12 +61,12 @@ export default function UserChatBubble({ text = '', images }: UserChatBubbleProp
   // 이미지 + 텍스트
   if (hasImages && text) {
     return (
-      <div className="flex flex-col items-end gap-4" style={{ width: '370px' }}>
-        <div className="flex flex-col items-end gap-3" style={{ width: '370px' }}>
+      <div className="flex flex-col items-end gap-4" style={{ maxWidth: '370px' }}>
+        <div className="flex flex-col items-end gap-3" style={{ maxWidth: '370px' }}>
           <ImageStack images={images} />
           <div
             className="inline-flex items-center justify-center gap-1 rounded-full bg-gray-100"
-            style={{ width: '370px', padding: '10px 20px' }}
+            style={{ maxWidth: '370px', padding: '10px 20px', boxSizing: 'border-box' }}
           >
             <span className="body-03 text-gray-900 text-center">{text}</span>
           </div>
@@ -78,14 +78,14 @@ export default function UserChatBubble({ text = '', images }: UserChatBubbleProp
   // 텍스트 많을 때
   if (isLong) {
     return (
-      <div className="flex flex-col items-end" style={{ width: '370px' }}>
+      <div className="flex flex-col items-end" style={{ maxWidth: '370px', alignSelf: 'flex-end' }}>
         <div
           className="relative flex flex-col items-start justify-start rounded-4 bg-gray-100 overflow-hidden"
-          style={{ width: '370px', height: '180px', padding: '16px 20px', boxSizing: 'border-box' }}
+          style={{ width: '100%', maxWidth: '370px', height: '180px', padding: '16px 20px', boxSizing: 'border-box' }}
         >
           <span
             className="body-03 text-gray-900 text-left block flex-shrink-0 overflow-hidden"
-            style={{ width: '330px', height: '148px' }}
+            style={{ width: '100%', height: '148px' }}
           >
             {text}
           </span>
@@ -95,7 +95,7 @@ export default function UserChatBubble({ text = '', images }: UserChatBubbleProp
             className="absolute left-0 flex items-center justify-center"
             style={{
               bottom: '1px',
-              width: '370px',
+              width: '100%',
               paddingTop: '18px',
               borderRadius: '0 0 16px 16px',
               background: 'linear-gradient(180deg, rgba(231, 234, 239, 0.00) -21.67%, var(--color-gray-100) 39.15%)',
@@ -103,7 +103,7 @@ export default function UserChatBubble({ text = '', images }: UserChatBubbleProp
           >
             <div
               className="flex items-center gap-1 flex-shrink-0"
-              style={{ width: '370px', padding: '6px 0 8px 20px' }}
+              style={{ width: '100%', padding: '6px 0 8px 20px', boxSizing: 'border-box' }}
             >
               <button
                 type="button"
@@ -124,10 +124,10 @@ export default function UserChatBubble({ text = '', images }: UserChatBubbleProp
 
   // 한 줄 (기본) / 펼쳐진 상태
   return (
-    <div className="flex flex-col items-end" style={{ width: '370px' }}>
+    <div className="flex flex-col items-end" style={{ maxWidth: '370px' }}>
       <div
         className={`inline-flex items-center justify-center gap-1 bg-gray-100 ${isExpanded ? 'rounded-4' : 'rounded-full'}`}
-        style={{ padding: '10px 20px' }}
+        style={{ padding: '10px 20px', maxWidth: '100%', boxSizing: 'border-box' }}
       >
         <span className="body-03 text-gray-900 text-center">{text}</span>
       </div>

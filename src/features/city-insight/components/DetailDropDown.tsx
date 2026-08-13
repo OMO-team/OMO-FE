@@ -19,7 +19,7 @@ export default function DetailDropDown({ selectedOptions, onSelect }: DetailDrop
 
     useEffect(() => {
         const allSelected = DETAIL_OPTIONS.every(item => selectedOptions[item.title])
-        if (allSelected) 
+        if (allSelected)
             setIsOpen(false)
     }, [selectedOptions])
 
