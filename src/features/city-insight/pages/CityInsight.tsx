@@ -30,6 +30,7 @@ import CompareModal from '../../compare/components/CompareModal';
 
 // hooks
 import { usePurposes } from '../../home/hooks/usePurposes';
+import { useAllCountries } from '../../home/hooks/useAllCountries';
 import { useCities } from '../hooks/useCities';
 import {
   useCityPurposeCombinations,
@@ -312,6 +313,31 @@ export default function CityInsight() {
     return combinations.filter(c => c.description.toLowerCase().includes(q));
   }, [isFromSearch, combinations, keyword]);
 
+  /** 목적이 정해지지 않은 진입(전역 검색 등)은 RegionDropDown이 목적별 국가 목록을
+   *  가져오지 못해 패널이 비어 보인다 — 목적별 국가 목록을 모두 합쳐 그 대신 넘겨주고,
+   *  검색 결과에 실린 국가를 찾는 이름→코드 매핑에도 함께 쓴다 */
+  const regionPurposeType = activePurpose?.type ?? parsedSearch?.params.purposeType;
+  const { countries: allCountries } = useAllCountries(purposes, { enabled: !regionPurposeType });
+  const countryNameToCode = useMemo(
+    () => new Map(allCountries.map(c => [c.name, c.code])),
+    [allCountries]
+  );
+
+  /** 새로 들어온 검색어당 한 번만 자동 적용 — 그래야 사용자가 필터를 직접 지우거나
+   *  바꾼 뒤에 결과가 재계산되어도 그 선택을 덮어쓰지 않는다. prevUrlKeyword와 같은 방식으로
+   *  렌더 중에 바로 반영해, 이펙트에서 setState를 호출해 생기는 불필요한 리렌더를 피한다 */
+  const [autoSelectedKeyword, setAutoSelectedKeyword] = useState<string | null>(null);
+  if (isFromSearch && autoSelectedKeyword !== urlKeyword && searchFilteredCombinations.length > 0) {
+    const names = Array.from(new Set(searchFilteredCombinations.map(c => c.country.name)));
+    const matched = names
+      .map(name => ({ name, code: countryNameToCode.get(name) }))
+      .filter((c): c is { name: string; code: string } => !!c.code);
+    if (matched.length > 0) {
+      setAutoSelectedKeyword(urlKeyword);
+      setSelectedCountries(matched);
+    }
+  }
+
   // 추천 도시는 AI 응답에 실려와서 목적을 모른다 — 목적별 후보 목록과 맞춰보고 붙인다
   const { sets: purposeCityIdSets } = usePurposeCityIdSets(purposes, {
     enabled: isFromRecommendation,
@@ -541,7 +567,8 @@ export default function CityInsight() {
                   <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
                   <RegionDropDown
                     key={`region-${resetKey}`}
-                    purposeType={activePurpose?.type ?? parsedSearch?.params.purposeType}
+                    purposeType={regionPurposeType}
+                    countries={regionPurposeType ? undefined : allCountries}
                     value={selectedCountries}
                     onSelect={handleSelect}
                     onReset={() => setSelectedCountries([])}

@@ -4,16 +4,18 @@ import ChevronDownIcon from "../../../shared/components/ChevronDownIcon"
 import searchIcon from '../../../assets/icons/icon-search[18].svg'
 import { useCountriesByPurpose } from "../../home/hooks/useCountriesByPurpose"
 import { useOutsideClick } from "../../../shared/hooks/useOutsideClick"
-import type { Purpose } from "../../home/types/home"
+import type { Country, Purpose } from "../../home/types/home"
 
 interface RegionDropDownProps {
   purposeType?: Purpose['type'];
+  /** 목적이 없는 진입(전역 검색 등)에서 목적별 국가 조회 대신 쓸 전체 국가 목록 */
+  countries?: Country[];
   value?: { name: string; code: string }[];
   onSelect: (codes: string[], names: string[]) => void;
   onReset: () => void;
 }
 
-export default function RegionDropDown({ purposeType, value, onSelect, onReset }: RegionDropDownProps) {
+export default function RegionDropDown({ purposeType, countries: countriesOverride, value, onSelect, onReset }: RegionDropDownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [openContinents, setOpenContinents] = useState<string[]>([])
   const [selectedCountries, setSelectedCountries] = useState<{ name: string; code: string }[]>(value ?? [])
@@ -28,7 +30,10 @@ export default function RegionDropDown({ purposeType, value, onSelect, onReset }
   }, [value])
   useOutsideClick(containerRef, () => setIsOpen(false))
 
-  const { data: countries = [] } = useCountriesByPurpose(isOpen ? purposeType : undefined)
+  const { data: fetchedCountries = [] } = useCountriesByPurpose(
+    isOpen && !countriesOverride ? purposeType : undefined
+  )
+  const countries = countriesOverride ?? fetchedCountries
 
   const grouped = countries.reduce<Record<string, typeof countries>>((acc, country) => {
     const continent = country.continent ?? '기타'
