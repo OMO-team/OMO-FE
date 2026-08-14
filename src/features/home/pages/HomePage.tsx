@@ -13,7 +13,7 @@ export default function HomePage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [oauthError, setOauthError] = useState(
-    (location.state as HomeLocationState)?.oauthError ?? null,
+    (location.state as HomeLocationState)?.oauthError ?? null
   );
 
   useEffect(() => {
@@ -43,7 +43,11 @@ export default function HomePage() {
       )}
       {/* 좌우 패딩은 헤더의 실측 곡선과 동일 — 967px까지 32px로 고정, 이후 50vw-451.5px 기울기로 1279px에서 188px 도달 */}
       <div className="relative flex flex-col items-center px-[clamp(32px,50vw_-_451.5px,188px)] pt-[clamp(48px,10.52vw_+_8.55px,160px)] pb-[clamp(32px,4.51vw_+_15.1px,80px)] gap-[clamp(48px,10.52vw_+_8.55px,160px)]">
-        <AIPromptSection onSubmit={(value) => { if (value.trim()) openChat(value.trim()); }} />
+        <AIPromptSection
+          onSubmit={value => {
+            if (value.trim()) openChat(value.trim());
+          }}
+        />
         <CategorySection />
       </div>
     </div>

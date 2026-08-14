@@ -82,18 +82,18 @@ export default function LoginModal({
   return (
     <form
       onSubmit={handleSubmit}
-      className="inline-flex justify-center items-start rounded-4 bg-white"
-      style={{ padding: '30px 40px 40px 40px', gap: '4px' }}
+      className="flex w-full max-w-[480px] justify-center items-start rounded-4 bg-white"
+      style={{ padding: '30px clamp(20px, 8vw, 40px) 40px clamp(20px, 8vw, 40px)', gap: '4px' }}
       role="dialog"
       aria-modal="true"
     >
-      <div className="flex flex-col items-center" style={{ gap: '36px' }}>
+      <div className="flex w-full flex-col items-center" style={{ gap: '36px' }}>
 
         {/* 헤더: 타이틀 + 닫기 */}
-        <div className="flex items-center" style={{ width: '400px', gap: '118px' }}>
+        <div className="flex w-full max-w-[400px] items-center justify-between">
           <span
-            className="text-gray-900"
-            style={{ width: '257px', height: '24px', flexShrink: 0, fontFamily: 'Pretendard Variable', fontSize: '18px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.36px' }}
+            className="min-w-0 flex-1 truncate text-gray-900"
+            style={{ fontFamily: 'Pretendard Variable', fontSize: '18px', fontWeight: 500, lineHeight: '140%', letterSpacing: '-0.36px' }}
           >
             로그인
           </span>
@@ -107,11 +107,11 @@ export default function LoginModal({
           </button>
         </div>
 
-        <div className="flex flex-col items-center" style={{ gap: '24px' }}>
-          <div className="flex flex-col justify-center items-center">
+        <div className="flex w-full flex-col items-center" style={{ gap: '24px' }}>
+          <div className="flex w-full flex-col justify-center items-center">
 
             {/* 로그인 폼 */}
-            <div className="flex flex-col items-start" style={{ gap: '16px' }}>
+            <div className="flex w-full max-w-[400px] flex-col items-start" style={{ gap: '16px' }}>
 
               {/* 이메일 */}
               <Input
@@ -124,7 +124,7 @@ export default function LoginModal({
               />
 
               {/* 비밀번호 + 로그인 옵션 */}
-              <div className="flex flex-col items-start self-stretch" style={{ gap: '8px' }}>
+              <div className="flex w-full flex-col items-start self-stretch" style={{ gap: '8px' }}>
                 <Input
                   label="비밀번호"
                   type="password"
@@ -135,7 +135,7 @@ export default function LoginModal({
                 />
 
                 {/* 로그인 옵션: 로그인 유지 + 비밀번호 찾기 */}
-                <div className="flex items-center self-stretch" style={{ gap: '200px' }}>
+                <div className="flex w-full items-center justify-between self-stretch">
                   <div className="flex items-center" style={{ gap: '4px' }}>
                     <button
                       type="button"
@@ -149,9 +149,9 @@ export default function LoginModal({
                         <div className="border border-gray-300 bg-white rounded-1" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
                       )}
                     </button>
-                    <span className="body-04 text-gray-600">로그인 상태 유지</span>
+                    <span className="body-04 text-gray-600 whitespace-nowrap">로그인 상태 유지</span>
                   </div>
-                  <button type="button" onClick={onForgotPasswordClick} className="body-04 text-primary-500">
+                  <button type="button" onClick={onForgotPasswordClick} className="body-04 shrink-0 text-primary-500 whitespace-nowrap">
                     비밀번호 찾기
                   </button>
                 </div>
@@ -161,7 +161,7 @@ export default function LoginModal({
             {/* 폼 에러 */}
             {formError && (
               <span
-                className="body-02 text-[#FF2A14]"
+                className="body-02 w-full max-w-[400px] text-[#FF2A14]"
                 style={{ marginTop: '16px', alignSelf: 'flex-start' }}
               >
                 {formError}
@@ -172,11 +172,10 @@ export default function LoginModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex justify-center items-center rounded-2 bg-primary-500 disabled:opacity-50"
+              className="flex w-full max-w-[400px] justify-center items-center rounded-2 bg-primary-500 disabled:opacity-50"
               style={{
                 marginTop: formError ? '16px' : '26px',
-                width: '400px',
-                padding: '13px 169px',
+                padding: '13px 0',
                 gap: '4px',
               }}
             >
@@ -190,35 +189,34 @@ export default function LoginModal({
           </div>
 
           {/* 소셜 로그인 + 회원가입 */}
-          <div className="flex flex-col items-center self-stretch" style={{ gap: '24px' }}>
+          <div className="flex w-full flex-col items-center self-stretch" style={{ gap: '24px' }}>
 
             {/* 또는 구분선 */}
-            <div className="flex items-center" style={{ gap: '12px' }}>
-              <div className="bg-gray-400" style={{ width: '166px', height: '0.6px' }} />
+            <div className="flex w-full max-w-[400px] items-center" style={{ gap: '12px' }}>
+              <div className="h-[0.6px] min-w-0 flex-1 bg-gray-400" />
               <span
-                className="text-gray-400"
+                className="shrink-0 text-gray-400"
                 style={{ fontFamily: 'Pretendard Variable', fontSize: '14px', fontWeight: 400, lineHeight: '150%', letterSpacing: '-0.28px' }}
               >
                 또는
               </span>
-              <div className="bg-gray-400" style={{ width: '166px', height: '0.6px' }} />
+              <div className="h-[0.6px] min-w-0 flex-1 bg-gray-400" />
             </div>
 
-            <div className="flex flex-col items-center" style={{ gap: '24px' }}>
+            <div className="flex w-full flex-col items-center" style={{ gap: '24px' }}>
 
               {/* 소셜 로그인 버튼들 */}
-              <div className="flex flex-col items-start" style={{ gap: '12px' }}>
+              <div className="flex w-full flex-col items-start" style={{ gap: '12px' }}>
 
                 {/* 구글 로그인 */}
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={isGoogleLoading}
-                  className="flex flex-col justify-center items-center rounded-2 disabled:opacity-50"
+                  className="flex w-full max-w-[400px] flex-col justify-center items-center rounded-2 disabled:opacity-50"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
                   style={{
-                    width: '400px',
                     height: '48px',
                     padding: '8px 12px 8px 10px',
                     background: isGoogleHovered ? '#E7E6E6' : '#F2F2F2',
@@ -226,7 +224,7 @@ export default function LoginModal({
                     transition: 'background 0.15s',
                   }}
                 >
-                  <div className="flex justify-center items-center self-stretch" style={{ gap: '82px' }}>
+                  <div className="flex justify-center items-center self-stretch" style={{ gap: 'clamp(8px, 8vw, 82px)' }}>
                     <img src={googleIcon} alt="구글" style={{ width: '24px', height: '24px' }} />
                     <span
                       className="text-gray-900 text-center"
