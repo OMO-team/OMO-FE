@@ -133,15 +133,15 @@ export default function ForgotPasswordModal({
   return (
     <ModalOverlay onClose={onClose}>
       <form
-        className="inline-flex flex-col items-center pt-10 px-11 pb-[50px] gap-1 rounded-5 bg-gray-20"
+        className="flex w-full max-w-[488px] flex-col items-center pt-10 px-[clamp(20px,8vw,44px)] pb-[50px] gap-1 rounded-5 bg-gray-20"
         onSubmit={handleSubmit}
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-col justify-center items-center gap-9">
+        <div className="flex w-full flex-col justify-center items-center gap-9">
 
-          <div className="flex w-[400px] flex-col items-start gap-[7px]">
+          <div className="flex w-full max-w-[400px] flex-col items-start gap-[7px]">
             <div className="flex justify-between items-center self-stretch">
               <span className="heading-06 text-gray-800">비밀번호 찾기</span>
               <CloseButton
@@ -156,20 +156,20 @@ export default function ForgotPasswordModal({
             </span>
           </div>
 
-          <div className="flex flex-col items-start gap-[60px] self-stretch">
+          <div className="flex w-full flex-col items-start gap-[60px] self-stretch">
 
-            <div className="flex w-[400px] flex-col items-start gap-10">
+            <div className="flex w-full max-w-[400px] flex-col items-start gap-10">
 
-              <div className="flex flex-col items-start gap-[30px] self-stretch">
+              <div className="flex w-full flex-col items-start gap-[30px] self-stretch">
 
                 {/* 이메일 섹션 — 인증번호는 별도 페이지(회원가입과 동일한 인증 흐름)에서 입력받는다 */}
-                <div className="flex flex-col items-start gap-2 self-stretch">
+                <div className="flex w-full flex-col items-start gap-2 self-stretch">
                   <div className="flex flex-col items-start gap-1">
                     <label htmlFor="forgot-email" className="body-02 text-gray-900">이메일</label>
                     <span className="label-01 text-gray-600">가입하신 이메일 주소를 입력해주세요.</span>
                   </div>
-                  <div className="flex items-start gap-2 self-stretch">
-                    <div className="flex-1">
+                  <div className="flex w-full items-start gap-2 self-stretch">
+                    <div className="min-w-0 flex-1">
                       <Input
                         id="forgot-email"
                         type="email"
@@ -194,7 +194,7 @@ export default function ForgotPasswordModal({
                 </div>
 
                 {/* 비밀번호 섹션들 */}
-                <div className="flex flex-col items-start gap-4 self-stretch">
+                <div className="flex w-full flex-col items-start gap-4 self-stretch">
                   <Input
                     label="새 비밀번호"
                     type="password"
@@ -203,7 +203,7 @@ export default function ForgotPasswordModal({
                     placeholder="비밀번호를 입력해주세요"
                     error={newPasswordError}
                   />
-                  <div className="flex flex-col gap-2 self-stretch">
+                  <div className="flex w-full flex-col gap-2 self-stretch">
                     <Input
                       label="새 비밀번호 확인"
                       type="password"
@@ -221,7 +221,7 @@ export default function ForgotPasswordModal({
             </div>
 
             {/* 소셜 안내 + 버튼 */}
-            <div className="flex w-[400px] flex-col items-start gap-4">
+            <div className="flex w-full max-w-[400px] flex-col items-start gap-4">
               <div className="flex items-start gap-2 self-stretch">
                 <img src={errorReverseIcon} alt="" className="w-4 h-4 shrink-0 mt-[1px]" />
                 <span className="label-01 text-red-500">
