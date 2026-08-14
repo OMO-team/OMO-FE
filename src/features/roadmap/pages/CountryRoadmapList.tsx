@@ -339,7 +339,7 @@ export default function CountryRoadmapList({
             </div>
           )}
 
-          {activeTab === 0 && !isAllEmpty && !isCurrentTabEmpty && (
+          {!isAllEmpty && !isCurrentTabEmpty && (
             <div className="flex w-full justify-center mt-[clamp(48px,10vw,100px)] mb-[clamp(80px,20vw,300px)]">
               <PageNavigation
                 currentPage={currentPage}
