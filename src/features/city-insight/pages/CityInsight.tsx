@@ -679,8 +679,8 @@ export default function CityInsight() {
     : [];
 
   return (
-    <div className="w-full flex flex-col items-center justify-center mt-[30px]">
-      <div className="w-[1064px]">
+    <div className="w-full flex flex-col items-center justify-center mt-[30px] px-[clamp(32px,50vw_-_451.5px,188px)]">
+      <div className="w-full max-w-[1064px]">
         <SmartBriefingFAB />
         {!isFromCountry && (
           <div
@@ -715,7 +715,7 @@ export default function CityInsight() {
                   />
                   <SearchInputBar
                     placeholder="원하는 도시 조건을 입력해 보세요"
-                    width="w-[974px]"
+                    width="w-full max-w-[974px]"
                     value={input}
                     onChange={setInput}
                     onSearch={handleSearch}
@@ -745,8 +745,8 @@ export default function CityInsight() {
                   </div>
                 </div>
               )}
-              <div className="flex justify-between">
-                <div className="flex gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
                   <RegionDropDown
                     key={`region-${resetKey}`}
@@ -759,7 +759,7 @@ export default function CityInsight() {
                       saveStoredCountries([]);
                     }}
                   />
-                  <div className="w-px h-7 bg-gray-300"></div>
+                  <div className="w-px h-7 bg-gray-300 hidden sm:block"></div>
                   {DETAIL_OPTIONS.map(({ title, options }) => (
                     <DropDown
                       key={title}
@@ -770,7 +770,7 @@ export default function CityInsight() {
                     />
                   ))}
                 </div>
-                <button className="flex items-center gap-1" onClick={handleReset}>
+                <button className="flex shrink-0 items-center gap-1" onClick={handleReset}>
                   <p className="body-03 text-gray-400">필터 초기화</p>
                   <img src={filterResetIcon} alt="" />
                 </button>
@@ -789,7 +789,7 @@ export default function CityInsight() {
         )}
         {totalElements !== 0 ? (
           <>
-            <div className="mt-11 grid grid-cols-2 gap-5">
+            <div className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2">
               {cities.map(city => (
                 <CityInsightCard
                   key={combinationKey(city.cityId, city.purposeId)}
@@ -812,15 +812,15 @@ export default function CityInsight() {
               ))}
             </div>
             {isFromRecommendation ? (
-              <div className="mb-[304px]" />
+              <div className="mb-[clamp(80px,20vw,304px)]" />
             ) : (
-              <div className="mt-25 mb-[304px]">
+              <div className="mt-[clamp(48px,10vw,100px)] mb-[clamp(80px,20vw,304px)]">
                 <PageNavigation currentPage={page} totalPages={totalPages} onPageChange={setPage} />
               </div>
             )}
           </>
         ) : (
-          <div className="flex flex-col gap-[30px] items-center mt-[298px] mb-[295px]">
+          <div className="flex flex-col gap-[30px] items-center mt-[clamp(80px,20vw,298px)] mb-[clamp(80px,20vw,295px)]">
             <div className="w-[70px] h-[70px] bg-[#F1F8FF] flex justify-center items-center rounded-full">
               <FilterIcon width={42} height={42} />
             </div>
