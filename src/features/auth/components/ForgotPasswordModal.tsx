@@ -13,10 +13,19 @@ import { useAuthStore } from '../store/useAuthStore';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
+  /** 재설정 성공 후 처리를 커스텀하고 싶을 때(예: 로그인 상태에서 설정 화면 안에 뜨는 완료 화면).
+   *  넘기지 않으면 로그아웃 상태 전용 완료 화면(/auth/password-reset/success)으로 이동한다 */
   onSuccess?: () => void;
+  /** 이메일 인증 페이지로 갔다가 돌아올 때 배경이 될 화면 — 'home'(기본, 로그인 모달에서 진입)이면
+   *  홈+전역 로그인모달 시스템으로, 'settings'(설정 화면의 비밀번호 변경에서 진입)면 설정 화면으로 돌아온다 */
+  returnContext?: 'home' | 'settings';
 };
 
-export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswordModalProps) {
+export default function ForgotPasswordModal({
+  onClose,
+  onSuccess,
+  returnContext = 'home',
+}: ForgotPasswordModalProps) {
   const navigate = useNavigate();
   const resetPasswordDraft = useAuthStore((s) => s.resetPasswordDraft);
   const setResetPasswordDraft = useAuthStore((s) => s.setResetPasswordDraft);
@@ -56,7 +65,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       setResetPasswordDraft({ email, newPassword, confirmPassword, isEmailVerified: false });
       keepDraftOnUnmountRef.current = true;
       onClose();
-      navigate('/auth/password-reset/verify', { state: { email } });
+      navigate('/auth/password-reset/verify', { state: { email, returnContext } });
     } catch (error) {
       if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'MEMBER404_1') {
         setEmailError('가입되지 않은 이메일입니다.');
@@ -97,7 +106,11 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
       clearResetPasswordDraft();
       onClose();
-      onSuccess?.();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/auth/password-reset/success');
+      }
     } catch (error) {
       if (axios.isAxiosError<{ code?: string }>(error)) {
         const errorCode = error.response?.data?.code;

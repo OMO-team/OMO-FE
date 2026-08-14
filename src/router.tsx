@@ -17,6 +17,7 @@ import TaskDetailRoute from './features/roadmap/pages/TaskDetailRoute';
 // auth
 import EmailVerifyRoute from './features/auth/pages/EmailVerifyRoute';
 import PasswordResetVerifyRoute from './features/auth/pages/PasswordResetVerifyRoute';
+import PasswordResetSuccessRoute from './features/auth/pages/PasswordResetSuccessRoute';
 import OAuthCallbackRoute from './features/auth/pages/OAuthCallbackRoute';
 import GoogleLinkCallbackRoute from './features/auth/pages/GoogleLinkCallbackRoute';
 
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
       { path: '/myhome', element: <RoadmapApp />, handle: { hasOwnChatEntry: true } },
       { path: '/auth/email-verify', element: <EmailVerifyRoute /> },
       { path: '/auth/password-reset/verify', element: <PasswordResetVerifyRoute /> },
+      { path: '/auth/password-reset/success', element: <PasswordResetSuccessRoute /> },
       { path: '/oauth/callback', element: <OAuthCallbackRoute /> },
       { path: '/support/terms', element: <TermsAndPolicyRoute /> },
       { path: '/contact', element: <Contact /> },

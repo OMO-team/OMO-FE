@@ -49,7 +49,7 @@ export default function Footer({ onOpenSmartBriefing }: FooterProps) {
   ];
 
   return (
-    <footer className="flex w-full flex-col items-center gap-4 bg-gray-50">
+    <footer className="flex w-full flex-col items-center gap-4 bg-gray-100">
       <div className="mx-auto flex w-full max-w-content flex-col items-center gap-10 px-4">
         <div className="flex w-full flex-col gap-1 pt-7.5">
           <OmoLogoIcon className="h-5 w-auto shrink-0 self-start text-primary-600" />

@@ -53,10 +53,13 @@ export default function SettingsPage({
       : null;
   const googleLinkError =
     typeof locationState?.googleLinkError === 'string' ? locationState.googleLinkError : null;
+  /** 비밀번호 찾기 중 이메일 인증 페이지로 나갔다가(PasswordResetVerifyRoute) 돌아온 경우 —
+   *  설정 화면 배경을 유지한 채 비밀번호 찾기 모달을 다시 연다 */
+  const reopenPasswordFind = locationState?.reopenPasswordFind === true;
 
   const [activeModal, setActiveModal] = useState<
     'logout' | 'delete' | 'profile' | 'password-change' | 'password-find' | null
-  >(null);
+  >(reopenPasswordFind ? 'password-find' : null);
 
   // 프로필 데이터
   const [profileName, setProfileName] = useState('');
@@ -84,9 +87,9 @@ export default function SettingsPage({
   const [isGoogleLinking, setIsGoogleLinking] = useState(false);
 
   useEffect(() => {
-    if (!googleLinkResult) return;
+    if (!googleLinkResult && !reopenPasswordFind) return;
     navigate(location.pathname + location.search + location.hash, { replace: true, state: null });
-    // 마운트 시 1회만 실행한다. googleLinkResult는 초기 렌더의 값만 사용한다.
+    // 마운트 시 1회만 실행한다. googleLinkResult/reopenPasswordFind는 초기 렌더의 값만 사용한다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -390,6 +393,7 @@ export default function SettingsPage({
         <ForgotPasswordModal
           onClose={() => setActiveModal(null)}
           onSuccess={onPasswordChangeSuccess}
+          returnContext="settings"
         />
       )}
 
