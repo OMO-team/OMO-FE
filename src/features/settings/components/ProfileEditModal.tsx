@@ -104,13 +104,13 @@ export default function ProfileEditModal({
   return (
     <ModalOverlay onClose={onClose}>
       <form
-        className="flex max-h-[90vh] w-[790px] flex-col overflow-hidden rounded-5 bg-gray-20"
+        className="flex max-h-[90vh] w-full max-w-[790px] flex-col overflow-hidden rounded-5 bg-gray-20"
         onSubmit={handleSubmit}
         role="dialog"
         aria-modal="true"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex flex-col items-center gap-[70px] overflow-y-auto px-11 py-[50px]">
+        <div className="flex flex-col items-center gap-[70px] overflow-y-auto px-[clamp(20px,8vw,44px)] py-[50px]">
           <div className="flex w-full flex-col gap-[50px]">
             <div className="flex w-full items-center justify-between">
               <span className="heading-05 text-gray-800">프로필 수정</span>
@@ -122,7 +122,7 @@ export default function ProfileEditModal({
               />
             </div>
 
-            <div className="flex h-[165px] w-full items-center gap-[30px] rounded-4 bg-white px-10 py-[30px]">
+            <div className="flex min-h-[165px] w-full flex-wrap items-center gap-[30px] rounded-4 bg-white px-[clamp(16px,6vw,40px)] py-[30px]">
               <div className="relative shrink-0">
                 <div
                   className="size-[86px] rounded-full"
@@ -167,7 +167,7 @@ export default function ProfileEditModal({
                   <p className="title-01 text-gray-900">{nameValue} 님</p>
                   <p className="body-03 text-gray-600">{email}</p>
                 </div>
-                <div className="flex items-start gap-2">
+                <div className="flex flex-wrap items-start gap-2">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -192,7 +192,7 @@ export default function ProfileEditModal({
               </div>
             </div>
 
-            <div className="flex w-full flex-col gap-5 px-10">
+            <div className="flex w-full flex-col gap-5 px-[clamp(16px,6vw,40px)]">
               <div className="flex w-full flex-col gap-[10px]">
                 <label htmlFor="profile-edit-name" className="text-[16px] text-gray-900">
                   이름
@@ -213,7 +213,7 @@ export default function ProfileEditModal({
               </div>
             </div>
 
-            <div className="flex w-full flex-col gap-5 border-t border-gray-100 px-10 py-7">
+            <div className="flex w-full flex-col gap-5 border-t border-gray-100 px-[clamp(16px,6vw,40px)] py-7">
               <div className="flex flex-col items-start gap-1">
                 <p className="title-02 text-gray-900">연동 계정</p>
                 <p className="body-03 text-gray-600">
@@ -257,7 +257,7 @@ export default function ProfileEditModal({
             </div>
           </div>
 
-          <div className="flex w-[400px] flex-col gap-3">
+          <div className="flex w-full max-w-[400px] flex-col gap-3">
             {saveError && <span className="body-04 text-center text-[#FF2A14]">{saveError}</span>}
             <button
               type="submit"
