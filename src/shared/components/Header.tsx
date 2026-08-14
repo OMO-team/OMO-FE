@@ -157,7 +157,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
           여백이 다 줄어들어 왼쪽/오른쪽이 만나면 그 다음부터 검색창이 줄어듦.
           gap/패딩 값은 폭에 따라 바뀌지 않는 고정값(dev와 동일)으로 통일해
           850px 지점에서 텍스트/아이콘 위치가 튀지 않도록 함 */}
-      <header className={`sticky top-0 z-30 flex w-full px-4 py-6 xl:hidden ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
+      <header className={`sticky top-0 z-30 flex w-full px-8 py-6 xl:hidden ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
         <div className="@container mx-auto flex w-full max-w-[888px] items-center gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-4">
             <button type="button" onClick={() => navigate('/')} className="flex shrink-0 items-center justify-center self-stretch">

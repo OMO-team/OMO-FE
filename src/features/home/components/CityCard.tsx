@@ -9,7 +9,7 @@ type CityCardProps = {
 
 export default function CityCard({ name, imageUrl, recommendedCityCount, onClick }: CityCardProps) {
   return (
-    <button type="button" className="relative w-[344px] h-[280px] rounded-4 overflow-hidden flex-shrink-0 cursor-pointer" onClick={onClick}>
+    <button type="button" className="relative h-[280px] w-full max-w-[344px] rounded-4 overflow-hidden cursor-pointer" onClick={onClick}>
       <img
         src={imageUrl}
         alt={name}
