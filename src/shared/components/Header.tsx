@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Icon from "./Icon";
 import ExploreIcon from "./ExploreIcon";
 import HomeIcon from "./HomeIcon";
@@ -20,6 +21,14 @@ export default function Header({ variant = "default" }: HeaderProps) {
   const navigate = useNavigate();
   const isOverlay = variant === "overlay";
   const isTransparent = variant === "transparent";
+
+  const [debugWidth, setDebugWidth] = useState(0);
+  useEffect(() => {
+    const update = () => setDebugWidth(window.innerWidth);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   const activeNav: ActiveNav =
     pathname === "/city-insight"
@@ -72,6 +81,9 @@ export default function Header({ variant = "default" }: HeaderProps) {
 
   return (
     <>
+      <div className="fixed left-2 top-2 z-[999] rounded bg-black px-2 py-1 text-xs text-white">
+        width: {debugWidth}px
+      </div>
       {/* xl(1280px) 이상: dev(프로덕션) 원본과 완전히 동일한 고정 레이아웃 */}
       <header className={`sticky top-0 z-30 hidden w-full items-center justify-between px-[188px] pt-6 pb-6 xl:flex ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
         <div className="flex items-center gap-4">
@@ -142,10 +154,12 @@ export default function Header({ variant = "default" }: HeaderProps) {
       </header>
 
       {/* xl(1280px) 미만: 반응형 — 창이 줄어들면 좌우 여백이 먼저 줄고,
-          여백이 다 줄어들어 왼쪽/오른쪽이 만나면 그 다음부터 검색창이 줄어듦 */}
+          여백이 다 줄어들어 왼쪽/오른쪽이 만나면 그 다음부터 검색창이 줄어듦.
+          gap/패딩 값은 폭에 따라 바뀌지 않는 고정값(dev와 동일)으로 통일해
+          850px 지점에서 텍스트/아이콘 위치가 튀지 않도록 함 */}
       <header className={`sticky top-0 z-30 flex w-full px-4 py-6 xl:hidden ${isOverlay || isTransparent ? "bg-transparent" : "bg-white"}`}>
-        <div className="@container mx-auto flex w-full max-w-[888px] items-center gap-3 @[850px]:gap-4">
-          <div className="flex min-w-0 flex-1 items-center gap-2 @[850px]:gap-4">
+        <div className="@container mx-auto flex w-full max-w-[888px] items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
             <button type="button" onClick={() => navigate('/')} className="flex shrink-0 items-center justify-center self-stretch">
               <img
                 src={omoLogo}
@@ -156,7 +170,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
             </button>
 
             <div
-              className="flex h-10 min-w-0 flex-1 max-w-[418px] cursor-pointer items-center justify-end gap-2 rounded-2 bg-gray-50 px-3 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)]"
+              className="flex h-10 min-w-0 flex-1 max-w-[418px] cursor-pointer items-center justify-end rounded-2 bg-gray-50 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] gap-[clamp(8px,4cqw,32px)] pl-[clamp(12px,2.5cqw,20px)] pr-[clamp(12px,2cqw,16px)]"
               onClick={openSearch}
             >
               <span className="body-03 min-w-0 flex-1 truncate text-gray-400">
@@ -170,26 +184,26 @@ export default function Header({ variant = "default" }: HeaderProps) {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 @[850px]:gap-4">
+          <div className="flex shrink-0 items-center gap-2 @[850px]:gap-3">
             <div className="flex items-center">
               <button
                 onClick={handleExploreClick}
-                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-2.5 @[850px]:pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("explore")}`}
+                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] ${getNavTextClass("explore")}`}
               >
                 <Icon size="sm">
                   <ExploreIcon color={getNavIconColor("explore")} />
                 </Icon>
-                <span className="hidden @[850px]:inline">탐색</span>
+                <span>탐색</span>
               </button>
 
               <button
                 onClick={handleMyHomeClick}
-                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 pr-2.5 @[850px]:pr-3 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow ${getNavTextClass("myhome")}`}
+                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] ${getNavTextClass("myhome")}`}
               >
                 <Icon size="sm">
                   <HomeIcon color={getNavIconColor("myhome")} />
                 </Icon>
-                <span className="hidden @[850px]:inline">내 홈</span>
+                <span>내 홈</span>
               </button>
             </div>
 
@@ -199,13 +213,13 @@ export default function Header({ variant = "default" }: HeaderProps) {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => openModal('login')}
-                  className={`flex shrink-0 items-center rounded-2 px-2.5 @[850px]:px-[18px] py-2.5 body-03 whitespace-nowrap ${isOverlay ? "text-white" : "text-gray-700"}`}
+                  className={`flex shrink-0 items-center rounded-2 py-2.5 px-[clamp(10px,2.25cqw,18px)] body-03 whitespace-nowrap ${isOverlay ? "text-white" : "text-gray-700"}`}
                 >
                   로그인
                 </button>
                 <button
                   onClick={() => openModal('signup')}
-                  className="flex shrink-0 items-center rounded-2 bg-primary-500 px-2.5 @[850px]:px-[18px] py-2.5 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
+                  className="flex shrink-0 items-center rounded-2 bg-primary-500 py-2.5 px-[clamp(10px,2.25cqw,18px)] shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
                 >
                   회원가입
                 </button>
