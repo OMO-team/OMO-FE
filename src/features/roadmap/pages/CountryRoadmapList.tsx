@@ -27,6 +27,8 @@ type RemovedRecord = {
   countryName: string;
 };
 
+const WISHLIST_PAGE_SIZE = 6;
+
 type RemovedWish = {
   cityId: string;
   cityName: string;
@@ -96,6 +98,8 @@ export default function CountryRoadmapList({
   const [addedKeys, setAddedKeys] = useState<Set<string>>(new Set());
   /** 기본은 전부 펼친 상태 — 여기 담긴 국가만 접힌 상태로 표시 */
   const [collapsedCountries, setCollapsedCountries] = useState<Set<string>>(new Set());
+  /** 위시 리스트 탭은 나라별 로드맵 탭과 페이지 상태를 공유하면 안 되므로 별도로 관리 */
+  const [wishlistPage, setWishlistPage] = useState(1);
 
   const toggleCompare = useCompareStore(s => s.toggleCompare);
   const closeCompareModal = useCompareStore(s => s.closeModal);
@@ -109,7 +113,7 @@ export default function CountryRoadmapList({
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [currentPage]);
+  }, [currentPage, wishlistPage]);
 
   useEffect(() => {
     if (!removedRecord) return;
@@ -171,6 +175,13 @@ export default function CountryRoadmapList({
     onToggleWish?.(cityId, purposeId);
   };
 
+  /** 탭을 전환하면 이전 탭에서 보던 페이지가 아니라 항상 1페이지부터 다시 보여줌 */
+  const handleTabChange = (index: number) => {
+    setActiveTab(index);
+    if (index === 0) onPageChange?.(1);
+    else setWishlistPage(1);
+  };
+
   const toggleCountryGroup = (countryName: string) => {
     setCollapsedCountries(prev => {
       const next = new Set(prev);
@@ -225,6 +236,14 @@ export default function CountryRoadmapList({
   const isAllEmpty = !hasRoadmaps && !hasWishlist;
   const isCurrentTabEmpty = activeTab === 0 ? !hasRoadmaps : !hasWishlist;
 
+  const wishlistTotalPages = Math.max(1, Math.ceil(wishlistCities.length / WISHLIST_PAGE_SIZE));
+  /** wishlistCities 개수가 줄어 이전 페이지 번호가 더 이상 유효하지 않을 수 있어 매 렌더마다 범위를 보정 */
+  const safeWishlistPage = Math.min(wishlistPage, wishlistTotalPages);
+  const pagedWishlistCities = wishlistCities.slice(
+    (safeWishlistPage - 1) * WISHLIST_PAGE_SIZE,
+    safeWishlistPage * WISHLIST_PAGE_SIZE
+  );
+
   return (
     <div className="flex flex-col bg-white">
       {removedRecord && (
@@ -248,7 +267,7 @@ export default function CountryRoadmapList({
           <CategoryTab
             categories={['나라별 로드맵', '위시 리스트']}
             activeIndex={activeTab}
-            onChange={setActiveTab}
+            onChange={handleTabChange}
           />
 
           {isAllEmpty ? (
@@ -303,7 +322,7 @@ export default function CountryRoadmapList({
             )
           ) : hasWishlist ? (
             <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
-              {wishlistCities.map(city => (
+              {pagedWishlistCities.map(city => (
                 <CityInsightCard
                   key={wishKey(city.cityId, city.purposeId)}
                   imageUrl={city.imageUrl}
@@ -341,11 +360,19 @@ export default function CountryRoadmapList({
 
           {!isAllEmpty && !isCurrentTabEmpty && (
             <div className="flex w-full justify-center mt-[clamp(48px,10vw,100px)] mb-[clamp(80px,20vw,300px)]">
-              <PageNavigation
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={onPageChange}
-              />
+              {activeTab === 0 ? (
+                <PageNavigation
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={onPageChange}
+                />
+              ) : (
+                <PageNavigation
+                  currentPage={safeWishlistPage}
+                  totalPages={wishlistTotalPages}
+                  onPageChange={setWishlistPage}
+                />
+              )}
             </div>
           )}
         </div>
