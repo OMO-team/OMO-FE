@@ -88,21 +88,24 @@ export default function CountryRoadmapList({
   const [reportCityKey, setReportCityKey] = useState<string | null>(null);
   const [isCreatingRoadmap, setIsCreatingRoadmap] = useState(false);
   const [addErrorMessage, setAddErrorMessage] = useState<string | null>(null);
-  const [createdRoadmap, setCreatedRoadmap] = useState<{ roadmapId: number; cityName: string } | null>(null);
+  const [createdRoadmap, setCreatedRoadmap] = useState<{
+    roadmapId: number;
+    cityName: string;
+  } | null>(null);
   /** 이미 추가한 도시는 리포트를 다시 열어도 버튼이 비활성 상태로 유지되도록 기억 */
   const [addedKeys, setAddedKeys] = useState<Set<string>>(new Set());
   /** 기본은 전부 펼친 상태 — 여기 담긴 국가만 접힌 상태로 표시 */
   const [collapsedCountries, setCollapsedCountries] = useState<Set<string>>(new Set());
 
-  const toggleCompare = useCompareStore((s) => s.toggleCompare);
-  const closeCompareModal = useCompareStore((s) => s.closeModal);
-  const resetCompare = useCompareStore((s) => s.resetCompare);
-  const compareSelectableCities = wishlistCities.map((city) => ({
+  const toggleCompare = useCompareStore(s => s.toggleCompare);
+  const closeCompareModal = useCompareStore(s => s.closeModal);
+  const resetCompare = useCompareStore(s => s.resetCompare);
+  const compareSelectableCities = wishlistCities.map(city => ({
     cityId: Number(city.cityId),
     cityName: city.cityName,
   }));
   const reportCity =
-    wishlistCities.find((city) => wishKey(city.cityId, city.purposeId) === reportCityKey) ?? null;
+    wishlistCities.find(city => wishKey(city.cityId, city.purposeId) === reportCityKey) ?? null;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -169,7 +172,7 @@ export default function CountryRoadmapList({
   };
 
   const toggleCountryGroup = (countryName: string) => {
-    setCollapsedCountries((prev) => {
+    setCollapsedCountries(prev => {
       const next = new Set(prev);
       if (next.has(countryName)) next.delete(countryName);
       else next.add(countryName);
@@ -186,7 +189,7 @@ export default function CountryRoadmapList({
   /** 비교 모달에서 도시를 선택하면 모달을 닫고 그 도시의 AI 리포트로 이어줌 (비교는 도시 단위라 목적이 여러 개면 첫 항목 기준) */
   const handleSelectCompareCity = (cityId: number) => {
     closeCompareModal();
-    const matched = wishlistCities.find((city) => city.cityId === String(cityId));
+    const matched = wishlistCities.find(city => city.cityId === String(cityId));
     setReportCityKey(matched ? wishKey(matched.cityId, matched.purposeId) : null);
   };
 
@@ -204,12 +207,12 @@ export default function CountryRoadmapList({
     setAddErrorMessage(null);
     try {
       const result = await onAddRoadmap(Number(reportCity.cityId), reportCity.purposeId);
-      setAddedKeys((prev) => new Set(prev).add(wishKey(reportCity.cityId, reportCity.purposeId)));
+      setAddedKeys(prev => new Set(prev).add(wishKey(reportCity.cityId, reportCity.purposeId)));
       setCreatedRoadmap({ roadmapId: result.roadmapId, cityName: reportCity.cityName });
     } catch (error) {
       console.error('로드맵 생성 실패', error);
       setAddErrorMessage(
-        getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.'),
+        getErrorMessage(error, '로드맵을 만들지 못했어요. 잠시 후 다시 시도해주세요.')
       );
     } finally {
       setIsCreatingRoadmap(false);
@@ -225,7 +228,11 @@ export default function CountryRoadmapList({
   return (
     <div className="flex flex-col bg-white">
       {removedRecord && (
-        <RoadmapRemovedToast cityName={removedRecord.city.cityName} onUndo={handleUndo} onClose={handleCloseRemovedToast} />
+        <RoadmapRemovedToast
+          cityName={removedRecord.city.cityName}
+          onUndo={handleUndo}
+          onClose={handleCloseRemovedToast}
+        />
       )}
       {removedWish && (
         <RoadmapRemovedToast
@@ -236,97 +243,112 @@ export default function CountryRoadmapList({
         />
       )}
 
-      <div className="mx-auto flex w-full max-w-content flex-col items-start gap-8 py-10">
-        <CategoryTab categories={['나라별 로드맵', '위시 리스트']} activeIndex={activeTab} onChange={setActiveTab} />
+      <div className="flex w-full flex-col items-center px-[clamp(32px,50vw_-_451.5px,188px)]">
+        <div className="flex w-full max-w-content flex-col items-start gap-8 mt-[30px]">
+          <CategoryTab
+            categories={['나라별 로드맵', '위시 리스트']}
+            activeIndex={activeTab}
+            onChange={setActiveTab}
+          />
 
-        {isAllEmpty ? (
-          <div className="flex w-full flex-col items-center gap-4 py-20">
-            <EmptyStateIcon />
-            <div className="flex flex-col items-center gap-1">
-              <p className="title-02 text-gray-700">선택된 도시가 없습니다</p>
-              <p className="body-02 text-gray-500">준비를 시작할 도시를 선택해주세요</p>
+          {isAllEmpty ? (
+            <div className="flex w-full flex-col items-center gap-4 py-20">
+              <EmptyStateIcon />
+              <div className="flex flex-col items-center gap-1">
+                <p className="title-02 text-gray-700">선택된 도시가 없습니다</p>
+                <p className="body-02 text-gray-500">준비를 시작할 도시를 선택해주세요</p>
+              </div>
+              <div className="w-full max-w-89.5">
+                <LargeFillButton label="도시 탐색하러 가기" onClick={onExploreCity} />
+              </div>
             </div>
-            <div className="w-89.5">
-              <LargeFillButton label="도시 탐색하러 가기" onClick={onExploreCity} />
-            </div>
-          </div>
-        ) : activeTab === 0 ? (
-          hasRoadmaps ? (
-            <div className="flex w-full flex-col gap-12.5">
-              {groups.map((group) => {
-                const isExpanded = !collapsedCountries.has(group.countryName);
-                return (
-                  <div key={group.countryName} className="flex w-full flex-col gap-3">
-                    <CountryGroupHeader
-                      countryName={group.countryName}
-                      cityCount={group.cityCount}
-                      isExpanded={isExpanded}
-                      onToggle={() => toggleCountryGroup(group.countryName)}
-                    />
-                    {isExpanded && (
-                      <div className="flex w-full flex-wrap items-center gap-5">
-                        {group.cities.map((city) => (
-                          <CityRoadmapCard
-                            key={city.roadmapId ?? city.cityId}
-                            {...city}
-                            isWishlisted={wishedKeys.has(wishKey(city.cityId, city.purposeId))}
-                            onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
-                            onViewRoadmap={() => onViewRoadmap?.(city)}
-                            onDelete={() => setDeleteTarget(city)}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+          ) : activeTab === 0 ? (
+            hasRoadmaps ? (
+              <div className="flex w-full flex-col gap-12.5">
+                {groups.map(group => {
+                  const isExpanded = !collapsedCountries.has(group.countryName);
+                  return (
+                    <div key={group.countryName} className="flex w-full flex-col gap-3">
+                      <CountryGroupHeader
+                        countryName={group.countryName}
+                        cityCount={group.cityCount}
+                        isExpanded={isExpanded}
+                        onToggle={() => toggleCountryGroup(group.countryName)}
+                      />
+                      {isExpanded && (
+                        <div className="flex w-full flex-wrap items-center gap-5">
+                          {group.cities.map(city => (
+                            <CityRoadmapCard
+                              key={city.roadmapId ?? city.cityId}
+                              {...city}
+                              isWishlisted={wishedKeys.has(wishKey(city.cityId, city.purposeId))}
+                              onToggleWish={() =>
+                                handleToggleWish(city.cityId, city.cityName, city.purposeId)
+                              }
+                              onViewRoadmap={() => onViewRoadmap?.(city)}
+                              onDelete={() => setDeleteTarget(city)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex w-full flex-col items-center gap-4 py-20">
+                <EmptyStateIcon />
+                <p className="body-02 text-gray-500">아직 시작한 로드맵이 없어요</p>
+              </div>
+            )
+          ) : hasWishlist ? (
+            <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
+              {wishlistCities.map(city => (
+                <CityInsightCard
+                  key={wishKey(city.cityId, city.purposeId)}
+                  imageUrl={city.imageUrl}
+                  rating={city.rating}
+                  isWishlisted
+                  name={city.cityName}
+                  countryName={city.countryName}
+                  purposeName={city.purposeName}
+                  description={city.description}
+                  // city.monthlyCost는 "400만원"처럼 단위가 붙은 표시용 문자열이라 숫자만 뽑아서 넘김
+                  monthlyCost={Number(city.monthlyCost.replace(/[^0-9.]/g, '')) || 0}
+                  costPercent={city.costPercent}
+                  accommodationPercent={city.accommodationPercent}
+                  accommodationLabel={city.accommodationLabel}
+                  visaPercent={city.visaPercent}
+                  visaLabel={city.visaLabel}
+                  safetyScore={city.securityScore}
+                  languageScore={city.languageScore}
+                  internetScore={city.infrastructureScore}
+                  onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
+                  onCompare={() => toggleCompare(Number(city.cityId), city.cityName)}
+                  onReport={() => {
+                    setAddErrorMessage(null);
+                    setReportCityKey(wishKey(city.cityId, city.purposeId));
+                  }}
+                />
+              ))}
             </div>
           ) : (
             <div className="flex w-full flex-col items-center gap-4 py-20">
               <EmptyStateIcon />
-              <p className="body-02 text-gray-500">아직 시작한 로드맵이 없어요</p>
+              <p className="body-02 text-gray-500">아직 위시리스트에 담은 도시가 없어요</p>
             </div>
-          )
-        ) : hasWishlist ? (
-          <div className="grid w-full grid-cols-2 gap-5">
-            {wishlistCities.map((city) => (
-              <CityInsightCard
-                key={wishKey(city.cityId, city.purposeId)}
-                imageUrl={city.imageUrl}
-                rating={city.rating}
-                isWishlisted
-                name={city.cityName}
-                countryName={city.countryName}
-                purposeName={city.purposeName}
-                description={city.description}
-                // city.monthlyCost는 "400만원"처럼 단위가 붙은 표시용 문자열이라 숫자만 뽑아서 넘김
-                monthlyCost={Number(city.monthlyCost.replace(/[^0-9.]/g, '')) || 0}
-                costPercent={city.costPercent}
-                accommodationPercent={city.accommodationPercent}
-                accommodationLabel={city.accommodationLabel}
-                visaPercent={city.visaPercent}
-                visaLabel={city.visaLabel}
-                safetyScore={city.securityScore}
-                languageScore={city.languageScore}
-                internetScore={city.infrastructureScore}
-                onToggleWish={() => handleToggleWish(city.cityId, city.cityName, city.purposeId)}
-                onCompare={() => toggleCompare(Number(city.cityId), city.cityName)}
-                onReport={() => { setAddErrorMessage(null); setReportCityKey(wishKey(city.cityId, city.purposeId)); }}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex w-full flex-col items-center gap-4 py-20">
-            <EmptyStateIcon />
-            <p className="body-02 text-gray-500">아직 위시리스트에 담은 도시가 없어요</p>
-          </div>
-        )}
+          )}
 
-        {activeTab === 0 && !isAllEmpty && !isCurrentTabEmpty && (
-          <div className="flex w-full justify-center pt-25">
-            <PageNavigation currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
-          </div>
-        )}
+          {activeTab === 0 && !isAllEmpty && !isCurrentTabEmpty && (
+            <div className="flex w-full justify-center mt-[clamp(48px,10vw,100px)] mb-[clamp(80px,20vw,300px)]">
+              <PageNavigation
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={onPageChange}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {deleteTarget && (
@@ -345,9 +367,14 @@ export default function CountryRoadmapList({
       {reportCity && (
         <CityReportModal
           isOpen
-          onClose={() => { setReportCityKey(null); setAddErrorMessage(null); }}
+          onClose={() => {
+            setReportCityKey(null);
+            setAddErrorMessage(null);
+          }}
           data={buildCityReportData(reportCity)}
-          onSearch={(question) => cityAiReportApi.askQuestion(Number(reportCity.cityId), { question })}
+          onSearch={question =>
+            cityAiReportApi.askQuestion(Number(reportCity.cityId), { question })
+          }
           onAddToRoadmap={handleAddToRoadmap}
           isAddDisabled={
             isCreatingRoadmap ||
