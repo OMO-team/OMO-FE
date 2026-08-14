@@ -1,4 +1,5 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { EMAIL_REGEX } from '../constants/emailRegex';
 import ModalOverlay from '../../../shared/components/ModalOverlay';
@@ -8,6 +9,7 @@ import VerifyButton from '../../../shared/components/VerifyButton';
 import errorReverseIcon from '../../../assets/icons/error-reverse.svg';
 import { authApi } from '../api/authApi';
 import { passwordRegex } from '../../../shared/constants/passwordRegex';
+import { useAuthStore } from '../store/useAuthStore';
 
 type ForgotPasswordModalProps = {
   onClose: () => void;
@@ -15,22 +17,33 @@ type ForgotPasswordModalProps = {
 };
 
 export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswordModalProps) {
-  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+  const resetPasswordDraft = useAuthStore((s) => s.resetPasswordDraft);
+  const setResetPasswordDraft = useAuthStore((s) => s.setResetPasswordDraft);
+  const clearResetPasswordDraft = useAuthStore((s) => s.clearResetPasswordDraft);
+
+  const [email, setEmail] = useState(resetPasswordDraft?.email ?? '');
   const [emailError, setEmailError] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(resetPasswordDraft?.isEmailVerified ?? false);
 
-  const [code, setCode] = useState('');
-  const [codeError, setCodeError] = useState('');
-  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
-  const [verifiedEmail, setVerifiedEmail] = useState('');
-  const isVerified = verifiedEmail !== '' && verifiedEmail === email;
-
-  const [newPassword, setNewPassword] = useState('');
+  const [newPassword, setNewPassword] = useState(resetPasswordDraft?.newPassword ?? '');
   const [newPasswordError, setNewPasswordError] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(resetPasswordDraft?.confirmPassword ?? '');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  /** 이메일 인증을 위해 잠시 인증 페이지로 이동할 때만 draft를 유지 — 그 외(X 닫기, 바깥 클릭 등
+   *  실제 닫기)에는 언마운트 시 draft를 비운다. SignupModal과 동일한 패턴 */
+  const keepDraftOnUnmountRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (!keepDraftOnUnmountRef.current) {
+        clearResetPasswordDraft();
+      }
+    };
+  }, [clearResetPasswordDraft]);
 
   const handleSendPasswordResetEmail = async () => {
     if (!email) { setEmailError('가입하신 이메일 주소를 입력해주세요.'); return; }
@@ -40,10 +53,10 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     setIsSendingCode(true);
     try {
       await authApi.sendPasswordResetEmail({ email });
-      setEmailSent(true);
-      setVerifiedEmail('');
-      setCode('');
-      setCodeError('');
+      setResetPasswordDraft({ email, newPassword, confirmPassword, isEmailVerified: false });
+      keepDraftOnUnmountRef.current = true;
+      onClose();
+      navigate('/auth/password-reset/verify', { state: { email } });
     } catch (error) {
       if (axios.isAxiosError<{ code?: string }>(error) && error.response?.data?.code === 'MEMBER404_1') {
         setEmailError('가입되지 않은 이메일입니다.');
@@ -55,48 +68,18 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     }
   };
 
-  const handleVerifyCode = async () => {
-    if (!code) { setCodeError('인증번호를 입력해주세요.'); return; }
-    if (isVerifyingCode) return;
-    setCodeError('');
-    setIsVerifyingCode(true);
-    try {
-      await authApi.verifyPasswordResetCode({ email, code });
-      setVerifiedEmail(email);
-    } catch (error) {
-      if (axios.isAxiosError<{ code?: string }>(error)) {
-        const errorCode = error.response?.data?.code;
-        if (errorCode === 'AUTH400_1') {
-          setCodeError('인증번호가 만료되었습니다. 인증번호를 다시 요청해주세요.');
-        } else if (errorCode === 'AUTH400_2') {
-          setCodeError('인증번호가 일치하지 않습니다.');
-        } else if (errorCode === 'AUTH429_1') {
-          setCodeError('입력 가능 횟수를 초과했습니다. 인증번호를 다시 요청해주세요.');
-        } else {
-          setCodeError('인증번호 확인에 실패했습니다. 다시 시도해주세요.');
-        }
-      } else {
-        setCodeError('인증번호 확인에 실패했습니다. 다시 시도해주세요.');
-      }
-    } finally {
-      setIsVerifyingCode(false);
-    }
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
+    setEmailError('');
     setNewPasswordError('');
     setConfirmPasswordError('');
 
     let hasError = false;
 
-    if (!emailSent) {
-      setEmailError('인증코드를 먼저 발송해주세요.');
-      hasError = true;
-    } else if (!isVerified) {
-      setCodeError('이메일 인증을 완료해주세요.');
+    if (!isEmailVerified) {
+      setEmailError('이메일 인증을 먼저 완료해주세요.');
       hasError = true;
     }
     if (!passwordRegex.test(newPassword)) {
@@ -112,6 +95,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     setIsSubmitting(true);
     try {
       await authApi.resetPassword({ email, newPassword, newPasswordConfirm: confirmPassword });
+      clearResetPasswordDraft();
       onClose();
       onSuccess?.();
     } catch (error) {
@@ -120,6 +104,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
         if (errorCode === 'MEMBER404_1') {
           setEmailError('가입되지 않은 이메일입니다.');
         } else if (errorCode === 'AUTH400_3') {
+          setIsEmailVerified(false);
           setEmailError('이메일 인증을 다시 완료해주세요.');
         } else {
           setNewPasswordError('비밀번호 재설정에 실패했습니다. 다시 시도해주세요.');
@@ -164,7 +149,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
               <div className="flex flex-col items-start gap-[30px] self-stretch">
 
-                {/* 이메일 섹션 */}
+                {/* 이메일 섹션 — 인증번호는 별도 페이지(회원가입과 동일한 인증 흐름)에서 입력받는다 */}
                 <div className="flex flex-col items-start gap-2 self-stretch">
                   <div className="flex flex-col items-start gap-1">
                     <label htmlFor="forgot-email" className="body-02 text-gray-900">이메일</label>
@@ -176,39 +161,24 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
                         id="forgot-email"
                         type="email"
                         value={email}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          setEmail(e.target.value);
+                          if (isEmailVerified) setIsEmailVerified(false);
+                        }}
                         placeholder="이메일을 입력해주세요"
                         error={emailError}
                       />
                     </div>
-                    <VerifyButton active={email.length > 0 && !isSendingCode} onClick={handleSendPasswordResetEmail} />
+                    <VerifyButton
+                      active={email.length > 0 && !isSendingCode && !isEmailVerified}
+                      onClick={handleSendPasswordResetEmail}
+                      label={isEmailVerified ? '인증완료' : isSendingCode ? '발송 중...' : '인증'}
+                    />
                   </div>
+                  {isEmailVerified && (
+                    <span className="body-04 text-primary-500">이메일 인증이 완료되었습니다.</span>
+                  )}
                 </div>
-
-                {/* 인증번호 섹션 */}
-                {emailSent && (
-                  <div className="flex flex-col items-start gap-2 self-stretch">
-                    <label htmlFor="forgot-code" className="body-02 text-gray-900">인증번호</label>
-                    <div className="flex items-start gap-2 self-stretch">
-                      <div className="flex-1">
-                        <Input
-                          id="forgot-code"
-                          type="text"
-                          value={code}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
-                          placeholder="인증번호를 입력해주세요"
-                          error={codeError}
-                          disabled={isVerified}
-                        />
-                      </div>
-                      <VerifyButton
-                        active={code.length > 0 && !isVerifyingCode && !isVerified}
-                        onClick={handleVerifyCode}
-                        label={isVerified ? '인증완료' : '인증확인'}
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* 비밀번호 섹션들 */}
                 <div className="flex flex-col items-start gap-4 self-stretch">

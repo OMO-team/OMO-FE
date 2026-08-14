@@ -11,6 +11,10 @@ type EmailVerificationPageProps = {
   onResend?: () => Promise<number | undefined> | void;
   onVerify?: (code: string) => Promise<void>;
   onServiceStart?: () => void;
+  /** 인증 완료 화면의 안내 문구 — 회원가입/비밀번호 재설정 등 흐름마다 다르게 넘길 수 있음 */
+  successDescription?: string;
+  /** 인증 완료 화면의 버튼 라벨 */
+  successButtonLabel?: string;
 };
 
 const TOTAL_SECONDS = 5 * 60;
@@ -57,6 +61,8 @@ export default function EmailVerificationPage({
   onResend,
   onVerify,
   onServiceStart,
+  successDescription = '이제 OMO 서비스를 안전하게 이용할 수 있습니다.',
+  successButtonLabel = '서비스 이용하기',
 }: EmailVerificationPageProps) {
   const [step, setStep] = useState<Step>('sent');
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
@@ -317,7 +323,7 @@ export default function EmailVerificationPage({
                     이메일 인증이 정상적으로 완료되었습니다.
                   </span>
                   <span className="self-stretch text-center text-gray-700" style={descStyle}>
-                    이제 OMO 서비스를 안전하게 이용할 수 있습니다.
+                    {successDescription}
                   </span>
                 </div>
               </div>
@@ -327,7 +333,7 @@ export default function EmailVerificationPage({
               <span className="body-04 text-gray-500 self-stretch">비밀번호 재설정, 문의 답변, 중요 알림이 해당 이메일로 발송됩니다.</span>
             </InfoBox>
           </div>
-          <LargeFillButton label="서비스 이용하기" onClick={onServiceStart} className="title-05" />
+          <LargeFillButton label={successButtonLabel} onClick={onServiceStart} className="title-05" />
         </div>
       )}
 
