@@ -45,7 +45,7 @@ export default function Footer({ onOpenSmartBriefing }: FooterProps) {
   const serviceLinks: LinkItem[] = [
     { label: 'AI스마트 브리핑', onClick: onOpenSmartBriefing },
     { label: '도시별 인사이트 리포트', path: '/city-insight' },
-    { label: '내 출국 준비 로드맵', path: '/myhome/empty' },
+    { label: '내 출국 준비 로드맵', path: '/myhome' },
   ];
 
   return (
