@@ -21,7 +21,6 @@ import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { memberApi } from '../../features/settings/api/memberApi';
 import type { TermsAndPolicyLocationState } from '../pages/TermsAndPolicyRoute';
 import type { MainLayoutContext } from './useMainLayoutContext';
-import { SIDEBAR_HANDLE_WIDTH } from '../constants/layout';
 
 type RouteHandle = {
   headerVariant?: 'default' | 'overlay' | 'transparent';
@@ -29,8 +28,17 @@ type RouteHandle = {
 };
 
 export default function MainLayout() {
-  const { modalType, openModal, closeModal, isSearchOpen, closeSearch, signIn, signOut, authToast, clearAuthToast } =
-    useAuthStore();
+  const {
+    modalType,
+    openModal,
+    closeModal,
+    isSearchOpen,
+    closeSearch,
+    signIn,
+    signOut,
+    authToast,
+    clearAuthToast,
+  } = useAuthStore();
   const [recentSearches, setRecentSearches] = useState<string[]>(() => loadRecentSearches());
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
@@ -86,10 +94,6 @@ export default function MainLayout() {
       .filter(Boolean)
       .at(-1) ?? 'default';
   const isOverlay = headerVariant === 'overlay';
-  /** 페이지 자체에 채팅 진입점(홈의 프롬프트 입력창, 도시 탐색의 FAB)이 있으면 사이드바 손잡이가 중복이라 숨김 */
-  const hasPageOwnChatEntry = matches.some(
-    m => (m.handle as RouteHandle | undefined)?.hasOwnChatEntry
-  );
 
   const openChat = useCallback((initialMessage?: string) => {
     setChatInitialMessage(initialMessage);
@@ -118,27 +122,6 @@ export default function MainLayout() {
       <Footer onOpenSmartBriefing={() => openChat()} />
 
       <div className="fixed inset-y-0 right-0 z-40 flex">
-        {/* Sidebar_Collapse_Handle — 페이지 자체 채팅 진입점이 없는 곳에서만 노출 */}
-        {!hasPageOwnChatEntry && (
-          <button
-            type="button"
-            onClick={() => setIsChatOpen(prev => !prev)}
-            aria-label={isChatOpen ? 'AI 채팅 닫기' : 'AI 채팅 열기'}
-            className="flex h-full items-center cursor-pointer outline-none border-0"
-            style={{
-              width: `${SIDEBAR_HANDLE_WIDTH}px`,
-              paddingLeft: '10px',
-              background: '#FFF',
-              borderLeft: '1px solid #E7EAEF',
-            }}
-          >
-            <div
-              className="flex flex-col items-start flex-shrink-0 bg-gray-200"
-              style={{ width: '6px', height: '120px', borderRadius: '10px' }}
-            />
-          </button>
-        )}
-
         {isChatOpen && <AIChatPanel initialMessage={chatInitialMessage} onClose={closeChat} />}
       </div>
 
@@ -182,9 +165,7 @@ export default function MainLayout() {
         </ModalOverlay>
       )}
 
-      {authToast !== null && (
-        <AuthSuccessToast type={authToast} onClose={clearAuthToast} />
-      )}
+      {authToast !== null && <AuthSuccessToast type={authToast} onClose={clearAuthToast} />}
     </div>
   );
 }
