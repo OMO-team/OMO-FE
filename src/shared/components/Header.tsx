@@ -176,11 +176,9 @@ export default function Header({ variant = "default" }: HeaderProps) {
               <span className="body-03 min-w-0 flex-1 truncate text-gray-400">
                 도시나 키워드로 검색하기
               </span>
-              <span className="shrink-0">
-                <Icon size="md">
-                  <img src={iconSearch} alt="검색" />
-                </Icon>
-              </span>
+              <Icon size="md" className="shrink-0">
+                <img src={iconSearch} alt="검색" />
+              </Icon>
             </div>
           </div>
 
@@ -188,7 +186,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
             <div className="flex items-center">
               <button
                 onClick={handleExploreClick}
-                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] ${getNavTextClass("explore")}`}
+                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] min-w-[clamp(0px,9.01cqw,80px)] ${getNavTextClass("explore")}`}
               >
                 <Icon size="sm">
                   <ExploreIcon color={getNavIconColor("explore")} />
@@ -198,7 +196,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
 
               <button
                 onClick={handleMyHomeClick}
-                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] ${getNavTextClass("myhome")}`}
+                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] min-w-[clamp(0px,9.01cqw,80px)] ${getNavTextClass("myhome")}`}
               >
                 <Icon size="sm">
                   <HomeIcon color={getNavIconColor("myhome")} />
