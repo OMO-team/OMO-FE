@@ -46,21 +46,27 @@ export default function TermsAndPolicyPage({ onBack, initialTab = 0 }: TermsAndP
 
   return (
     <div className="flex flex-col bg-gray-20">
-      <main className="mx-auto flex w-full max-w-content flex-col gap-8 px-1 py-8">
-        <BackHeader title="이용약관 및 정책" onBack={onBack} />
+      {/* 좌우 여백을 Header와 동일한 구조로 맞춰, 창 폭이 줄어들어도 헤더 로고와 본문 좌우 경계선이
+          항상 일치하게 한다. xl 미만에서 안쪽 max-w-[888px] + mx-auto가 Header.tsx의 모바일
+          헤더와 똑같은 공식으로 거터를 32px→188px까지 서서히 늘리다가, xl 이상에서는 바깥
+          px-[188px] 고정값으로 넘겨받는다 */}
+      <main className="w-full px-8 py-8 xl:px-[188px]">
+        <div className="mx-auto flex w-full max-w-[888px] flex-col gap-8 xl:mx-0 xl:max-w-content">
+          <BackHeader title="이용약관 및 정책" onBack={onBack} />
 
-        <TermsTabSwitcher tabs={TABS} activeIndex={activeTab} onChange={setActiveTab} />
+          <TermsTabSwitcher tabs={TABS} activeIndex={activeTab} onChange={setActiveTab} />
 
-        <div className="mb-25 flex flex-col rounded-4 bg-white px-10 py-8">
-          {isLoading && <p className="body-02 text-gray-500">약관을 불러오는 중...</p>}
-          {isError && (
-            <p className="body-02 text-red-500">약관을 불러오지 못했어요. 다시 시도해주세요.</p>
-          )}
-          {term && (
-            <ReactMarkdown components={getMarkdownComponents(isTerms)}>
-              {term.content}
-            </ReactMarkdown>
-          )}
+          <div className="mb-25 flex flex-col rounded-4 bg-white px-[clamp(16px,6vw,40px)] py-8">
+            {isLoading && <p className="body-02 text-gray-500">약관을 불러오는 중...</p>}
+            {isError && (
+              <p className="body-02 text-red-500">약관을 불러오지 못했어요. 다시 시도해주세요.</p>
+            )}
+            {term && (
+              <ReactMarkdown components={getMarkdownComponents(isTerms)}>
+                {term.content}
+              </ReactMarkdown>
+            )}
+          </div>
         </div>
       </main>
     </div>
