@@ -271,7 +271,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
     >
       {/* 헤더: 타이틀 + 닫기 (고정) */}
       <div
-        className="flex w-full max-w-[400px] flex-shrink-0 items-center justify-between"
+        className="flex w-full flex-shrink-0 items-center justify-between"
         style={{ padding: '30px clamp(20px, 8vw, 40px) 0 clamp(20px, 8vw, 40px)' }}
       >
         <span className="title-01 min-w-0 flex-1 truncate text-gray-900">회원가입</span>
