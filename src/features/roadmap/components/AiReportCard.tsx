@@ -11,9 +11,9 @@ type AiReportCardProps = {
 
 export default function AiReportCard({ score, cityName, summary, onViewReport }: AiReportCardProps) {
   return (
-    <div className="flex w-[434px] flex-col gap-[30px] rounded-4 bg-white px-4 py-6">
+    <div className="flex w-full flex-col gap-[30px] rounded-4 bg-white px-4 py-6">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="heading-06 flex items-center gap-1 text-primary-500">
             <StarIcon size={28} className="text-primary-500" /> 총점 {score}
           </span>

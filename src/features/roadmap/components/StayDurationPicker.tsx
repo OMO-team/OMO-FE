@@ -35,7 +35,7 @@ export default function StayDurationPicker({
     <div className="flex w-full flex-col gap-2">
       <span className="body-02 text-gray-700">체류 기간</span>
 
-      <div className="flex w-full items-center justify-center gap-2">
+      <div className="flex w-full flex-wrap items-center justify-center gap-2">
         {PRESETS.map((preset) => {
           const isSelected = hasChosen && preset === months;
           return (

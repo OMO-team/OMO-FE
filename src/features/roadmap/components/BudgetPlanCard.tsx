@@ -24,8 +24,10 @@ export default function BudgetPlanCard({
   totalBudget,
 }: BudgetPlanCardProps) {
   return (
-    <div className="flex w-[434px] flex-col items-center rounded-4 border border-gray-100 bg-white px-7 pb-[30px] pt-6">
-      <div className="flex w-[358px] flex-col gap-10">
+    <div className="flex w-full flex-col items-center rounded-4 border border-gray-100 bg-white px-7 pb-[30px] pt-6">
+      {/* %는 부모의 패딩을 뺀 안쪽 기준으로 계산된다. px-7(56px)을 뺀 실제 안쪽 폭은 434-56=378px이므로
+          94.708995% = 358px / 378px — 카드가 유동폭이 돼도 안쪽 콘텐츠 폭 비율이 그대로 유지됨 */}
+      <div className="flex w-[94.708995%] flex-col gap-10">
         <div className="flex items-center gap-2">
           <MoneyIcon className="size-icon-md text-primary-900" />
           <p className="heading-06 text-primary-900">예산 계획</p>
