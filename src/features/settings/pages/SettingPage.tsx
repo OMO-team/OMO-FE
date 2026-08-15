@@ -37,7 +37,6 @@ interface SettingsPageProps {
 }
 
 export default function SettingsPage({
-  onNavigateToTerms,
   onLogout,
   onDeleteAccount,
   onPasswordChangeSuccess,
