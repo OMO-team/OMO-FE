@@ -1,5 +1,4 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import Icon from './Icon';
 import ExploreIcon from './ExploreIcon';
 import HomeIcon from './HomeIcon';
@@ -21,14 +20,6 @@ export default function Header({ variant = 'default' }: HeaderProps) {
   const navigate = useNavigate();
   const isOverlay = variant === 'overlay';
   const isTransparent = variant === 'transparent';
-
-  const [debugWidth, setDebugWidth] = useState(0);
-  useEffect(() => {
-    const update = () => setDebugWidth(window.innerWidth);
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
 
   const activeNav: ActiveNav =
     pathname === '/city-insight' ? 'explore' : pathname.startsWith('/myhome') ? 'myhome' : null;
@@ -78,9 +69,6 @@ export default function Header({ variant = 'default' }: HeaderProps) {
 
   return (
     <>
-      <div className="fixed left-2 top-2 z-[999] rounded bg-black px-2 py-1 text-xs text-white">
-        width: {debugWidth}px
-      </div>
       {/* xl(1280px) 이상: dev(프로덕션) 원본과 완전히 동일한 고정 레이아웃 */}
       <header
         className={`sticky top-0 z-30 hidden w-full items-center justify-between px-[188px] pt-6 pb-6 xl:flex ${isOverlay || isTransparent ? 'bg-transparent' : 'bg-white'}`}

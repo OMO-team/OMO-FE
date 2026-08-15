@@ -1,4 +1,5 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import EmailVerificationPage from './EmailVerificationPage';
 import { authApi } from '../api/authApi';
 import { useAuthStore } from '../store/useAuthStore';
@@ -12,6 +13,15 @@ export default function PasswordResetVerifyRoute() {
   /** 비밀번호 찾기 모달을 어디서 열고 들어왔는지 — 'settings'면 설정 화면의 비밀번호 변경 흐름,
    *  그 외(기본)는 로그인 모달에서 진입한 홈 화면 흐름 */
   const returnContext: 'home' | 'settings' = state?.returnContext === 'settings' ? 'settings' : 'home';
+
+  /** 비밀번호 찾기 모달을 거치지 않고 URL로 직접 들어온 경우 — 인증할 이메일 자체가 없어 진행 불가 */
+  useEffect(() => {
+    if (!email) openModal('forgot');
+  }, [email, openModal]);
+
+  if (!email) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <EmailVerificationPage

@@ -15,6 +15,7 @@ import RoadmapDashboardRoute from './features/roadmap/pages/RoadmapDashboardRout
 import TaskDetailRoute from './features/roadmap/pages/TaskDetailRoute';
 
 // auth
+import RequireAuth from './features/auth/components/RequireAuth';
 import EmailVerifyRoute from './features/auth/pages/EmailVerifyRoute';
 import PasswordResetVerifyRoute from './features/auth/pages/PasswordResetVerifyRoute';
 import PasswordResetSuccessRoute from './features/auth/pages/PasswordResetSuccessRoute';
@@ -47,12 +48,30 @@ export const router = createBrowserRouter([
       { path: '/contact', element: <Contact /> },
       {
         path: '/myhome/dashboard/:roadmapId',
-        element: <RoadmapDashboardRoute />,
+        element: (
+          <RequireAuth>
+            <RoadmapDashboardRoute />
+          </RequireAuth>
+        ),
         handle: { headerVariant: 'overlay' },
         children: [{ path: 'task-detail/:taskId', element: <TaskDetailRoute /> }],
       },
     ],
   },
-  { path: '/setting', element: <SettingsApp /> },
-  { path: '/settings/account', element: <GoogleLinkCallbackRoute /> },
+  {
+    path: '/setting',
+    element: (
+      <RequireAuth>
+        <SettingsApp />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/settings/account',
+    element: (
+      <RequireAuth>
+        <GoogleLinkCallbackRoute />
+      </RequireAuth>
+    ),
+  },
 ]);

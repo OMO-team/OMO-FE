@@ -37,7 +37,6 @@ interface SettingsPageProps {
 }
 
 export default function SettingsPage({
-  onNavigateToTerms,
   onLogout,
   onDeleteAccount,
   onPasswordChangeSuccess,
@@ -336,7 +335,7 @@ export default function SettingsPage({
                 <SettingActionItem
                   title="이용약관 및 정책"
                   right={<img src={chevronRightIcon} alt="" className="h-3.5" />}
-                  onClick={onNavigateToTerms}
+                  onClick={() => navigate('/support/terms')}
                 />
                 <SettingActionItem
                   title="앱 버전"
