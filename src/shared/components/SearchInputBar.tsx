@@ -19,8 +19,10 @@ export default function SearchInputBar({
   width = 'w-[730px]',
   showIcon = false,
 }: SearchInputBarProps) {
+  // self-stretch: items-start인 부모 안에서도 이 행이 shrink-to-fit 되지 않고 실제 남은 폭을
+  // 받도록 함 — 그래야 flex-1로 넘긴 검색창이 그 폭을 기준으로 정확히 채워진다
   return (
-    <div className='flex justify-start items-center gap-2'>
+    <div className='flex self-stretch justify-start items-center gap-2'>
       <div className={`flex min-w-0 justify-start items-center ${width} overflow-hidden gap-1 ${showIcon ? 'px-6 py-4' : 'px-[27px] py-3'} rounded-3 bg-white border border-primary-100`}>
         {showIcon && <SmartBriefingIcon type="blue" />}
         {submittedQuery ? (

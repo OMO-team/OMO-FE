@@ -22,7 +22,7 @@ export default function ThumbnailVideo({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="w-[214px] h-[143px] relative overflow-hidden rounded-4 bg-cover bg-center block"
+      className="w-[clamp(160px,20.576923cqw,214px)] h-[143px] relative overflow-hidden rounded-4 bg-cover bg-center block"
       style={
         thumbnailUrl
           ? { backgroundImage: `url(${thumbnailUrl})` }
@@ -36,13 +36,13 @@ export default function ThumbnailVideo({
             "linear-gradient(180deg, color-mix(in srgb, var(--color-primary-900) 0%, transparent) 0%, color-mix(in srgb, var(--color-gray-900) 55%, transparent) 100%)",
         }}
       />
-      <div className="flex flex-col justify-end items-start w-[184px] absolute left-[17px] bottom-3 gap-1">
+      <div className="flex w-[clamp(130px,17.692308cqw,184px)] flex-col items-start justify-end absolute left-[clamp(8px,1.634615cqw,17px)] bottom-3 gap-1">
         <div className="flex justify-center items-center gap-1 px-2 py-1 rounded-md bg-white/40">
           {/* 재생 아이콘이 카드 정중앙(왼쪽 92px 지점부터)에 고정돼 있어, 뱃지 텍스트 시작
               위치(25px)부터 아이콘과 닿기 전인 67px보다 여유 있게 50px에서 잘라 말줄임표로 보여준다 */}
           <p className="label-03 max-w-[50px] truncate text-gray-700">{displayTag}</p>
         </div>
-        <p className="body-04 text-white w-[184px] line-clamp-2">{title}</p>
+        <p className="body-04 text-white w-[clamp(130px,17.692308cqw,184px)] line-clamp-2">{title}</p>
       </div>
       <svg
         width="30"

@@ -71,18 +71,24 @@ export default function CityReportModal({
       <div
         // 900px 고정이면 브라우저 툴바 때문에 세로가 짧은 화면에서 하단 버튼이 잘린다.
         // 화면보다 커지지 않게 상한을 씌우면 본문만 스크롤되고 푸터는 항상 보인다.
-        className="w-[1040px] max-w-[95vw] h-[900px] max-h-[90vh] relative rounded-5 bg-white overflow-hidden flex flex-col"
+        // @container: 이 박스는 폭이 콘텐츠가 아니라 w-[1040px]/max-w-[95vw]로 스스로 정해지므로,
+        // 안쪽 고정 px 값들을 이 박스 실제 폭 기준 cqw로 비례 축소해도 순환 참조 없이 안전하다.
+        className="@container w-[1040px] max-w-[95vw] h-[900px] max-h-[90vh] relative rounded-5 bg-white overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <CloseButton onClick={onClose} className="absolute top-6 right-6 z-10 shadow-02" />
-        <div className="flex-1 flex flex-col justify-start items-center overflow-y-auto scrollbar-hide gap-10 pb-10">
+        {/* overflow-x-auto: cqw로 줄어든 폭이 바닥값(floor)에 닿아도 더는 못 줄어드는 극단적으로 좁은 화면을 위한 안전장치 */}
+        <div className="flex-1 flex flex-col justify-start items-center overflow-x-auto overflow-y-auto scrollbar-hide gap-10 pb-10">
           <ReportHero
             cityName={data.cityName}
             purposeName={data.purposeName}
             heroImageUrl={data.heroImageUrl}
             ratingBadge={data.ratingBadge}
           />
-          <div className="flex flex-col justify-start items-start w-[896px] gap-9">
+          {/* 폭 자체에 바닥값을 두면 박스가 그보다 좁아졌을 때 여백이 사라지고 콘텐츠가 넘친다.
+              대신 좌우 여백(최소 24px, 최대 72px)을 기준으로 폭을 "박스 폭 - 여백*2"로 계산해
+              화면이 아무리 좁아져도 여백이 항상 남아 있게 한다 */}
+          <div className="flex w-[calc(100cqw_-_2*clamp(24px,6.923077cqw,72px))] flex-col items-start justify-start gap-9">
             <AISearchPanel keywords={data.searchKeywords} onSearch={onSearch} />
             <div className="flex flex-col justify-start items-start self-stretch gap-9">
               <div className="flex flex-col justify-start items-start self-stretch gap-[30px]">
@@ -93,8 +99,9 @@ export default function CityReportModal({
                 />
                 <KeySummary items={keySummary} />
               </div>
-              <div className="flex justify-start items-start self-stretch gap-4">
-                <div className="flex flex-col justify-start items-start w-[432px] gap-[60px]">
+              {/* 두 컬럼이 각자의 floor까지 줄어도 안 맞으면 flex-wrap이 자동으로 세로 스택으로 전환 */}
+              <div className="flex flex-wrap items-start justify-start self-stretch gap-[clamp(8px,1.538462cqw,16px)]">
+                <div className="flex w-[clamp(300px,41.538462cqw,432px)] flex-col items-start justify-start gap-[60px]">
                   <KeyMetrics metrics={keyMetrics} />
                   {showProsCons && (
                     <ProsCons
@@ -105,7 +112,7 @@ export default function CityReportModal({
                     />
                   )}
                 </div>
-                <div className="flex flex-col justify-start items-start w-[448px] gap-5">
+                <div className="flex w-[clamp(300px,43.076923cqw,448px)] flex-col items-start justify-start gap-5">
                   <VlogReviews vlogs={vlogs ?? []} />
                 </div>
               </div>

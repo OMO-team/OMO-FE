@@ -39,7 +39,7 @@ export default function AISearchPanel({
 
   return (
     <div
-      className={`flex flex-col justify-start items-center self-stretch gap-3.5 pl-[42px] pr-9 pt-6 ${
+      className={`flex flex-col justify-start items-center self-stretch gap-3.5 pl-[clamp(20px,4.038462cqw,42px)] pr-[clamp(16px,3.461538cqw,36px)] pt-6 ${
         result || isLoading || hasError ? "pb-7" : "pb-[30px]"
       } rounded-4 bg-primary-50`}
     >
@@ -51,8 +51,12 @@ export default function AISearchPanel({
             onChange={setInputValue}
             onSearch={runSearch}
             placeholder="궁금한 내용을 물어보세요"
+            // 박스 기준 % 폭은 검색창-패널 사이에 여백(콘텐츠 여백+패널 padding)이 이중으로 줄어드는 걸
+            // 반영하지 못해 좁은 화면에서 패널 밖으로 넘쳤다. flex-1로 실제 남은 공간을 그대로 채우면
+            // 어떤 폭에서도 넘치지 않고, 전체 화면에서는 dev와 같은 730px 근사값을 자연히 만든다.
+            width="flex-1 max-w-[730px]"
           />
-          <div className="flex justify-start items-center gap-1.5">
+          <div className="flex flex-wrap justify-start items-center gap-1.5">
             {keywords.map((keyword) => (
               <Chip
                 key={keyword}
