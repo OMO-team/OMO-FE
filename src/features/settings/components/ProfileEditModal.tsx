@@ -110,7 +110,7 @@ export default function ProfileEditModal({
         aria-modal="true"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex flex-col items-center gap-[70px] overflow-y-auto px-[clamp(20px,8vw,44px)] py-[50px]">
+        <div className="flex flex-col items-center gap-[70px] overflow-y-auto px-[clamp(20px,8vw,44px)] py-[50px] scrollbar-hide">
           <div className="flex w-full flex-col gap-[50px]">
             <div className="flex w-full items-center justify-between">
               <span className="heading-05 text-gray-800">프로필 수정</span>
