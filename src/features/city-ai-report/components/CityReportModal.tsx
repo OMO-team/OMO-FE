@@ -99,9 +99,12 @@ export default function CityReportModal({
                 />
                 <KeySummary items={keySummary} />
               </div>
-              {/* 두 컬럼이 각자의 floor까지 줄어도 안 맞으면 flex-wrap이 자동으로 세로 스택으로 전환 */}
+              {/* 두 컬럼이 각자의 floor까지 줄어도 안 맞으면 flex-wrap이 자동으로 세로 스택으로 전환.
+                  grow: 나란히 있을 때는 남는 공간이 없어(432+448+gap=896=래퍼 폭) dev 원본 비율 그대로지만,
+                  스택된 뒤에는 혼자 한 줄을 차지하므로 grow가 남은 폭을 그 컬럼에 채워 VLOG 등 내부
+                  카드들이 다시 여러 개씩 배치될 공간이 생긴다 */}
               <div className="flex flex-wrap items-start justify-start self-stretch gap-[clamp(8px,1.538462cqw,16px)]">
-                <div className="flex w-[clamp(300px,41.538462cqw,432px)] flex-col items-start justify-start gap-[60px]">
+                <div className="flex grow basis-[clamp(300px,41.538462cqw,432px)] flex-col items-start justify-start gap-[60px]">
                   <KeyMetrics metrics={keyMetrics} />
                   {showProsCons && (
                     <ProsCons
@@ -112,7 +115,11 @@ export default function CityReportModal({
                     />
                   )}
                 </div>
-                <div className="flex w-[clamp(300px,43.076923cqw,448px)] flex-col items-start justify-start gap-5">
+                {/* floor를 332px(영상 2개 + 간격의 최소치, 160*2+12)로 올려서, 나란히 있는 채로는
+                    VLOG가 절대 영상 1개짜리 폭까지 좁아지지 않게 함 — 그보다 더 좁아져야 하면
+                    flex-wrap이 아예 장단점 아래로 내려버리고, 내려간 뒤엔 grow로 훨씬 넓어져
+                    다시 2개가 들어간다 */}
+                <div className="flex grow basis-[clamp(332px,43.076923cqw,448px)] flex-col items-start justify-start gap-5">
                   <VlogReviews vlogs={vlogs ?? []} />
                 </div>
               </div>
