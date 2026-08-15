@@ -109,7 +109,7 @@ export default function ForgotPasswordModal({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/auth/password-reset/success');
+        navigate('/auth/password-reset/success', { state: { completed: true } });
       }
     } catch (error) {
       if (axios.isAxiosError<{ code?: string }>(error)) {
