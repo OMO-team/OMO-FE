@@ -42,7 +42,7 @@ export default function CityRoadmapCard({
   onDelete,
 }: CityRoadmapCardProps) {
   return (
-    <div className="flex w-130.5 flex-col overflow-hidden rounded-4 border-2 border-transparent bg-white shadow-02 transition-colors hover:border-primary-500 hover:bg-gray-20 hover:shadow-[0px_5px_16px_0px_rgba(21,93,252,0.2)]">
+    <div className="flex w-full max-w-130.5 flex-col overflow-hidden rounded-4 border-2 border-transparent bg-white shadow-02 transition-colors hover:border-primary-500 hover:bg-gray-20 hover:shadow-[0px_5px_16px_0px_rgba(21,93,252,0.2)]">
       <div
         className="relative h-62.5 bg-cover bg-center"
         style={{ backgroundImage: `url(${imageUrl})` }}

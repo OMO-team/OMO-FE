@@ -27,15 +27,15 @@ export default function SettingActionItem({
           onClick ? "cursor-pointer hover:bg-gray-50" : ""
         }`}
       >
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           {iconSrc && (
             <span
-              className={`flex items-center justify-center rounded-2 p-3.5 ${iconBgClassName}`}
+              className={`flex shrink-0 items-center justify-center rounded-2 p-3.5 ${iconBgClassName}`}
             >
               <img src={iconSrc} alt="" className="size-icon-md" />
             </span>
           )}
-          <div className="flex flex-col items-start gap-1">
+          <div className="flex min-w-0 flex-col items-start gap-1">
             <p className="title-02 text-gray-900">{title}</p>
             {description && (
               <p className="body-02 text-gray-500">{description}</p>

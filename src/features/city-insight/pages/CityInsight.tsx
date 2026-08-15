@@ -1,4 +1,3 @@
-
 // react
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -45,12 +44,12 @@ import {
 import { adaptCityToCardProps } from '../utils/cityAdapter';
 
 // types
-import type { 
-  CityItem, 
-  CityQueryParams, 
-  DifficultyType, 
-  PurposeType, 
-  StayDurationType 
+import type {
+  CityItem,
+  CityQueryParams,
+  DifficultyType,
+  PurposeType,
+  StayDurationType,
 } from '../types/cityInsight';
 import type { CitySummary } from '../../chat/types/dto';
 
@@ -171,9 +170,12 @@ function buildAppliedConditionLabels(parsed: ParsedSearchQuery): string[] {
   if (params.purposeType) labels.push(PURPOSE_LABELS[params.purposeType]);
   if (params.maxMonthlyCost !== undefined) labels.push(`예산 ${params.maxMonthlyCost}만원 이하`);
   if (params.minSafetyScore !== undefined) labels.push(`치안 ${params.minSafetyScore}점 이상`);
-  if (params.housingDifficulty) labels.push(`숙소 난이도 ${REVERSE_DIFFICULTY_MAP[params.housingDifficulty]}`);
-  if (params.visaDifficulty) labels.push(`비자 난이도 ${REVERSE_DIFFICULTY_MAP[params.visaDifficulty]}`);
-  if (params.stayDuration) labels.push(`체류 기간 ${REVERSE_STAY_DURATION_MAP[params.stayDuration]}`);
+  if (params.housingDifficulty)
+    labels.push(`숙소 난이도 ${REVERSE_DIFFICULTY_MAP[params.housingDifficulty]}`);
+  if (params.visaDifficulty)
+    labels.push(`비자 난이도 ${REVERSE_DIFFICULTY_MAP[params.visaDifficulty]}`);
+  if (params.stayDuration)
+    labels.push(`체류 기간 ${REVERSE_STAY_DURATION_MAP[params.stayDuration]}`);
   if (parsed.minLanguageScore !== undefined) labels.push('영어 소통 가능');
   if (parsed.minInfraScore !== undefined) labels.push('인프라 우수');
   if (parsed.minRating !== undefined) labels.push('평점 우수');
@@ -228,12 +230,10 @@ export default function CityInsight() {
   const urlCountryCodes = searchParams.getAll('countryCodes');
   const urlCountryCodesKey = urlCountryCodes.join(',');
 
-  const locationState = location.state as
-    | {
-        recommendedCities?: CitySummary[];
-        parsedSearch?: { query: string; conditionLabels?: string[] } & ParsedSearchQuery;
-      }
-    | null;
+  const locationState = location.state as {
+    recommendedCities?: CitySummary[];
+    parsedSearch?: { query: string; conditionLabels?: string[] } & ParsedSearchQuery;
+  } | null;
   const recommendedCities = locationState?.recommendedCities;
   const parsedSearch = locationState?.parsedSearch;
 
@@ -451,7 +451,9 @@ export default function CityInsight() {
    *  가져오지 못해 패널이 비어 보인다 — 목적별 국가 목록을 모두 합쳐 그 대신 넘겨주고,
    *  검색 결과에 실린 국가를 찾는 이름→코드 매핑에도 함께 쓴다 */
   const regionPurposeType = activePurpose?.type ?? parsedSearch?.params.purposeType;
-  const { countries: allCountries } = useAllCountriesByPurpose(purposes, { enabled: !regionPurposeType });
+  const { countries: allCountries } = useAllCountriesByPurpose(purposes, {
+    enabled: !regionPurposeType,
+  });
   const countryNameToCode = useMemo(
     () => new Map(allCountries.map(c => [c.name, c.code])),
     [allCountries]
@@ -679,8 +681,8 @@ export default function CityInsight() {
     : [];
 
   return (
-    <div className="w-full flex flex-col items-center justify-center mt-[30px]">
-      <div className="w-[1064px]">
+    <div className="w-full flex flex-col items-center justify-center mt-[30px] px-[clamp(32px,50vw_-_451.5px,188px)]">
+      <div className="w-full max-w-[1064px]">
         <SmartBriefingFAB />
         {!isFromCountry && (
           <div
@@ -715,7 +717,7 @@ export default function CityInsight() {
                   />
                   <SearchInputBar
                     placeholder="원하는 도시 조건을 입력해 보세요"
-                    width="w-[974px]"
+                    width="w-full max-w-[974px]"
                     value={input}
                     onChange={setInput}
                     onSearch={handleSearch}
@@ -723,9 +725,9 @@ export default function CityInsight() {
                   />
                 </>
               )}
-               {(isFromSearch || isFromParsedSearch) && (
-                  <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
-                )}
+              {(isFromSearch || isFromParsedSearch) && (
+                <p className="body-03 text-gray-500">총 {totalElements}개의 검색결과가 나왔어요</p>
+              )}
               {appliedConditionLabels.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <p className="body-05 text-gray-500">AI가 적용한 조건</p>
@@ -745,8 +747,8 @@ export default function CityInsight() {
                   </div>
                 </div>
               )}
-              <div className="flex justify-between">
-                <div className="flex gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <DetailDropDown selectedOptions={selectedOptions} onSelect={handleSelectOption} />
                   <RegionDropDown
                     key={`region-${resetKey}`}
@@ -759,7 +761,7 @@ export default function CityInsight() {
                       saveStoredCountries([]);
                     }}
                   />
-                  <div className="w-px h-7 bg-gray-300"></div>
+                  <div className="w-px h-7 bg-gray-300 hidden sm:block"></div>
                   {DETAIL_OPTIONS.map(({ title, options }) => (
                     <DropDown
                       key={title}
@@ -770,7 +772,7 @@ export default function CityInsight() {
                     />
                   ))}
                 </div>
-                <button className="flex items-center gap-1" onClick={handleReset}>
+                <button className="flex shrink-0 items-center gap-1" onClick={handleReset}>
                   <p className="body-03 text-gray-400">필터 초기화</p>
                   <img src={filterResetIcon} alt="" />
                 </button>
@@ -789,7 +791,7 @@ export default function CityInsight() {
         )}
         {totalElements !== 0 ? (
           <>
-            <div className="mt-11 grid grid-cols-2 gap-5">
+            <div className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2">
               {cities.map(city => (
                 <CityInsightCard
                   key={combinationKey(city.cityId, city.purposeId)}
@@ -812,15 +814,15 @@ export default function CityInsight() {
               ))}
             </div>
             {isFromRecommendation ? (
-              <div className="mb-[304px]" />
+              <div className="mb-[clamp(80px,20vw,304px)]" />
             ) : (
-              <div className="mt-25 mb-[304px]">
+              <div className="mt-[clamp(48px,10vw,100px)] mb-[clamp(80px,20vw,300px)]">
                 <PageNavigation currentPage={page} totalPages={totalPages} onPageChange={setPage} />
               </div>
             )}
           </>
         ) : (
-          <div className="flex flex-col gap-[30px] items-center mt-[298px] mb-[295px]">
+          <div className="flex flex-col gap-[30px] items-center mt-[clamp(80px,20vw,298px)] mb-[clamp(80px,20vw,295px)]">
             <div className="w-[70px] h-[70px] bg-[#F1F8FF] flex justify-center items-center rounded-full">
               <FilterIcon width={42} height={42} />
             </div>

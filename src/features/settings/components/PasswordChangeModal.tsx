@@ -75,13 +75,13 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
   return (
     <ModalOverlay onClose={onClose}>
       <form
-        className="inline-flex flex-col items-center gap-9 rounded-5 bg-gray-20 px-11 pb-[50px] pt-10"
+        className="flex w-full max-w-[488px] flex-col items-center gap-9 rounded-5 bg-gray-20 px-[clamp(20px,8vw,44px)] pb-[50px] pt-10"
         onSubmit={handleSubmit}
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex w-[400px] flex-col items-start gap-[7px]">
+        <div className="flex w-full max-w-[400px] flex-col items-start gap-[7px]">
           <div className="flex items-center justify-between self-stretch">
             <span className="heading-05 text-gray-800">비밀번호 변경</span>
             <CloseButton onClick={onClose} hasBackground={false} iconSize="xs" className="h-9 w-9 rounded-full" />
@@ -91,8 +91,8 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
           </span>
         </div>
 
-        <div className="flex flex-col items-start gap-[60px]">
-          <div className="flex w-[400px] flex-col items-start gap-10">
+        <div className="flex w-full flex-col items-start gap-[60px]">
+          <div className="flex w-full max-w-[400px] flex-col items-start gap-10">
             <div className="flex w-full flex-col items-start gap-[30px]">
               <Input
                 label="현재 비밀번호"
@@ -136,7 +136,7 @@ export default function PasswordChangeModal({ onClose, onForgotPassword, onSucce
             </div>
           </div>
 
-          <div className="flex w-[400px] flex-col items-start gap-4">
+          <div className="flex w-full max-w-[400px] flex-col items-start gap-4">
             <div className="flex items-start gap-2 self-stretch">
               <img src={errorReverseIcon} alt="" className="mt-[1px] h-4 w-4 shrink-0" />
               <span className="label-01 text-[#FF2A14]">

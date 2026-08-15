@@ -120,8 +120,15 @@ export default function Contact() {
     }
 
   return (
-    <div className='w-full flex flex-col items-center justify-center'>
-        <div>
+    <div className='w-full'>
+        {/* 좌우 여백을 Header와 동일한 구조로 맞춰, 창 폭이 줄어들어도 헤더 로고와 본문 왼쪽 경계선이
+            항상 일치하게 한다. xl 미만에서 안쪽 max-w-[888px] + mx-auto가 Header.tsx의 모바일
+            헤더와 똑같은 공식으로 거터를 32px→188px까지 서서히 늘리다가, xl 이상에서는 바깥
+            px-[188px] 고정값으로 넘겨받는다 — 안쪽 없이 바깥만 xl:px-[188px]로 고정하면
+            968~1280px 구간에서 헤더는 점점 벌어지는데 본문은 32px에 멈춰 있다가 1280px 경계에서
+            갑자기 튀는 문제가 있었다 */}
+        <div className='px-8 xl:px-[188px]'>
+          <div className='mx-auto w-full max-w-[888px] xl:mx-0 xl:max-w-none'>
             {/* 헤더 */}
             <div className='mt-14 mb-14'>
                 <div className='flex gap-5 mb-4.5'>
@@ -146,7 +153,7 @@ export default function Contact() {
                     <br />오류 문의의 경우 화면 캡처를 함께 첨부하면 더 빠른 확인이 가능해요.
                 </p>
                 {/* 고객센터 정보 */}
-                <div className='mt-5 px-5 py-3 bg-gray-100 rounded-[12px] flex gap-4 items-center'>
+                <div className='mt-5 px-5 py-3 bg-gray-100 rounded-[12px] flex flex-wrap gap-4 items-center'>
                     <div className='flex gap-2 items-center'>
                         <h3 className='body-01'>고객센터</h3>
                         <h3 className='body-01'>omo@omo.com</h3>
@@ -161,28 +168,28 @@ export default function Contact() {
                 {/* 문의 유형 드롭다운 */}
                 <div className='flex flex-col gap-3.25'>
                     <p className='title-05'>문의 유형<span className='text-red-500'>*</span></p>
-                    <DropDown 
+                    <DropDown
                     title={contactType ?? '문의 유형을 선택해 주세요.'}
                     options={[...CONTACT_TYPE_OPTIONS]}
                     onSelect={(option) => setContactType(option)}
-                    triggerClassName='w-49'
-                    className='w-49 bg-gray-50 border border-gray-100'
+                    triggerClassName='w-full max-w-49'
+                    className='w-full max-w-49 bg-gray-50 border border-gray-100'
                     />
                 </div>
 
                 {/* 이름 / 이메일 입력 */}
-                <div className='mt-7.5 w-full flex items-center gap-14.5'>
-                    <div className='flex flex-col gap-6.75'>
+                <div className='mt-7.5 w-full flex flex-wrap items-center gap-14.5'>
+                    <div className='flex flex-1 basis-0 min-w-60 flex-col gap-6.75'>
                         <p className='title-05'>이름<span className='text-red-500'>*</span></p>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className='w-100.5 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-900 placeholder:text-gray-300' placeholder='이름을 입력해주세요' />
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className='w-full max-w-100.5 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-900 placeholder:text-gray-300' placeholder='이름을 입력해주세요' />
                     </div>
-                    
-                    <div className='flex flex-col gap-2'>
+
+                    <div className='flex flex-1 basis-0 min-w-60 flex-col gap-2'>
                         <div className='flex flex-col gap-0.5'>
                             <p className='title-05'>이메일<span className='text-red-500'>*</span></p>
                             <p className='label-01 text-gray-600'>문의 답변은 입력한 이메일로 발송됩니다.</p>
                         </div>
-                        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} className='w-100 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-900 placeholder:text-gray-300' placeholder='답변을 받을 이메일을 입력해주세요' />
+                        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} className='w-full max-w-100 border border-gray-100 rounded-[8px] px-4 py-3 body-03 text-gray-900 placeholder:text-gray-300' placeholder='답변을 받을 이메일을 입력해주세요' />
                     </div>
                 </div>
 
@@ -213,7 +220,7 @@ export default function Contact() {
                             이미지는 최대 3개까지 첨부할 수 있어요.  PDF, JPG/JPEG, PNG 최대 5MB 이하
                         </p>
                     </div>
-                    <div className='flex gap-[14px]'>
+                    <div className='flex flex-wrap gap-[14px]'>
                         {[0,1,2].map((index) => (
                             <label key={index}>
                                 <input type="file" className='hidden' accept='image/*' onChange={(e) => handeFileChange(e, index)} />
@@ -235,9 +242,10 @@ export default function Contact() {
 
                 {/* 문의하기 버튼 */}
                 <div className='w-full flex justify-end mb-[300px]'>
-                    <button disabled={!isValid || isSubmitting} onClick={handleSubmit} className='mt-20 w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02 disabled:bg-gray-400'>{isSubmitting ? '제출 중...' : '문의하기'}</button>
+                    <button disabled={!isValid || isSubmitting} onClick={handleSubmit} className='mt-20 w-full max-w-[282px] h-12 bg-gray-700 text-white rounded-[8px] title-02 disabled:bg-gray-400'>{isSubmitting ? '제출 중...' : '문의하기'}</button>
                 </div>
             </div>
+          </div>
         </div>
 
         {isModalOpen && (

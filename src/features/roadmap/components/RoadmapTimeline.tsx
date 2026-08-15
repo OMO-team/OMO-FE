@@ -33,7 +33,7 @@ export default function RoadmapTimeline({ tasks, onTaskClick }: RoadmapTimelineP
   today.setHours(0, 0, 0, 0);
 
   return (
-    <div className="relative flex w-153.5 flex-col gap-2">
+    <div className="relative flex w-full flex-col gap-2">
       <div className="pointer-events-none absolute bottom-3.5 left-5.75 top-3.5 w-px rounded-full bg-gray-300" aria-hidden />
       {tasks.map((task, i) => (
         <TimeLineTaskCard

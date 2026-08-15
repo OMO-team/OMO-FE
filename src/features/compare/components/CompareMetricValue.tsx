@@ -14,7 +14,7 @@ export default function CompareMetricValue({
   isBest = false,
 }: CompareMetricValueProps) {
   return (
-    <div className="flex h-[52px] w-[222px] flex-col items-end gap-1">
+    <div className="flex h-[52px] w-full flex-col items-end gap-1">
       <p className={`body-04 text-right ${isBest ? "font-bold text-primary-600" : "text-gray-800"}`}>
         {value}
       </p>

@@ -43,18 +43,21 @@ export default function CompareSelectionBar({
   return (
     <div className="fixed inset-x-0 bottom-6 z-40 flex flex-col items-center gap-2 px-4">
       {showMaxWarning && <CompareMaxWarning />}
-      <div className="flex items-center gap-5 overflow-hidden rounded-full bg-primary-900 px-8 py-3 shadow-[4px_8px_16px_0_rgba(6,49,88,0.2)]">
-        <div className="flex items-center gap-4">
-          <span className="body-02 whitespace-nowrap text-white">
+      <div className="flex max-w-[calc(100vw-2rem)] items-center gap-[clamp(12px,3vw,20px)] overflow-hidden rounded-full bg-primary-900 px-[clamp(16px,6vw,32px)] py-3 shadow-[4px_8px_16px_0_rgba(6,49,88,0.2)]">
+        <div className="flex min-w-0 items-center gap-[clamp(8px,2vw,16px)]">
+          <span className="body-02 shrink-0 whitespace-nowrap text-white">
             {compareList.length}개 비교중
           </span>
 
-          <div className="flex items-center gap-2">
+          {/* 도시 이름이 길거나 3개가 다 선택돼 칩이 다 안 들어가면, 바 전체가 넘치는 대신 이 영역만 가로 스크롤 */}
+          {/* 네이티브 스크롤바는 브라우저/OS마다 차지하는 높이가 달라 위아래 여백이 비대칭으로 보이므로 숨기고, 스크롤 동작만 유지 */}
+          <div className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-x-auto">
             {selectedCities.map((city) => (
               <Chip
                 key={city.cityId}
                 label={city.cityName}
                 variant="dark"
+                className="shrink-0"
                 onRemove={() => removeFromCompare(city.cityId)}
               />
             ))}
@@ -66,6 +69,7 @@ export default function CompareSelectionBar({
           variant={canOpenModal ? "primary" : "dark"}
           disabled={!canOpenModal}
           onClick={openModal}
+          className="shrink-0"
         />
       </div>
     </div>

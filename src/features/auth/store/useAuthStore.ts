@@ -13,12 +13,20 @@ export type SignupDraft = {
   isEmailVerified: boolean;
 };
 
+export type ResetPasswordDraft = {
+  email: string;
+  newPassword: string;
+  confirmPassword: string;
+  isEmailVerified: boolean;
+};
+
 interface AuthState {
   isLoggedIn: boolean;
   userAvatarUrl?: string;
   modalType: ModalType;
   isSearchOpen: boolean;
   signupDraft: SignupDraft | null;
+  resetPasswordDraft: ResetPasswordDraft | null;
   authToast: AuthToastType;
   signIn: (userAvatarUrl?: string) => void;
   signOut: () => void;
@@ -29,6 +37,9 @@ interface AuthState {
   setSignupDraft: (draft: SignupDraft) => void;
   markSignupEmailVerified: () => void;
   clearSignupDraft: () => void;
+  setResetPasswordDraft: (draft: ResetPasswordDraft) => void;
+  markResetPasswordEmailVerified: () => void;
+  clearResetPasswordDraft: () => void;
   showAuthToast: (type: NonNullable<AuthToastType>) => void;
   clearAuthToast: () => void;
 }
@@ -39,6 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   modalType: null,
   isSearchOpen: false,
   signupDraft: null,
+  resetPasswordDraft: null,
   authToast: null,
   signIn: (userAvatarUrl) => set({ isLoggedIn: true, userAvatarUrl }),
   signOut: () => set({ isLoggedIn: false, userAvatarUrl: undefined }),
@@ -52,6 +64,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       signupDraft: state.signupDraft ? { ...state.signupDraft, isEmailVerified: true } : state.signupDraft,
     })),
   clearSignupDraft: () => set({ signupDraft: null }),
+  setResetPasswordDraft: (draft) => set({ resetPasswordDraft: draft }),
+  markResetPasswordEmailVerified: () =>
+    set((state) => ({
+      resetPasswordDraft: state.resetPasswordDraft
+        ? { ...state.resetPasswordDraft, isEmailVerified: true }
+        : state.resetPasswordDraft,
+    })),
+  clearResetPasswordDraft: () => set({ resetPasswordDraft: null }),
   showAuthToast: (type) => set({ authToast: type }),
   clearAuthToast: () => set({ authToast: null }),
 }));

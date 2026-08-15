@@ -19,7 +19,7 @@ export default function CategorySection() {
   const visibleCountries = countries.slice(0, showMore ? 6 : 3);
 
   return (
-    <div className="flex flex-col items-start w-[1064px] gap-[40px]">
+    <div className="flex w-full max-w-[1064px] flex-col items-start gap-[40px]">
 
       <CategoryTab
         categories={categoryNames}
@@ -29,10 +29,16 @@ export default function CategorySection() {
 
       <div className="flex flex-col items-start gap-[36px] self-stretch">
 
-        <div className="flex items-center justify-between self-stretch">
-          <div className="flex flex-col items-start w-[482px] gap-[10px]">
-            <p className="heading-04 text-gray-900 self-stretch">
-              {activePurpose ? `어느 나라로 ${activePurpose.name} 준비를 시작할까요?` : ''}
+        <div className="flex flex-wrap items-center justify-between gap-3 self-stretch">
+          <div className="flex w-full max-w-[482px] flex-col items-start gap-[10px]">
+            <p className="heading-04 break-keep text-gray-900 self-stretch">
+              {activePurpose && (
+                <>
+                  <span className="whitespace-nowrap">{`어느 나라로 ${activePurpose.name} 준비를`}</span>
+                  <br className="sm:hidden" />
+                  {' 시작할까요?'}
+                </>
+              )}
             </p>
             <p className="title-01 text-gray-500 self-stretch">
               {activePurpose ? `OMO가 고른, 당신을 위한 ${activePurpose.name} 도시 리스트` : ''}
@@ -56,7 +62,7 @@ export default function CategorySection() {
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-4 self-stretch">
+        <div className="grid gap-4 self-stretch" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))' }}>
           {visibleCountries.map(country => (
             <CityCard
               key={country.countryId}
