@@ -269,25 +269,34 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
       role="dialog"
       aria-modal="true"
     >
+      {/* 헤더: 타이틀 + 닫기 (고정) */}
+      <div
+        className="flex w-full max-w-[400px] flex-shrink-0 items-center justify-between"
+        style={{ padding: '30px clamp(20px, 8vw, 40px) 0 clamp(20px, 8vw, 40px)' }}
+      >
+        <span className="title-01 min-w-0 flex-1 truncate text-gray-900">회원가입</span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex justify-center items-center flex-shrink-0"
+          style={{ width: '24px', height: '24px' }}
+        >
+          <img src={closeIcon} alt="닫기" style={{ width: '14px', height: '14px' }} />
+        </button>
+      </div>
+
       <div
         className="scrollbar-hide flex w-full flex-col items-center overflow-y-auto"
-        style={{ padding: '30px clamp(20px, 8vw, 40px) 40px clamp(20px, 8vw, 40px)', gap: '36px' }}
+        style={{ padding: '24px clamp(20px, 8vw, 40px) 40px clamp(20px, 8vw, 40px)', gap: '36px' }}
       >
-        {/* 헤더: 타이틀 + 닫기 */}
-        <div className="flex w-full max-w-[400px] items-center justify-between">
-          <span className="title-01 min-w-0 flex-1 truncate text-gray-900">회원가입</span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex justify-center items-center flex-shrink-0"
-            style={{ width: '24px', height: '24px' }}
+        <div
+          className="flex w-full flex-col items-center"
+          style={{ gap: '24px', alignSelf: 'stretch' }}
+        >
+          <div
+            className="flex w-full flex-col items-center"
+            style={{ gap: '40px', alignSelf: 'stretch' }}
           >
-            <img src={closeIcon} alt="닫기" style={{ width: '14px', height: '14px' }} />
-          </button>
-        </div>
-
-        <div className="flex w-full flex-col items-center" style={{ gap: '24px', alignSelf: 'stretch' }}>
-          <div className="flex w-full flex-col items-center" style={{ gap: '40px', alignSelf: 'stretch' }}>
             {/* 회원가입 폼 */}
             <div
               className="flex w-full max-w-[400px] flex-col items-start"
@@ -362,9 +371,15 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
               className="flex w-full max-w-[400px] flex-col items-start"
               style={{ gap: '24px', alignSelf: 'stretch' }}
             >
-              <div className="flex w-full max-w-[380px] flex-col items-start" style={{ gap: '8px' }}>
+              <div
+                className="flex w-full max-w-[380px] flex-col items-start"
+                style={{ gap: '8px' }}
+              >
                 {/* 전체 동의하기 */}
-                <div className="flex w-full items-center" style={{ gap: '4px', alignSelf: 'stretch' }}>
+                <div
+                  className="flex w-full items-center"
+                  style={{ gap: '4px', alignSelf: 'stretch' }}
+                >
                   <button
                     type="button"
                     role="checkbox"
