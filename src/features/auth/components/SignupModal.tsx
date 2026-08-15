@@ -265,19 +265,17 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex max-h-[90vh] flex-col items-center overflow-hidden rounded-4 bg-white"
+      className="flex max-h-[90vh] w-full max-w-[480px] flex-col items-center overflow-hidden rounded-4 bg-white"
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="scrollbar-hide flex flex-col items-center overflow-y-auto"
-        style={{ padding: '30px 40px 40px 40px', gap: '36px' }}
+        className="scrollbar-hide flex w-full flex-col items-center overflow-y-auto"
+        style={{ padding: '30px clamp(20px, 8vw, 40px) 40px clamp(20px, 8vw, 40px)', gap: '36px' }}
       >
         {/* 헤더: 타이틀 + 닫기 */}
-        <div className="flex items-center" style={{ width: '400px', gap: '118px' }}>
-          <span className="title-01 text-gray-900" style={{ width: '257px' }}>
-            회원가입
-          </span>
+        <div className="flex w-full max-w-[400px] items-center justify-between">
+          <span className="title-01 min-w-0 flex-1 truncate text-gray-900">회원가입</span>
           <button
             type="button"
             onClick={onClose}
@@ -288,11 +286,11 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
           </button>
         </div>
 
-        <div className="flex flex-col items-center" style={{ gap: '24px', alignSelf: 'stretch' }}>
-          <div className="flex flex-col items-center" style={{ gap: '40px', alignSelf: 'stretch' }}>
+        <div className="flex w-full flex-col items-center" style={{ gap: '24px', alignSelf: 'stretch' }}>
+          <div className="flex w-full flex-col items-center" style={{ gap: '40px', alignSelf: 'stretch' }}>
             {/* 회원가입 폼 */}
             <div
-              className="flex flex-col items-start"
+              className="flex w-full max-w-[400px] flex-col items-start"
               style={{ gap: '16px', alignSelf: 'stretch' }}
             >
               {/* 이름 */}
@@ -306,10 +304,10 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
               />
 
               {/* 이메일 + 인증 버튼 */}
-              <div className="flex flex-col gap-[6px] self-stretch">
+              <div className="flex w-full flex-col gap-[6px] self-stretch">
                 <span className="body-02 text-gray-900 self-stretch">이메일</span>
-                <div className="flex items-start gap-2">
-                  <div className="flex-1">
+                <div className="flex w-full items-start gap-2">
+                  <div className="min-w-0 flex-1">
                     <Input
                       type="email"
                       value={email}
@@ -343,7 +341,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
               />
 
               {/* 비밀번호 확인 */}
-              <div className="flex flex-col gap-[6px] self-stretch">
+              <div className="flex w-full flex-col gap-[6px] self-stretch">
                 <Input
                   type="password"
                   value={confirmPassword}
@@ -361,12 +359,12 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
             {/* 동의 + 회원가입 버튼 */}
             <div
-              className="flex flex-col items-start"
+              className="flex w-full max-w-[400px] flex-col items-start"
               style={{ gap: '24px', alignSelf: 'stretch' }}
             >
-              <div className="flex flex-col items-start" style={{ width: '380px', gap: '8px' }}>
+              <div className="flex w-full max-w-[380px] flex-col items-start" style={{ gap: '8px' }}>
                 {/* 전체 동의하기 */}
-                <div className="flex items-center" style={{ gap: '4px', alignSelf: 'stretch' }}>
+                <div className="flex w-full items-center" style={{ gap: '4px', alignSelf: 'stretch' }}>
                   <button
                     type="button"
                     role="checkbox"
@@ -393,15 +391,15 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                 </div>
 
                 <div
-                  className="flex flex-col items-start"
+                  className="flex w-full flex-col items-start"
                   style={{ gap: '8px', alignSelf: 'stretch' }}
                 >
                   {/* 이용약관 동의 */}
                   <div
-                    className="flex items-center"
+                    className="flex w-full items-center"
                     style={{ paddingTop: '6px', alignSelf: 'stretch' }}
                   >
-                    <div className="flex items-center" style={{ width: '360px', gap: '8px' }}>
+                    <div className="flex w-full max-w-[360px] items-center" style={{ gap: '8px' }}>
                       <button
                         type="button"
                         onClick={handleAgreeTerms}
@@ -412,9 +410,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                           color={agreeTerms ? 'var(--color-primary-500)' : 'var(--color-gray-300)'}
                         />
                       </button>
-                      <div className="flex items-center flex-1" style={{ gap: '4px' }}>
+                      <div className="flex min-w-0 items-center flex-1" style={{ gap: '4px' }}>
                         <span className="body-04 text-gray-800">이용약관 동의</span>
-                        <span className="body-04 text-primary-500">(필수)</span>
+                        <span className="body-04 text-primary-500 whitespace-nowrap">(필수)</span>
                       </div>
                       <button
                         type="button"
@@ -429,10 +427,10 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
 
                   {/* 개인정보 처리방침 동의 */}
                   <div
-                    className="flex items-center"
+                    className="flex w-full items-center"
                     style={{ paddingTop: '6px', alignSelf: 'stretch' }}
                   >
-                    <div className="flex items-center" style={{ width: '360px', gap: '8px' }}>
+                    <div className="flex w-full max-w-[360px] items-center" style={{ gap: '8px' }}>
                       <button
                         type="button"
                         onClick={handleAgreePrivacy}
@@ -445,9 +443,9 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                           }
                         />
                       </button>
-                      <div className="flex items-center flex-1" style={{ gap: '4px' }}>
+                      <div className="flex min-w-0 items-center flex-1" style={{ gap: '4px' }}>
                         <span className="body-04 text-black">개인정보 처리방침 동의</span>
-                        <span className="body-04 text-primary-500">(필수)</span>
+                        <span className="body-04 text-primary-500 whitespace-nowrap">(필수)</span>
                       </div>
                       <button
                         type="button"
@@ -468,8 +466,8 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex justify-center items-center rounded-2 bg-primary-500 title-02 text-white disabled:opacity-50"
-                style={{ padding: '13px 169px', alignSelf: 'stretch' }}
+                className="flex w-full justify-center items-center rounded-2 bg-primary-500 title-02 text-white disabled:opacity-50"
+                style={{ padding: '13px 0', alignSelf: 'stretch' }}
               >
                 {isSubmitting ? '처리 중...' : '회원가입'}
               </button>
@@ -477,26 +475,25 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
           </div>
 
           {/* 또는 + 소셜 로그인 + 로그인 유도 */}
-          <div className="flex flex-col items-center self-stretch" style={{ gap: '24px' }}>
+          <div className="flex w-full flex-col items-center self-stretch" style={{ gap: '24px' }}>
             {/* 또는 구분선 */}
-            <div className="flex items-center" style={{ gap: '12px' }}>
-              <div className="bg-gray-400" style={{ width: '166px', height: '0.6px' }} />
-              <span className="body-04 text-gray-400">또는</span>
-              <div className="bg-gray-400" style={{ width: '166px', height: '0.6px' }} />
+            <div className="flex w-full max-w-[400px] items-center" style={{ gap: '12px' }}>
+              <div className="h-[0.6px] min-w-0 flex-1 bg-gray-400" />
+              <span className="body-04 shrink-0 text-gray-400">또는</span>
+              <div className="h-[0.6px] min-w-0 flex-1 bg-gray-400" />
             </div>
 
-            <div className="flex flex-col items-center" style={{ gap: '24px' }}>
+            <div className="flex w-full flex-col items-center" style={{ gap: '24px' }}>
               {/* 소셜 로그인 버튼들 */}
-              <div className="flex flex-col items-start" style={{ gap: '12px' }}>
+              <div className="flex w-full flex-col items-start" style={{ gap: '12px' }}>
                 <button
                   type="button"
                   onClick={handleGoogleSignup}
                   disabled={isGoogleLoading}
-                  className="flex flex-col justify-center items-center rounded-2 disabled:opacity-50"
+                  className="flex w-full max-w-[400px] flex-col justify-center items-center rounded-2 disabled:opacity-50"
                   onMouseEnter={() => setIsGoogleHovered(true)}
                   onMouseLeave={() => setIsGoogleHovered(false)}
                   style={{
-                    width: '400px',
                     height: '48px',
                     padding: '8px 12px 8px 10px',
                     background: isGoogleHovered ? '#E7E6E6' : '#F2F2F2',
@@ -506,7 +503,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
                 >
                   <div
                     className="flex justify-center items-center self-stretch"
-                    style={{ gap: '82px' }}
+                    style={{ gap: 'clamp(8px, 8vw, 82px)' }}
                   >
                     <img src={googleIcon} alt="구글" style={{ width: '24px', height: '24px' }} />
                     <span className="title-02 text-gray-900 text-center">Google 계정으로 가입</span>

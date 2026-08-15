@@ -14,7 +14,7 @@ const InfoCard = forwardRef<HTMLDivElement, InfoCardProps>(function InfoCard(
     <div
       ref={ref}
       style={height ? { height } : undefined}
-      className="flex w-[440px] flex-col items-start justify-start gap-1 rounded-3 bg-gray-100 px-6 py-4"
+      className="flex w-[clamp(280px,42.307692cqw,440px)] flex-col items-start justify-start gap-1 rounded-3 bg-gray-100 px-6 py-4"
     >
       <div className="flex flex-col items-start justify-start gap-2 self-stretch">
         <p className="body-01 text-[#181a1f] self-stretch">{title}</p>

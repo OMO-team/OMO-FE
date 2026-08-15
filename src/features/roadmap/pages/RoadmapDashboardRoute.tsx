@@ -9,7 +9,7 @@ export default function RoadmapDashboardRoute() {
   const handleBack = () => {
     /** location.key === 'default'면 이 세션에서 뒤로 갈 히스토리가 없다는 뜻 (직접 URL 진입/새로고침) */
     if (location.key === 'default') {
-      navigate('/myhome/empty', { replace: true });
+      navigate('/myhome', { replace: true });
     } else {
       navigate(-1);
     }

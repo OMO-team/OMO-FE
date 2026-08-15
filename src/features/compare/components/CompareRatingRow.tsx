@@ -8,7 +8,7 @@ export default function CompareRatingRow({ rating }: CompareRatingRowProps) {
   const filledStars = Math.round(rating);
 
   return (
-    <div className="flex h-[52px] w-[222px] items-center gap-2">
+    <div className="flex h-[52px] w-full items-center gap-2">
       <span className="heading-06 text-primary-500">
         총점 {rating.toFixed(1)}
       </span>

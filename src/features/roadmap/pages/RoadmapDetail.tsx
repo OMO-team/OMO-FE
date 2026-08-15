@@ -181,8 +181,16 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
     <div className="flex min-h-screen flex-col bg-gray-20">
       <CityHeroBanner cityName={detail.cityName} progressPercent={Math.round(detail.progressRate)} imageUrl={detail.cityImageUrl} />
 
-      <div className="mx-auto flex w-full max-w-content gap-7.5 px-4 py-10">
-        <div className="relative flex flex-col gap-5">
+      {/* 왼쪽 여백만 헤더와 같은 공식(clamp(32px, 50vw-451.5px, 188px))을 써서 헤더 로고와 같은
+          수직선에 맞춘다. 오른쪽은 작은 고정 여백만 둬서, 두 카드 합(614+30+434=1078px)이 들어갈
+          공간이 있는 한 절대 줄어들지 않고 항상 dev 원본 그대로 나란히 보이게 한다.
+          (양쪽 다 헤더 폭 만큼 빼면 1280px 같은 흔한 화면에서도 두 카드가 다 못 들어가 찌그러졌었음) */}
+      <div className="w-full py-10 pl-[clamp(32px,50vw_-_451.5px,188px)] pr-8">
+        {/* justify-start + 고정 basis(dev 원본 px값): 계산이 아니라 실제로 안 들어갈 때만
+            flex-wrap이 자동으로 세로로 내리므로, 들어가는 한 100% dev와 동일하게 나온다.
+            줄바꿈된 뒤에는 grow가 남는 폭을 채우고, min-w가 그 이상 좁아지는 걸 막는다 */}
+        <div className="flex w-full flex-wrap items-start justify-start gap-7.5">
+          <div className="relative flex min-w-[360px] max-w-[614px] grow basis-[614px] flex-col gap-5">
           <RoadmapHeader
             year={datePickerViewYear}
             month={datePickerViewMonth}
@@ -252,7 +260,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           )}
         </div>
 
-        <div className="flex flex-col gap-7.5">
+        <div className="flex min-w-[300px] max-w-[434px] grow basis-[434px] flex-col gap-7.5">
           <BudgetPlanCard
             months={months}
             onMonthsChange={(newMonths) => updateBudgetMutation.mutate(newMonths)}
@@ -269,6 +277,7 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
             summary={catalogCity?.description ?? '준비중'}
             onViewReport={() => setIsReportOpen(true)}
           />
+        </div>
         </div>
       </div>
 

@@ -11,6 +11,10 @@ type EmailVerificationPageProps = {
   onResend?: () => Promise<number | undefined> | void;
   onVerify?: (code: string) => Promise<void>;
   onServiceStart?: () => void;
+  /** 인증 완료 화면의 안내 문구 — 회원가입/비밀번호 재설정 등 흐름마다 다르게 넘길 수 있음 */
+  successDescription?: string;
+  /** 인증 완료 화면의 버튼 라벨 */
+  successButtonLabel?: string;
 };
 
 const TOTAL_SECONDS = 5 * 60;
@@ -36,7 +40,7 @@ function InfoBox({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="flex flex-col items-start self-stretch rounded-4 bg-gray-50"
-      style={{ padding: '32px 40px', gap: '4px' }}
+      style={{ padding: '32px clamp(16px, 6vw, 40px)', gap: '4px' }}
     >
       {children}
     </div>
@@ -57,6 +61,8 @@ export default function EmailVerificationPage({
   onResend,
   onVerify,
   onServiceStart,
+  successDescription = '이제 OMO 서비스를 안전하게 이용할 수 있습니다.',
+  successButtonLabel = '서비스 이용하기',
 }: EmailVerificationPageProps) {
   const [step, setStep] = useState<Step>('sent');
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
@@ -167,18 +173,19 @@ export default function EmailVerificationPage({
   };
 
   const codeBoxes = (expired = false) => (
-    <div className="flex items-center" style={{ gap: '4px' }}>
+    <div className="flex w-full max-w-[296px] items-center justify-center" style={{ gap: '4px' }}>
       {code.map((digit, i) => (
         expired ? (
           <div
             key={i}
-            className="flex items-center justify-center rounded-xl border bg-white"
+            className="flex shrink-0 items-center justify-center rounded-xl border bg-white"
             style={{
-              width: '46px', height: '60px',
+              width: 'clamp(28px, 8vw, 46px)',
+              height: 'clamp(38px, 10.5vw, 60px)',
               borderColor: 'var(--color-red-300)',
               color: 'var(--color-red-300)',
               fontFamily: 'Pretendard Variable',
-              fontSize: '22px',
+              fontSize: 'clamp(16px, 4vw, 22px)',
               fontWeight: 600,
               lineHeight: '140%',
               letterSpacing: '-0.66px',
@@ -198,8 +205,14 @@ export default function EmailVerificationPage({
             onKeyDown={(e) => handleCodeKeyDown(i, e)}
             aria-label={`인증번호 ${i + 1}번째 자리`}
             autoComplete="one-time-code"
-            className={`text-center outline-none rounded-xl bg-white text-gray-900 border ${digit ? 'border-primary-500' : 'border-gray-200'}`}
-            style={{ width: '46px', height: '60px', fontFamily: 'Pretendard Variable', fontSize: '24px', fontWeight: 600 }}
+            className={`shrink-0 text-center outline-none rounded-xl bg-white text-gray-900 border ${digit ? 'border-primary-500' : 'border-gray-200'}`}
+            style={{
+              width: 'clamp(28px, 8vw, 46px)',
+              height: 'clamp(38px, 10.5vw, 60px)',
+              fontFamily: 'Pretendard Variable',
+              fontSize: 'clamp(16px, 4vw, 24px)',
+              fontWeight: 600,
+            }}
           />
         )
       ))}
@@ -208,8 +221,8 @@ export default function EmailVerificationPage({
 
   const card = (
     <div
-      className="flex flex-col items-center rounded-4 bg-white"
-      style={{ width: '610px', padding: '60px', gap: '42px' }}
+      className="flex w-full max-w-[610px] flex-col items-center rounded-4 bg-white"
+      style={{ padding: 'clamp(24px, 8vw, 60px)', gap: '42px' }}
     >
 
       {/* SENT */}
@@ -220,11 +233,11 @@ export default function EmailVerificationPage({
             <div className="flex flex-col items-center self-stretch gap-[20px]">
               <MailIcon />
               <div className="flex flex-col items-center justify-center gap-2 self-stretch">
-                <span className="heading-05 text-black self-stretch text-center px-24">
+                <span className="heading-05 text-black self-stretch text-center px-[clamp(16px,10vw,96px)]">
                   인증 메일이 발송되었어요.
                 </span>
                 <div className="flex flex-col items-center self-stretch" style={{ gap: '2px' }}>
-                  <div className="flex items-center justify-center self-stretch">
+                  <div className="flex flex-wrap items-center justify-center self-stretch">
                     <span className="text-gray-700 break-all" style={descStyle}>{email}</span>
                     <span className="text-gray-700" style={descStyle}>로 인증 메일이 발송되었습니다.</span>
                   </div>
@@ -255,7 +268,7 @@ export default function EmailVerificationPage({
             <div className="flex flex-col items-center self-stretch gap-[20px]">
               <MailIcon />
               {/* 11445 */}
-              <div className="flex flex-col items-center justify-center gap-2 self-stretch px-24">
+              <div className="flex flex-col items-center justify-center gap-2 self-stretch px-[clamp(16px,10vw,96px)]">
                 <span className="heading-05 text-black self-stretch text-center">
                   인증번호를 입력해 주세요.
                 </span>
@@ -267,7 +280,7 @@ export default function EmailVerificationPage({
 
             {/* 인증번호 입력 섹션: 위쪽 36px */}
             <div className="flex flex-col items-center self-stretch gap-[12px] mt-[36px]">
-              <div style={{ width: '296px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="flex w-full max-w-[296px] items-center justify-between">
                 <span className="body-03 text-gray-500">인증번호 6자리</span>
                 <span className="title-02 text-red-500">{minutes}:{seconds}</span>
               </div>
@@ -302,7 +315,7 @@ export default function EmailVerificationPage({
             <div className="flex flex-col items-center self-stretch gap-[20px]">
               <MailIcon />
               <div className="flex flex-col items-center justify-center gap-2 self-stretch">
-                <span className="heading-05 text-black self-stretch text-center px-24">
+                <span className="heading-05 text-black self-stretch text-center px-[clamp(16px,10vw,96px)]">
                   이메일 인증이 완료되었어요.
                 </span>
                 <div className="flex flex-col items-center self-stretch" style={{ gap: '2px' }}>
@@ -310,7 +323,7 @@ export default function EmailVerificationPage({
                     이메일 인증이 정상적으로 완료되었습니다.
                   </span>
                   <span className="self-stretch text-center text-gray-700" style={descStyle}>
-                    이제 OMO 서비스를 안전하게 이용할 수 있습니다.
+                    {successDescription}
                   </span>
                 </div>
               </div>
@@ -320,7 +333,7 @@ export default function EmailVerificationPage({
               <span className="body-04 text-gray-500 self-stretch">비밀번호 재설정, 문의 답변, 중요 알림이 해당 이메일로 발송됩니다.</span>
             </InfoBox>
           </div>
-          <LargeFillButton label="서비스 이용하기" onClick={onServiceStart} className="title-05" />
+          <LargeFillButton label={successButtonLabel} onClick={onServiceStart} className="title-05" />
         </div>
       )}
 
@@ -330,7 +343,7 @@ export default function EmailVerificationPage({
           <div className="flex flex-col items-center self-stretch">
             <div className="flex flex-col items-center self-stretch gap-[20px]">
               <MailIcon error />
-              <div className="flex flex-col items-center justify-center gap-2 self-stretch px-24">
+              <div className="flex flex-col items-center justify-center gap-2 self-stretch px-[clamp(16px,10vw,96px)]">
                 <span className="heading-05 text-black self-stretch text-center">
                   인증 시간이 만료되었어요
                 </span>
@@ -342,7 +355,7 @@ export default function EmailVerificationPage({
 
             {/* 만료된 코드 표시: 위쪽 36px */}
             <div className="flex flex-col items-center self-stretch gap-[12px] mt-[36px]">
-              <div style={{ width: '296px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="flex w-full max-w-[296px] items-center justify-between">
                 <span className="body-03 text-gray-500">인증번호 6자리</span>
                 <span className="title-02 text-red-500">00:00</span>
               </div>
@@ -369,7 +382,7 @@ export default function EmailVerificationPage({
             <div className="flex flex-col items-center self-stretch gap-[20px]">
               <MailIcon error />
               <div className="flex flex-col items-center justify-center gap-2 self-stretch">
-                <span className="heading-05 text-black self-stretch text-center px-24">
+                <span className="heading-05 text-black self-stretch text-center px-[clamp(16px,10vw,96px)]">
                   인증번호 요청 횟수를 초과했어요.
                 </span>
                 <span className="self-stretch text-center text-gray-700" style={descStyle}>
@@ -397,7 +410,7 @@ export default function EmailVerificationPage({
             <div className="flex flex-col items-center self-stretch gap-[20px]">
               <MailIcon error />
               <div className="flex flex-col items-center justify-center gap-2 self-stretch">
-                <span className="heading-05 text-black self-stretch text-center px-24">
+                <span className="heading-05 text-black self-stretch text-center px-[clamp(16px,10vw,96px)]">
                   이메일 인증에 실패했어요.
                 </span>
                 <div className="flex flex-col items-center self-stretch" style={{ gap: '2px' }}>
@@ -425,7 +438,10 @@ export default function EmailVerificationPage({
 
   return (
     <div className="flex flex-col bg-gray-50">
-      <main className="flex flex-1 justify-center items-center py-[100px]">
+      {/* 좌우 여백을 Header와 동일한 구조(xl 이상: 고정 188px / 미만: 32px 거터)로 맞춰, 카드가
+          줄어들 때도 카드가 놓일 수 있는 영역의 경계가 헤더 로고·버튼과 항상 일치하게 한다.
+          카드 자체는 그 영역 안에서 계속 가운데 정렬된다 */}
+      <main className="flex flex-1 justify-center items-center px-8 py-[100px] xl:px-[188px]">
         {card}
       </main>
     </div>

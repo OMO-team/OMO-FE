@@ -106,7 +106,30 @@ export default function AIChatPanel({
   const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
 
   const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
+
+  /** 브라우저 창이 좁아지면 실제 렌더링 너비를 뷰포트 안으로 부드럽게 줄인다 — 패널이 뷰포트 너비와
+   *  똑같아지면 왼쪽 끝의 크기 조절 손잡이가 화면 경계에 딱 붙어(스크롤바 폭 오차 등으로) 가려질 수
+   *  있으므로, 손잡이가 항상 보이도록 왼쪽에 HANDLE_MARGIN만큼 여백을 남기고 상한을 건다.
+   *  panelWidth(드래그로 정한 "원하는" 너비)는 그대로 둬서, 창이 다시 넓어지면 원래 너비로 복원된다 */
+  const HANDLE_MARGIN = 24;
+  const [viewportWidth, setViewportWidth] = useState(() => document.documentElement.clientWidth);
+  useEffect(() => {
+    const update = () => setViewportWidth(document.documentElement.clientWidth);
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  const effectiveMaxWidth = Math.max(
+    MIN_PANEL_WIDTH,
+    Math.min(MAX_PANEL_WIDTH, viewportWidth - HANDLE_MARGIN)
+  );
+  const effectiveMaxWidthRef = useRef(effectiveMaxWidth);
+  useEffect(() => {
+    effectiveMaxWidthRef.current = effectiveMaxWidth;
+  }, [effectiveMaxWidth]);
+  const displayWidth = Math.min(panelWidth, effectiveMaxWidth);
 
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollStartTimeRef = useRef<number>(0);
@@ -138,7 +161,7 @@ export default function AIChatPanel({
     if (!state) return;
     const delta = state.startX - e.clientX;
     const nextWidth = Math.min(
-      MAX_PANEL_WIDTH,
+      effectiveMaxWidthRef.current,
       Math.max(MIN_PANEL_WIDTH, state.startWidth + delta)
     );
     setPanelWidth(nextWidth);
@@ -146,13 +169,15 @@ export default function AIChatPanel({
 
   const handleResizeEnd = useCallback(() => {
     resizeRef.current = null;
+    setIsResizing(false);
     document.body.style.userSelect = '';
     window.removeEventListener('mousemove', handleResizeMove);
   }, [handleResizeMove]);
 
   const handleResizeStart = (e: React.MouseEvent) => {
     e.preventDefault();
-    resizeRef.current = { startX: e.clientX, startWidth: panelWidth };
+    resizeRef.current = { startX: e.clientX, startWidth: displayWidth };
+    setIsResizing(true);
     document.body.style.userSelect = 'none';
     window.addEventListener('mousemove', handleResizeMove);
     window.addEventListener('mouseup', handleResizeEnd);
@@ -403,9 +428,9 @@ export default function AIChatPanel({
         isClosing
           ? 'animate-[panel-slide-out_0.22s_ease-in_forwards]'
           : 'animate-[panel-slide-in_0.28s_ease-out_forwards]'
-      }`}
+      } ${isResizing ? '' : 'transition-[width] duration-150 ease-out'}`}
       style={{
-        width: `${panelWidth}px`,
+        width: `${displayWidth}px`,
         minWidth: `${MIN_PANEL_WIDTH}px`,
         maxWidth: `${MAX_PANEL_WIDTH}px`,
         flexShrink: 0,
@@ -480,13 +505,13 @@ export default function AIChatPanel({
         style={{
           width: '100%',
           height: '61px',
-          padding: '14px 34px 6px 30px',
+          padding: '14px clamp(16px, 6vw, 34px) 6px clamp(16px, 6vw, 30px)',
           boxSizing: 'border-box',
         }}
       >
         <div className="flex items-center flex-shrink-0" style={{ width: '100%' }}>
           {/* AI Chat Title 드롭다운 버튼 — 겹칠 만큼 좁아지면 숨김 */}
-          {panelWidth >= PANEL_COMPACT_THRESHOLD && (
+          {displayWidth >= PANEL_COMPACT_THRESHOLD && (
             <div className="relative flex" style={{ minWidth: 0 }}>
               <button
                 type="button"
@@ -589,7 +614,7 @@ export default function AIChatPanel({
           )}
 
           {/* Frame 11200: New Chat + More Menu + Collapse — ml-auto로 항상 오른쪽 끝에 고정 (제목이 사라져도 위치 유지), 더 좁아지면 잘려 보이니 숨김 */}
-          {panelWidth >= HEADER_ICONS_MIN_WIDTH && (
+          {displayWidth >= HEADER_ICONS_MIN_WIDTH && (
             <div className="flex items-center justify-end gap-3 flex-shrink-0 ml-auto">
               {/* New Chat 버튼 */}
               <div className="relative">
@@ -713,7 +738,7 @@ export default function AIChatPanel({
         className={`flex-1 overflow-y-auto overflow-x-hidden flex flex-col ${hasChatStarted ? 'items-start' : 'items-center justify-end'} [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200`}
         style={{ scrollbarGutter: 'stable', paddingRight: '0px' }}
       >
-        {panelWidth < PANEL_COMPACT_THRESHOLD ? null : hasChatStarted ? (
+        {displayWidth < PANEL_COMPACT_THRESHOLD ? null : hasChatStarted ? (
           <div className="flex flex-col items-start w-full pb-[200px]">
             {chatHistory.map(entry =>
               entry.status === 'completed' && entry.briefingData ? (
@@ -763,7 +788,7 @@ export default function AIChatPanel({
             className="flex flex-col items-start"
             style={{
               width: '100%',
-              padding: '0 40px',
+              padding: '0 clamp(16px, 8vw, 40px)',
               gap: '26px',
               marginBottom: '62px',
               boxSizing: 'border-box',
@@ -820,12 +845,12 @@ export default function AIChatPanel({
       </div>
 
       {/* Frame 11265: 하단 입력 영역 (그라데이션 + 입력창) — 좁아지면 숨김 */}
-      {panelWidth >= PANEL_COMPACT_THRESHOLD && (
+      {displayWidth >= PANEL_COMPACT_THRESHOLD && (
         <div
           style={{
             display: 'flex',
             width: '100%',
-            padding: '0 50px 60px 50px',
+            padding: '0 clamp(16px, 10vw, 50px) clamp(24px, 12vw, 60px) clamp(16px, 10vw, 50px)',
             flexDirection: 'column',
             alignItems: 'flex-start',
             gap: '4px',
@@ -883,7 +908,7 @@ export default function AIChatPanel({
 
               {/* Frame 11209: 아이콘 행 — 입력창이 좁아 버튼이 밖으로 밀려나면 가운데 정렬로 전환 */}
               <div
-                className={`flex items-center ${panelWidth < SEND_BUTTON_CENTER_THRESHOLD ? 'justify-center' : 'justify-between'}`}
+                className={`flex items-center ${displayWidth < SEND_BUTTON_CENTER_THRESHOLD ? 'justify-center' : 'justify-between'}`}
                 style={{ alignSelf: 'stretch' }}
               >
                 {/* 전송 / 중지 버튼 */}
@@ -892,7 +917,7 @@ export default function AIChatPanel({
                     type="button"
                     aria-label="응답 중지"
                     onClick={handleStop}
-                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400 ${panelWidth < SEND_BUTTON_CENTER_THRESHOLD ? '' : 'ml-auto'}`}
+                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 cursor-pointer bg-gray-400 ${displayWidth < SEND_BUTTON_CENTER_THRESHOLD ? '' : 'ml-auto'}`}
                     style={{
                       width: '32px',
                       height: '32px',
@@ -926,7 +951,7 @@ export default function AIChatPanel({
                     type="button"
                     onClick={handleSubmit}
                     disabled={!hasText}
-                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ${panelWidth < SEND_BUTTON_CENTER_THRESHOLD ? '' : 'ml-auto'} ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
+                    className={`flex items-center justify-center rounded-full border-none flex-shrink-0 transition-colors ${displayWidth < SEND_BUTTON_CENTER_THRESHOLD ? '' : 'ml-auto'} ${hasText ? 'bg-primary-500 cursor-pointer' : 'bg-gray-200 cursor-default'}`}
                     style={{
                       width: '32px',
                       height: '32px',

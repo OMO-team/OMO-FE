@@ -46,14 +46,14 @@ export default function SearchModal({
 
   return (
     <div
-      className="flex h-[496px] w-[1440px] flex-col items-center overflow-hidden bg-white"
+      className="flex h-[min(496px,88vh)] w-full flex-col items-center overflow-hidden bg-white"
       role="dialog"
       aria-modal="true"
     >
       {/* L_Search Header */}
-      <div className="flex w-[1440px] flex-col items-center">
-        <div className="flex w-[1064px] items-center justify-between px-5 pb-6 pt-9">
-          <div className="flex flex-1 items-center gap-[57px]">
+      <div className="flex w-full flex-col items-center">
+        <div className="flex w-full max-w-[1064px] items-center justify-between px-5 pb-6 pt-9">
+          <div className="flex min-w-0 flex-1 items-center gap-[clamp(16px,6vw,57px)]">
             <button
               type="button"
               onClick={handleSearch}
@@ -63,7 +63,7 @@ export default function SearchModal({
             </button>
             <input
               type="text"
-              className="body-02 flex-1 bg-transparent outline-none placeholder:text-gray-500"
+              className="body-02 min-w-0 flex-1 bg-transparent outline-none placeholder:text-gray-500"
               placeholder="도시나 키워드로 검색하기"
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
@@ -78,12 +78,12 @@ export default function SearchModal({
             <img src={closeIcon} alt="닫기" className="size-[14px]" />
           </button>
         </div>
-        <div className="h-px w-[1440px] bg-gray-100" />
+        <div className="h-px w-full bg-gray-100" />
       </div>
 
       {/* L_Search Content */}
-      <div className="flex w-[1064px] min-h-0 flex-1 flex-col items-center">
-        <div className="flex items-center justify-between self-stretch px-5 pb-0 pt-10">
+      <div className="flex w-full max-w-[1064px] min-h-0 flex-1 flex-col items-center">
+        <div className="flex items-center justify-between self-stretch px-5 pb-0 pt-[clamp(24px,8vw,40px)]">
           <span className="heading-06 text-gray-900">최근 검색어</span>
           {hasSearches && (
             <button type="button" onClick={onClearAll} className="flex items-center gap-1">
@@ -98,11 +98,11 @@ export default function SearchModal({
         {hasSearches ? (
           <div className="scrollbar-hide mt-4 flex w-full min-h-0 flex-1 flex-col items-start overflow-x-hidden overflow-y-auto pb-4">
             {recentSearches.map((query, i) => (
-              <div key={i} className="flex w-[1064px] items-center gap-1 px-5 py-5">
+              <div key={i} className="flex w-full items-center gap-1 px-5 py-5">
                 <button
                   type="button"
                   onClick={() => submitQuery(query)}
-                  className={`body-02 line-clamp-1 flex-1 overflow-hidden text-ellipsis text-left cursor-pointer ${i === 0 ? 'text-gray-600' : 'text-gray-700'}`}
+                  className={`body-02 line-clamp-1 min-w-0 flex-1 overflow-hidden text-ellipsis text-left cursor-pointer ${i === 0 ? 'text-gray-600' : 'text-gray-700'}`}
                 >
                   {query}
                 </button>
@@ -130,7 +130,7 @@ export default function SearchModal({
             ))}
           </div>
         ) : (
-          <p className="body-01 mt-[60px] self-stretch text-center text-gray-500">
+          <p className="body-01 mt-[clamp(32px,10vw,60px)] self-stretch text-center text-gray-500">
             최근 검색어가 없습니다
           </p>
         )}

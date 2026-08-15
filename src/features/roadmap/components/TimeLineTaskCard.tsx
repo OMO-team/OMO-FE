@@ -54,12 +54,12 @@ export default function TimeLineTaskCard({
   const StatusIcon = STATUS_ICON[status];
 
   return (
-    <div className="flex w-153.5 items-center pl-2">
+    <div className="flex w-full items-center pl-2">
       <StatusIcon className="relative size-icon-lg shrink-0" />
       <button
         type="button"
         onClick={onClick}
-        className={`flex w-144.5 flex-col items-start gap-2 rounded-4 border px-5 py-4 text-left transition-colors ${
+        className={`flex flex-1 flex-col items-start gap-2 rounded-4 border px-5 py-4 text-left transition-colors ${
           isOngoing
             ? 'border-primary-500 bg-white shadow-[0px_5px_16px_0px_rgba(21,93,252,0.2)]'
             : isMuted

@@ -45,11 +45,11 @@ export default function Footer({ onOpenSmartBriefing }: FooterProps) {
   const serviceLinks: LinkItem[] = [
     { label: 'AI스마트 브리핑', onClick: onOpenSmartBriefing },
     { label: '도시별 인사이트 리포트', path: '/city-insight' },
-    { label: '내 출국 준비 로드맵', path: '/myhome/empty' },
+    { label: '내 출국 준비 로드맵', path: '/myhome' },
   ];
 
   return (
-    <footer className="flex w-full flex-col items-center gap-4 bg-gray-50">
+    <footer className="flex w-full flex-col items-center gap-4 bg-gray-100">
       <div className="mx-auto flex w-full max-w-content flex-col items-center gap-10 px-4">
         <div className="flex w-full flex-col gap-1 pt-7.5">
           <OmoLogoIcon className="h-5 w-auto shrink-0 self-start text-primary-600" />

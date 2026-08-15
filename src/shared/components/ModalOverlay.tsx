@@ -29,13 +29,23 @@ export default function ModalOverlay({
 
   return (
     <div
-      className={`fixed inset-0 flex justify-center bg-gray-800/50 px-4 pb-4 ${align === 'top' ? 'items-start pt-0' : 'items-center pt-4'}`}
+      className={`fixed inset-0 flex justify-center bg-gray-800/50 ${
+        align === 'top' ? 'items-start' : 'items-center px-4 pb-4 pt-4'
+      }`}
       style={{ zIndex }}
       onClick={onClose}
     >
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div onClick={stopPropagation}>{children}</div>
-      </div>
+      {align === 'top' ? (
+        <div onClick={stopPropagation} className="w-full">
+          {children}
+        </div>
+      ) : (
+        <div className="flex min-h-full w-full items-center justify-center p-4">
+          <div onClick={stopPropagation} className="flex w-full justify-center">
+            {children}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

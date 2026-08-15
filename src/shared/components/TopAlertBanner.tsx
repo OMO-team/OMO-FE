@@ -161,18 +161,18 @@ export default function TopAlertBanner({
 
   return (
     <div
-      className={`inline-flex flex-col justify-center items-center border ${v.banner}`}
+      className={`inline-flex max-w-full flex-col justify-center items-center border ${v.banner}`}
       style={{
-        height: '48px',
+        minHeight: '48px',
         padding: '6px 20px',
         borderRadius: '100px',
         boxShadow: '0 3px 8px 0 rgba(6, 49, 88, 0.16)',
       }}
     >
       {/* 내부 행 */}
-      <div className="flex items-center justify-between gap-[30px] self-stretch">
+      <div className="flex min-w-0 items-center justify-between gap-[30px] self-stretch">
         {/* 아이콘 + 텍스트 */}
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <div
             className={`flex items-center justify-center p-[6px] rounded-full flex-shrink-0 ${v.iconBg}`}
           >
@@ -180,7 +180,12 @@ export default function TopAlertBanner({
               <BannerIcon variant={variant} icon={resolvedIcon} />
             </div>
           </div>
-          <span style={{ ...TEXT_STYLE, color: v.textColor, width: '428px' }}>{message}</span>
+          <span
+            className="min-w-0 flex-1"
+            style={{ ...TEXT_STYLE, color: v.textColor, maxWidth: '428px' }}
+          >
+            {message}
+          </span>
         </div>
 
         {/* 다시시도 칩 + X 버튼 */}

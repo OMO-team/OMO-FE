@@ -23,7 +23,7 @@ export default function RoadmapHeader({
   onDepartureDateClick,
 }: RoadmapHeaderProps) {
   return (
-    <div className="flex w-153.5 flex-col gap-4 rounded-4 border border-gray-100 bg-white px-6 pb-4 pt-7.5">
+    <div className="flex w-full flex-col gap-4 rounded-4 border border-gray-100 bg-white px-6 pb-4 pt-7.5">
       <RoadmapMonthSelector
         year={year}
         month={month}

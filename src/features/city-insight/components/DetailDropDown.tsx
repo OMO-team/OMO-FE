@@ -30,18 +30,18 @@ export default function DetailDropDown({ selectedOptions, onSelect }: DetailDrop
             <span className={`body-03 ${isOpen ? 'text-white' : 'text-gray-600'}`}>상세필터</span>
         </button>
         {isOpen && (
-        <div id="detail-dropdown-panel" className='absolute top-10 z-1 bg-white w-[624px] h-[242px] flex flex-col justify-center items-center border border-gray-100 rounded-2 px-6 py-5 shadow-01'>
+        <div id="detail-dropdown-panel" className='absolute top-10 z-1 bg-white w-[min(624px,calc(100vw-64px))] max-h-[70vh] overflow-y-auto flex flex-col justify-center items-center border border-gray-100 rounded-2 px-6 py-5 shadow-01'>
             {DETAIL_OPTIONS.map((item, index) => (
-                <div key={item.title} className={`w-full flex items-center ${index !== DETAIL_OPTIONS.length - 1 ? 'mb-3' : ''}`}>
+                <div key={item.title} className={`w-full flex items-center gap-y-2 ${index !== DETAIL_OPTIONS.length - 1 ? 'mb-3' : ''}`}>
                     <div className="flex items-center w-25 shrink-0">
                         <p className="flex-1 text-gray-700 body-02">{item.title}</p>
                         <div className="w-px h-4 bg-gray-200" />
                     </div>
-                    <div className="flex ml-5">
+                    <div className="flex min-w-0 max-[699px]:flex-wrap gap-y-2 ml-5">
                         {item.options.map((option) => {
                             const isSelected = selectedOptions[item.title] === option
                             return (
-                                <div key={option} className={`flex items-center pl-4 w-28.5 h-7.5 rounded-1 cursor-pointer ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => {onSelect(item.title, option)}}>
+                                <div key={option} className={`flex items-center pl-4 w-28.5 h-7.5 rounded-1 cursor-pointer shrink-0 ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`} onClick={() => {onSelect(item.title, option)}}>
                                     <p className={`body-04 ${isSelected ? 'text-primary-800' : 'text-gray-700'}`}>{option}</p>
                                 </div>
                             )
