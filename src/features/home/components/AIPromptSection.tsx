@@ -24,7 +24,7 @@ export default function AIPromptSection({ onSubmit }: AIPromptSectionProps) {
           <div className="w-8 h-8">
             <img src={suitcaseIcon} alt="여행" />
           </div>
-          <h2 className="heading-02 text-gray-900">
+          <h2 className="heading-02 font-semibold text-gray-900">
             어느 나라로<br className="sm:hidden" /> 떠나고 싶으신가요?
           </h2>
         </div>

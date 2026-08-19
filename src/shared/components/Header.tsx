@@ -149,8 +149,8 @@ export default function Header({ variant = 'default' }: HeaderProps) {
       <header
         className={`sticky top-0 z-30 flex w-full px-8 py-6 xl:hidden ${isOverlay || isTransparent ? 'bg-transparent' : 'bg-white'}`}
       >
-        <div className="@container mx-auto flex w-full max-w-[888px] items-center gap-3">
-          <div className="flex min-w-0 flex-1 items-center gap-4">
+        <div className="@container mx-auto flex w-full max-w-[888px] items-center gap-1 @[480px]:gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-1 @[480px]:gap-4">
             <button
               type="button"
               onClick={() => navigate('/')}
@@ -165,10 +165,10 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </button>
 
             <div
-              className="flex h-10 min-w-0 flex-1 max-w-[418px] cursor-pointer items-center justify-end rounded-2 bg-gray-50 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] gap-[clamp(8px,4cqw,32px)] pl-[clamp(12px,2.5cqw,20px)] pr-[clamp(12px,2cqw,16px)]"
+              className="flex h-10 w-8 shrink-0 cursor-pointer items-center justify-center rounded-2 bg-gray-50 shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] gap-[clamp(8px,4cqw,32px)] @[480px]:min-w-0 @[480px]:w-auto @[480px]:flex-1 @[480px]:max-w-[418px] @[480px]:justify-end @[480px]:pl-[clamp(12px,2.5cqw,20px)] @[480px]:pr-[clamp(12px,2cqw,16px)]"
               onClick={openSearch}
             >
-              <span className="body-03 min-w-0 flex-1 truncate text-gray-400">
+              <span className="body-03 hidden min-w-0 flex-1 truncate text-gray-400 @[480px]:block">
                 도시나 키워드로 검색하기
               </span>
               <Icon size="md" className="shrink-0">
@@ -177,42 +177,42 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 @[850px]:gap-3">
+          <div className="flex shrink-0 items-center gap-1 @[480px]:gap-2 @[850px]:gap-3">
             <div className="flex items-center">
               <button
                 onClick={handleExploreClick}
-                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] min-w-[clamp(0px,9.01cqw,80px)] ${getNavTextClass('explore')}`}
+                className={`flex shrink-0 items-center justify-center gap-[10px] rounded-2 py-2.5 px-1.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow @[480px]:justify-start @[480px]:pl-2.5 @[480px]:pr-[clamp(10px,1.5cqw,12px)] @[480px]:min-w-[clamp(0px,9.01cqw,80px)] ${getNavTextClass('explore')}`}
               >
                 <Icon size="sm">
                   <ExploreIcon color={getNavIconColor('explore')} />
                 </Icon>
-                <span>탐색</span>
+                <span className="hidden @[480px]:inline">탐색</span>
               </button>
 
               <button
                 onClick={handleMyHomeClick}
-                className={`flex shrink-0 items-center gap-[10px] rounded-2 py-2.5 pl-2.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow pr-[clamp(10px,1.5cqw,12px)] min-w-[clamp(0px,9.01cqw,80px)] ${getNavTextClass('myhome')}`}
+                className={`flex shrink-0 items-center justify-center gap-[10px] rounded-2 py-2.5 px-1.5 body-02 whitespace-nowrap hover:shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] transition-shadow @[480px]:justify-start @[480px]:pl-2.5 @[480px]:pr-[clamp(10px,1.5cqw,12px)] @[480px]:min-w-[clamp(0px,9.01cqw,80px)] ${getNavTextClass('myhome')}`}
               >
                 <Icon size="sm">
                   <HomeIcon color={getNavIconColor('myhome')} />
                 </Icon>
-                <span>내 홈</span>
+                <span className="hidden @[480px]:inline">내 홈</span>
               </button>
             </div>
 
             {isLoggedIn ? (
               accountButton
             ) : (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5 @[480px]:gap-1">
                 <button
                   onClick={() => openModal('login')}
-                  className={`flex shrink-0 items-center rounded-2 py-2.5 px-[clamp(10px,2.25cqw,18px)] body-03 whitespace-nowrap ${isOverlay ? 'text-white' : 'text-gray-700'}`}
+                  className={`flex shrink-0 items-center rounded-2 py-2.5 px-[clamp(6px,2.25cqw,18px)] body-03 whitespace-nowrap ${isOverlay ? 'text-white' : 'text-gray-700'}`}
                 >
                   로그인
                 </button>
                 <button
                   onClick={() => openModal('signup')}
-                  className="flex shrink-0 items-center rounded-2 bg-primary-500 py-2.5 px-[clamp(10px,2.25cqw,18px)] shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
+                  className="flex shrink-0 items-center rounded-2 bg-primary-500 py-2.5 px-[clamp(6px,2.25cqw,18px)] shadow-[0_3px_8px_0_rgba(6,49,88,0.16)] body-03 text-white whitespace-nowrap"
                 >
                   회원가입
                 </button>
