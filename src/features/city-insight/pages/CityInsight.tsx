@@ -783,7 +783,11 @@ export default function CityInsight() {
                 <FilterChip
                   key={code}
                   label={name}
-                  onRemove={() => setSelectedCountries(prev => prev.filter(c => c.code !== code))}
+                  onRemove={() => {
+                    const next = selectedCountries.filter(c => c.code !== code);
+                    setSelectedCountries(next);
+                    saveStoredCountries(next);
+                  }}
                 />
               ))}
             </div>
