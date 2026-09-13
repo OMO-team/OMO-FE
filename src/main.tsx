@@ -14,7 +14,8 @@ if (!amplitudeApiKey) {
 } else {
   amplitude.initAll(amplitudeApiKey, {
     analytics: { autocapture: true },
-    sessionReplay: { sampleRate: 1 },
+    // 세션 녹화는 Clarity가 전담한다 — 두 도구가 동시에 DOM을 녹화할 이유가 없어 0%로 둔다.
+    sessionReplay: { sampleRate: 0 },
   });
   amplitude.track('Viewed Home Page', { prompt_version: 'BA400.4' }); // helps improve this setup flow — safe to remove once you've verified the event lands
 }
