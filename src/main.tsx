@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as amplitude from '@amplitude/unified';
-import Clarity from '@microsoft/clarity';
+// import Clarity from '@microsoft/clarity';
 import './index.css';
 import { router } from './router.tsx';
 
@@ -17,16 +17,16 @@ if (!amplitudeApiKey) {
     // 세션 녹화는 Clarity가 전담한다 — 두 도구가 동시에 DOM을 녹화할 이유가 없어 0%로 둔다.
     sessionReplay: { sampleRate: 0 },
   });
-  amplitude.track('Viewed Home Page', { prompt_version: 'BA400.4' }); // helps improve this setup flow — safe to remove once you've verified the event lands
 }
 
-const clarityProjectId = import.meta.env.VITE_CLARITY_PROJECT_ID;
-
-if (!clarityProjectId) {
-  console.warn('Clarity project ID missing — session recording disabled');
-} else {
-  Clarity.init(clarityProjectId);
-}
+// 개인정보 처리방침 및 사용자 동의 처리 전까지 Clarity 세션 녹화를 비활성화한다.
+// const clarityProjectId = import.meta.env.VITE_CLARITY_PROJECT_ID;
+//
+// if (!clarityProjectId) {
+//   console.warn('Clarity project ID missing — session recording disabled');
+// } else {
+//   Clarity.init(clarityProjectId);
+// }
 
 const queryClient = new QueryClient();
 
