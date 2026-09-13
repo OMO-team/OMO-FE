@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as amplitude from '@amplitude/unified';
+import Clarity from '@microsoft/clarity';
 import './index.css';
 import { router } from './router.tsx';
 
@@ -16,6 +17,14 @@ if (!amplitudeApiKey) {
     sessionReplay: { sampleRate: 1 },
   });
   amplitude.track('Viewed Home Page', { prompt_version: 'BA400.4' }); // helps improve this setup flow — safe to remove once you've verified the event lands
+}
+
+const clarityProjectId = import.meta.env.VITE_CLARITY_PROJECT_ID;
+
+if (!clarityProjectId) {
+  console.warn('Clarity project ID missing — session recording disabled');
+} else {
+  Clarity.init(clarityProjectId);
 }
 
 const queryClient = new QueryClient();
