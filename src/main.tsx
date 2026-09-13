@@ -2,8 +2,14 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as amplitude from '@amplitude/unified';
 import './index.css';
 import { router } from './router.tsx';
+
+amplitude.initAll(import.meta.env.VITE_AMPLITUDE_API_KEY, {
+  analytics: { autocapture: true },
+  sessionReplay: { sampleRate: 1 },
+});
 
 const queryClient = new QueryClient();
 
