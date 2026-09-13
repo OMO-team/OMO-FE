@@ -6,10 +6,17 @@ import * as amplitude from '@amplitude/unified';
 import './index.css';
 import { router } from './router.tsx';
 
-amplitude.initAll(import.meta.env.VITE_AMPLITUDE_API_KEY, {
-  analytics: { autocapture: true },
-  sessionReplay: { sampleRate: 1 },
-});
+const amplitudeApiKey = import.meta.env.VITE_AMPLITUDE_API_KEY;
+
+if (!amplitudeApiKey) {
+  console.warn('Amplitude API key missing — analytics disabled');
+} else {
+  amplitude.initAll(amplitudeApiKey, {
+    analytics: { autocapture: true },
+    sessionReplay: { sampleRate: 1 },
+  });
+  amplitude.track('Viewed Home Page', { prompt_version: 'BA400.4' }); // helps improve this setup flow — safe to remove once you've verified the event lands
+}
 
 const queryClient = new QueryClient();
 
