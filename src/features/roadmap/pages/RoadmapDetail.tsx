@@ -18,6 +18,7 @@ import { citiesApi } from '../api/citiesApi';
 import { tasksApi } from '../api/tasksApi';
 import { cityQueryKeys, roadmapQueryKeys, taskQueryKeys } from '../api/queryKeys';
 import { toRoadmapTaskData, formatDotDate, getToday } from '../utils/roadmapDetailAdapter';
+import { trackSelectedRoadmapTask } from '../../../lib/analytics';
 import { toCityInsightData } from '../utils/wishlistAdapter';
 import { buildCityReportData } from '../utils/buildCityReportData';
 import type { RoadmapDetail as RoadmapDetailResult } from '../types/api';
@@ -224,8 +225,10 @@ export default function RoadmapDetail({ roadmapId, onBack }: RoadmapDetailProps)
           <RoadmapTimeline
             tasks={detail.tasks.map((task) => toRoadmapTaskData(task, completedCountByTask.get(task.taskId)))}
             onTaskClick={(index) => {
-              const taskId = detail.tasks[index]?.taskId;
-              if (taskId != null) navigate(`task-detail/${taskId}`, { preventScrollReset: true });
+              const task = detail.tasks[index];
+              if (task == null) return;
+              trackSelectedRoadmapTask(task.category, task.name);
+              navigate(`task-detail/${task.taskId}`, { preventScrollReset: true });
             }}
           />
 

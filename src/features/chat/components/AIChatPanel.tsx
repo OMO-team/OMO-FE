@@ -9,6 +9,7 @@ import fileErrorIcon from '../../../assets/icons/icon-file-error.svg';
 import clockTealIcon from '../../../assets/icons/icon-clock-teal.svg';
 import AIChatThread from './AIChatThread';
 import { chatApi } from '../api/chatApi';
+import { trackSubmittedAiPrompt } from '../../../lib/analytics';
 import useTypingEffect from '../hooks/useTypingEffect';
 import type { ChipInfo, ChatEntry } from '../types/dto';
 import {
@@ -277,6 +278,7 @@ export default function AIChatPanel({
   const submitQuery = useCallback(
     async (query: string, currentSessionId: number | null) => {
       const entryId = Date.now().toString();
+      trackSubmittedAiPrompt(currentSessionId !== null);
       currentEntryIdRef.current = entryId;
       setChatHistory(prev => [
         ...prev,

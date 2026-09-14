@@ -4,6 +4,7 @@ import axios from 'axios';
 import { authApi } from '../api/authApi';
 import { memberApi } from '../../settings/api/memberApi';
 import { useAuthStore } from '../store/useAuthStore';
+import { trackSignedUp } from '../../../lib/analytics';
 
 export default function OAuthCallbackRoute() {
   const [searchParams] = useSearchParams();
@@ -39,6 +40,7 @@ export default function OAuthCallbackRoute() {
         signIn(info?.profileImageUrl ?? undefined);
         const intent = sessionStorage.getItem('oauthIntent');
         sessionStorage.removeItem('oauthIntent');
+        if (intent === 'signup') trackSignedUp('google');
         showAuthToast(intent === 'signup' ? 'signup' : 'login');
         navigate('/', { replace: true });
       })

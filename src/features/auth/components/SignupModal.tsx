@@ -10,6 +10,7 @@ import { authApi } from '../api/authApi';
 import { passwordRegex } from '../constants/passwordRegex';
 import { EMAIL_REGEX } from '../constants/emailRegex';
 import { useAuthStore } from '../store/useAuthStore';
+import { trackSignedUp } from '../../../lib/analytics';
 import type { TermType } from '../types/dto';
 
 type SignupModalProps = {
@@ -241,6 +242,7 @@ export default function SignupModal({ onClose, onLoginClick }: SignupModalProps)
         passwordConfirm: confirmPassword,
         agreedTermsIds,
       });
+      trackSignedUp('email');
       clearSignupDraft();
       showAuthToast('signup');
       onClose();
