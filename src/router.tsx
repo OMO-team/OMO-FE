@@ -10,8 +10,8 @@ import RequireAuth from './features/auth/components/RequireAuth';
 // fallback
 import PageLoader from './shared/components/PageLoader';
 
-// home
-const HomePage = lazy(() => import('./features/home/pages/HomePage'));
+// home (eager — LCP 대상 이미지가 있어 lazy 적용 시 LCP 악화)
+import HomePage from './features/home/pages/HomePage';
 
 // city-insight
 const CityInsight = lazy(() => import('./features/city-insight/pages/CityInsight'));
@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Suspense fallback={fallback}><HomePage /></Suspense>,
+        element: <HomePage />,
         handle: { headerVariant: 'transparent', hasOwnChatEntry: true },
       },
       {
