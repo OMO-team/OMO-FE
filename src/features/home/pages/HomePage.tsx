@@ -4,7 +4,7 @@ import AIPromptSection from '../components/AIPromptSection';
 import CategorySection from '../components/CategorySection';
 import TopAlertBanner from '../../../shared/components/TopAlertBanner';
 import { useMainLayoutContext } from '../../../shared/layouts/useMainLayoutContext';
-import mapBg from '../../../assets/images/map-bg.png';
+import mapBg from '../../../assets/images/map-bg.webp';
 
 type HomeLocationState = { oauthError?: string } | null;
 
